@@ -1,0 +1,48 @@
+name: Deploy to NuxtHub
+on: push
+
+jobs:
+  deploy:
+    name: Deploy to NuxtHub
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+      url: ${{ steps.deploy.outputs.deployment-url }}
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Ensure NuxtHub module is installed
+        run: pnpx nuxthub@latest ensure
+
+      - name: Build application
+        run: pnpm build
+        env:
+          NODE_OPTIONS: --max-old-space-size=14000
+          NUXT_UI_PRO_LICENSE: ${{ secrets.NUXT_UI_PRO_LICENSE }}
+          NUXT_HUB_PROJECT_KEY: ${{ secrets.NUXT_HUB_PROJECT_KEY }}
+          NUXT_HUB_ENV: ${{ secrets.NUXT_HUB_ENV }}
+          NUXT_GITHUB_AUTH_TOKEN: ${{ secrets.NUXT_GITHUB_AUTH_TOKEN }}
+          NUXT_GITHUB_ACCESS_TOKEN: ${{ secrets.NUXT_GITHUB_ACCESS_TOKEN }}
+          NUXT_EMAIL_OCTOPUS_TOKEN: ${{ secrets.NUXT_EMAIL_OCTOPUS_TOKEN }}
+
+      - name: Deploy to NuxtHub
+        uses: nuxt-hub/action@v1
+        id: deploy
+        with:
+          project-key: nuxtseo-com-rtoh
