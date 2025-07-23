@@ -141,7 +141,7 @@ export default defineNuxtConfig({
   site: {
     url: 'https://unlighthouse.dev',
     name: 'Unlighthouse',
-    description: 'Like Google Lighthouse, but it scans every single page.',
+    description: 'Google Lighthouse for your entire site.',
     titleSeparator: '·',
   },
 

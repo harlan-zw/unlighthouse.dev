@@ -127,7 +127,7 @@ const { data: sponsors } = await useFetch('/api/github/sponsors.json', {
         <h2 class="text-center font-semibold text-3xl mb-8">
           Step 2. View your report
         </h2>
-        <iframe src="https://inspect.unlighthouse.dev/" class="w-full max-w-[1200px] mx-auto h-[60vh] rounded-lg shadow-lg" />
+        <iframe src="https://unlighthouse-demo.netlify.app/" loading="lazy" class="w-full max-w-[1200px] mx-auto h-[60vh] rounded-lg shadow-lg" />
       </div>
     </section>
     <section class="py-5 sm:py-10 xl:py-15 max-w-[1200px] mx-auto">
