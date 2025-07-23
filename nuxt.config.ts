@@ -27,7 +27,7 @@ export default defineNuxtConfig({
               .then(buffer => JSON.parse(buffer.toString()))
             const preSize = routes.exclude.length
             routes.exclude = routes.exclude.filter((path) => {
-              if (path.startsWith('/guides') || path.startsWith('/api') || path.startsWith('/integrations')) {
+              if (path.startsWith('/guides') || path.startsWith('/api-doc') || path.startsWith('/integrations')) {
                 return false
               }
               return true
@@ -35,8 +35,8 @@ export default defineNuxtConfig({
             if (!routes.exclude.includes('/guides/*')) {
               routes.exclude.push('/guides/*')
             }
-            if (!routes.exclude.includes('/api/*')) {
-              routes.exclude.push('/api/*')
+            if (!routes.exclude.includes('/api-doc/*')) {
+              routes.exclude.push('/api-doc/*')
             }
             if (!routes.exclude.includes('/integrations/*')) {
               routes.exclude.push('/integrations/*')
@@ -89,16 +89,6 @@ export default defineNuxtConfig({
     },
   },
 
-  twoslash: {
-    floatingVueOptions: {
-      classMarkdown: 'prose prose-(--ui-text-muted) dark:prose-invert bg-blue-500',
-    },
-    // Skip Twoslash in dev to improve performance. Turn this on when you want to explictly test twoslash in dev.
-    enableInDev: false,
-    // Do not throw when twoslash fails, the typecheck should be down in github.com/nuxt/nuxt's CI
-    throws: false,
-  },
-
   fonts: {
     experimental: {
       processCSSVariables: true,
@@ -121,7 +111,9 @@ export default defineNuxtConfig({
       pages: {
         routes: {
           exclude: [
-            '/docs/*',
+            '/guides/*',
+            '/integrations/*',
+            '/api-doc/*',
             '/__nuxt_content/*',
             '/llms.txt',
             '/llms-full.txt',
@@ -164,7 +156,6 @@ export default defineNuxtConfig({
             'json',
             'html',
             'bash',
-            'xml',
             'diff',
             'md',
             'dotenv',
@@ -226,6 +217,12 @@ export default defineNuxtConfig({
       '/api/github/sponsors.json': { prerender: true },
       '/api/_mdc/highlight': { cache: { group: 'mdc', name: 'highlight', maxAge: 60 * 60 } },
       '/api/_nuxt_icon': { cache: { group: 'icon', name: 'icon', maxAge: 60 * 60 * 24 * 7 } },
+      // /api/config -> /api-docs/config
+      '/api/config': { redirect: { to: '/api-docs/config', statusCode: 301 } },
+      // /api/glossary -> /api-docs/glossary
+      '/api/glossary': { redirect: { to: '/api-docs/glossary', statusCode: 301 } },
+      // /api/index -> /api-docs/index
+      '/api': { redirect: { to: '/api-docs', statusCode: 301 } },
     },
     scripts: {
       registry: {

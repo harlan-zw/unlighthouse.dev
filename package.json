@@ -14,7 +14,7 @@
     "twoslash:verify": "nuxt-content-twoslash verify --content-dir content"
   },
   "dependencies": {
-    "@mdream/nuxt": "^0.8.2",
+    "@mdream/nuxt": "^0.8.3",
     "three": "^0.178.0",
     "troisjs": "^0.3.4"
   },

@@ -10,7 +10,7 @@ export const menu = computed(() => {
     },
     {
       label: 'API',
-      to: '/api/config',
+      to: '/api-doc',
     },
     {
       label: 'Releases',
