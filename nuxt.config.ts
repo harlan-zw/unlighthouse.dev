@@ -114,6 +114,9 @@ export default defineNuxtConfig({
       crawlLinks: true,
       routes: ['/', '/404.html'],
     },
+    experimental: {
+      openAPI: true,
+    },
     cloudflare: {
       pages: {
         routes: {
