@@ -42,6 +42,9 @@ export default defineCachedEventHandler(async (e) => {
   })
 }, {
   // last for 1 day
+  getKey() {
+    return 'github:sponsors:harlan-zw'
+  },
   maxAge: 60 * 60 * 24,
   swr: true,
 })
