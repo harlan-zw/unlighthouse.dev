@@ -6,7 +6,7 @@ import type { BadgeProps, LinkProps } from '@nuxt/ui'
 import type { AccordionRootEmits, AccordionRootProps } from 'reka-ui'
 import type { VariantProps } from 'tailwind-variants'
 import _appConfig from '#build/app.config'
-import theme from '#build/ui-pro/content/content-navigation'
+import theme from '#build/ui/content/content-navigation'
 import { tv } from 'tailwind-variants'
 
 type ContentNavigationVariants = VariantProps<typeof contentNavigation>
@@ -71,14 +71,14 @@ export interface ContentNavigationSlots<T> {
   'link-trailing': SlotProps<T>
 }
 
-const appConfig = _appConfig as AppConfig & { uiPro: { contentNavigation: Partial<typeof theme> } }
-const contentNavigation = tv({ extend: tv(theme), ...(appConfig.uiPro?.contentNavigation || {}) })
+const appConfig = _appConfig as AppConfig & { ui: { contentNavigation: Partial<typeof theme> } }
+const contentNavigation = tv({ extend: tv(theme), ...(appConfig.ui?.contentNavigation || {}) })
 </script>
 
 <script setup lang="ts" generic="T extends ContentNavigationLink">
 /* eslint-disable */
 import { useAppConfig, useRoute } from '#imports'
-import { mapContentNavigationItem } from '#ui-pro/utils/content'
+import { mapContentNavigationItem } from '#ui/utils/content'
 import { pickLinkProps } from '#ui/utils/link'
 import { createReusableTemplate, reactivePick } from '@vueuse/core'
 import { Primitive, useForwardPropsEmits } from 'reka-ui'

@@ -15,6 +15,14 @@ if (!page.value?.id) {
   throw createError({ statusCode: 404, statusMessage: 'Page not found', fatal: true })
 }
 
+// Handle client-side navigation
+watch(() => route.path, async (newPath) => {
+  const data = await useCurrentDocPage()
+  page.value = data.page.value
+  surround.value = data.surround.value
+  lastCommit.value = data.lastCommit.value
+})
+
 useSeoMeta({
   title: () => page.value?.title,
   description: () => page.value?.description,
@@ -24,14 +32,11 @@ useSeoMeta({
 useHead({
   link: () => {
     return [
-      // add prev and next using surround
       ...(surround.value?.length
-        ? surround.value.map((s, i) => {
-            return {
-              rel: i === 0 ? 'prev' : 'next',
-              href: joinURL('https://unlighthouse.dev/', s.path),
-            }
-          })
+        ? surround.value.map((s: any, i: number) => ({
+            rel: i === 0 ? 'prev' : 'next',
+            href: joinURL('https://unlighthouse.dev/', s.path),
+          }))
         : []),
     ]
   },
@@ -54,20 +59,21 @@ const repoLinks = computed(() => [
   },
 ])
 
-// add seo meta for last commit
-if (lastCommit.value) {
-  useSeoMeta({
-    articleModifiedTime: lastCommit.value.date,
-    ogType: 'article',
-  })
-}
+watchEffect(() => {
+  if (lastCommit.value) {
+    useSeoMeta({
+      articleModifiedTime: lastCommit.value.date,
+      ogType: 'article',
+    })
+  }
+})
 </script>
 
 <template>
-  <div v-if="page">
-    <div class="max-w-[66ch] ml-auto md:ml-0 md:mr-auto">
+  <div class="flex justify-between w-full">
+    <div class="max-w-[66ch] ml-auto md:ml-0 md:mr-auto w-full">
       <UPageHeader
-        :title="page.title" :headline="headline" class="text-balance pt-4" :links="!['overview', 'intro-to-unhead'].includes(route.path.split('/').pop()) ? [
+        :title="page?.title" :headline="headline" class="text-balance pt-4" :links="!['overview', 'intro-to-unhead'].includes(route.path.split('/').pop() || '') ? [
           { label: 'Copy for LLMs', to: repoLinks[1].to, icon: 'i-catppuccin-markdown', target: '_blank' },
         ] : []"
         :ui="{ title: 'leading-normal' }"
@@ -90,7 +96,7 @@ if (lastCommit.value) {
       </UPageHeader>
 
       <UPageBody prose class="pb-0">
-        <ContentRenderer v-if="page.body" :value="page" class="mb-10" />
+        <ContentRenderer v-if="page?.body" :value="page" class="mb-10" />
         <div class="justify-center flex items-center gap-5 font-semibold">
           <div class="flex items-center gap-2">
             <UIcon name="i-simple-icons-github" class="w-5 h-5" />
@@ -109,6 +115,21 @@ if (lastCommit.value) {
         <USeparator v-if="surround?.length" class="my-8" />
         <UContentSurround :surround="surround" />
       </UPageBody>
+    </div>
+
+    <div class="hidden xl:block max-w-75 w-full">
+      <div class="pt-11 pl-10 gap-5 flex flex-col">
+        <div v-if="page?.body?.toc?.links?.length > 1">
+          <div class="mb-5 flex items-center gap-2 text-[var(--ui-text-accented)]">
+            <UIcon name="i-tabler-align-left-2" class="size-4" />
+            <div class="text-xs font-medium">
+              On this page
+            </div>
+          </div>
+          <TableOfContents :links="page.body.toc.links" />
+        </div>
+        <Ads />
+      </div>
     </div>
   </div>
 </template>

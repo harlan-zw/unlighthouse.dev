@@ -24,7 +24,7 @@ if (!stats.value) {
   })
 }
 provide('stats', stats)
-const { data: navigation } = await useAsyncData(`navigation`, () => queryCollectionNavigation('root'), {
+const { data: navigation } = await useAsyncData(`navigation-error`, () => queryCollectionNavigation('root'), {
   default: () => [],
   async transform(res) {
     const nav = mapPath(res)
@@ -37,7 +37,7 @@ const { data: navigation } = await useAsyncData(`navigation`, () => queryCollect
         m.icon = 'i-noto-globe-with-meridians'
         m.title = 'Migration Guides'
       }
-      else if (m.path.includes('/guides')) {
+      else if (m.path.includes('/guide')) {
         m.title = 'Core Concepts'
       }
       if (m.children?.length) {

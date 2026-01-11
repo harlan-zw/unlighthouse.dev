@@ -38,8 +38,6 @@ export default defineAppConfig({
       primary: 'violet',
       neutral: 'neutral',
     },
-  },
-  uiPro: {
     contentNavigation: {
       slots: {
         list: 'space-y-2',
@@ -74,7 +72,6 @@ export default defineAppConfig({
       a: {
         base: [
           'relative border-none underline underline-offset-4 text-[var(--ui-text)] decoration-transition-all decoration-opacity-70 decoration-[0.1rem] decoration-[var(--ui-text-dimmed)]',
-          // set a :after border under the link
           'transition-all',
           'hover:text-[var(--ui-text-dimmed)] decoration-opacity-100 hover:underline-offset-1 hover:decoration-[0.1rem]',
         ],

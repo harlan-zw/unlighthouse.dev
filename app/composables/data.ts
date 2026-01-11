@@ -18,43 +18,39 @@ export async function useCurrentDocPage() {
   if (nuxtApp.static.data.docsCurrent?.path === route.path) {
     return await nuxtApp.static.data.docsCurrent.promise
   }
-  // eslint-disable-next-line no-async-promise-executor
-  const p = new Promise(async (resolve) => {
-    const [{ data: page }, { data: surround }] = await Promise.all([
-      useAsyncData(`docs-${route.path}`, () => queryCollection('root').path(route.path).first(), {
-        transform(item) {
-          modifyRelativeDocLinksWithFramework(item.body.value)
-          return item
+
+  const p = Promise.all([
+    queryCollection('root').path(route.path).first(),
+    queryCollectionItemSurroundings('root', route.path, {
+      fields: ['title', 'description', 'path'],
+    }),
+  ])
+    .then(async ([pageData, surroundData]) => {
+      if (!pageData?.body?.value) {
+        throw createError({ statusCode: 404, statusMessage: `Page not found: ${route.path}`, fatal: true })
+      }
+
+      modifyRelativeDocLinksWithFramework(pageData.body.value)
+
+      const page = ref(pageData)
+      const surround = ref((surroundData || []).filter(Boolean).map(m => ({
+        ...m,
+        _path: m.path,
+      })))
+
+      const lastCommitData = await $fetch(`/api/github/last-file-commit`, {
+        query: {
+          file: `docs/${pageData.stem}`,
         },
-      }),
-      useAsyncData(`docs-${route.path}-surround`, () => queryCollectionItemSurroundings('root', route.path, {
-        fields: ['title', 'description', 'path'],
-      }), {
-        transform(items) {
-          return items.map((m) => {
-            return {
-              ...m,
-              _path: m.path,
-            }
-          })
-        },
-      }),
-    ])
-    await nuxtApp.runWithContext(async () => {
-      const { data: lastCommit } = await useAsyncData(`docs-${route.path}-last-commit`, () => {
-        return $fetch(`/api/github/last-file-commit`, {
-          query: {
-            file: `docs/${page.value?.stem}`,
-          },
-        })
-      })
-      resolve({
+      }).catch(() => null)
+      const lastCommit = ref(lastCommitData)
+
+      return {
         page,
         surround,
         lastCommit,
-      })
+      }
     })
-  })
 
   nuxtApp.static.data.docsCurrent = { promise: p, path: toRaw(route.path) }
   return p

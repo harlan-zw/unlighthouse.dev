@@ -7,11 +7,11 @@ import { gray, logger } from './logger'
 export default defineNuxtConfig({
   modules: [
     '@nuxtjs/seo',
-    '@nuxt/ui-pro',
+    '@nuxt/ui',
     'motion-v/nuxt',
     '@nuxt/content',
     '@vueuse/nuxt',
-    '@nuxthub/core',
+    'nitro-cloudflare-dev',
     '@mdream/nuxt',
     '@nuxt/scripts',
     '@nuxt/image',
@@ -27,13 +27,13 @@ export default defineNuxtConfig({
               .then(buffer => JSON.parse(buffer.toString()))
             const preSize = routes.exclude.length
             routes.exclude = routes.exclude.filter((path) => {
-              if (path.startsWith('/guides') || path.startsWith('/api-doc') || path.startsWith('/integrations')) {
+              if (path.startsWith('/guide') || path.startsWith('/api-doc') || path.startsWith('/integrations')) {
                 return false
               }
               return true
             })
-            if (!routes.exclude.includes('/guides/*')) {
-              routes.exclude.push('/guides/*')
+            if (!routes.exclude.includes('/guide/*')) {
+              routes.exclude.push('/guide/*')
             }
             if (!routes.exclude.includes('/api-doc/*')) {
               routes.exclude.push('/api-doc/*')
@@ -61,15 +61,9 @@ export default defineNuxtConfig({
     ],
   },
 
-  uiPro: {
+  ui: {
     mdc: true,
     content: true,
-  },
-
-  hub: {
-    database: true,
-    cache: true,
-    kv: true,
   },
 
   future: {
@@ -99,6 +93,7 @@ export default defineNuxtConfig({
   },
 
   nitro: {
+    preset: 'cloudflare_durable',
     prerender: {
       failOnError: false,
       crawlLinks: true,
@@ -107,18 +102,14 @@ export default defineNuxtConfig({
     experimental: {
       openAPI: true,
     },
-    cloudflare: {
-      pages: {
-        routes: {
-          exclude: [
-            '/guides/*',
-            '/integrations/*',
-            '/api-doc/*',
-            '/__nuxt_content/*',
-            '/llms.txt',
-            '/llms-full.txt',
-          ],
-        },
+    storage: {
+      cache: {
+        driver: 'cloudflare-kv-binding',
+        binding: 'CACHE',
+      },
+      kv: {
+        driver: 'cloudflare-kv-binding',
+        binding: 'KV',
       },
     },
   },
@@ -141,7 +132,7 @@ export default defineNuxtConfig({
   },
 
   content: {
-    database: { type: 'd1', binding: 'DB' },
+    database: { type: 'd1', bindingName: 'DB' },
     build: {
       markdown: {
         highlight: {
