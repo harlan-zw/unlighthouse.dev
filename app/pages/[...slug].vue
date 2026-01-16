@@ -44,6 +44,12 @@ useHead({
 
 const headline = computed(() => titleCase(getLastPathSegment(getPathSegments(route.path, route.path.split('/').length - 2))))
 
+defineOgImageComponent('Docs', {
+  title: page.value?.title,
+  description: page.value?.description,
+  headline,
+})
+
 prerenderRoutes(`${route.path}.md`)
 
 const repoLinks = computed(() => [
@@ -78,21 +84,23 @@ watchEffect(() => {
         ] : []"
         :ui="{ title: 'leading-normal' }"
       >
-        <div v-if="lastCommit" class="mt-3 text-sm">
-          <div class="text-[var(--ui-text-dimmed)]">
-            Last updated <time class="font-semibold" :datetime="lastCommit.date">{{ lastCommit.dateHuman }}</time> by <UBadge color="neutral" variant="outline">
-              <NuxtLink :to="`https://github.com/${lastCommit.author.committer}`" external target="_blank" class="inline-flex items-center gap-1.5">
-                <div class="hover:text-[var(--ui-text)] text-[var(--ui-text-muted)] transition">
-                  {{ lastCommit.author.name }}
-                </div>
-              </NuxtLink>
-            </UBadge> in <UBadge variant="outline" color="neutral" class="my-1">
-              <NuxtLink :to="lastCommit.url" target="_blank" external class="hover:text-[var(--ui-text)] text-[var(--ui-text-muted)] transition max-w-[250px] whitespace-nowrap overflow-hidden text-ellipsis">
-                {{ lastCommit.message }}
-              </NuxtLink>
-            </UBadge>.
+        <ClientOnly>
+          <div v-if="lastCommit?.author" class="mt-3 text-sm">
+            <div class="text-[var(--ui-text-dimmed)]">
+              Last updated <time class="font-semibold" :datetime="lastCommit.date">{{ lastCommit.dateHuman }}</time> by <UBadge color="neutral" variant="outline">
+                <NuxtLink :to="`https://github.com/${lastCommit.author.committer}`" external target="_blank" class="inline-flex items-center gap-1.5">
+                  <div class="hover:text-[var(--ui-text)] text-[var(--ui-text-muted)] transition">
+                    {{ lastCommit.author.name }}
+                  </div>
+                </NuxtLink>
+              </UBadge> in <UBadge variant="outline" color="neutral" class="my-1">
+                <NuxtLink :to="lastCommit.url" target="_blank" external class="hover:text-[var(--ui-text)] text-[var(--ui-text-muted)] transition max-w-[250px] whitespace-nowrap overflow-hidden text-ellipsis">
+                  {{ lastCommit.message }}
+                </NuxtLink>
+              </UBadge>.
+            </div>
           </div>
-        </div>
+        </ClientOnly>
       </UPageHeader>
 
       <UPageBody prose class="pb-0">
@@ -112,8 +120,8 @@ watchEffect(() => {
           </div>
         </div>
         <FeedbackButtons :edit-link="repoLinks[0].to" />
-        <USeparator v-if="surround?.length" class="my-8" />
-        <UContentSurround :surround="surround" />
+        <USeparator v-if="surround?.length || page?.relatedPages?.length" class="my-8" />
+        <ContentNext :surround="surround" :related-pages="page?.relatedPages" />
       </UPageBody>
     </div>
 

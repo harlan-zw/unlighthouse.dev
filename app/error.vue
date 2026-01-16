@@ -70,7 +70,7 @@ const { data: navigation } = await useAsyncData(`navigation-error`, () => queryC
   },
 })
 provide('navigation', navigation)
-const { data: search } = await useLazyAsyncData(`search`, () => queryCollectionSearchSections('root'))
+const { data: search } = await useLazyAsyncData(`search-error`, () => queryCollectionSearchSections('root'))
 provide('search', search)
 if (props.error.statusCode) {
   const walkChildren = (children: any[], parents: string[] = []) => {

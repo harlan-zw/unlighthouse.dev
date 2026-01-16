@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs'
 import { defineCollection, defineContentConfig } from '@nuxt/content'
 import { asSeoCollection } from '@nuxtjs/seo/content'
 import { relative, resolve } from 'pathe'
-import z from 'zod'
+import { z } from 'zod'
 import { logger } from './logger'
 
 const schema = z.object({
@@ -48,9 +48,98 @@ function resolvableUnlighthouseCollection() {
   }))
 }
 
+// Local content collections
+const blog = defineCollection(asSeoCollection({
+  schema,
+  type: 'page',
+  source: {
+    include: '**/*.md',
+    cwd: 'content/blog',
+    prefix: '/blog',
+  },
+}))
+
+const cloud = defineCollection(asSeoCollection({
+  schema,
+  type: 'page',
+  source: {
+    include: '**/*.md',
+    cwd: 'content/cloud',
+    prefix: '/cloud',
+  },
+}))
+
+const tools = defineCollection(asSeoCollection({
+  schema,
+  type: 'page',
+  source: {
+    include: '**/*.md',
+    cwd: 'content/tools',
+    prefix: '/tools',
+  },
+}))
+
+const glossary = defineCollection(asSeoCollection({
+  schema,
+  type: 'page',
+  source: {
+    include: '**/*.md',
+    cwd: 'content/glossary',
+    prefix: '/glossary',
+  },
+}))
+
+const learn = defineCollection(asSeoCollection({
+  schema,
+  type: 'page',
+  source: {
+    include: '**/*.md',
+    cwd: 'content/learn',
+    prefix: '/learn',
+  },
+}))
+
+const compare = defineCollection(asSeoCollection({
+  schema,
+  type: 'page',
+  source: {
+    include: '**/*.md',
+    cwd: 'content/compare',
+    prefix: '/compare',
+  },
+}))
+
+const automation = defineCollection(asSeoCollection({
+  schema,
+  type: 'page',
+  source: {
+    include: '**/*.md',
+    cwd: 'content/automation',
+    prefix: '/automation',
+  },
+}))
+
+const frameworks = defineCollection(asSeoCollection({
+  schema,
+  type: 'page',
+  source: {
+    include: '**/*.md',
+    cwd: 'content/frameworks',
+    prefix: '/frameworks',
+  },
+}))
+
 export const content = defineContentConfig({
   collections: {
     root: resolvableUnlighthouseCollection(),
+    glossary,
+    // blog,
+    // cloud,
+    // tools,
+    // learn,
+    // compare,
+    // automation,
+    // frameworks,
   },
 })
 

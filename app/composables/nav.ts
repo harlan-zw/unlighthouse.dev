@@ -13,6 +13,10 @@ export const menu = computed(() => {
       to: '/api-doc',
     },
     {
+      label: 'Glossary',
+      to: '/glossary',
+    },
+    {
       label: 'Releases',
       to: '/releases',
     },

@@ -6,64 +6,6 @@ definePageMeta({
   },
 })
 
-const code = ref('')
-const cursor = ref(false)
-const typedLength = ref(0)
-
-const showLighthouse3d = ref(false)
-
-onMounted(() => {
-  // show the lighthouse 3d after 1 second if we have a laptop screen or higher
-  if (window.innerWidth > 1024) {
-    useTimeoutFn(() => {
-      showLighthouse3d.value = true
-    }, 1000)
-  }
-
-  const blink = useDebounceFn(() => {
-    // eslint-disable-next-line ts/no-use-before-define
-    write()
-  }, 500)
-
-  const plainText = 'npx unlighthouse --site #your-site'
-
-  // Color indexes: npx (0-2), unlighthouse (4-15), --site (17-22), #your-site (24-33)
-  const getColoredText = (text: string) => {
-    let result = ''
-    for (let i = 0; i < text.length; i++) {
-      if (i === 0)
-        result += '<span style="color: #80A665;">'
-      else if (i === 3)
-        result += '</span> <span style="color: #C98A7D;">'
-      else if (i === 16)
-        result += '</span> <span style="color: #C99076;">'
-      else if (i === 23)
-        result += '</span> <span style="color: #758575DD;">'
-      result += text[i]
-    }
-    result += '</span>'
-    return result
-  }
-
-  const write = useDebounceFn(() => {
-    if (typedLength.value < plainText.length) {
-      typedLength.value++
-      const textToShow = plainText.substring(0, typedLength.value)
-      code.value = getColoredText(textToShow)
-    }
-
-    // start blink
-    blink()
-    // conditionally show the blink
-    if (cursor.value)
-      code.value += '█'
-  }, 70)
-
-  watch(() => typedLength.value, write, {
-    immediate: true,
-  })
-})
-
 defineOgImageComponent('NuxtSeo', {
   title: 'Unlighthouse',
   description: 'Like Google Lighthouse, but it scans every single page.',
@@ -78,188 +20,247 @@ const { data: sponsors } = await useFetch('/api/github/sponsors.json', {
 </script>
 
 <template>
-  <div class="mx-5 xl:mx-0">
-    <Gradient class="absolute w-full left-0 top-15 z-[-1] opacity-50" />
-    <section class="max-w-[1200px] mx-auto flex justify-center items-center sm:py-[5rem] py-[3rem]">
-      <div class="lg:w-[100ch]">
-        <h1 class="font-title text-gray-900 dark:text-gray-100 text-4xl leading-25 font-extrabold tracking-tight sm:text-5xl lg:text-6xl" style="line-height: 1.3;">
-          Google Lighthouse for your entire site.
+  <div>
+    <!-- Hero -->
+    <section class="relative pt-16 pb-8 lg:pt-24 lg:pb-12">
+      <div class="max-w-4xl mx-auto px-6 text-center">
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] text-gray-900 dark:text-white mb-6">
+          Lighthouse for your
+          <span class="text-violet-600 dark:text-violet-400"> entire site</span>
         </h1>
-        <p class="text-gray-700 dark:text-gray-300 mt-4 max-w-3xl text-xl ">
-          Unlighthouse crawls and scans your entire site with Google Lighthouse providing a unified report for your site's health.
+        <p class="text-lg lg:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-8">
+          Crawl every page, run Google Lighthouse audits, get one unified performance report.
         </p>
-        <div class="mt-5">
-          <UButton size="xl" to="/guide/getting-started/unlighthouse-cli">
-            Read the docs
-          </UButton>
+
+        <!-- Terminal + CTAs inline -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+          <div class="inline-flex items-center gap-2 bg-gray-900 rounded-lg px-4 py-3 font-mono text-sm border border-gray-800">
+            <span class="text-gray-500">$</span>
+            <span class="text-emerald-400">npx</span>
+            <span class="text-white">unlighthouse</span>
+            <span class="text-amber-400">--site</span>
+            <span class="text-gray-500">example.com</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <UButton size="lg" to="/guide/getting-started/unlighthouse-cli">
+              Get Started
+            </UButton>
+            <UButton size="lg" variant="ghost" color="neutral" to="https://github.com/harlan-zw/unlighthouse" target="_blank">
+              <UIcon name="i-carbon-logo-github" class="w-5 h-5" />
+              GitHub
+            </UButton>
+          </div>
         </div>
-        <p class="text-muted mt-2 max-w-3xl text-sm">
-          MIT Open source
+        <p class="text-xs text-gray-500">
+          Node 20+ · MIT licensed · Zero config
         </p>
       </div>
-      <div class="items-center justify-center hidden lg:flex w-full relative">
+    </section>
+
+    <!-- Demo - Full width showcase -->
+    <section class="px-4 sm:px-6 lg:px-8 pb-16 lg:pb-24">
+      <div class="max-w-7xl mx-auto">
+        <div class="relative">
+          <!-- Glow effect -->
+          <div class="absolute -inset-4 bg-gradient-to-b from-violet-500/10 via-violet-500/5 to-transparent rounded-3xl blur-3xl" />
+
+          <!-- Browser frame -->
+          <div class="relative bg-gray-900 rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10">
+            <!-- Browser chrome -->
+            <div class="flex items-center gap-3 px-4 py-3 bg-gray-800/80 border-b border-gray-700/50">
+              <div class="flex gap-2">
+                <div class="w-3 h-3 rounded-full bg-red-500/90" />
+                <div class="w-3 h-3 rounded-full bg-amber-400/90" />
+                <div class="w-3 h-3 rounded-full bg-emerald-500/90" />
+              </div>
+              <div class="flex-1 max-w-md mx-auto">
+                <div class="bg-gray-700/50 rounded-lg px-4 py-1.5 text-sm text-gray-400 font-mono text-center">
+                  localhost:5678
+                </div>
+              </div>
+              <div class="w-[68px]" />
+            </div>
+
+            <!-- Demo iframe -->
+            <iframe
+              src="https://unlighthouse-demo.netlify.app/"
+              loading="lazy"
+              class="block w-full bg-white"
+              style="height: 70vh; min-height: 500px;"
+              title="Unlighthouse Demo Report"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Features -->
+    <section class="px-5 py-16 lg:py-20 bg-gray-50/50 dark:bg-gray-900/30">
+      <div class="max-w-6xl mx-auto">
+        <h2 class="text-2xl font-bold mb-8 text-center">
+          Why Unlighthouse
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="p-5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
+            <div class="flex items-center gap-3 mb-2">
+              <Icon name="noto:high-voltage" class="w-6 h-6" />
+              <h3 class="font-semibold">
+                Parallel Scans
+              </h3>
+            </div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              Threaded workers with opportunistic throttling for fast audits.
+            </p>
+          </div>
+          <div class="p-5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
+            <div class="flex items-center gap-3 mb-2">
+              <Icon name="noto:lady-beetle" class="w-6 h-6" />
+              <h3 class="font-semibold">
+                Auto Crawling
+              </h3>
+            </div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              Discovers URLs via robots.txt, sitemap.xml, and internal links.
+            </p>
+          </div>
+          <div class="p-5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
+            <div class="flex items-center gap-3 mb-2">
+              <Icon name="noto:sushi" class="w-6 h-6" />
+              <h3 class="font-semibold">
+                Smart Sampling
+              </h3>
+            </div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              Auto-samples dynamic routes to reduce scan time.
+            </p>
+          </div>
+          <div class="p-5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
+            <div class="flex items-center gap-3 mb-2">
+              <Icon name="noto:rainbow" class="w-6 h-6" />
+              <h3 class="font-semibold">
+                Modern UI
+              </h3>
+            </div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              Search, sort, and re-scan pages in the Vite-powered client.
+            </p>
+          </div>
+          <div class="p-5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
+            <div class="flex items-center gap-3 mb-2">
+              <Icon name="noto:candy" class="w-6 h-6" />
+              <h3 class="font-semibold">
+                SEO Insights
+              </h3>
+            </div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              Titles, meta descriptions, share images, link analysis.
+            </p>
+          </div>
+          <div class="p-5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
+            <div class="flex items-center gap-3 mb-2">
+              <Icon name="noto:check-mark-button" class="w-6 h-6" />
+              <h3 class="font-semibold">
+                A11y Summary
+              </h3>
+            </div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              Accessibility audit with contrast issue visualization.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="px-5 py-16 lg:py-20">
+      <div class="max-w-6xl mx-auto">
+        <div class="flex flex-col lg:flex-row items-center justify-between gap-10 mb-10">
+          <div class="text-center lg:text-left">
+            <div class="text-4xl lg:text-5xl font-bold mb-2">
+              {{ humanNumber(stats.downloads.averageDownloads30) }}
+            </div>
+            <p class="text-gray-500">
+              downloads per day
+            </p>
+          </div>
+          <div class="flex gap-10 lg:gap-16">
+            <div class="text-center">
+              <div class="text-3xl lg:text-4xl font-light flex items-center gap-2">
+                <UIcon name="i-carbon-chart-line-smooth" class="w-8 h-8 text-violet-500" />
+                {{ humanNumber(stats.downloads.totalDownloads30) }}
+              </div>
+              <p class="text-sm text-gray-500 mt-1">
+                monthly downloads
+              </p>
+            </div>
+            <div class="text-center">
+              <div class="text-3xl lg:text-4xl font-light flex items-center gap-2">
+                <UIcon name="i-carbon-star" class="w-8 h-8 text-amber-500" />
+                {{ humanNumber(stats.stars.stars) }}
+              </div>
+              <p class="text-sm text-gray-500 mt-1">
+                GitHub stars
+              </p>
+            </div>
+          </div>
+        </div>
         <ClientOnly>
-          <LazyLighthouseThreeD v-if="showLighthouse3d" class="absolute left-0 -top-[350px] transform" />
+          <UnlighthouseDownloads class="rounded-xl mx-auto max-w-2xl w-full overflow-hidden" />
         </ClientOnly>
       </div>
     </section>
-    <section class="py-5 sm:py-10 xl:py-15 space-y-12">
-      <div>
-        <h2 class="text-center font-semibold text-3xl mb-5">
-          Step 1. Run the command
-        </h2>
-        <div class="max-w-[40rem] mx-auto">
-          <p class="mb-7 text-gray-700 dark:text-gray-300 mt-4 max-w-3xl text-center text-xl lg:text-left">
-            Run the command below in your terminal. It will scan your site and generate a report. <span class="text-sm opacity-70">Requires Node >= 20</span>
-          </p>
-          <div class="flex items-center space-x-10">
-            <!--   we need to style this div like a nice terminal bash using tailwind   -->
-            <div class="max-w-full overflow-x-auto flex flex-grow items-center  space-x-3 border-2 border-solid border-gray-600/50 dark:bg-[#121212] lg:p-5 p-2 text-gray-300 font-mono lg:text-lg rounded-t-lg shadow-lg relative">
-              <div class="hidden lg:block">
-                &gt;
-              </div>
-              <div class="text-xl flex-grow" :lines="false" lang="bash" v-html="code" />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div>
-        <h2 class="text-center font-semibold text-3xl mb-8">
-          Step 2. View your report
-        </h2>
-        <iframe src="https://unlighthouse-demo.netlify.app/" loading="lazy" class="w-full max-w-[1200px] mx-auto h-[60vh] rounded-lg shadow-lg" />
-      </div>
-    </section>
-    <section class="py-5 sm:py-10 xl:py-15 max-w-[1200px] mx-auto">
-      <h2 class="mb-6 text-3xl font-bold font-title">
-        Features
-      </h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        <ShowcaseCard label="Speedy Scans" description="Take advantage of your CPU with threaded workers and use opportunistic throttling and categories for lightning quick scans.">
-          <Icon name="noto:high-voltage" class="w-1/2 h-1/2" />
-        </ShowcaseCard>
-        <ShowcaseCard label="Zero-config Link Crawling" description="Fast, configurable URL discovery using robots.txt, sitemap.xml, internal link crawling and project file scanning.">
-          <Icon name="noto:lady-beetle" class="w-1/2 h-1/2" />
-        </ShowcaseCard>
-        <ShowcaseCard label="No Time Wasted" description="Fewer URLs to scan with automatic sampling of dynamic routes. Hook up your local project files to make it even smarter.">
-          <Icon name="noto:sushi" class="w-1/2 h-1/2" />
-        </ShowcaseCard>
-        <ShowcaseCard label="Modern UI" description="View your sites' health as a whole with the Unlighthouse client built with Vite. Easily see, search and sort your pages, re-scan individual pages and more.">
-          <Icon name="noto:rainbow" class="w-1/2 h-1/2" />
-        </ShowcaseCard>
-        <ShowcaseCard label="SEO Goodies" description="View all of your pages titles, share images, meta descriptions, see how many internal and external links you have.">
-          <Icon name="noto:candy" class="w-1/2 h-1/2" />
-        </ShowcaseCard>
-        <ShowcaseCard label="Accessibility Summary" description="See how your sites accessibility stacks up, find high-leverage issues to fix easily and visually see colour contrast issues.">
-          <Icon name="noto:check-mark-button" class="w-1/2 h-1/2" />
-        </ShowcaseCard>
-      </div>
-    </section>
-    <section class="py-5 sm:py-10 xl:py-15 max-w-[1200px] mx-auto">
-      <div class="xl:flex items-center justify-around mb-10">
-        <div class="xl:max-w-sm xl:mb-0 mb-10">
-          <div class="font-bold mb-5 text-5xl">
-            {{ humanNumber(stats.downloads.averageDownloads30) }} downloads<br>
-            <span class="text-blue-300 text-3xl">per day, on average</span>
-          </div>
-          <p class="opacity-80 mb-5">
-            Unlighthouse is used and trusted by thousands of developers and companies around the world.
-          </p>
-        </div>
-        <div class="text-6xl space-y-6 px-5 lg:px-0">
-          <div class="flex justify-between text-right gap-5">
-            <div class="mb-1  font-light items-center flex gap-5">
-              <UIcon name="i-carbon-chart-line-smooth" class="h-15 w-15 mr-1 opacity-80" />
-              {{ humanNumber(stats.downloads.totalDownloads30) }}
-            </div>
-            <div class="flex items-center font-normal opacity-70 text-sm">
-              Downloads<br>/ month
-            </div>
-          </div>
-          <div class="flex justify-between gap-5">
-            <div class="mb-1 font-light items-center flex gap-5">
-              <UIcon name="i-carbon-star" class="h-15 w-15 mr-1 opacity-90" />
-              {{ humanNumber(stats.stars.stars) }}
-            </div>
-            <div class="flex items-center font-normal text-right opacity-70 text-sm">
-              Total Stars
-            </div>
-          </div>
-        </div>
-      </div>
-      <ClientOnly>
-        <UnlighthouseDownloads class="rounded mx-auto max-w-[600px]  w-full h-full overflow-hidden" />
-      </ClientOnly>
-    </section>
-    <section class="py-5 sm:py-10 xl:py-15 max-w-[1200px] mx-auto">
-      <UContainer>
-        <div class="xl:grid grid-cols-2 gap-10">
-          <div class="mb-10 mx-auto max-w-lg flex flex-col  lg:items-start">
-            <h2 class=" font-bold mb-3 text-5xl text-center lg:text-left">
-              Funded by the community
-              <span class="text-blue-300 text-3xl" />
+
+    <!-- Sponsors -->
+    <section class="px-5 py-16 lg:py-20 bg-gray-50/50 dark:bg-gray-900/30">
+      <div class="max-w-6xl mx-auto">
+        <div class="lg:grid grid-cols-2 gap-12">
+          <div class="mb-10 lg:mb-0">
+            <h2 class="text-3xl lg:text-4xl font-bold mb-4">
+              Community Funded
             </h2>
-            <p class="mb-5 text-neutral-700 dark:text-neutral-300 mt-4 max-w-xl text-center text-xl lg:text-left">
-              Unlighthouse is completely free and open-source due to the generous support of the community.
+            <p class="text-gray-600 dark:text-gray-400 text-lg mb-6 max-w-md">
+              Unlighthouse is free and open-source thanks to generous community sponsors.
             </p>
-            <div>
-              <UButton size="lg" to="https://github.com/sponsors/harlan-zw">
-                Become a sponsor
-              </UButton>
-            </div>
+            <UButton size="lg" to="https://github.com/sponsors/harlan-zw">
+              Become a sponsor
+            </UButton>
           </div>
-          <div v-if="sponsors" class="max-w-xl mx-auto">
-            <div class="text-2xl font-semibold mb-5">
-              Top Sponsors
-            </div>
-            <div class="sm:grid space-y-5 md:space-y-0 grid-cols-3 gap-5 mb-10">
-              <div v-for="(entry, key) in sponsors.$50 || {}" :key="key">
-                <NuxtLink :to="entry.sponsor.websiteUrl" class="flex items-center gap-2">
-                  <NuxtImg loading="lazy" :alt="entry.sponsor.name" width="56" height="56" :src="entry.sponsor.avatarUrl" class="w-14 h-14 rounded-full" />
-                  <div>
-                    <div class="font-bold text-xl whitespace-nowrap">
-                      {{ entry.sponsor.name }}
-                    </div>
-                    <div v-if="entry.sponsor.websiteUrl" class="text-neutral-400">
-                      {{ entry.sponsor.websiteUrl.replace('https://', '') }}
-                    </div>
-                  </div>
+          <div v-if="sponsors">
+            <div class="mb-6">
+              <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                Top Sponsors
+              </h3>
+              <div class="flex flex-wrap gap-4">
+                <NuxtLink v-for="(entry, key) in sponsors.$50 || {}" :key="key" :to="entry.sponsor.websiteUrl" class="flex items-center gap-2 hover:opacity-80 transition">
+                  <NuxtImg loading="lazy" :alt="entry.sponsor.name" width="40" height="40" :src="entry.sponsor.avatarUrl" class="w-10 h-10 rounded-full" />
+                  <span class="font-medium">{{ entry.sponsor.name }}</span>
                 </NuxtLink>
               </div>
             </div>
-            <div class="text-2xl font-semibold mb-5">
-              Gold Sponsors
-            </div>
-            <div class="sm:grid space-y-5 md:space-y-0 grid-cols-3 gap-5 mb-10">
-              <div v-for="(entry, key) in sponsors.$25 || {}" :key="key">
-                <NuxtLink :to="entry.sponsor.websiteUrl" class="flex items-center gap-2">
-                  <NuxtImg loading="lazy" :alt="entry.sponsor.name || entry.sponsor.login" width="48" height="48" :src="entry.sponsor.avatarUrl" class="w-12 h-12 rounded-full" />
-                  <div>
-                    <div class="font-bold text-sm whitespace-nowrap">
-                      {{ entry.sponsor.name || entry.sponsor.login }}
-                    </div>
-                    <div v-if="entry.sponsor.websiteUrl" class="text-xs text-neutral-400">
-                      {{ entry.sponsor.websiteUrl.replace('https://', '') }}
-                    </div>
-                  </div>
+            <div class="mb-6">
+              <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                Gold Sponsors
+              </h3>
+              <div class="flex flex-wrap gap-3">
+                <NuxtLink v-for="(entry, key) in sponsors.$25 || {}" :key="key" :to="entry.sponsor.websiteUrl" class="hover:opacity-80 transition">
+                  <NuxtImg loading="lazy" :alt="entry.sponsor.name || entry.sponsor.login" width="36" height="36" :src="entry.sponsor.avatarUrl" class="w-9 h-9 rounded-full" />
                 </NuxtLink>
               </div>
             </div>
-            <div class="text-2xl font-semibold mb-5">
-              Backers
-            </div>
-            <div class="grid grid-cols-6 sm:grid-cols-10 gap-3 mb-10">
-              <div v-for="(entry, key) in sponsors.others || {}" :key="key">
-                <UTooltip :text="entry.sponsor.name || entry.sponsor.login">
-                  <NuxtLink :to="(entry.monthlyDollars > 5 ? entry.sponsor.websiteUrl : entry.sponsor.linkUrl) || entry.sponsor.linkUrl" class="flex items-center gap-2">
-                    <NuxtImg loading="lazy" :alt="entry.sponsor.name || entry.sponsor.login" width="48" height="48" :src="entry.sponsor.avatarUrl" class="w-12 h-12 rounded-full" :class="entry.monthlyDollars > 5 ? ['ring-green-500 ring-2'] : []" />
+            <div>
+              <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                Backers
+              </h3>
+              <div class="flex flex-wrap gap-2">
+                <UTooltip v-for="(entry, key) in sponsors.others || {}" :key="key" :text="entry.sponsor.name || entry.sponsor.login">
+                  <NuxtLink :to="(entry.monthlyDollars > 5 ? entry.sponsor.websiteUrl : entry.sponsor.linkUrl) || entry.sponsor.linkUrl" class="hover:opacity-80 transition">
+                    <NuxtImg loading="lazy" :alt="entry.sponsor.name || entry.sponsor.login" width="32" height="32" :src="entry.sponsor.avatarUrl" class="w-8 h-8 rounded-full" :class="entry.monthlyDollars > 5 ? ['ring-green-500 ring-2'] : []" />
                   </NuxtLink>
                 </UTooltip>
               </div>
             </div>
           </div>
         </div>
-      </UContainer>
+      </div>
     </section>
   </div>
 </template>

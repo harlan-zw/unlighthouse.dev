@@ -12,6 +12,26 @@ export async function useStats() {
   return asyncData
 }
 
+function getCollectionForPath(path: string) {
+  if (path.startsWith('/glossary'))
+    return 'glossary'
+  if (path.startsWith('/learn'))
+    return 'learn'
+  if (path.startsWith('/blog'))
+    return 'blog'
+  if (path.startsWith('/cloud'))
+    return 'cloud'
+  if (path.startsWith('/tools'))
+    return 'tools'
+  if (path.startsWith('/compare'))
+    return 'compare'
+  if (path.startsWith('/automation'))
+    return 'automation'
+  if (path.startsWith('/frameworks'))
+    return 'frameworks'
+  return 'root'
+}
+
 export async function useCurrentDocPage() {
   const nuxtApp = useNuxtApp()
   const route = useRouter().currentRoute.value
@@ -19,9 +39,10 @@ export async function useCurrentDocPage() {
     return await nuxtApp.static.data.docsCurrent.promise
   }
 
+  const collection = getCollectionForPath(route.path)
   const p = Promise.all([
-    queryCollection('root').path(route.path).first(),
-    queryCollectionItemSurroundings('root', route.path, {
+    queryCollection(collection).path(route.path).first(),
+    queryCollectionItemSurroundings(collection, route.path, {
       fields: ['title', 'description', 'path'],
     }),
   ])

@@ -15,24 +15,36 @@ const appConfig = useAppConfig()
 
 useHead({
   style: [
-    { innerHTML: `:root { --ui-primary: #8e51ff; } .dark { --ui-primary: #8e51ff; }`, id: 'nuxt-ui-black-as-primary', tagPriority: -2 },
+    { innerHTML: `:root { --ui-primary: #1d293d; } .dark { --ui-primary: oklch(0.809 0.105 251.813); }`, id: 'nuxt-ui-black-as-primary', tagPriority: -2 },
   ],
   htmlAttrs: {
     lang: 'en',
   },
   meta: [
-    { name: 'theme-color', content: '#0000FF', media: '(prefers-color-scheme: light)' },
-    { name: 'theme-color', content: '#000000', media: '(prefers-color-scheme: dark)' },
+    { name: 'theme-color', content: '#a684ff', media: '(prefers-color-scheme: light)' },
+    { name: 'theme-color', content: '#5d0ec0', media: '(prefers-color-scheme: dark)' },
     { name: 'color-scheme', content: 'light dark' },
   ],
 })
 
 const {
   data: search,
-} = await useLazyAsyncData(`search`, () => queryCollectionSearchSections('root'))
+} = await useLazyAsyncData(`search`, async () => {
+  const [root, glossary] = await Promise.all([
+    queryCollectionSearchSections('root'),
+    queryCollectionSearchSections('glossary'),
+  ])
+  return [...root, ...glossary]
+})
 const {
   data: navigation,
-} = await useLazyAsyncData(`navigation`, () => queryCollectionNavigation('root'), {
+} = await useLazyAsyncData(`navigation`, async () => {
+  const [root, glossary] = await Promise.all([
+    queryCollectionNavigation('root'),
+    queryCollectionNavigation('glossary'),
+  ])
+  return [...root, ...glossary]
+}, {
   default: () => [],
   async transform(res) {
     const nav = mapPath(res)
@@ -79,7 +91,7 @@ onKeyStroke('Divide', () => {
 </script>
 
 <template>
-  <UApp :toaster="appConfig.toaster">
+  <UApp :toaster="appConfig.toaster" :tooltip="{ delayDuration: 0 }">
     <NuxtLoadingIndicator color="#FFF" />
     <Header class="z-100" />
     <NuxtLayout>
@@ -114,4 +126,17 @@ onKeyStroke('Divide', () => {
 
 <style>
 /* Safelist (do not remove): [&>div]:*:my-0 [&>div]:*:w-full h-64 !px-0 !py-0 !pt-0 !pb-0 !p-0 !justify-start !min-h-96 h-136 border-(--ui-border-muted) bg-(--ui-bg) */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.07;
+  z-index: 10;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 100px 100px;
+}
 </style>

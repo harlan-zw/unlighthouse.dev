@@ -4,6 +4,18 @@
 @theme {
   --font-sans: 'Hubot Sans', sans-serif;
   --font-mono: 'Fira Code', monospace;
+
+  --color-neutral-50: oklch(98.4% 0.003 285);
+  --color-neutral-100: oklch(96.8% 0.007 285);
+  --color-neutral-200: oklch(92.9% 0.013 285);
+  --color-neutral-300: oklch(86.9% 0.022 285);
+  --color-neutral-400: oklch(70.4% 0.04 285);
+  --color-neutral-500: oklch(55.4% 0.046 285);
+  --color-neutral-600: oklch(44.6% 0.043 285);
+  --color-neutral-700: oklch(37.2% 0.044 285);
+  --color-neutral-800: oklch(27.9% 0.041 285);
+  --color-neutral-900: oklch(20.8% 0.042 285);
+  --color-neutral-950: oklch(12.9% 0.042 285);
 }
 
 :root {
@@ -132,10 +144,15 @@ html.dark {
   top: 25vh;
   width: 100%;
   height: 30vh;
-  background: radial-gradient(50% 50% at 50% 50%, #00DC82 0%, rgba(0, 220, 130, 0) 100%);
   filter: blur(180px);
-  opacity: 0.6;
   z-index: -1;
+  background: radial-gradient(50% 50% at 50% 50%, var(--ui-color-primary-100) 0%, var(--ui-color-primary-300) 100%);
+  opacity: 0.75;
+}
+
+.dark .gradient {
+  background: radial-gradient(50% 50% at 50% 50%, var(--ui-color-primary-900) 0%, var(--ui-color-primary-800) 100%);
+  opacity: 0.1;
 }
 
 @keyframes slide-right {

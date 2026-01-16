@@ -30,13 +30,39 @@ export default defineAppConfig({
       check: 'i-carbon-checkmark',
       close: 'i-carbon-close',
       ellipsis: 'i-carbon-overflow-menu-horizontal',
-      loading: 'i-carbon-loading',
+      loading: 'i-carbon-in-progress',
       minus: 'i-carbon-subtract',
       search: 'i-carbon-search',
     },
+    navigationMenu: {
+      slots: {
+        item: '!py-0',
+        link: 'flex flex-col items-center justify-start w-full gap-0.5 w-[90px]',
+        linkLabel: 'text-xs text-toned',
+        linkTrailing: 'absolute right-2 top-2',
+        linkTrailingIcon: 'size-4 text-dimmed',
+        childList: '!grid-cols-5',
+        childLink: 'flex flex-col items-center justify-start w-full gap-0.5',
+        childLinkLabel: 'text-[10px] text-center text-muted',
+        childLinkIcon: 'size-6 !text-blue-300',
+      },
+      variants: {
+        active: {
+          false: {
+            linkLeadingIcon: 'text-toned',
+          },
+        },
+      },
+    },
     colors: {
       primary: 'violet',
-      neutral: 'neutral',
+      neutral: 'slate',
+      pro: 'violet',
+    },
+    separator: {
+      slots: {
+        border: 'border-gray-200 dark:border-gray-800',
+      },
     },
     contentNavigation: {
       slots: {
@@ -46,11 +72,11 @@ export default defineAppConfig({
       variants: {
         active: {
           true: {
-            link: 'text-[var(--ui-text-toned)] after:-left-[1px] font-semibold rounded-[10px] after:rounded-[10px] after:w-full after:h-full after:absolute after:bottom-0 after:block after:bg-[var(--ui-bg-elevated)]/50 after:shadow-xs',
+            link: 'text-[var(--ui-text-toned)] after:-left-[1px] font-semibold rounded-[10px] after:rounded-[10px] after:w-full after:h-full after:absolute after:bottom-0 after:block after:bg-elevated/50 after:shadow-xs',
           },
           false: {
             link: 'text-[var(--ui-text-toned)]',
-            linkLeadingIcon: 'text-[var(--ui-text-dimmed)]',
+            linkLeadingIcon: 'text-dimmed',
           },
         },
       },
@@ -60,7 +86,7 @@ export default defineAppConfig({
           variant: 'pill',
           active: true,
           class: {
-            link: 'text-[var(--ui-text-highlighted)] ',
+            link: 'text-highlighted',
           },
         },
       ],
@@ -68,12 +94,13 @@ export default defineAppConfig({
     prose: {
       codeIcon: {
         'robots.txt': 'vscode-icons:file-type-robots',
+        'txt': 'vscode-icons:file-type-text',
       },
       a: {
         base: [
           'relative border-none underline underline-offset-4 text-[var(--ui-text)] decoration-transition-all decoration-opacity-70 decoration-[0.1rem] decoration-[var(--ui-text-dimmed)]',
           'transition-all',
-          'hover:text-[var(--ui-text-dimmed)] decoration-opacity-100 hover:underline-offset-1 hover:decoration-[0.1rem]',
+          'hover:text-dimmed decoration-opacity-100 hover:underline-offset-1 hover:decoration-[0.1rem]',
         ],
       },
     },

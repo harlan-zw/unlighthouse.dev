@@ -1,5 +1,3 @@
 <template>
-  <div class="container mx-auto">
-    <slot />
-  </div>
+  <slot />
 </template>

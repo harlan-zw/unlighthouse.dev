@@ -12,9 +12,11 @@ export default defineNuxtConfig({
     '@nuxt/content',
     '@vueuse/nuxt',
     'nitro-cloudflare-dev',
-    '@mdream/nuxt',
     '@nuxt/scripts',
     '@nuxt/image',
+    'nuxt-skew-protection',
+    'nuxt-ai-ready',
+    '@nuxtjs/mcp-toolkit',
     async (_, nuxt) => {
       nuxt.hooks.hook('nitro:init', (nitro) => {
         // from sponsorkit
@@ -52,6 +54,7 @@ export default defineNuxtConfig({
   ],
 
   sitemap: {
+    zeroRuntime: true,
     exclude: [
       '**/.navigation',
       '/__nuxt_content/**',
@@ -62,12 +65,25 @@ export default defineNuxtConfig({
   },
 
   ui: {
+    experimental: {
+      componentDetection: true,
+    },
     mdc: true,
     content: true,
   },
 
   future: {
-    compatibilityVersion: 4,
+    compatibilityVersion: 5,
+  },
+
+  aiReady: {
+    database: {
+      type: 'd1',
+      bindingName: 'DB',
+    },
+    cron: true,
+    runtimeSync: true,
+    indexNow: true,
   },
 
   runtimeConfig: {
@@ -93,14 +109,25 @@ export default defineNuxtConfig({
   },
 
   nitro: {
-    preset: 'cloudflare_durable',
+    externals: {
+      external: ['agents/mcp'],
+    },
+    preset: 'cloudflare-durable',
+    cloudflare: {
+      deployConfig: true,
+      nodeCompat: true,
+    },
     prerender: {
+      autoSubfolderIndex: false,
       failOnError: false,
       crawlLinks: true,
       routes: ['/', '/404.html'],
     },
     experimental: {
       openAPI: true,
+      websocket: true,
+      asyncContext: true,
+      tasks: true,
     },
     storage: {
       cache: {
@@ -268,6 +295,9 @@ export default defineNuxtConfig({
     head: {
       templateParams: {
         separator: '·',
+      },
+      bodyAttrs: {
+        class: 'antialiased font-sans text-neutral-700 dark:text-neutral-200 bg-white dark:bg-neutral-900',
       },
     },
   },
