@@ -86,6 +86,13 @@ export default defineNuxtConfig({
     indexNow: true,
   },
 
+  skewProtection: {
+    debug: true,
+    connectionTracking: true,
+    routeTracking: true,
+    ipTracking: true,
+  },
+
   runtimeConfig: {
     emailOctopusToken: '', // NUXT_EMAIL_OCTOPUS_TOKEN
     githubAccessToken: '', // NUXT_GITHUB_ACCESS_TOKEN
