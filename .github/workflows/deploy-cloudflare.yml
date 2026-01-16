@@ -21,6 +21,14 @@ jobs:
 
       - run: pnpm i
 
+      - name: Cache for Nuxt SEO
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.cache/nuxt-seo
+          key: nuxt-skew-${{ github.sha }}
+          restore-keys: |
+            nuxt-skew-
+
       - run: pnpm build
         timeout-minutes: 30
         env:
