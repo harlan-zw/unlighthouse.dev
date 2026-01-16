@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^7.0.1",
-    "@iconify-json/carbon": "^1.2.16",
+    "@iconify-json/carbon": "^1.2.18",
     "@iconify-json/heroicons": "^1.2.3",
     "@iconify-json/logos": "^1.2.10",
     "@iconify-json/material-symbols": "^1.2.51",
@@ -32,7 +32,7 @@
     "@iconify-json/simple-icons": "^1.2.66",
     "@iconify-json/uil": "^1.2.3",
     "@iconify-json/unjs": "^1.2.3",
-    "@iconify-json/vscode-icons": "^1.2.38",
+    "@iconify-json/vscode-icons": "^1.2.39",
     "@inspira-ui/plugins": "^0.0.1",
     "@nuxt/content": "^3.11.0",
     "@nuxt/devtools": "3.1.1",
@@ -41,7 +41,7 @@
     "@nuxt/scripts": "^0.13.2",
     "@nuxt/ui": "^4.3.0",
     "@nuxtjs/seo": "^3.3.0",
-    "@sentry/nuxt": "^10.33.0",
+    "@sentry/nuxt": "^10.34.0",
     "@unovis/vue": "^1.6.2",
     "@vueuse/core": "^14.1.0",
     "@vueuse/nuxt": "^14.1.0",
@@ -52,10 +52,10 @@
     "date-fns": "^4.1.0",
     "eslint": "^9.39.2",
     "markdownlint-cli": "^0.47.0",
-    "motion-v": "^1.8.1",
+    "motion-v": "^1.9.0",
     "nitro-cloudflare-dev": "^0.2.2",
     "nuxt": "^4.2.2",
-    "nuxt-ai-ready": "^0.9.3",
+    "nuxt-ai-ready": "^0.9.4",
     "nuxt-build-cache": "^0.1.1",
     "nuxt-lodash": "^2.5.3",
     "nuxt-skew-protection": "^0.7.4",
@@ -67,7 +67,7 @@
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.18",
     "tailwindcss-animate": "^1.0.7",
-    "wrangler": "^4.58.0"
+    "wrangler": "^4.59.2"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
@@ -81,7 +81,7 @@
       "workerd"
     ],
     "overrides": {
-      "h3": "^1.15.4",
+      "h3": "^1.15.5",
       "vite": "npm:vite@8.0.0-beta.2"
     }
   }
