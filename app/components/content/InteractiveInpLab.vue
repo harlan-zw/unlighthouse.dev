@@ -398,15 +398,15 @@ const blockColors: Record<string, string> = {
           </div>
         </div>
       </div>
-
-      <template #fallback>
-        <div class="rounded-xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] h-96 flex items-center justify-center">
-          <div class="flex items-center gap-2 text-[var(--ui-text-muted)]">
-            <div class="size-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-            <span>Loading demo...</span>
-          </div>
-        </div>
-      </template>
     </div>
+
+    <template #fallback>
+      <div class="rounded-xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] h-96 flex items-center justify-center">
+        <div class="flex items-center gap-2 text-[var(--ui-text-muted)]">
+          <div class="size-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+          <span>Loading demo...</span>
+        </div>
+      </div>
+    </template>
   </ClientOnly>
 </template>
