@@ -31,6 +31,7 @@ jobs:
           NUXT_GITHUB_ACCESS_TOKEN: ${{ secrets.NUXT_GITHUB_ACCESS_TOKEN }}
           NUXT_GITHUB_AUTH_CLIENT_SECRET: ${{ secrets.NUXT_GITHUB_AUTH_CLIENT_SECRET }}
           NUXT_EMAIL_OCTOPUS_TOKEN: ${{ secrets.NUXT_EMAIL_OCTOPUS_TOKEN }}
+          NUXT_SEO_PRO_KEY: ${{ secrets.NUXT_SEO_PRO_KEY }}
 
       - run: pnpx wrangler deploy
         env:
