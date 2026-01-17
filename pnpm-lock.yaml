@@ -131,8 +131,8 @@ importers:
         specifier: ^4.2.2
         version: 4.2.2(@parcel/watcher@2.5.4)(@types/node@25.0.9)(@vue/compiler-sfc@3.5.26)(better-sqlite3@12.6.0)(cac@6.7.14)(db0@0.3.4(better-sqlite3@12.6.0))(eslint@9.39.2(jiti@2.6.1))(ioredis@5.9.2)(magicast@0.5.1)(optionator@0.9.4)(rolldown@1.0.0-beta.54)(rollup@4.55.1)(terser@5.46.0)(typescript@5.9.3)(vite@8.0.0-beta.2(@types/node@25.0.9)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))(yaml@2.8.2)
       nuxt-ai-ready:
-        specifier: ^0.9.4
-        version: 0.9.4(@nuxtjs/sitemap@7.5.2(magicast@0.5.1)(vite@8.0.0-beta.2(@types/node@25.0.9)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))(vue@3.5.26(typescript@5.9.3))(zod@4.3.5))(better-sqlite3@12.6.0)(magicast@0.5.1)(vue@3.5.26(typescript@5.9.3))
+        specifier: ^0.10.0
+        version: 0.10.0(@nuxtjs/sitemap@7.5.2(magicast@0.5.1)(vite@8.0.0-beta.2(@types/node@25.0.9)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))(vue@3.5.26(typescript@5.9.3))(zod@4.3.5))(better-sqlite3@12.6.0)(magicast@0.5.1)(vue@3.5.26(typescript@5.9.3))
       nuxt-build-cache:
         specifier: ^0.1.1
         version: 0.1.1(magicast@0.5.1)
@@ -140,8 +140,8 @@ importers:
         specifier: ^2.5.3
         version: 2.5.3(magicast@0.5.1)
       nuxt-skew-protection:
-        specifier: ^0.7.4
-        version: 0.7.4(@nuxtjs/robots@5.6.7(magicast@0.5.1)(vue@3.5.26(typescript@5.9.3))(zod@4.3.5))(db0@0.3.4(better-sqlite3@12.6.0))(ioredis@5.9.2)(magicast@0.5.1)(vue@3.5.26(typescript@5.9.3))
+        specifier: ^0.7.5
+        version: 0.7.5(@nuxtjs/robots@5.6.7(magicast@0.5.1)(vue@3.5.26(typescript@5.9.3))(zod@4.3.5))(db0@0.3.4(better-sqlite3@12.6.0))(ioredis@5.9.2)(magicast@0.5.1)(vue@3.5.26(typescript@5.9.3))
       octokit:
         specifier: ^5.0.5
         version: 5.0.5
@@ -6463,8 +6463,8 @@ packages:
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
 
-  nuxt-ai-ready@0.9.4:
-    resolution: {integrity: sha512-NCMGinjppH3neCOJ273LfPO1gwBTr9X48L9c4MOjJOlRdgpqYjaG4XFp5Fzc9C9qERxfM831ulxdIVAz3Fdx6Q==}
+  nuxt-ai-ready@0.10.0:
+    resolution: {integrity: sha512-UvUB41iDNOeRncfdGD4sniktanpZ/dKsblBFRubHT4CFwgm3HTHG33DDYJXX3ctW6GzW27a2JTqf1qVVwJB79A==}
     hasBin: true
     peerDependencies:
       '@nuxtjs/sitemap': ^7.0.0
@@ -6516,8 +6516,8 @@ packages:
   nuxt-site-config@3.2.17:
     resolution: {integrity: sha512-gmQkBWesVsEt0r10Jo16awufLpQYV4Ql2sOcmDz6CPdk0msZG/pDN6mzFVtMMorEtqixjqPVSIcFK++AueTKFw==}
 
-  nuxt-skew-protection@0.7.4:
-    resolution: {integrity: sha512-XbzjHpq58JPMAXaloaqOY3IwavLnooSyYiDZAophRSjHVbvGU/B8jz5StLHF2SVl0GM/GW7uX+GqSgV+HVlP2w==}
+  nuxt-skew-protection@0.7.5:
+    resolution: {integrity: sha512-4POqhsZAiHVZVe0QKtDJ8srXNtPuhR3CoHKso5D41kPRdxkn6nec0JP0OHc+H6V8BPkZ06b0AwduWU1ULpX6tg==}
     peerDependencies:
       '@nuxtjs/robots': '>=5.6.7'
       ably: '>=2'
@@ -15860,7 +15860,7 @@ snapshots:
     dependencies:
       boolbase: 1.0.0
 
-  nuxt-ai-ready@0.9.4(@nuxtjs/sitemap@7.5.2(magicast@0.5.1)(vite@8.0.0-beta.2(@types/node@25.0.9)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))(vue@3.5.26(typescript@5.9.3))(zod@4.3.5))(better-sqlite3@12.6.0)(magicast@0.5.1)(vue@3.5.26(typescript@5.9.3)):
+  nuxt-ai-ready@0.10.0(@nuxtjs/sitemap@7.5.2(magicast@0.5.1)(vite@8.0.0-beta.2(@types/node@25.0.9)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))(vue@3.5.26(typescript@5.9.3))(zod@4.3.5))(better-sqlite3@12.6.0)(magicast@0.5.1)(vue@3.5.26(typescript@5.9.3)):
     dependencies:
       '@clack/prompts': 0.11.0
       '@nuxt/kit': 4.2.2(magicast@0.5.1)
@@ -16069,7 +16069,7 @@ snapshots:
       - magicast
       - vue
 
-  nuxt-skew-protection@0.7.4(@nuxtjs/robots@5.6.7(magicast@0.5.1)(vue@3.5.26(typescript@5.9.3))(zod@4.3.5))(db0@0.3.4(better-sqlite3@12.6.0))(ioredis@5.9.2)(magicast@0.5.1)(vue@3.5.26(typescript@5.9.3)):
+  nuxt-skew-protection@0.7.5(@nuxtjs/robots@5.6.7(magicast@0.5.1)(vue@3.5.26(typescript@5.9.3))(zod@4.3.5))(db0@0.3.4(better-sqlite3@12.6.0))(ioredis@5.9.2)(magicast@0.5.1)(vue@3.5.26(typescript@5.9.3)):
     dependencies:
       '@clack/prompts': 0.11.0
       '@nuxt/kit': 4.2.2(magicast@0.5.1)
