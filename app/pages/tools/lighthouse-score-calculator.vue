@@ -110,11 +110,12 @@ function handleMetricUpdate(id: MetricId, value: number) {
                 <span class="text-sm font-semibold">Lighthouse v10+ Scoring</span>
               </div>
               <div class="flex items-center gap-2">
-                <UButtonGroup>
+                <div class="inline-flex rounded-md border border-(--ui-border) overflow-hidden">
                   <UButton
                     :color="calc.device.value === 'mobile' ? 'primary' : 'neutral'"
                     :variant="calc.device.value === 'mobile' ? 'solid' : 'ghost'"
                     size="xs"
+                    :ui="{ rounded: 'rounded-none' }"
                     @click="calc.device.value = 'mobile'"
                   >
                     <UIcon name="i-heroicons-device-phone-mobile" class="w-3.5 h-3.5 mr-1" />
@@ -124,12 +125,13 @@ function handleMetricUpdate(id: MetricId, value: number) {
                     :color="calc.device.value === 'desktop' ? 'primary' : 'neutral'"
                     :variant="calc.device.value === 'desktop' ? 'solid' : 'ghost'"
                     size="xs"
+                    :ui="{ rounded: 'rounded-none' }"
                     @click="calc.device.value = 'desktop'"
                   >
                     <UIcon name="i-heroicons-computer-desktop" class="w-3.5 h-3.5 mr-1" />
                     Desktop
                   </UButton>
-                </UButtonGroup>
+                </div>
                 <UButton variant="ghost" color="neutral" size="xs" @click="calc.reset()">
                   Reset
                 </UButton>

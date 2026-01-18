@@ -29,9 +29,46 @@ const toolsNav = computed(() => resourcesMenu.value.find(i => i.label === 'Tools
   >
     <template #left>
       <Logo />
+    </template>
 
-      <!-- Product navigation (left side) - simple links -->
+    <template #default>
       <UNavigationMenu :items="productMenu" class="hidden lg:flex justify-center" />
+      <UNavigationMenu :ui="{ viewport: 'min-w-[450px]' }" :items="[learnNav]" class="hidden lg:flex justify-center">
+        <template #item-content="{ item }">
+          <ul class="grid grid-cols-3 p-2 gap-2">
+            <li v-for="child in item.children" :key="child.to" class="text-center">
+              <UButton variant="ghost" :to="child.to" class="w-full">
+                <div class="w-full">
+                  <div class="flex items-center justify-center gap-1 w-full mb-1">
+                    <UIcon :name="child.icon" class="block w-6 h-6 mb-0.5 align-text-top opacity-85" />
+                  </div>
+                  <div class="text-xs text-muted">
+                    {{ child.label }}
+                  </div>
+                </div>
+              </UButton>
+            </li>
+          </ul>
+        </template>
+      </UNavigationMenu>
+      <UNavigationMenu :ui="{ viewport: 'min-w-[240px]' }" :items="[toolsNav]" class="hidden lg:flex justify-center">
+        <template #item-content="{ item }">
+          <ul class="grid grid-cols-2 p-2 gap-2">
+            <li v-for="child in item.children" :key="child.to" class="text-center">
+              <UButton variant="ghost" :to="child.to" class="w-full">
+                <div class="w-full">
+                  <div class="flex items-center justify-center gap-1 w-full mb-1">
+                    <UIcon :name="child.icon" class="block w-6 h-6 mb-0.5 align-text-top opacity-85" />
+                  </div>
+                  <div class="text-xs text-muted">
+                    {{ child.label }}
+                  </div>
+                </div>
+              </UButton>
+            </li>
+          </ul>
+        </template>
+      </UNavigationMenu>
     </template>
 
     <!-- Mobile menu body -->
@@ -120,49 +157,6 @@ const toolsNav = computed(() => resourcesMenu.value.find(i => i.label === 'Tools
 
     <template #right>
       <div class="flex items-center justify-end lg:-mr-1.5 ml-3 gap-2">
-        <!-- Resources navigation (right) -->
-        <div class="hidden lg:flex items-center">
-          <!-- Learn dropdown -->
-          <UNavigationMenu :ui="{ viewport: 'min-w-[450px]' }" :items="[learnNav]" class="justify-center">
-            <template #item-content="{ item }">
-              <ul class="grid grid-cols-3 p-2 gap-2">
-                <li v-for="child in item.children" :key="child.to" class="text-center">
-                  <UButton variant="ghost" :to="child.to" class="w-full">
-                    <div class="w-full">
-                      <div class="flex items-center justify-center gap-1 w-full mb-1">
-                        <UIcon :name="child.icon" class="block w-6 h-6 mb-0.5 align-text-top opacity-85" />
-                      </div>
-                      <div class="text-xs text-muted">
-                        {{ child.label }}
-                      </div>
-                    </div>
-                  </UButton>
-                </li>
-              </ul>
-            </template>
-          </UNavigationMenu>
-
-          <!-- Tools dropdown -->
-          <UNavigationMenu :ui="{ viewport: 'min-w-[240px]' }" :items="[toolsNav]" class="justify-center">
-            <template #item-content="{ item }">
-              <ul class="grid grid-cols-2 p-2 gap-2">
-                <li v-for="child in item.children" :key="child.to" class="text-center">
-                  <UButton variant="ghost" :to="child.to" class="w-full">
-                    <div class="w-full">
-                      <div class="flex items-center justify-center gap-1 w-full mb-1">
-                        <UIcon :name="child.icon" class="block w-6 h-6 mb-0.5 align-text-top opacity-85" />
-                      </div>
-                      <div class="text-xs text-muted">
-                        {{ child.label }}
-                      </div>
-                    </div>
-                  </UButton>
-                </li>
-              </ul>
-            </template>
-          </UNavigationMenu>
-        </div>
-
         <!-- Search -->
         <UInput
           type="search"

@@ -1,24 +1,10 @@
-// Left side: Unlighthouse-specific items (simple links)
+// Left side: Simple "Get Started" link (docs submenu handles pillars)
 export const productMenu = computed(() => [
   {
-    label: 'Guide',
-    title: 'Guide',
-    to: '/guide/getting-started/unlighthouse-cli',
-  },
-  {
-    label: 'Integrations',
-    title: 'Integrations',
-    to: '/integrations/cli',
-  },
-  {
-    label: 'API',
-    title: 'API',
-    to: '/api-doc',
-  },
-  {
-    label: 'Releases',
-    title: 'Releases',
-    to: '/releases',
+    label: 'Get Started',
+    title: 'Get Started',
+    icon: 'i-ph:book-open-duotone',
+    to: '/guide/getting-started/how-it-works',
   },
 ])
 

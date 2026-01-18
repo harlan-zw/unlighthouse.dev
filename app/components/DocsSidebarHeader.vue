@@ -1,11 +1,17 @@
 <script setup lang="ts">
 const route = useRoute()
-const navigation = inject('navigation')
+const navigation = inject<Ref<any[]>>('navigation')
+
+// Find the active pillar (guide, integrations, api-doc) and return its children
 const bottom = computed(() => {
-  return (navigation.value || []).find((l) => {
-    const parentPath = l.path.split('/').slice(0, 2).join('/') || ''
-    return route.path.startsWith(parentPath)
-  })?.children || []
+  const pillars = ['guide', 'integrations', 'api-doc']
+  const activePillar = pillars.find(p => route.path.startsWith(`/${p}`))
+
+  if (!activePillar || !navigation?.value?.length)
+    return []
+
+  const pillarNav = navigation.value.find(l => l.path.endsWith(`/${activePillar}`))
+  return pillarNav?.children || []
 })
 </script>
 
