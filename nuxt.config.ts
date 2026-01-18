@@ -174,22 +174,6 @@ export default defineNuxtConfig({
           NUXT_CLOUDFLARE_ANALYTICS_API_TOKEN: process.env.NUXT_CLOUDFLARE_ANALYTICS_API_TOKEN || '',
           NUXT_CLOUDFLARE_ACCOUNT_ID: process.env.NUXT_CLOUDFLARE_ACCOUNT_ID || '',
         },
-        d1_databases: [
-          {
-            binding: 'DB',
-            database_id: '5274d98a-9e23-4a78-b9af-46444ec20b2a', // unlighthouse
-          },
-        ],
-        kv_namespaces: [
-          {
-            binding: 'KV',
-            id: '29fb5bd433c44a989ac1fbd72940f1e4', // unlighthouse
-          },
-          {
-            binding: 'CACHE',
-            id: '8f765d0c531c41edb94790f2d31d8dba', // unlighthouse_cache
-          },
-        ],
       },
     },
     prerender: {
