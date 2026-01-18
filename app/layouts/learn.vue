@@ -1,7 +1,4 @@
 <script lang="ts" setup>
-import { motion } from 'motion-v'
-import { isHydratingRef } from '~/composables/data'
-
 const route = useRoute()
 
 interface NavItem {
