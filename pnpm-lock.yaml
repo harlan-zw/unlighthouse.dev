@@ -131,8 +131,8 @@ importers:
         specifier: ^4.2.2
         version: 4.2.2(@parcel/watcher@2.5.4)(@types/node@25.0.9)(@vue/compiler-sfc@3.5.26)(better-sqlite3@12.6.2)(cac@6.7.14)(db0@0.3.4(better-sqlite3@12.6.2))(eslint@9.39.2(jiti@2.6.1))(ioredis@5.9.2)(magicast@0.5.1)(optionator@0.9.4)(rolldown@1.0.0-beta.54)(rollup@4.55.1)(terser@5.46.0)(typescript@5.9.3)(vite@8.0.0-beta.2(@types/node@25.0.9)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))(yaml@2.8.2)
       nuxt-ai-ready:
-        specifier: ^0.10.1
-        version: 0.10.1(@nuxtjs/sitemap@7.5.2(magicast@0.5.1)(vite@8.0.0-beta.2(@types/node@25.0.9)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))(vue@3.5.26(typescript@5.9.3))(zod@4.3.5))(better-sqlite3@12.6.2)(magicast@0.5.1)(vue@3.5.26(typescript@5.9.3))
+        specifier: ^0.10.2
+        version: 0.10.2(@nuxtjs/sitemap@7.5.2(magicast@0.5.1)(vite@8.0.0-beta.2(@types/node@25.0.9)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))(vue@3.5.26(typescript@5.9.3))(zod@4.3.5))(better-sqlite3@12.6.2)(magicast@0.5.1)(vue@3.5.26(typescript@5.9.3))
       nuxt-build-cache:
         specifier: ^0.1.1
         version: 0.1.1(magicast@0.5.1)
@@ -6463,8 +6463,8 @@ packages:
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
 
-  nuxt-ai-ready@0.10.1:
-    resolution: {integrity: sha512-qO/dPbOvt+ZSFwEnvUIj5nCilWdfE8TVske7tDxTgwHI/DA4T9qNNlrqSxCmI76slpvxIanLo0rb5hhlKkHf+w==}
+  nuxt-ai-ready@0.10.2:
+    resolution: {integrity: sha512-PMN+/wl3Vk/89ahiF5SaLyVMeCeTzmjOM15T/V2SIuBxdSTUOB/J7HqVZdVdvmnCdS2hxvRpEPuDzXFJ2BO69w==}
     hasBin: true
     peerDependencies:
       '@nuxtjs/sitemap': ^7.0.0
@@ -15860,7 +15860,7 @@ snapshots:
     dependencies:
       boolbase: 1.0.0
 
-  nuxt-ai-ready@0.10.1(@nuxtjs/sitemap@7.5.2(magicast@0.5.1)(vite@8.0.0-beta.2(@types/node@25.0.9)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))(vue@3.5.26(typescript@5.9.3))(zod@4.3.5))(better-sqlite3@12.6.2)(magicast@0.5.1)(vue@3.5.26(typescript@5.9.3)):
+  nuxt-ai-ready@0.10.2(@nuxtjs/sitemap@7.5.2(magicast@0.5.1)(vite@8.0.0-beta.2(@types/node@25.0.9)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))(vue@3.5.26(typescript@5.9.3))(zod@4.3.5))(better-sqlite3@12.6.2)(magicast@0.5.1)(vue@3.5.26(typescript@5.9.3)):
     dependencies:
       '@clack/prompts': 0.11.0
       '@nuxt/kit': 4.2.2(magicast@0.5.1)
