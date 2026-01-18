@@ -149,8 +149,6 @@ const breadcrumbs = useBreadcrumbItems({
     ]
   }),
 })
-
-const isHydrating = isHydratingRef()
 </script>
 
 <template>
