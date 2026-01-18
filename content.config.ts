@@ -89,13 +89,13 @@ const glossary = defineCollection(asSeoCollection({
   },
 }))
 
-const learn = defineCollection(asSeoCollection({
+const learnLighthouse = defineCollection(asSeoCollection({
   schema,
   type: 'page',
   source: {
     include: '**/*.md',
-    cwd: 'content/learn',
-    prefix: '/learn',
+    cwd: 'content/learn-lighthouse',
+    prefix: '/learn-lighthouse',
   },
 }))
 
@@ -133,10 +133,10 @@ export const content = defineContentConfig({
   collections: {
     root: resolvableUnlighthouseCollection(),
     glossary,
+    learnLighthouse,
     // blog,
     // cloud,
     // tools,
-    // learn,
     // compare,
     // automation,
     // frameworks,
