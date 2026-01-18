@@ -125,6 +125,72 @@ export default defineNuxtConfig({
     cloudflare: {
       deployConfig: true,
       nodeCompat: true,
+      wrangler: {
+        routes: [
+          {
+            pattern: 'unlighthouse.dev',
+            zone_name: 'unlighthouse.dev',
+            custom_domain: true,
+          },
+          {
+            pattern: 'www.unlighthouse.dev',
+            zone_name: 'unlighthouse.dev',
+            custom_domain: true,
+          },
+        ],
+        durable_objects: {
+          bindings: [
+            {
+              name: '$DurableObject',
+              class_name: '$DurableObject',
+            },
+          ],
+        },
+        migrations: [
+          {
+            tag: 'v1',
+            new_classes: ['$DurableObject'],
+          },
+        ],
+        ai: {
+          binding: 'AI',
+          experimental_remote: true,
+        },
+        observability: {
+          logs: {
+            enabled: true,
+            head_sampling_rate: 1,
+            invocation_logs: true,
+          },
+        },
+        vars: {
+          NUXT_SESSION_PASSWORD: process.env.NUXT_SESSION_PASSWORD || '',
+          NUXT_OAUTH_GITHUB_CLIENT_ID: process.env.NUXT_OAUTH_GITHUB_CLIENT_ID || '',
+          NUXT_OAUTH_GITHUB_CLIENT_SECRET: process.env.NUXT_OAUTH_GITHUB_CLIENT_SECRET || '',
+          NUXT_OAUTH_GITHUB_REDIRECT_URL: process.env.NUXT_OAUTH_GITHUB_REDIRECT_URL || '',
+          NUXT_GITHUB_ACCESS_TOKEN: process.env.NUXT_GITHUB_ACCESS_TOKEN || '',
+          NUXT_EMAIL_OCTOPUS_TOKEN: process.env.NUXT_EMAIL_OCTOPUS_TOKEN || '',
+          NUXT_GITHUB_AUTH_TOKEN: process.env.NUXT_GITHUB_AUTH_TOKEN || '',
+          NUXT_CLOUDFLARE_ANALYTICS_API_TOKEN: process.env.NUXT_CLOUDFLARE_ANALYTICS_API_TOKEN || '',
+          NUXT_CLOUDFLARE_ACCOUNT_ID: process.env.NUXT_CLOUDFLARE_ACCOUNT_ID || '',
+        },
+        d1_databases: [
+          {
+            binding: 'DB',
+            database_id: '5274d98a-9e23-4a78-b9af-46444ec20b2a', // unlighthouse
+          },
+        ],
+        kv_namespaces: [
+          {
+            binding: 'KV',
+            id: '29fb5bd433c44a989ac1fbd72940f1e4', // unlighthouse
+          },
+          {
+            binding: 'CACHE',
+            id: '8f765d0c531c41edb94790f2d31d8dba', // unlighthouse_cache
+          },
+        ],
+      },
     },
     prerender: {
       autoSubfolderIndex: false,
