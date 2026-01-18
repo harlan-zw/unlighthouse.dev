@@ -55,7 +55,7 @@
     "motion-v": "^1.9.0",
     "nitro-cloudflare-dev": "^0.2.2",
     "nuxt": "^4.2.2",
-    "nuxt-ai-ready": "^0.10.6",
+    "nuxt-ai-ready": "^0.10.7",
     "nuxt-build-cache": "^0.1.1",
     "nuxt-lodash": "^2.5.3",
     "nuxt-skew-protection": "^0.7.5",
