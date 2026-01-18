@@ -78,6 +78,7 @@ export default defineNuxtConfig({
 
   aiReady: {
     debug: true,
+    debugCron: true,
     database: {
       type: 'd1',
       bindingName: 'DB',
