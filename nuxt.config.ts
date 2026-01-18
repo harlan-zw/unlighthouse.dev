@@ -132,11 +132,11 @@ export default defineNuxtConfig({
             zone_name: 'unlighthouse.dev',
             custom_domain: true,
           },
-          {
-            pattern: 'www.unlighthouse.dev',
-            zone_name: 'unlighthouse.dev',
-            custom_domain: true,
-          },
+          // {
+          //   pattern: 'www.unlighthouse.dev',
+          //   zone_name: 'unlighthouse.dev',
+          //   custom_domain: true,
+          // },
         ],
         durable_objects: {
           bindings: [
