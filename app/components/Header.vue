@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useStats } from '../composables/data'
-import { menu } from '../composables/nav'
+import { productMenu, resourcesMenu } from '../composables/nav'
 
 const { data: stats } = await useStats()
 const githubStars = computed(() => {
@@ -9,29 +9,48 @@ const githubStars = computed(() => {
 })
 
 const navigation = inject('navigation')
-
 const { open: openSearch } = useContentSearch()
 
 onKeyStroke('Divide', () => {
   openSearch.value = true
 })
+
+// Resources with dropdowns
+const learnNav = computed(() => resourcesMenu.value.find(i => i.label === 'Learn'))
+const toolsNav = computed(() => resourcesMenu.value.find(i => i.label === 'Tools'))
 </script>
 
 <template>
-  <UHeader :ui="{ root: 'border-none bg-transparent pt-2 mb-3 px-5 h-auto', container: 'max-w-[1452px] lg:bg-gray-600/3 lg:border border-[var(--ui-border)] lg:dark:bg-gray-900/10 mx-auto py-0 px-0 lg:px-5 sm:px-0 rounded-lg' }">
+  <UHeader
+    :ui="{
+      root: 'border-none bg-transparent pt-2 mb-3 px-5 h-auto',
+      container: 'max-w-[1452px] lg:bg-gray-600/3 lg:border border-[var(--ui-border)] lg:dark:bg-gray-900/10 mx-auto py-0 px-0 lg:px-5 sm:px-0 rounded-lg',
+    }"
+  >
     <template #left>
       <Logo />
-      <div class="hidden lg:block">
-        <UNavigationMenu :ui="{ viewport: 'min-w-[600px]' }" :items="menu.slice(0, 3)" class="justify-center" />
-      </div>
+
+      <!-- Product navigation (left side) - simple links -->
+      <UNavigationMenu :items="productMenu" class="hidden lg:flex justify-center" />
     </template>
 
+    <!-- Mobile menu body -->
     <template #body>
       <div class="space-y-3">
         <div class="flex gap-3">
-          <UInput type="search" size="sm" class="cursor-pointer w-[70px]" shortcut="divide" @click="openSearch = true">
+          <UInput
+            type="search"
+            size="sm"
+            class="cursor-pointer w-[70px]"
+            shortcut="divide"
+            @click="openSearch = true"
+          >
             <template #leading>
-              <UContentSearchButton size="sm" class="cursor-pointer  p-0 opacity-70 hover:opacity-100" @click="openSearch = true" />
+              <UContentSearchButton
+                size="sm"
+                class="cursor-pointer p-0 opacity-70 hover:opacity-100"
+                @click="openSearch = true"
+              />
             </template>
             <template #trailing>
               <UKbd @click="openSearch = true">
@@ -40,10 +59,15 @@ onKeyStroke('Divide', () => {
             </template>
           </UInput>
           <UTooltip text="Star on GitHub">
-            <UButton to="https://github.com/harlan-zw/unlighthouse" target="_blank" color="primary" variant="ghost">
+            <UButton
+              to="https://github.com/harlan-zw/unlighthouse"
+              target="_blank"
+              color="primary"
+              variant="ghost"
+            >
               <template #leading>
                 <div class="flex items-center transition rounded-l py-1 space-x-1 dark:text-neutral-200">
-                  <UIcon name="i-carbon-star" class="w-3 h-3 " />
+                  <UIcon name="i-carbon-star" class="w-3 h-3" />
                 </div>
               </template>
               <div class="font-semibold font-mono">
@@ -63,32 +87,116 @@ onKeyStroke('Divide', () => {
           </UTooltip>
         </div>
         <USeparator />
-        <UContentNavigation :navigation="navigation" />
+
+        <!-- Mobile: Product section -->
+        <div class="space-y-1">
+          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-2">
+            Unlighthouse
+          </p>
+          <UContentNavigation :navigation="navigation" />
+        </div>
+
+        <USeparator />
+
+        <!-- Mobile: Resources section -->
+        <div class="space-y-1">
+          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-2">
+            Resources
+          </p>
+          <nav class="space-y-1">
+            <NuxtLink
+              v-for="item in resourcesMenu"
+              :key="item.label"
+              :to="item.to"
+              class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              <UIcon v-if="item.icon" :name="item.icon" class="w-4 h-4 opacity-70" />
+              {{ item.label }}
+            </NuxtLink>
+          </nav>
+        </div>
       </div>
     </template>
 
     <template #right>
-      <div class="flex items-center justify-end lg:-mr-1.5 ml-3 gap-3">
-        <div class="hidden lg:block">
-          <UNavigationMenu :items="menu.slice(3)" :ui="{ viewport: 'min-w-[500px] -left-full' }" class="justify-center" />
-        </div>
-        <div>
-          <UInput type="search" size="sm" class="cursor-pointer hidden lg:block w-[70px]" shortcut="divide" @click="openSearch = true">
-            <template #leading>
-              <UContentSearchButton size="sm" class="cursor-pointer  p-0 opacity-70 hover:opacity-100" @click="openSearch = true" />
+      <div class="flex items-center justify-end lg:-mr-1.5 ml-3 gap-2">
+        <!-- Resources navigation (right) -->
+        <div class="hidden lg:flex items-center">
+          <!-- Learn dropdown -->
+          <UNavigationMenu :ui="{ viewport: 'min-w-[450px]' }" :items="[learnNav]" class="justify-center">
+            <template #item-content="{ item }">
+              <ul class="grid grid-cols-3 p-2 gap-2">
+                <li v-for="child in item.children" :key="child.to" class="text-center">
+                  <UButton variant="ghost" :to="child.to" class="w-full">
+                    <div class="w-full">
+                      <div class="flex items-center justify-center gap-1 w-full mb-1">
+                        <UIcon :name="child.icon" class="block w-6 h-6 mb-0.5 align-text-top opacity-85" />
+                      </div>
+                      <div class="text-xs text-muted">
+                        {{ child.label }}
+                      </div>
+                    </div>
+                  </UButton>
+                </li>
+              </ul>
             </template>
-            <template #trailing>
-              <UKbd @click="openSearch = true">
-                /
-              </UKbd>
+          </UNavigationMenu>
+
+          <!-- Tools dropdown -->
+          <UNavigationMenu :ui="{ viewport: 'min-w-[240px]' }" :items="[toolsNav]" class="justify-center">
+            <template #item-content="{ item }">
+              <ul class="grid grid-cols-2 p-2 gap-2">
+                <li v-for="child in item.children" :key="child.to" class="text-center">
+                  <UButton variant="ghost" :to="child.to" class="w-full">
+                    <div class="w-full">
+                      <div class="flex items-center justify-center gap-1 w-full mb-1">
+                        <UIcon :name="child.icon" class="block w-6 h-6 mb-0.5 align-text-top opacity-85" />
+                      </div>
+                      <div class="text-xs text-muted">
+                        {{ child.label }}
+                      </div>
+                    </div>
+                  </UButton>
+                </li>
+              </ul>
             </template>
-          </UInput>
+          </UNavigationMenu>
         </div>
+
+        <!-- Search -->
+        <UInput
+          type="search"
+          size="sm"
+          class="cursor-pointer hidden lg:block w-[70px]"
+          shortcut="divide"
+          @click="openSearch = true"
+        >
+          <template #leading>
+            <UContentSearchButton
+              size="sm"
+              class="cursor-pointer p-0 opacity-70 hover:opacity-100"
+              @click="openSearch = true"
+            />
+          </template>
+          <template #trailing>
+            <UKbd @click="openSearch = true">
+              /
+            </UKbd>
+          </template>
+        </UInput>
+
+        <!-- GitHub stars -->
         <UTooltip text="Star on GitHub">
-          <UButton class="hidden sm:flex" to="https://github.com/harlan-zw/unlighthouse" target="_blank" color="primary" variant="ghost">
+          <UButton
+            class="hidden sm:flex"
+            to="https://github.com/harlan-zw/unlighthouse"
+            target="_blank"
+            color="primary"
+            variant="ghost"
+          >
             <template #leading>
               <div class="flex items-center transition rounded-l py-1 space-x-1 dark:text-neutral-200">
-                <UIcon name="i-carbon-star" class="w-3 h-3 " />
+                <UIcon name="i-carbon-star" class="w-3 h-3" />
               </div>
             </template>
             <div class="font-semibold font-mono">
@@ -97,8 +205,10 @@ onKeyStroke('Divide', () => {
           </UButton>
         </UTooltip>
 
+        <!-- Color mode -->
         <ColorModeButton />
 
+        <!-- GitHub link -->
         <UTooltip text="Open Unlighthouse on GitHub">
           <UButton
             aria-label="Unlighthouse on GitHub"

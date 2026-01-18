@@ -5,6 +5,11 @@ export default defineAppConfig({
     duration: 5000,
   },
   ui: {
+    header: {
+      slots: {
+        center: 'flex-1 flex justify-start',
+      },
+    },
     icons: {
       caution: 'i-carbon-warning-alt',
       copy: 'i-carbon-copy',
