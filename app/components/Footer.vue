@@ -30,6 +30,7 @@ const toolsLinks = [
   { label: 'INP Analyzer', icon: 'i-heroicons-cursor-arrow-rays', to: '/tools/inp-analyzer' },
   { label: 'CLS Debugger', icon: 'i-heroicons-arrows-pointing-out', to: '/tools/cls-debugger' },
   { label: 'PSI Performance', icon: 'i-heroicons-chart-bar', to: '/tools/pagespeed-insights-performance' },
+  { label: 'Report Viewer', icon: 'i-heroicons-document-chart-bar', to: '/tools/lighthouse-report-viewer' },
 ]
 </script>
 

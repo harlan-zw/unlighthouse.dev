@@ -52,9 +52,9 @@ const toolsNav = computed(() => resourcesMenu.value.find(i => i.label === 'Tools
           </ul>
         </template>
       </UNavigationMenu>
-      <UNavigationMenu :ui="{ viewport: 'min-w-[240px]' }" :items="[toolsNav]" class="hidden lg:flex justify-center">
+      <UNavigationMenu :ui="{ viewport: 'min-w-[450px]' }" :items="[toolsNav]" class="hidden lg:flex justify-center">
         <template #item-content="{ item }">
-          <ul class="grid grid-cols-2 p-2 gap-2">
+          <ul class="grid grid-cols-3 p-2 gap-2">
             <li v-for="child in item.children" :key="child.to" class="text-center">
               <UButton variant="ghost" :to="child.to" class="w-full">
                 <div class="w-full">

@@ -19,6 +19,14 @@ defineOgImageComponent('NuxtSeo', {
 
 const tools = [
   {
+    title: 'Lighthouse Report Viewer',
+    description: 'Upload your Lighthouse JSON report to visualize scores, metrics, and audits interactively.',
+    icon: 'i-heroicons-document-chart-bar',
+    to: '/tools/lighthouse-report-viewer',
+    color: 'violet',
+    metrics: ['All Categories', 'Audits', 'Metrics'],
+  },
+  {
     title: 'Lighthouse Score Calculator',
     description: 'Calculate your performance score interactively. Adjust metrics to see how they impact your overall Lighthouse score.',
     icon: 'i-heroicons-calculator',

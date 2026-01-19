@@ -90,6 +90,12 @@ export const resourcesMenu = computed(() => [
         icon: 'i-heroicons-chart-bar',
         to: '/tools/pagespeed-insights-performance',
       },
+      {
+        label: 'Report Viewer',
+        title: 'Lighthouse Report Viewer',
+        icon: 'i-heroicons-document-chart-bar',
+        to: '/tools/lighthouse-report-viewer',
+      },
     ],
   },
 ])
