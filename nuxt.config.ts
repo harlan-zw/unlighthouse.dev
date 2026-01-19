@@ -58,6 +58,10 @@ export default defineNuxtConfig({
     exclude: [
       '**/.navigation',
       '/__nuxt_content/**',
+      '/glossary',
+      '/api-doc',
+      '/api-doc/config',
+      '/api-doc/glossary',
     ],
     xslColumns: [
       { label: 'URL', width: '100%' },
