@@ -35,7 +35,6 @@ function resolvableUnlighthouseCollection() {
       })
     }
   }
-  // use github source
   logger.info(`🔗 Docs source using GitHub`)
   return defineCollection(asSeoCollection({
     schema,
