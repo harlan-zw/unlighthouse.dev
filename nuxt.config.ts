@@ -124,6 +124,8 @@ export default defineNuxtConfig({
     githubAuthClientId: '', // NUXT_GITHUB_AUTH_CLIENT_ID
     githubAuthClientSecret: '', // NUXT_GITHUB_AUTH_SECRET_ID
     googleApiToken: '', // NUXT_GOOGLE_API_TOKEN (PageSpeed Insights)
+    cloudflareAccountId: '', // NUXT_CLOUDFLARE_ACCOUNT_ID
+    cloudflareAnalyticsApiToken: '', // NUXT_CLOUDFLARE_ANALYTICS_API_TOKEN
 
     public: {
       // moduleDeps: pkgJson.dependencies,

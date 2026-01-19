@@ -16,9 +16,11 @@ export default defineEventHandler(async (event): Promise<ToolAnalyticsSummary> =
   const range = (query.range as string) || '7d'
   const { value, unit } = getTimeRangeFilter(range)
 
-  const env = event.context.cloudflare?.env as { CF_ACCOUNT_ID?: string, CF_API_TOKEN?: string } | undefined
+  const config = useRuntimeConfig(event)
+  const accountId = config.cloudflareAccountId
+  const apiToken = config.cloudflareAnalyticsApiToken
 
-  if (!env?.CF_ACCOUNT_ID || !env?.CF_API_TOKEN) {
+  if (!accountId || !apiToken) {
     return {
       totalEvents: 0,
       uniqueSessions: 0,
@@ -41,10 +43,10 @@ export default defineEventHandler(async (event): Promise<ToolAnalyticsSummary> =
     GROUP BY tool, action, session_id, status
   `
 
-  const response = await $fetch<{ data: { tool: string, action: string, session_id: string, status: string, count: number }[] }>(`https://api.cloudflare.com/client/v4/accounts/${env.CF_ACCOUNT_ID}/analytics_engine/sql`, {
+  const response = await $fetch<{ data: { tool: string, action: string, session_id: string, status: string, count: number }[] }>(`https://api.cloudflare.com/client/v4/accounts/${accountId}/analytics_engine/sql`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${env.CF_API_TOKEN}`,
+      'Authorization': `Bearer ${apiToken}`,
       'Content-Type': 'text/plain',
     },
     body: sql,
@@ -63,7 +65,8 @@ export default defineEventHandler(async (event): Promise<ToolAnalyticsSummary> =
     sessions.add(row.session_id)
     toolCounts.set(row.tool, (toolCounts.get(row.tool) || 0) + row.count)
     actionCounts.set(row.action, (actionCounts.get(row.action) || 0) + row.count)
-    if (row.status === 'error') errorCount += row.count
+    if (row.status === 'error')
+      errorCount += row.count
   }
 
   return {

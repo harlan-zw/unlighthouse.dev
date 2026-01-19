@@ -17,3 +17,7 @@ id = "8f765d0c531c41edb94790f2d31d8dba"
 binding = "DB"
 database_name = "unlighthouse"
 database_id = "5274d98a-9e23-4a78-b9af-46444ec20b2a"
+
+[[analytics_engine_datasets]]
+binding = "TOOL_ANALYTICS"
+dataset = "unlighthouse_tool_usage"
