@@ -23,5 +23,15 @@ export async function validateUrl(url?: string) {
   if (!parsed.host)
     throw createError({ message: 'Invalid URL: no host found', statusCode: 422 })
 
+  // Check URL is reachable before expensive PSI call
+  const reachable = await $fetch.raw(normalized, {
+    method: 'HEAD',
+    timeout: 5_000,
+    redirect: 'follow',
+  }).catch(() => null)
+
+  if (!reachable)
+    throw createError({ message: `URL not reachable: ${normalized}`, statusCode: 400 })
+
   return normalized
 }
