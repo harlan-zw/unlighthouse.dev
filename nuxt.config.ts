@@ -174,6 +174,7 @@ export default defineNuxtConfig({
           NUXT_GITHUB_AUTH_TOKEN: process.env.NUXT_GITHUB_AUTH_TOKEN || '',
           NUXT_CLOUDFLARE_ANALYTICS_API_TOKEN: process.env.NUXT_CLOUDFLARE_ANALYTICS_API_TOKEN || '',
           NUXT_CLOUDFLARE_ACCOUNT_ID: process.env.NUXT_CLOUDFLARE_ACCOUNT_ID || '',
+          NUXT_GOOGLE_API_TOKEN: process.env.NUXT_GOOGLE_API_TOKEN || '',
         },
       },
     },
