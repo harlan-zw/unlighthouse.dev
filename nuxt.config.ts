@@ -208,6 +208,7 @@ export default defineNuxtConfig({
       failOnError: false,
       crawlLinks: true,
       routes: ['/', '/404.html'],
+      ignore: ['/auth/**', '/admin/**', '/api/debug/**'],
     },
     experimental: {
       openAPI: true,
@@ -337,6 +338,8 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
+    // auth endpoints must not be cached (cookies need to be set fresh)
+    '/auth/**': { cache: false, headers: { 'cache-control': 'no-store' } },
   },
 
   css: [

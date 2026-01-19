@@ -19,6 +19,17 @@ export default defineEventHandler(async (event) => {
       hasOAuthClientSecret: !!process.env.NUXT_OAUTH_GITHUB_CLIENT_SECRET,
       redirectUrl: process.env.NUXT_OAUTH_GITHUB_REDIRECT_URL || 'not set',
     },
+    runtimeOauth: {
+      hasClientId: !!config.oauth?.github?.clientId,
+      clientIdPrefix: config.oauth?.github?.clientId?.slice(0, 8) || 'not set',
+      hasClientSecret: !!config.oauth?.github?.clientSecret,
+      redirectUrl: config.oauth?.github?.redirectUrl || 'not set',
+    },
+    sessionConfig: {
+      maxAge: config.session?.maxAge,
+      sameSite: config.session?.cookie?.sameSite,
+      secure: config.session?.cookie?.secure,
+    },
     cookies: {
       hasAuthState: !!cookies['nuxt-auth-state'],
       hasSession: !!cookies['nuxt-session'],
