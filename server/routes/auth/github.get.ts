@@ -4,7 +4,7 @@ import { useDB } from '../../utils/db'
 
 const ADMIN_EMAILS = ['harlan@harlanzw.com']
 
-export default defineOAuthGitHubEventHandler({
+const handler = defineOAuthGitHubEventHandler({
   config: {
     scope: ['read:user', 'user:email'],
   },
@@ -68,4 +68,17 @@ export default defineOAuthGitHubEventHandler({
     console.error('[github auth] OAuth error:', error)
     return sendRedirect(event, `/admin?error=${encodeURIComponent(error.message || 'auth_failed')}`)
   },
+})
+
+// Workaround for nuxt-auth-utils bug: https://github.com/atinux/nuxt-auth-utils/issues/461
+export default defineEventHandler(async (event) => {
+  const query = getQuery(event)
+  const stateCookie = getCookie(event, 'nuxt-auth-state')
+
+  // Clear stale state cookie if starting fresh OAuth flow
+  if (!query.state && stateCookie) {
+    deleteCookie(event, 'nuxt-auth-state')
+    return sendRedirect(event, event.path)
+  }
+  return handler(event)
 })
