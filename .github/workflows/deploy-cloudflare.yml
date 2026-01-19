@@ -44,6 +44,7 @@ jobs:
           NUXT_OAUTH_GITHUB_CLIENT_ID: ${{ secrets.NUXT_OAUTH_GITHUB_CLIENT_ID }}
           NUXT_OAUTH_GITHUB_CLIENT_SECRET: ${{ secrets.NUXT_OAUTH_GITHUB_CLIENT_SECRET }}
           NUXT_OAUTH_GITHUB_REDIRECT_URL: ${{ secrets.NUXT_OAUTH_GITHUB_REDIRECT_URL }}
+          NUXT_SESSION_PASSWORD: ${{ secrets.NUXT_SESSION_PASSWORD }}
 
       - run: pnpx wrangler deploy
         env:
