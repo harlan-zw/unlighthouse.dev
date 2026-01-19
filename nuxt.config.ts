@@ -203,7 +203,6 @@ export default defineNuxtConfig({
 
   linkChecker: {
     report: {
-      // generate both a html and markdown report
       html: true,
       markdown: true,
       json: true,
