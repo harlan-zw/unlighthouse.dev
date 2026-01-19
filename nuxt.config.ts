@@ -103,6 +103,14 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    session: {
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      password: '', // NUXT_SESSION_PASSWORD
+      cookie: {
+        sameSite: 'lax',
+        secure: true,
+      },
+    },
     emailOctopusToken: '', // NUXT_EMAIL_OCTOPUS_TOKEN
     githubAccessToken: '', // NUXT_GITHUB_ACCESS_TOKEN
     githubAuthToken: '', // NUXT_GITHUB_AUTH_TOKEN
