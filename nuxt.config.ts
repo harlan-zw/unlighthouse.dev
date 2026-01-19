@@ -114,7 +114,7 @@ export default defineNuxtConfig({
     emailOctopusToken: '', // NUXT_EMAIL_OCTOPUS_TOKEN
     githubAccessToken: '', // NUXT_GITHUB_ACCESS_TOKEN
     githubAuthToken: '', // NUXT_GITHUB_AUTH_TOKEN
-    githubAuthClientId: 'cabace556bd9519d9299', // NUXT_GITHUB_AUTH_CLIENT_ID
+    githubAuthClientId: '', // NUXT_GITHUB_AUTH_CLIENT_ID
     githubAuthClientSecret: '', // NUXT_GITHUB_AUTH_SECRET_ID
     googleApiToken: '', // NUXT_GOOGLE_API_TOKEN (PageSpeed Insights)
 
