@@ -26,13 +26,10 @@ const learnLinks = [
 
 const toolsLinks = [
   { label: 'Score Calculator', icon: 'i-heroicons-calculator', to: '/tools/lighthouse-score-calculator' },
-]
-
-const resourceLinks = [
-  { label: 'Bulk Testing', icon: 'i-heroicons-squares-2x2', to: '/learn-lighthouse/bulk-lighthouse-testing' },
-  { label: 'Automation', icon: 'i-carbon-flow', to: '/automation' },
-  { label: 'Cloud', icon: 'i-carbon-cloud', to: '/cloud' },
-  { label: 'Compare', icon: 'i-carbon-compare', to: '/compare' },
+  { label: 'LCP Finder', icon: 'i-heroicons-photo', to: '/tools/lcp-finder' },
+  { label: 'INP Analyzer', icon: 'i-heroicons-cursor-arrow-rays', to: '/tools/inp-analyzer' },
+  { label: 'CLS Debugger', icon: 'i-heroicons-arrows-pointing-out', to: '/tools/cls-debugger' },
+  { label: 'PSI Performance', icon: 'i-heroicons-chart-bar', to: '/tools/pagespeed-insights-performance' },
 ]
 </script>
 
@@ -76,9 +73,7 @@ const resourceLinks = [
           <!-- Docs Section -->
           <section class="max-w-[350px]">
             <h3 class="font-bold mb-5 flex items-center gap-1">
-              <NuxtLink to="/" title="Home" class="flex items-end gap-1.5 font-bold text-xl text-neutral-900 dark:text-white font-title">
-                <Logo />
-              </NuxtLink>
+              <Logo />
             </h3>
             <div class="mb-7">
               <nav>
@@ -137,22 +132,9 @@ const resourceLinks = [
                 Tools
               </NuxtLink>
             </h3>
-            <nav class="mb-7">
-              <ul class="space-y-4">
-                <li v-for="(link, key) in toolsLinks" :key="key">
-                  <ULink :to="link.to" class="flex items-center gap-1 hover:underline transition">
-                    <UIcon v-if="link.icon" dynamic :name="link.icon" class="w-4 h-4" />
-                    {{ link.label }}
-                  </ULink>
-                </li>
-              </ul>
-            </nav>
-            <div class="text-sm text-toned mb-5 font-semibold">
-              Resources
-            </div>
             <nav>
               <ul class="space-y-4">
-                <li v-for="(link, key) in resourceLinks" :key="key">
+                <li v-for="(link, key) in toolsLinks" :key="key">
                   <ULink :to="link.to" class="flex items-center gap-1 hover:underline transition">
                     <UIcon v-if="link.icon" dynamic :name="link.icon" class="w-4 h-4" />
                     {{ link.label }}

@@ -216,7 +216,7 @@ function handleMetricUpdate(id: MetricId, value: number) {
     <section class="px-3 sm:px-6 lg:px-8 pb-12">
       <div class="max-w-6xl mx-auto">
         <!-- How Lighthouse Calculates - Two Column Layout -->
-        <div class="mb-10 grid lg:grid-cols-[1fr,320px] gap-6 lg:gap-8 items-start">
+        <div class="mb-10 grid lg:grid-cols-[1fr_500px] gap-6 lg:gap-14 items-start">
           <!-- Left: Text Content -->
           <div>
             <h2 class="text-xl sm:text-2xl font-bold mb-3 text-gray-900 dark:text-white">
@@ -498,21 +498,26 @@ function handleMetricUpdate(id: MetricId, value: number) {
                     </div>
                   </div>
                 </div>
-                <!-- Collapsible details -->
-                <details class="mt-3 group/details">
-                  <summary class="flex items-center gap-1.5 text-xs text-gray-500 cursor-pointer hover:text-gray-700 dark:hover:text-gray-300 select-none">
-                    <UIcon name="i-heroicons-chevron-right" class="w-3 h-3 transition-transform group-open/details:rotate-90" />
-                    What affects LCP
-                  </summary>
-                  <div class="mt-2 pl-4 grid sm:grid-cols-2 gap-1 text-xs text-gray-600 dark:text-gray-400">
-                    <span>• Slow server response (TTFB)</span>
-                    <span>• Render-blocking CSS/JS</span>
-                    <span>• Large unoptimized images</span>
-                    <span>• Client-side rendering delays</span>
-                  </div>
-                </details>
+                <!-- What affects LCP -->
                 <div class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
-                  <NuxtLink to="/learn-lighthouse/lcp" class="inline-flex items-center gap-1 text-xs font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors">
+                  <div class="text-[10px] font-medium text-gray-500 mb-2">
+                    What affects LCP
+                  </div>
+                  <div class="grid sm:grid-cols-2 gap-x-3 gap-y-1">
+                    <NuxtLink to="/learn-lighthouse/lcp/slow-server-response" class="text-xs text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                      → Slow server response
+                    </NuxtLink>
+                    <NuxtLink to="/learn-lighthouse/lcp/render-blocking-resources" class="text-xs text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                      → Render-blocking resources
+                    </NuxtLink>
+                    <NuxtLink to="/learn-lighthouse/lcp/large-images" class="text-xs text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                      → Large unoptimized images
+                    </NuxtLink>
+                    <NuxtLink to="/learn-lighthouse/lcp/client-side-rendering" class="text-xs text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                      → Client-side rendering
+                    </NuxtLink>
+                  </div>
+                  <NuxtLink to="/learn-lighthouse/lcp" class="mt-2 inline-flex items-center gap-1 text-xs font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors">
                     Complete LCP Guide
                     <UIcon name="i-heroicons-arrow-right" class="w-3 h-3" />
                   </NuxtLink>
@@ -555,20 +560,26 @@ function handleMetricUpdate(id: MetricId, value: number) {
                     </div>
                   </div>
                 </div>
-                <details class="mt-3 group/details">
-                  <summary class="flex items-center gap-1.5 text-xs text-gray-500 cursor-pointer hover:text-gray-700 dark:hover:text-gray-300 select-none">
-                    <UIcon name="i-heroicons-chevron-right" class="w-3 h-3 transition-transform group-open/details:rotate-90" />
-                    What affects CLS
-                  </summary>
-                  <div class="mt-2 pl-4 grid sm:grid-cols-2 gap-1 text-xs text-gray-600 dark:text-gray-400">
-                    <span>• Images without dimensions</span>
-                    <span>• Ads/embeds without reserved space</span>
-                    <span>• Dynamically injected content</span>
-                    <span>• Web fonts causing FOUT</span>
-                  </div>
-                </details>
+                <!-- What affects CLS -->
                 <div class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
-                  <NuxtLink to="/learn-lighthouse/cls" class="inline-flex items-center gap-1 text-xs font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors">
+                  <div class="text-[10px] font-medium text-gray-500 mb-2">
+                    What affects CLS
+                  </div>
+                  <div class="grid sm:grid-cols-2 gap-x-3 gap-y-1">
+                    <NuxtLink to="/learn-lighthouse/cls/unsized-images" class="text-xs text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                      → Unsized images
+                    </NuxtLink>
+                    <NuxtLink to="/learn-lighthouse/cls/ads-embeds-iframes" class="text-xs text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                      → Ads/embeds/iframes
+                    </NuxtLink>
+                    <NuxtLink to="/learn-lighthouse/cls/dynamic-content-injection" class="text-xs text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                      → Dynamic content injection
+                    </NuxtLink>
+                    <NuxtLink to="/learn-lighthouse/cls/web-fonts-causing-foit" class="text-xs text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                      → Web fonts causing FOIT
+                    </NuxtLink>
+                  </div>
+                  <NuxtLink to="/learn-lighthouse/cls" class="mt-2 inline-flex items-center gap-1 text-xs font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors">
                     Complete CLS Guide
                     <UIcon name="i-heroicons-arrow-right" class="w-3 h-3" />
                   </NuxtLink>
@@ -611,20 +622,26 @@ function handleMetricUpdate(id: MetricId, value: number) {
                     </div>
                   </div>
                 </div>
-                <details class="mt-3 group/details">
-                  <summary class="flex items-center gap-1.5 text-xs text-gray-500 cursor-pointer hover:text-gray-700 dark:hover:text-gray-300 select-none">
-                    <UIcon name="i-heroicons-chevron-right" class="w-3 h-3 transition-transform group-open/details:rotate-90" />
-                    What affects INP
-                  </summary>
-                  <div class="mt-2 pl-4 grid sm:grid-cols-2 gap-1 text-xs text-gray-600 dark:text-gray-400">
-                    <span>• Long-running JavaScript</span>
-                    <span>• Heavy event handlers</span>
-                    <span>• Large DOM size (&gt;1,400 nodes)</span>
-                    <span>• Third-party scripts & hydration</span>
-                  </div>
-                </details>
+                <!-- What affects INP -->
                 <div class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
-                  <NuxtLink to="/learn-lighthouse/inp" class="inline-flex items-center gap-1 text-xs font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors">
+                  <div class="text-[10px] font-medium text-gray-500 mb-2">
+                    What affects INP
+                  </div>
+                  <div class="grid sm:grid-cols-2 gap-x-3 gap-y-1">
+                    <NuxtLink to="/learn-lighthouse/inp/long-running-javascript" class="text-xs text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                      → Long-running JavaScript
+                    </NuxtLink>
+                    <NuxtLink to="/learn-lighthouse/inp/event-handler-delays" class="text-xs text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                      → Event handler delays
+                    </NuxtLink>
+                    <NuxtLink to="/learn-lighthouse/inp/dom-size" class="text-xs text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                      → Large DOM size
+                    </NuxtLink>
+                    <NuxtLink to="/learn-lighthouse/inp/third-party-scripts" class="text-xs text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                      → Third-party scripts
+                    </NuxtLink>
+                  </div>
+                  <NuxtLink to="/learn-lighthouse/inp" class="mt-2 inline-flex items-center gap-1 text-xs font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors">
                     Complete INP Guide
                     <UIcon name="i-heroicons-arrow-right" class="w-3 h-3" />
                   </NuxtLink>

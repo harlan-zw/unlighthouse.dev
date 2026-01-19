@@ -101,6 +101,7 @@ export default defineNuxtConfig({
     githubAuthToken: '', // NUXT_GITHUB_AUTH_TOKEN
     githubAuthClientId: 'cabace556bd9519d9299', // NUXT_GITHUB_AUTH_CLIENT_ID
     githubAuthClientSecret: '', // NUXT_GITHUB_AUTH_SECRET_ID
+    googleApiToken: '', // NUXT_GOOGLE_API_TOKEN (PageSpeed Insights)
 
     public: {
       // moduleDeps: pkgJson.dependencies,

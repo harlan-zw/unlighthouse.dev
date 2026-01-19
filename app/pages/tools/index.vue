@@ -26,6 +26,38 @@ const tools = [
     color: 'violet',
     metrics: ['FCP', 'SI', 'LCP', 'TBT', 'CLS'],
   },
+  {
+    title: 'LCP Element Finder',
+    description: 'Identify which element is your Largest Contentful Paint and get actionable recommendations to improve it.',
+    icon: 'i-heroicons-photo',
+    to: '/tools/lcp-finder',
+    color: 'violet',
+    metrics: ['LCP', 'Core Web Vital'],
+  },
+  {
+    title: 'INP Analyzer',
+    description: 'Analyze Interaction to Next Paint issues. Find slow event handlers and optimize responsiveness.',
+    icon: 'i-heroicons-cursor-arrow-rays',
+    to: '/tools/inp-analyzer',
+    color: 'violet',
+    metrics: ['INP', 'Core Web Vital'],
+  },
+  {
+    title: 'CLS Debugger',
+    description: 'Debug Cumulative Layout Shift issues. Identify elements causing unexpected layout shifts.',
+    icon: 'i-heroicons-arrows-pointing-out',
+    to: '/tools/cls-debugger',
+    color: 'violet',
+    metrics: ['CLS', 'Core Web Vital'],
+  },
+  {
+    title: 'PageSpeed Insights Performance',
+    description: 'Get detailed PageSpeed Insights performance data with field and lab metrics.',
+    icon: 'i-heroicons-chart-bar',
+    to: '/tools/pagespeed-insights-performance',
+    color: 'violet',
+    metrics: ['Performance', 'Field Data'],
+  },
 ]
 </script>
 

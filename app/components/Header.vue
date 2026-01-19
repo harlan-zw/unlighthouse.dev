@@ -22,6 +22,7 @@ const toolsNav = computed(() => resourcesMenu.value.find(i => i.label === 'Tools
 
 <template>
   <UHeader
+    :to="undefined"
     :ui="{
       root: 'border-none bg-transparent pt-2 mb-3 px-5 h-auto',
       container: 'max-w-[1452px] lg:bg-gray-600/3 lg:border border-[var(--ui-border)] lg:dark:bg-gray-900/10 mx-auto py-0 px-0 lg:px-5 sm:px-0 rounded-lg',
