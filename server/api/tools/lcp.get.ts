@@ -1,4 +1,6 @@
+import { trackToolLookup, trackToolUsage } from '../../utils/analytics'
 import { detectFramework, extractOpportunities, extractScreenshot, fetchPSI } from '../../utils/psi'
+import { checkFreeToolRateLimit } from '../../utils/rate-limit'
 
 interface BreakdownPhase {
   subpart: string
@@ -12,9 +14,13 @@ interface DiscoveryCheck {
 }
 
 export default defineCachedEventHandler(async (event) => {
+  await checkFreeToolRateLimit(event)
   const query = getQuery(event)
   const url = await validateUrl(query.url as string)
   const strategy = (query.strategy === 'desktop' ? 'desktop' : 'mobile') as 'mobile' | 'desktop'
+
+  await trackToolUsage(event, 'lcp', 'use')
+  await trackToolLookup(event, 'lcp', url, strategy)
 
   const results = await fetchPSI(event, url, strategy)
 

@@ -5,6 +5,8 @@ import { resolve } from 'pathe'
 import { gray, logger } from './logger'
 
 export default defineNuxtConfig({
+  extends: ['./layers/admin'],
+
   modules: [
     '@nuxtjs/seo',
     '@nuxt/ui',
@@ -17,6 +19,7 @@ export default defineNuxtConfig({
     'nuxt-skew-protection',
     'nuxt-ai-ready',
     '@nuxtjs/mcp-toolkit',
+    'nuxt-auth-utils',
     async (_, nuxt) => {
       nuxt.hooks.hook('nitro:init', (nitro) => {
         // from sponsorkit

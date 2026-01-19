@@ -973,6 +973,9 @@ const totalResourceSize = computed(() => {
                   </UButton>
                 </div>
               </div>
+
+              <!-- Feedback -->
+              <ToolsToolFeedback tool-id="pagespeed-insights" :context="{ url: urlInput, strategy }" />
             </div>
 
             <!-- Empty state -->

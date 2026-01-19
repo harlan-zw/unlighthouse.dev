@@ -1,9 +1,15 @@
+import { trackToolLookup, trackToolUsage } from '../../utils/analytics'
 import { detectFramework, extractScreenshot, fetchPSI } from '../../utils/psi'
+import { checkFreeToolRateLimit } from '../../utils/rate-limit'
 
 export default defineCachedEventHandler(async (event) => {
+  await checkFreeToolRateLimit(event)
   const query = getQuery(event)
   const url = await validateUrl(query.url as string)
   const strategy = (query.strategy === 'desktop' ? 'desktop' : 'mobile') as 'mobile' | 'desktop'
+
+  await trackToolUsage(event, 'pagespeed-insights', 'use')
+  await trackToolLookup(event, 'pagespeed-insights', url, strategy)
 
   const results = await fetchPSI(event, url, strategy)
   const audits = results.lighthouseResult.audits

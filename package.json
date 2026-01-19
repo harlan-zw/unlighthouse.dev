@@ -2,7 +2,7 @@
   "name": "unlighthouse.dev",
   "type": "module",
   "private": true,
-  "packageManager": "pnpm@10.28.0",
+  "packageManager": "pnpm@10.28.1",
   "engines": {
     "node": ">=22.0.0"
   },
@@ -16,6 +16,8 @@
   "dependencies": {
     "@nuxtjs/mcp-toolkit": "^0.6.2",
     "agents": "^0.3.6",
+    "drizzle-orm": "^0.45.1",
+    "nuxt-auth-utils": "^0.5.27",
     "three": "^0.182.0",
     "troisjs": "^0.3.4",
     "zod": "^4.3.5"
@@ -29,7 +31,7 @@
     "@iconify-json/noto": "^1.2.7",
     "@iconify-json/ph": "^1.2.2",
     "@iconify-json/radix-icons": "^1.2.6",
-    "@iconify-json/simple-icons": "^1.2.66",
+    "@iconify-json/simple-icons": "^1.2.67",
     "@iconify-json/uil": "^1.2.3",
     "@iconify-json/unjs": "^1.2.3",
     "@iconify-json/vscode-icons": "^1.2.40",
@@ -55,7 +57,7 @@
     "motion-v": "^1.9.0",
     "nitro-cloudflare-dev": "^0.2.2",
     "nuxt": "^4.2.2",
-    "nuxt-ai-ready": "^0.10.8",
+    "nuxt-ai-ready": "^0.10.9",
     "nuxt-build-cache": "^0.1.1",
     "nuxt-lodash": "^2.5.3",
     "nuxt-skew-protection": "^0.7.5",

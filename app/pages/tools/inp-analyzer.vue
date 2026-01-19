@@ -867,6 +867,9 @@ const insights = computed<InpInsight[]>(() => {
                   </UButton>
                 </div>
               </div>
+
+              <!-- Feedback -->
+              <ToolsToolFeedback tool-id="inp-analyzer" :context="{ url: urlInput, strategy }" />
             </div>
           </div>
         </div>

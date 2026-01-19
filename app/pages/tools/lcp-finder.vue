@@ -987,6 +987,9 @@ const insights = computed<LcpInsight[]>(() => {
                   </UButton>
                 </div>
               </div>
+
+              <!-- Feedback -->
+              <ToolsToolFeedback tool-id="lcp-finder" :context="{ url: urlInput, strategy }" />
             </div>
           </div>
         </div>
