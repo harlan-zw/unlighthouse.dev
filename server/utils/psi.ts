@@ -7,7 +7,9 @@ const _fetchPSI = cachedFunction(async (url: string, strategy: 'mobile' | 'deskt
   psiUrl.searchParams.set('strategy', strategy)
   psiUrl.searchParams.set('key', token)
 
-  return $fetch<PSIResult>(psiUrl.toString())
+  return $fetch<PSIResult>(psiUrl.toString(), {
+    timeout: 120_000, // 2 min - PSI can be slow
+  })
 }, {
   base: 'psi',
   swr: true,

@@ -127,6 +127,9 @@ export default defineNuxtConfig({
       deployConfig: true,
       nodeCompat: true,
       wrangler: {
+        limits: {
+          cpu_ms: 120_000, // 2 min for slow PSI calls
+        },
         routes: [
           {
             pattern: 'unlighthouse.dev',
