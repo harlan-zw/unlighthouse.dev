@@ -43,6 +43,7 @@ jobs:
           NUXT_GOOGLE_API_TOKEN: ${{ secrets.NUXT_GOOGLE_API_TOKEN }}
           NUXT_OAUTH_GITHUB_CLIENT_ID: ${{ secrets.NUXT_OAUTH_GITHUB_CLIENT_ID }}
           NUXT_OAUTH_GITHUB_CLIENT_SECRET: ${{ secrets.NUXT_OAUTH_GITHUB_CLIENT_SECRET }}
+          NUXT_OAUTH_GITHUB_REDIRECT_URL: ${{ secrets.NUXT_OAUTH_GITHUB_REDIRECT_URL }}
 
       - run: pnpx wrangler deploy
         env:
