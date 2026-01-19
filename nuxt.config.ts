@@ -103,6 +103,13 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    oauth: {
+      github: {
+        redirectUrl: '', // NUXT_OAUTH_GITHUB_REDIRECT_URL
+        clientId: '', // NUXT_OAUTH_GITHUB_CLIENT_ID
+        clientSecret: '', // NUXT_OAUTH_GITHUB_CLIENT_SECRET
+      },
+    },
     session: {
       maxAge: 60 * 60 * 24 * 7, // 7 days
       password: '', // NUXT_SESSION_PASSWORD
