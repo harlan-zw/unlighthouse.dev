@@ -33,20 +33,25 @@ export default defineEventHandler(async (event): Promise<ToolAnalyticsSummary> =
       blob3 as action,
       blob4 as session_id,
       blob5 as status,
-      COUNT(*) as count
+      COUNT() as count
     FROM unlighthouse_tool_usage
     WHERE timestamp > NOW() - INTERVAL '${value}' ${unit}
       AND blob1 = 'tool'
     GROUP BY tool, action, session_id, status
   `
 
-  const response = await $fetch<{ data: { tool: string, action: string, session_id: string, status: string, count: number }[] }>(`https://api.cloudflare.com/client/v4/accounts/${accountId}/analytics_engine/sql`, {
+  const response = await $fetch<{ data: { tool: string, action: string, session_id: string, status: string, count: number }[], errors?: { code: number, message: string }[] }>(`https://api.cloudflare.com/client/v4/accounts/${accountId}/analytics_engine/sql`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${apiToken}`,
       'Content-Type': 'text/plain',
     },
     body: sql,
+  }).catch((err) => {
+    throw createError({
+      statusCode: err.statusCode || 500,
+      message: `Cloudflare API error: ${err.data?.errors?.[0]?.message || err.message}`,
+    })
   })
 
   const rows = response.data || []
