@@ -37,7 +37,7 @@ export default defineEventHandler(async (event): Promise<ToolAnalyticsSummary> =
       blob4 as session_id,
       blob5 as status,
       COUNT(*) as count
-    FROM tool_usage
+    FROM unlighthouse_tool_usage
     WHERE timestamp > NOW() - INTERVAL '${value}' ${unit}
       AND blob1 = 'tool'
     GROUP BY tool, action, session_id, status
