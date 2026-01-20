@@ -63,12 +63,13 @@ export default defineEventHandler(async (event): Promise<ToolAnalyticsSummary> =
   let errorCount = 0
 
   for (const row of rows) {
-    totalEvents += row.count
+    const count = Number(row.count)
+    totalEvents += count
     sessions.add(row.session_id)
-    toolCounts.set(row.tool, (toolCounts.get(row.tool) || 0) + row.count)
-    actionCounts.set(row.action, (actionCounts.get(row.action) || 0) + row.count)
+    toolCounts.set(row.tool, (toolCounts.get(row.tool) || 0) + count)
+    actionCounts.set(row.action, (actionCounts.get(row.action) || 0) + count)
     if (row.status === 'error')
-      errorCount += row.count
+      errorCount += count
   }
 
   return {
