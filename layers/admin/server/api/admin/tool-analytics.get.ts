@@ -21,13 +21,10 @@ export default defineEventHandler(async (event): Promise<ToolAnalyticsSummary> =
   const apiToken = config.cloudflareAnalyticsApiToken
 
   if (!accountId || !apiToken) {
-    return {
-      totalEvents: 0,
-      uniqueSessions: 0,
-      topTools: [],
-      topActions: [],
-      errorRate: 0,
-    }
+    throw createError({
+      statusCode: 500,
+      message: `Missing cloudflare config: ${!accountId ? 'accountId' : ''} ${!apiToken ? 'apiToken' : ''}`.trim(),
+    })
   }
 
   const sql = `
@@ -50,7 +47,7 @@ export default defineEventHandler(async (event): Promise<ToolAnalyticsSummary> =
       'Content-Type': 'text/plain',
     },
     body: sql,
-  }).catch(() => ({ data: [] }))
+  })
 
   const rows = response.data || []
 

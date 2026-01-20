@@ -21,3 +21,7 @@ database_id = "5274d98a-9e23-4a78-b9af-46444ec20b2a"
 [[analytics_engine_datasets]]
 binding = "TOOL_ANALYTICS"
 dataset = "unlighthouse_tool_usage"
+
+[vars]
+NUXT_CLOUDFLARE_ACCOUNT_ID = "5904138d55ca25d5670dca6adf99894e"
+# NUXT_CLOUDFLARE_ANALYTICS_API_TOKEN must be set via: pnpm dlx wrangler secret put NUXT_CLOUDFLARE_ANALYTICS_API_TOKEN
