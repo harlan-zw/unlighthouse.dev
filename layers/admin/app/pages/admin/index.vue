@@ -45,7 +45,7 @@ interface ToolLookup {
   tool: 'pagespeed-insights' | 'lcp' | 'cls' | 'inp'
   query: string
   strategy: 'mobile' | 'desktop' | null
-  created_at: number
+  created_at: number | string | Date
 }
 
 interface LookupResponse {
@@ -119,7 +119,11 @@ const lookupColumns: TableColumn<ToolLookup>[] = [
     accessorKey: 'created_at',
     header: 'Time',
     cell: ({ row }) => {
-      const date = new Date(row.original.created_at * 1000)
+      const raw = row.original.created_at
+      // Handle both Date object (from drizzle) and unix seconds
+      const date = raw instanceof Date ? raw : new Date(typeof raw === 'number' ? raw * 1000 : raw)
+      if (Number.isNaN(date.getTime()))
+        return h('span', { class: 'text-[var(--ui-text-dimmed)]' }, '—')
       return h('time', {
         class: 'text-sm text-[var(--ui-text-muted)]',
         datetime: date.toISOString(),
