@@ -47,20 +47,21 @@ defineOgImageComponent('NuxtSeo', {
   theme: '#0891b2',
 })
 
-// Loading messages
+// Loading messages with tips - shown during PageSpeed API analysis
 const { current: loadingMessage, start: startMessages, stop: stopMessages } = useLoadingMessages([
-  'Scanning for sneaky shifts...',
-  'Catching elements in the act...',
-  'Measuring pixel movements...',
-  'Interrogating your fonts...',
-  'Inspecting image dimensions...',
-  'Watching elements jiggle...',
-  'Calculating shift scores...',
-  'Finding the usual suspects...',
-  'Almost stable...',
-  'Documenting the chaos...',
-  'Building shift timeline...',
-  'Cross-referencing culprits...',
+  'Connecting to PageSpeed Insights API...',
+  'Tip: Always set width and height on images',
+  'Running Lighthouse audit on your page...',
+  'Tip: Reserve space for ads and embeds',
+  'Analyzing layout stability during load...',
+  'Tip: Use font-display: optional for web fonts',
+  'Detecting elements causing layout shifts...',
+  'Tip: Avoid inserting content above existing content',
+  'Measuring cumulative layout shift score...',
+  'Tip: Use CSS aspect-ratio for responsive images',
+  'Identifying unsized images and media...',
+  'Tip: Add skeleton loaders for async content',
+  'Generating CLS analysis report...',
 ], 3000)
 
 // State

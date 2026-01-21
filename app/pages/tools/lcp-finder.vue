@@ -47,23 +47,23 @@ defineOgImageComponent('NuxtSeo', {
   theme: '#a855f7',
 })
 
-// Loading messages - have fun while waiting for PSI API
+// Loading messages with tips - shown during PageSpeed API analysis
 const { current: loadingMessage, start: startMessages, stop: stopMessages } = useLoadingMessages([
-  'Waking up Google\'s servers...',
-  'Sending carrier pigeons to PageSpeed...',
-  'Lighthouse is warming up...',
-  'Measuring pixels with a tiny ruler...',
-  'Counting every byte...',
-  'Asking Chrome nicely to render your page...',
-  'Timing the paint, literally...',
-  'Interrogating your LCP element...',
-  'Still faster than your CI pipeline...',
-  'Google is thinking really hard...',
-  'Almost there, probably...',
-  'Finding the biggest thing on your page...',
-  'Judging your font choices...',
-  'Calculating Core Web Vitals...',
-  'Making sure it\'s not a potato server...',
+  'Connecting to PageSpeed Insights API...',
+  'Tip: Add fetchpriority="high" to your LCP image',
+  'Running Lighthouse audit on your page...',
+  'Tip: Preload LCP images with <link rel="preload">',
+  'Analyzing page render timeline...',
+  'Tip: Avoid lazy-loading images above the fold',
+  'Identifying the largest contentful element...',
+  'Tip: Use WebP or AVIF for smaller image files',
+  'Measuring Time to First Byte (TTFB)...',
+  'Tip: A fast server response improves all metrics',
+  'Calculating resource load delays...',
+  'Tip: Inline critical CSS to speed up first paint',
+  'Measuring element render timing...',
+  'Tip: Reduce JavaScript blocking the main thread',
+  'Generating performance report...',
 ], 3000)
 
 // State

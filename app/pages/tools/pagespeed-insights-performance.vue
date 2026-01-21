@@ -47,21 +47,22 @@ defineOgImageComponent('NuxtSeo', {
   theme: '#4285f4',
 })
 
-// Loading messages
+// Loading messages with tips - shown during PageSpeed API analysis
 const { current: loadingMessage, start: startMessages, stop: stopMessages } = useLoadingMessages([
-  'Waking up Google\'s servers...',
-  'Sending carrier pigeons to PageSpeed...',
-  'Lighthouse is warming up...',
-  'Measuring pixels with a tiny ruler...',
-  'Counting every byte...',
-  'Asking Chrome nicely to render your page...',
-  'Timing the paint, literally...',
-  'Still faster than your CI pipeline...',
-  'Google is thinking really hard...',
-  'Almost there, probably...',
-  'Calculating Core Web Vitals...',
-  'Analyzing third-party scripts...',
-  'Measuring main thread work...',
+  'Connecting to PageSpeed Insights API...',
+  'Tip: Core Web Vitals affect search rankings',
+  'Running Lighthouse audit on your page...',
+  'Tip: Test on mobile—it uses slower throttling',
+  'Analyzing page load performance...',
+  'Tip: Scores above 90 are considered good',
+  'Measuring First Contentful Paint (FCP)...',
+  'Tip: Reduce render-blocking resources',
+  'Calculating Largest Contentful Paint (LCP)...',
+  'Tip: Optimize your largest visible element',
+  'Measuring Total Blocking Time (TBT)...',
+  'Tip: Keep long tasks under 50ms each',
+  'Analyzing Cumulative Layout Shift (CLS)...',
+  'Generating full performance report...',
 ], 3000)
 
 // State

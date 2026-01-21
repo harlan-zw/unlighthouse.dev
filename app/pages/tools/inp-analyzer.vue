@@ -47,20 +47,21 @@ defineOgImageComponent('NuxtSeo', {
   theme: '#06b6d4',
 })
 
-// Loading messages
+// Loading messages with tips - shown during PageSpeed API analysis
 const { current: loadingMessage, start: startMessages, stop: stopMessages } = useLoadingMessages([
-  'Warming up the main thread...',
-  'Counting long tasks...',
-  'Analyzing script execution...',
-  'Measuring interaction delays...',
-  'Interrogating third-party scripts...',
-  'Profiling JavaScript bundles...',
-  'Timing event handlers...',
-  'Calculating Total Blocking Time...',
-  'Finding the slow bits...',
-  'Almost responsive...',
-  'Checking for hydration issues...',
-  'Parsing the performance trace...',
+  'Connecting to PageSpeed Insights API...',
+  'Tip: Break long tasks into smaller chunks',
+  'Running Lighthouse audit on your page...',
+  'Tip: Defer non-critical JavaScript',
+  'Profiling main thread activity...',
+  'Tip: Use code splitting to reduce bundle size',
+  'Measuring Total Blocking Time (TBT)...',
+  'Tip: Load third-party scripts with async/defer',
+  'Analyzing script evaluation time...',
+  'Tip: Use web workers for heavy computation',
+  'Detecting long tasks (>50ms)...',
+  'Tip: Consider progressive hydration strategies',
+  'Generating INP analysis report...',
 ], 3000)
 
 // State
