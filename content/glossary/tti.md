@@ -33,9 +33,11 @@ Time to Interactive measured when a page became fully interactive - displaying u
 ## What Replaced TTI
 
 ### Lab Testing
+
 [Total Blocking Time (TBT)](/glossary/tbt) - Measures cumulative main thread blocking. Now has 30% Lighthouse weight.
 
 ### Field Measurement
+
 [Interaction to Next Paint (INP)](/glossary/inp) - Measures actual interaction responsiveness. Core Web Vital since March 2024.
 
 ## Historical Thresholds
