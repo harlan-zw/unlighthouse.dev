@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { motion } from 'motion-v'
+import { animate } from 'motion-v'
 import { isHydratingRef } from '~/composables/data'
 
 const route = useRoute()
@@ -11,6 +11,18 @@ watch(() => route.path, () => {
 })
 
 const isHydrating = isHydratingRef()
+
+const contentRef = ref(null)
+
+onMounted(() => {
+  if (!contentRef.value || isHydrating.value)
+    return
+  animate(contentRef.value, {
+    opacity: [0, 1],
+    transform: ['translateY(16px)', 'translateY(0px)'],
+    filter: ['blur(0.2rem)', 'blur(0)'],
+  }, { duration: 0.2 })
+})
 
 const subSectionLinks = computed(() => {
   if (!navigation?.value?.length)
@@ -67,28 +79,9 @@ const subSectionLinks = computed(() => {
               <DocsSidebarHeader />
             </UPageAside>
           </template>
-          <ClientOnly>
-            <AnimatePresence mode="wait">
-              <motion.div
-                :key="route.path"
-                :initial="isHydrating ? {} : { opacity: 0, y: 16, filter: 'blur(0.2rem)' }"
-                :animate="{ opacity: 1, y: 0, filter: 'blur(0)' }"
-                :exit="{ opacity: 0, y: 16, filter: 'blur(0.2rem)' }"
-                :transition="{
-                  duration: 0.2,
-                }"
-              >
-                <div class="mx-auto pt-7">
-                  <slot />
-                </div>
-              </motion.div>
-            </AnimatePresence>
-            <template #fallback>
-              <div class="mx-auto pt-7">
-                <slot />
-              </div>
-            </template>
-          </ClientOnly>
+          <div ref="contentRef" class="mx-auto pt-7">
+            <slot />
+          </div>
         </UPage>
       </div>
     </UMain>
