@@ -72,7 +72,9 @@ const { data: navigation } = await useAsyncData(`navigation-error`, () => queryC
 provide('navigation', navigation)
 const { data: search } = await useLazyAsyncData(`search-error`, () => queryCollectionSearchSections('root'))
 provide('search', search)
-if (props.error.statusCode) {
+// Don't do fuzzy redirects during prerender - it causes infinite redirect loops
+const isPrerendering = import.meta.server && !import.meta.dev
+if (props.error.statusCode && !isPrerendering) {
   const walkChildren = (children: any[], parents: string[] = []) => {
     return (children || []).flatMap((item) => {
       if (item.children) {
