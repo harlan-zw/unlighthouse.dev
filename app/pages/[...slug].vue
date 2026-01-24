@@ -47,7 +47,7 @@ const headline = computed(() => titleCase(getLastPathSegment(getPathSegments(rou
 defineOgImage('Docs', {
   title: page.value?.title,
   description: page.value?.description,
-  headline,
+  headline: headline.value,
 })
 
 prerenderRoutes(`${route.path}.md`)
