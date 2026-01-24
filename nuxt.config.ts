@@ -138,7 +138,7 @@ export default defineNuxtConfig({
       processCSSVariables: true,
     },
     families: [
-      { name: 'Hubot Sans', provider: 'local', weight: [200, 900], stretch: '75% 125%' },
+      { name: 'Hubot Sans', provider: 'local', weight: [200, 900], stretch: '75% 125%', global: true },
     ],
   },
 
@@ -352,10 +352,6 @@ export default defineNuxtConfig({
 
   ogImage: {
     zeroRuntime: true,
-    fonts: [
-      'Hubot+Sans:400',
-      'Hubot+Sans:700',
-    ],
   },
 
   icon: {
