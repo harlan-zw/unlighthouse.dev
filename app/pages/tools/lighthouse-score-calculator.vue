@@ -15,7 +15,7 @@ useSeoMeta({
   description: 'Interactive calculator showing how Lighthouse calculates your performance score. Understand FCP, LCP, TBT, CLS, and Speed Index weights, thresholds, and scoring curves.',
 })
 
-defineOgImageComponent('NuxtSeo', {
+defineOgImage('NuxtSeo', {
   title: 'Lighthouse Score Calculator',
   description: 'Calculate your performance score interactively',
   theme: '#a855f7',

@@ -6,7 +6,7 @@ definePageMeta({
   },
 })
 
-defineOgImageComponent('NuxtSeo', {
+defineOgImage('NuxtSeo', {
   title: 'Unlighthouse',
   description: 'Like Google Lighthouse, but it scans every single page.',
   theme: '#a855f7',

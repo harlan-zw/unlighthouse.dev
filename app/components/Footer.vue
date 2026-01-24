@@ -25,6 +25,9 @@ const learnLinks = [
 ]
 
 const toolsLinks = [
+  { label: 'Bulk PageSpeed', icon: 'i-heroicons-squares-2x2', to: '/tools/bulk-pagespeed' },
+  { label: 'CWV Checker', icon: 'i-heroicons-chart-pie', to: '/tools/cwv-checker' },
+  { label: 'CWV History', icon: 'i-heroicons-chart-bar', to: '/tools/cwv-history' },
   { label: 'Score Calculator', icon: 'i-heroicons-calculator', to: '/tools/lighthouse-score-calculator' },
   { label: 'LCP Finder', icon: 'i-heroicons-photo', to: '/tools/lcp-finder' },
   { label: 'INP Analyzer', icon: 'i-heroicons-cursor-arrow-rays', to: '/tools/inp-analyzer' },

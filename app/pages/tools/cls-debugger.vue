@@ -41,7 +41,7 @@ useSeoMeta({
   description: 'Identify which elements cause Cumulative Layout Shift on your page. See exactly what\'s moving and get fixes to stop the jank.',
 })
 
-defineOgImageComponent('NuxtSeo', {
+defineOgImage('NuxtSeo', {
   title: 'CLS Debugger',
   description: 'Find layout shift culprits',
   theme: '#0891b2',

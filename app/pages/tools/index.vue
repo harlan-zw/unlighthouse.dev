@@ -11,13 +11,29 @@ useSeoMeta({
   description: 'Free web performance tools: Lighthouse score calculator, Core Web Vitals analyzers, and more.',
 })
 
-defineOgImageComponent('NuxtSeo', {
+defineOgImage('NuxtSeo', {
   title: 'Performance Tools',
   description: 'Free Lighthouse calculators and analyzers',
   theme: '#a855f7',
 })
 
 const tools = [
+  {
+    title: 'Bulk PageSpeed Test',
+    description: 'Test up to 10 URLs at once with PageSpeed Insights. Get performance scores for multiple pages in one batch.',
+    icon: 'i-heroicons-squares-2x2',
+    to: '/tools/bulk-pagespeed',
+    color: 'amber',
+    metrics: ['Batch Testing', 'Performance', 'Core Web Vitals'],
+  },
+  {
+    title: 'Core Web Vitals Checker',
+    description: 'Check if your page passes Google\'s Core Web Vitals. Test LCP, CLS, and INP with lab and real user data.',
+    icon: 'i-heroicons-check-badge',
+    to: '/tools/cwv-checker',
+    color: 'emerald',
+    metrics: ['LCP', 'CLS', 'INP', 'Core Web Vitals'],
+  },
   {
     title: 'Lighthouse Report Viewer',
     description: 'Upload your Lighthouse JSON report to visualize scores, metrics, and audits interactively.',
@@ -92,14 +108,33 @@ const tools = [
             v-for="tool in tools"
             :key="tool.to"
             :to="tool.to"
-            class="group relative p-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-violet-300 dark:hover:border-violet-700 transition-all hover:shadow-lg"
+            class="group relative p-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 transition-all hover:shadow-lg"
+            :class="{
+              'hover:border-amber-300 dark:hover:border-amber-700': tool.color === 'amber',
+              'hover:border-emerald-300 dark:hover:border-emerald-700': tool.color === 'emerald',
+              'hover:border-violet-300 dark:hover:border-violet-700': tool.color === 'violet' || !tool.color,
+            }"
           >
             <div class="flex items-start gap-4">
-              <div class="p-3 rounded-xl bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400">
+              <div
+                class="p-3 rounded-xl"
+                :class="{
+                  'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400': tool.color === 'amber',
+                  'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400': tool.color === 'emerald',
+                  'bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400': tool.color === 'violet' || !tool.color,
+                }"
+              >
                 <UIcon :name="tool.icon" class="w-6 h-6" />
               </div>
               <div class="flex-1">
-                <h2 class="text-xl font-semibold mb-2 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                <h2
+                  class="text-xl font-semibold mb-2 transition-colors"
+                  :class="{
+                    'group-hover:text-amber-600 dark:group-hover:text-amber-400': tool.color === 'amber',
+                    'group-hover:text-emerald-600 dark:group-hover:text-emerald-400': tool.color === 'emerald',
+                    'group-hover:text-violet-600 dark:group-hover:text-violet-400': tool.color === 'violet' || !tool.color,
+                  }"
+                >
                   {{ tool.title }}
                 </h2>
                 <p class="text-gray-600 dark:text-gray-400 mb-3">
@@ -115,7 +150,15 @@ const tools = [
                   </span>
                 </div>
               </div>
-              <UIcon name="i-heroicons-arrow-right" class="w-5 h-5 text-gray-400 group-hover:text-violet-500 group-hover:translate-x-1 transition-all" />
+              <UIcon
+                name="i-heroicons-arrow-right"
+                class="w-5 h-5 text-gray-400 group-hover:translate-x-1 transition-all"
+                :class="{
+                  'group-hover:text-amber-500': tool.color === 'amber',
+                  'group-hover:text-emerald-500': tool.color === 'emerald',
+                  'group-hover:text-violet-500': tool.color === 'violet' || !tool.color,
+                }"
+              />
             </div>
           </NuxtLink>
         </div>

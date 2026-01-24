@@ -8,7 +8,7 @@ useSeoMeta({
   description: 'Guides and tutorials for improving your site\'s Core Web Vitals and performance. Master LCP, CLS, and INP with actionable fixes.',
 })
 
-defineOgImageComponent('Docs', {
+defineOgImage('Docs', {
   title: 'Learn Lighthouse',
   description: 'Master Core Web Vitals with actionable guides',
   headline: 'Learn',

@@ -41,7 +41,7 @@ useSeoMeta({
   description: 'Find the LCP element on any page. See what\'s slowing down your Largest Contentful Paint and get actionable recommendations to improve it.',
 })
 
-defineOgImageComponent('NuxtSeo', {
+defineOgImage('NuxtSeo', {
   title: 'LCP Element Finder',
   description: 'Identify your Largest Contentful Paint element',
   theme: '#a855f7',

@@ -41,7 +41,7 @@ useSeoMeta({
   description: 'Analyze your page\'s Interaction to Next Paint (INP). Find long tasks, main thread blockers, and third-party scripts slowing down interactivity.',
 })
 
-defineOgImageComponent('NuxtSeo', {
+defineOgImage('NuxtSeo', {
   title: 'INP Analyzer',
   description: 'Test your Interaction to Next Paint score',
   theme: '#06b6d4',

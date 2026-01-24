@@ -14,7 +14,7 @@ useSeoMeta({
   description: 'Upload your Lighthouse JSON report to visualize scores, metrics, and audits. Interactive viewer with dark mode and detailed breakdowns.',
 })
 
-defineOgImageComponent('NuxtSeo', {
+defineOgImage('NuxtSeo', {
   title: 'Lighthouse Report Viewer',
   description: 'Upload and analyze Lighthouse JSON reports',
   theme: '#a855f7',

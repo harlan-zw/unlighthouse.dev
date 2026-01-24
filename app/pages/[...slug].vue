@@ -44,7 +44,7 @@ useHead({
 
 const headline = computed(() => titleCase(getLastPathSegment(getPathSegments(route.path, route.path.split('/').length - 2))))
 
-defineOgImageComponent('Docs', {
+defineOgImage('Docs', {
   title: page.value?.title,
   description: page.value?.description,
   headline,

@@ -61,6 +61,24 @@ export const resourcesMenu = computed(() => [
     to: '/tools',
     children: [
       {
+        label: 'Bulk PageSpeed',
+        title: 'Bulk PageSpeed Test',
+        icon: 'i-heroicons-squares-2x2',
+        to: '/tools/bulk-pagespeed',
+      },
+      {
+        label: 'CWV Checker',
+        title: 'Core Web Vitals Checker',
+        icon: 'i-heroicons-chart-pie',
+        to: '/tools/cwv-checker',
+      },
+      {
+        label: 'CWV History',
+        title: 'Core Web Vitals History',
+        icon: 'i-heroicons-chart-bar',
+        to: '/tools/cwv-history',
+      },
+      {
         label: 'Score Calculator',
         title: 'Score Calculator',
         icon: 'i-heroicons-calculator',

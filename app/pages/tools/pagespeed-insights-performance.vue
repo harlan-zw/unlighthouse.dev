@@ -41,7 +41,7 @@ useSeoMeta({
   description: 'Comprehensive PageSpeed Insights performance report with Core Web Vitals, resource analysis, third-party breakdown, and actionable recommendations.',
 })
 
-defineOgImageComponent('NuxtSeo', {
+defineOgImage('NuxtSeo', {
   title: 'PageSpeed Insights',
   description: 'Full performance report',
   theme: '#4285f4',
