@@ -18,6 +18,7 @@ const learnLinks = [
   { label: 'LCP Fixes', icon: 'i-heroicons-photo', to: '/learn-lighthouse/lcp' },
   { label: 'CLS Fixes', icon: 'i-heroicons-arrows-pointing-out', to: '/learn-lighthouse/cls' },
   { label: 'INP Fixes', icon: 'i-heroicons-cursor-arrow-rays', to: '/learn-lighthouse/inp' },
+  { label: 'Lighthouse CI', icon: 'i-heroicons-play-circle', to: '/learn-lighthouse/lighthouse-ci' },
   { label: 'Accessibility', icon: 'i-heroicons-eye', to: '/learn-lighthouse/accessibility' },
   { label: 'SEO', icon: 'i-heroicons-magnifying-glass', to: '/learn-lighthouse/seo' },
   { label: 'Best Practices', icon: 'i-heroicons-check-badge', to: '/learn-lighthouse/best-practices' },

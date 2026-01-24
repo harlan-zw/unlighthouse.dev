@@ -719,6 +719,15 @@ const insights = computed<InpInsight[]>(() => {
                 </div>
               </div>
 
+              <!-- CrUX Field Data (INP from real users) -->
+              <div class="mb-6">
+                <ToolsCruxFieldDataCard
+                  metric="inp"
+                  :url="urlInput"
+                  :form-factor="strategy === 'mobile' ? 'PHONE' : 'DESKTOP'"
+                />
+              </div>
+
               <div class="grid lg:grid-cols-2 gap-6">
                 <!-- Left: Third-Party Impact -->
                 <div>
@@ -1050,6 +1059,10 @@ const insights = computed<InpInsight[]>(() => {
             <UButton to="/tools/lighthouse-score-calculator" variant="ghost" size="sm">
               <UIcon name="i-heroicons-calculator" class="w-4 h-4 mr-1" />
               Score Calculator
+            </UButton>
+            <UButton to="/learn-lighthouse/inp" variant="ghost" size="sm">
+              <UIcon name="i-heroicons-academic-cap" class="w-4 h-4 mr-1" />
+              INP Optimization Guide
             </UButton>
             <UButton to="/glossary/inp" variant="ghost" size="sm">
               <UIcon name="i-heroicons-book-open" class="w-4 h-4 mr-1" />

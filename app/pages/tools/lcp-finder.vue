@@ -836,6 +836,17 @@ const insights = computed<LcpInsight[]>(() => {
                 </div>
               </div>
 
+              <!-- CrUX Field Data -->
+              <div class="mb-6">
+                <ToolsCruxFieldDataCard
+                  metric="lcp"
+                  :url="urlInput"
+                  :form-factor="strategy === 'mobile' ? 'PHONE' : 'DESKTOP'"
+                  :lab-value="result.lcp.value"
+                  :lab-display-value="result.lcp.displayValue"
+                />
+              </div>
+
               <div class="grid lg:grid-cols-2 gap-6">
                 <!-- Left: Timing & Threshold -->
                 <div class="space-y-5">

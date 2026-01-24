@@ -47,6 +47,7 @@ export const metricDefinitions = {
     poor: 1800,
     description: 'Measures server response time. A good TTFB should be under 800ms.',
     learnMoreUrl: '/glossary/ttfb',
+    toolUrl: '/tools/ttfb-checker',
   },
 } as const
 
@@ -101,7 +102,7 @@ export function getCruxRatingBgColor(rating: CruxRating): string {
   }
 }
 
-export function getRatingIcon(rating: Rating): string {
+export function getCruxRatingIcon(rating: CruxRating): string {
   switch (rating) {
     case 'good':
       return 'i-heroicons-check-circle'

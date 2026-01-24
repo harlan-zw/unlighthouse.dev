@@ -204,3 +204,100 @@ export async function fetchCrUXHistory(event: H3Event, url: string, mode: 'origi
     throw e
   })
 }
+
+// Current CrUX data types
+interface CrUXCurrentResult {
+  key: {
+    formFactor: 'PHONE' | 'DESKTOP' | 'TABLET'
+    origin?: string
+    url?: string
+  }
+  metrics: {
+    cumulative_layout_shift?: CrUXMetric
+    largest_contentful_paint?: CrUXMetric
+    interaction_to_next_paint?: CrUXMetric
+    first_contentful_paint?: CrUXMetric
+    experimental_time_to_first_byte?: CrUXMetric
+    round_trip_time?: CrUXMetric
+  }
+  collectionPeriod: {
+    firstDate: { year: number, month: number, day: number }
+    lastDate: { year: number, month: number, day: number }
+  }
+}
+
+interface CrUXMetric {
+  histogram: Array<{
+    start: number | string
+    end?: number | string
+    density: number | string
+  }>
+  percentiles: {
+    p75: number | string
+  }
+}
+
+export interface NormalizedCrUXCurrentResult {
+  collectionStart: string
+  collectionEnd: string
+  lcp?: { p75: number, good: number, needsImprovement: number, poor: number }
+  cls?: { p75: number, good: number, needsImprovement: number, poor: number }
+  inp?: { p75: number, good: number, needsImprovement: number, poor: number }
+  fcp?: { p75: number, good: number, needsImprovement: number, poor: number }
+  ttfb?: { p75: number, good: number, needsImprovement: number, poor: number }
+}
+
+function normalizeMetric(metric: CrUXMetric | undefined): { p75: number, good: number, needsImprovement: number, poor: number } | undefined {
+  if (!metric)
+    return undefined
+  const p75 = typeof metric.percentiles.p75 === 'string' ? Number.parseFloat(metric.percentiles.p75) : metric.percentiles.p75
+  const histogram = metric.histogram || []
+  const good = typeof histogram[0]?.density === 'string' ? Number.parseFloat(histogram[0].density) : (histogram[0]?.density || 0)
+  const needsImprovement = typeof histogram[1]?.density === 'string' ? Number.parseFloat(histogram[1].density) : (histogram[1]?.density || 0)
+  const poor = typeof histogram[2]?.density === 'string' ? Number.parseFloat(histogram[2].density) : (histogram[2]?.density || 0)
+  return { p75, good, needsImprovement, poor }
+}
+
+export function normalizeCruxCurrent(data: CrUXCurrentResult): NormalizedCrUXCurrentResult {
+  const { metrics, collectionPeriod } = data
+  const startDate = new Date(collectionPeriod.firstDate.year, collectionPeriod.firstDate.month - 1, collectionPeriod.firstDate.day)
+  const endDate = new Date(collectionPeriod.lastDate.year, collectionPeriod.lastDate.month - 1, collectionPeriod.lastDate.day)
+  return {
+    collectionStart: `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-${String(startDate.getDate()).padStart(2, '0')}`,
+    collectionEnd: `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`,
+    lcp: normalizeMetric(metrics.largest_contentful_paint),
+    cls: normalizeMetric(metrics.cumulative_layout_shift),
+    inp: normalizeMetric(metrics.interaction_to_next_paint),
+    fcp: normalizeMetric(metrics.first_contentful_paint),
+    ttfb: normalizeMetric(metrics.experimental_time_to_first_byte),
+  }
+}
+
+export async function fetchCrUXCurrent(event: H3Event, url: string, mode: 'origin' | 'url', formFactor: FormFactor) {
+  const apiKey = useRuntimeConfig(event).googleApiToken
+  if (!apiKey)
+    throw createError({ statusCode: 500, message: 'Google API key not configured' })
+
+  const endpoint = `https://chromeuxreport.googleapis.com/v1/records:queryRecord?key=${apiKey}`
+
+  const payload: Record<string, unknown> = {}
+  if (formFactor !== 'ALL_FORM_FACTORS')
+    payload.formFactor = formFactor
+
+  if (mode === 'origin') {
+    const parsed = new URL(url.startsWith('http') ? url : `https://${url}`)
+    payload.origin = `${parsed.protocol}//${parsed.host}`
+  }
+  else {
+    payload.url = url
+  }
+
+  return $fetch<{ record: CrUXCurrentResult }>(endpoint, {
+    method: 'POST',
+    body: payload,
+  }).catch((e) => {
+    if (e?.status === 404 || e?.statusCode === 404)
+      return null
+    throw e
+  })
+}

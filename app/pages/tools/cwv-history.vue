@@ -1,17 +1,16 @@
 <script setup lang="ts">
 import type { CWVHistoryResponse } from '~~/server/api/tools/cwv-history.post'
-import type { MetricKey, Rating } from '~/utils/crux'
+import type { CruxRating, MetricKey } from '~/utils/crux'
 import { watchDebounced } from '@vueuse/core'
 import { motion } from 'motion-v'
 import {
   allMetrics,
   cwvMetrics,
-  formatMetricValue,
+  formatCruxMetricValue,
+  getCruxRatingIcon,
   getMetricRating,
   getPassesAllCWV,
-  getRatingIcon,
   metricDefinitions,
-
 } from '~/utils/crux'
 
 definePageMeta({
@@ -186,7 +185,7 @@ const currentMetrics = computed(() => {
       abbr: def.abbr,
       name: def.name,
       value,
-      displayValue: formatMetricValue(key, value),
+      displayValue: formatCruxMetricValue(key, value),
       rating,
       good: def.good,
       poor: def.poor,
@@ -209,7 +208,7 @@ const supportingMetrics = computed(() => {
       abbr: def.abbr,
       name: def.name,
       value,
-      displayValue: formatMetricValue(key, value),
+      displayValue: formatCruxMetricValue(key, value),
       rating,
     }
   })
@@ -292,7 +291,7 @@ const chartAreaPath = computed(() => {
   return `${linePath} L ${lastX} 100 L ${firstX} 100 Z`
 })
 
-const ratingColors: Record<Rating | 'null', { bg: string, border: string, text: string, badge: string }> = {
+const ratingColors: Record<CruxRating | 'null', { bg: string, border: string, text: string, badge: string }> = {
   'good': {
     bg: 'bg-emerald-50 dark:bg-emerald-900/20',
     border: 'border-emerald-200 dark:border-emerald-800',
@@ -590,7 +589,7 @@ function formatChartDate(date: string) {
                     </div>
                     <UIcon
                       v-if="metric.rating"
-                      :name="getRatingIcon(metric.rating)"
+                      :name="getCruxRatingIcon(metric.rating)"
                       class="w-6 h-6 mx-auto mb-1"
                       :class="ratingColors[metric.rating].text"
                     />

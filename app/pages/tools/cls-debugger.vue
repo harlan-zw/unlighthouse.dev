@@ -659,6 +659,17 @@ const insights = computed<ClsInsight[]>(() => {
                 </div>
               </div>
 
+              <!-- CrUX Field Data -->
+              <div class="mb-6">
+                <ToolsCruxFieldDataCard
+                  metric="cls"
+                  :url="urlInput"
+                  :form-factor="strategy === 'mobile' ? 'PHONE' : 'DESKTOP'"
+                  :lab-value="result.cls.value"
+                  :lab-display-value="result.cls.displayValue"
+                />
+              </div>
+
               <div class="grid lg:grid-cols-2 gap-6">
                 <!-- Left: Threshold & Shift Elements -->
                 <div class="space-y-5">
@@ -1054,6 +1065,10 @@ const insights = computed<ClsInsight[]>(() => {
             <UButton to="/tools/pagespeed-insights-performance" variant="outline" size="sm" class="gap-2">
               <UIcon name="i-heroicons-chart-bar" class="w-4 h-4" />
               Full Performance Report
+            </UButton>
+            <UButton to="/learn-lighthouse/cls" variant="outline" size="sm" class="gap-2">
+              <UIcon name="i-heroicons-book-open" class="w-4 h-4" />
+              CLS Optimization Guide
             </UButton>
           </div>
         </div>
