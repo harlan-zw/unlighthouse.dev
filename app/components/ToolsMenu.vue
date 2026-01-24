@@ -5,9 +5,9 @@ const toolCategories = [
     description: 'Debug individual metrics',
     color: 'emerald',
     tools: [
-      { label: 'LCP Finder', icon: 'i-heroicons-photo', to: '/tools/lcp-finder', badge: 'LCP' },
-      { label: 'CLS Debugger', icon: 'i-heroicons-arrows-pointing-out', to: '/tools/cls-debugger', badge: 'CLS' },
-      { label: 'INP Analyzer', icon: 'i-heroicons-cursor-arrow-rays', to: '/tools/inp-analyzer', badge: 'INP' },
+      { label: 'LCP Finder', icon: 'i-heroicons-photo', to: '/tools/lcp-finder' },
+      { label: 'CLS Debugger', icon: 'i-heroicons-arrows-pointing-out', to: '/tools/cls-debugger' },
+      { label: 'INP Analyzer', icon: 'i-heroicons-cursor-arrow-rays', to: '/tools/inp-analyzer' },
     ],
   },
   {
@@ -15,10 +15,10 @@ const toolCategories = [
     description: 'Measure & compare',
     color: 'violet',
     tools: [
-      { label: 'CWV Checker', icon: 'i-heroicons-check-badge', to: '/tools/cwv-checker', badge: 'CrUX' },
-      { label: 'CWV History', icon: 'i-heroicons-chart-bar', to: '/tools/cwv-history', badge: '25w' },
-      { label: 'CWV Compare', icon: 'i-heroicons-scale', to: '/tools/cwv-compare', badge: 'vs' },
-      { label: 'TTFB Checker', icon: 'i-heroicons-clock', to: '/tools/ttfb-checker', badge: 'TTFB' },
+      { label: 'CWV Checker', icon: 'i-heroicons-check-badge', to: '/tools/cwv-checker' },
+      { label: 'CWV History', icon: 'i-heroicons-chart-bar', to: '/tools/cwv-history' },
+      { label: 'CWV Compare', icon: 'i-heroicons-scale', to: '/tools/cwv-compare' },
+      { label: 'TTFB Checker', icon: 'i-heroicons-clock', to: '/tools/ttfb-checker' },
     ],
   },
   {
@@ -28,7 +28,7 @@ const toolCategories = [
     tools: [
       { label: 'Score Calculator', icon: 'i-heroicons-calculator', to: '/tools/lighthouse-score-calculator' },
       { label: 'Report Viewer', icon: 'i-heroicons-document-chart-bar', to: '/tools/lighthouse-report-viewer' },
-      { label: 'Bulk PageSpeed', icon: 'i-heroicons-squares-2x2', to: '/tools/bulk-pagespeed', badge: '10×' },
+      { label: 'Bulk PageSpeed', icon: 'i-heroicons-squares-2x2', to: '/tools/bulk-pagespeed' },
       { label: 'PSI Performance', icon: 'i-heroicons-chart-bar', to: '/tools/pagespeed-insights-performance' },
     ],
   },
@@ -40,27 +40,24 @@ const colorClasses = {
     iconBg: 'bg-emerald-500/10 dark:bg-emerald-500/15',
     icon: 'text-emerald-600 dark:text-emerald-400',
     hover: 'hover:bg-emerald-500/5 dark:hover:bg-emerald-500/10',
-    badge: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
   },
   violet: {
     dot: 'bg-violet-500',
     iconBg: 'bg-violet-500/10 dark:bg-violet-500/15',
     icon: 'text-violet-600 dark:text-violet-400',
     hover: 'hover:bg-violet-500/5 dark:hover:bg-violet-500/10',
-    badge: 'bg-violet-500/15 text-violet-700 dark:text-violet-300',
   },
   amber: {
     dot: 'bg-amber-500',
     iconBg: 'bg-amber-500/10 dark:bg-amber-500/15',
     icon: 'text-amber-600 dark:text-amber-400',
     hover: 'hover:bg-amber-500/5 dark:hover:bg-amber-500/10',
-    badge: 'bg-amber-500/15 text-amber-700 dark:text-amber-300',
   },
 }
 </script>
 
 <template>
-  <div class="tools-menu grid grid-cols-3 gap-0 p-0 min-w-[540px]">
+  <div class="tools-menu grid grid-cols-3 gap-0 p-0 min-w-[680px]">
     <div
       v-for="(category, catIdx) in toolCategories"
       :key="category.label"
@@ -108,21 +105,10 @@ const colorClasses = {
             />
           </div>
 
-          <!-- Label + badge -->
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-1.5">
-              <span class="text-sm font-medium text-[var(--ui-text)] truncate group-hover:text-[var(--ui-text-highlighted)] transition-colors">
-                {{ tool.label }}
-              </span>
-              <span
-                v-if="tool.badge"
-                class="shrink-0 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide rounded"
-                :class="colorClasses[category.color].badge"
-              >
-                {{ tool.badge }}
-              </span>
-            </div>
-          </div>
+          <!-- Label -->
+          <span class="text-sm font-medium text-[var(--ui-text)] group-hover:text-[var(--ui-text-highlighted)] transition-colors whitespace-nowrap">
+            {{ tool.label }}
+          </span>
 
           <!-- Arrow on hover -->
           <UIcon

@@ -43,7 +43,7 @@
     "@nuxt/scripts": "^1.0.0-beta.1",
     "@nuxt/ui": "^4.4.0",
     "@nuxtjs/seo": "^3.3.0",
-    "nuxt-og-image": "^6.0.0-beta.2",
+    "nuxt-og-image": "^6.0.0-beta.3",
     "@sentry/nuxt": "^10.36.0",
     "@unovis/vue": "^1.6.2",
     "@vueuse/core": "^14.1.0",
