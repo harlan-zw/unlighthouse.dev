@@ -10,6 +10,8 @@ navigation:
 relatedPages:
   - path: /learn/inp
     title: INP Guide
+  - path: /tools/cwv-checker
+    title: Core Web Vitals Checker
   - path: /glossary/lcp
     title: Largest Contentful Paint (LCP)
   - path: /glossary/cls
@@ -48,6 +50,7 @@ While [93% of sites had good FID](https://web.dev/blog/inp-cwv), only [74% have 
 
 ## Measure INP
 
+- [Core Web Vitals Checker](/tools/cwv-checker) - test any page
 - [PageSpeed Insights](https://pagespeed.web.dev/) (field data)
 - Search Console Core Web Vitals report
 - Web Vitals Chrome extension

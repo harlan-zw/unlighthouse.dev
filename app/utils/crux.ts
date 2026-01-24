@@ -51,12 +51,12 @@ export const metricDefinitions = {
 } as const
 
 export type MetricKey = keyof typeof metricDefinitions
-export type Rating = 'good' | 'needs-improvement' | 'poor'
+export type CruxRating = 'good' | 'needs-improvement' | 'poor'
 
 export const cwvMetrics: MetricKey[] = ['lcp', 'cls', 'inp']
 export const allMetrics: MetricKey[] = ['lcp', 'cls', 'inp', 'fcp', 'ttfb']
 
-export function getMetricRating(metric: MetricKey, value: number): Rating {
+export function getMetricRating(metric: MetricKey, value: number): CruxRating {
   const def = metricDefinitions[metric]
   if (value <= def.good)
     return 'good'
@@ -65,7 +65,7 @@ export function getMetricRating(metric: MetricKey, value: number): Rating {
   return 'poor'
 }
 
-export function formatMetricValue(metric: MetricKey, value: number | undefined): string {
+export function formatCruxMetricValue(metric: MetricKey, value: number | undefined): string {
   if (value === undefined || value === null)
     return '-'
   if (metric === 'cls')
@@ -75,7 +75,7 @@ export function formatMetricValue(metric: MetricKey, value: number | undefined):
   return `${Math.round(value)}ms`
 }
 
-export function getRatingColor(rating: Rating): string {
+export function getCruxRatingColor(rating: CruxRating): string {
   switch (rating) {
     case 'good':
       return 'text-green-500'
@@ -88,7 +88,7 @@ export function getRatingColor(rating: Rating): string {
   }
 }
 
-export function getRatingBgColor(rating: Rating): string {
+export function getCruxRatingBgColor(rating: CruxRating): string {
   switch (rating) {
     case 'good':
       return 'bg-green-500'

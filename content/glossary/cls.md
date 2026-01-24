@@ -10,6 +10,8 @@ navigation:
 relatedPages:
   - path: /learn/cls
     title: CLS Guide
+  - path: /tools/cwv-checker
+    title: Core Web Vitals Checker
   - path: /glossary/lcp
     title: Largest Contentful Paint (LCP)
   - path: /glossary/inp
@@ -48,6 +50,7 @@ Layout shifts cause accidental clicks and lost reading position. [79% of mobile 
 
 ## Measure CLS
 
+- [Core Web Vitals Checker](/tools/cwv-checker) - test any page
 - Chrome DevTools Performance panel
 - Lighthouse audit
 - [PageSpeed Insights](https://pagespeed.web.dev/) (field data)

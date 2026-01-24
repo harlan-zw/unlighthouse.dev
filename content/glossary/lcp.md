@@ -10,6 +10,8 @@ navigation:
 relatedPages:
   - path: /learn/lcp
     title: LCP Guide
+  - path: /tools/cwv-checker
+    title: Core Web Vitals Checker
   - path: /glossary/cls
     title: Cumulative Layout Shift (CLS)
   - path: /glossary/inp
@@ -48,6 +50,7 @@ LCP is the [hardest Core Web Vital to pass](https://www.debugbear.com/blog/harde
 
 ## Measure LCP
 
+- [Core Web Vitals Checker](/tools/cwv-checker) - test any page
 - Chrome DevTools Performance panel
 - Lighthouse audit
 - [PageSpeed Insights](https://pagespeed.web.dev/) (field data)
