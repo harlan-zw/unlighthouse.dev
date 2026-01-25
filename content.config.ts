@@ -19,6 +19,7 @@ const schema = z.object({
 function resolvableUnlighthouseCollection() {
   const homeDir = process.env.HOME || process.env.USERPROFILE || process.cwd()
   const localDirPaths = new Set([
+    resolve(homeDir, 'pkg', 'unlighthouse-alt', 'docs'),
     resolve(homeDir, 'pkg', 'unlighthouse', 'docs'),
   ])
   for (const localDirPath of localDirPaths) {

@@ -871,7 +871,7 @@ function handleMetricUpdate(id: MetricId, value: number) {
                 Get Started
               </UButton>
               <UButton to="/learn-lighthouse/core-web-vitals" variant="outline" color="white" size="sm">
-                Learn More
+                Learn more about Core Web Vitals
               </UButton>
             </div>
           </div>

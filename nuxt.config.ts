@@ -344,14 +344,33 @@ export default defineNuxtConfig({
       '/api/github/sponsors.json': { prerender: true },
       '/api/_mdc/highlight': { cache: { group: 'mdc', name: 'highlight', maxAge: 60 * 60 } },
       '/api/_nuxt_icon': { cache: { group: 'icon', name: 'icon', maxAge: 60 * 60 * 24 * 7 } },
-      // /api/config -> /api-docs/config
-      '/api/config': { redirect: { to: '/api-docs/config', statusCode: 301 } },
-      // /api/glossary -> /api-docs/glossary
-      '/api/glossary': { redirect: { to: '/api-docs/glossary', statusCode: 301 } },
+      // /api/config -> /api-doc/config
+      '/api/config': { redirect: { to: '/api-doc/config', statusCode: 301 } },
+      // /api/glossary -> /api-doc/glossary
+      '/api/glossary': { redirect: { to: '/api-doc/glossary', statusCode: 301 } },
       // /guide/getting-started/unlighthouse-cli -> /guide/getting-started/installation
       '/guide/getting-started/unlighthouse-cli': { redirect: { to: '/guide/getting-started/installation', statusCode: 301 } },
-      // /api/index -> /api-docs/index
-      '/api': { redirect: { to: '/api-docs', statusCode: 301 } },
+      // /api/index -> /api-doc/index
+      '/api': { redirect: { to: '/api-doc', statusCode: 301 } },
+
+      // Fix redirects for broken links
+      '/cloud': { redirect: { to: '/', statusCode: 301 } },
+      '/guide/getting-started': { redirect: { to: '/guide/getting-started/installation', statusCode: 301 } },
+      '/learn-lighthouse/tbt': { redirect: { to: '/glossary/tbt', statusCode: 301 } },
+      '/glossary/index': { redirect: { to: '/glossary', statusCode: 301 } },
+      '/api-doc.md': { redirect: { to: '/api-doc', statusCode: 301 } },
+      '/api-doc/config.md': { redirect: { to: '/api-doc/config', statusCode: 301 } },
+      '/api-doc/glossary.md': { redirect: { to: '/api-doc/glossary', statusCode: 301 } },
+      '/api-doc/.md': { redirect: { to: '/api-doc', statusCode: 301 } },
+      '/api-doc/index.md': { redirect: { to: '/api-doc', statusCode: 301 } },
+
+      // Learn Lighthouse Fix redirects
+      '/learn-lighthouse/accessibility/fix': { redirect: { to: '/learn-lighthouse/accessibility#common-accessibility-issues', statusCode: 301 } },
+      '/learn-lighthouse/best-practices/fix': { redirect: { to: '/learn-lighthouse/best-practices#all-best-practices-issues', statusCode: 301 } },
+      '/learn-lighthouse/lcp/fix': { redirect: { to: '/learn-lighthouse/lcp#common-lcp-issues', statusCode: 301 } },
+      '/learn-lighthouse/cls/fix': { redirect: { to: '/learn-lighthouse/cls#common-cls-issues', statusCode: 301 } },
+      '/learn-lighthouse/inp/fix': { redirect: { to: '/learn-lighthouse/inp#common-inp-issues', statusCode: 301 } },
+      '/learn-lighthouse/seo/fix': { redirect: { to: '/learn-lighthouse/seo#all-seo-audits', statusCode: 301 } },
     },
     scripts: {
       registry: {
