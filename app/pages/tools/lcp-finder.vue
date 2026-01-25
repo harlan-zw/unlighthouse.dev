@@ -1720,7 +1720,7 @@ const insights = computed<LcpInsight[]>(() => {
               </p>
             </div>
             <div class="flex flex-wrap gap-2 justify-center sm:justify-end">
-              <UButton to="/guide/getting-started/unlighthouse-cli" variant="solid" size="sm">
+              <UButton to="/guide/getting-started/installation" variant="solid" size="sm">
                 Get Started
               </UButton>
               <UButton to="/learn-lighthouse/lcp" variant="outline" size="sm">

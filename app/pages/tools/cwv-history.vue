@@ -519,7 +519,7 @@ function formatChartDate(date: string) {
                       Check CWV (Lab)
                     </UButton>
                     <UButton
-                      to="/guide/getting-started/unlighthouse-cli"
+                      to="/guide/getting-started/installation"
                       color="primary"
                       size="sm"
                     >
@@ -820,7 +820,7 @@ function formatChartDate(date: string) {
                         Run Lab Test
                       </UButton>
                       <UButton
-                        to="/guide/getting-started/unlighthouse-cli"
+                        to="/guide/getting-started/installation"
                         color="primary"
                         size="sm"
                       >

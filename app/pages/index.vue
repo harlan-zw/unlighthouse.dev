@@ -42,7 +42,7 @@ const { data: sponsors } = await useFetch('/api/github/sponsors.json', {
             <span class="text-gray-500">example.com</span>
           </div>
           <div class="flex items-center gap-3">
-            <UButton size="lg" to="/guide/getting-started/unlighthouse-cli">
+            <UButton size="lg" to="/guide/getting-started/installation">
               Get Started
             </UButton>
             <UButton size="lg" variant="ghost" color="neutral" to="https://github.com/harlan-zw/unlighthouse" target="_blank">

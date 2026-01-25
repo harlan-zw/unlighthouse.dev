@@ -223,7 +223,7 @@ export default defineNuxtConfig({
       autoSubfolderIndex: false,
       crawlLinks: true,
       routes: ['/', '/404.html'],
-      ignore: ['/auth/github', '/auth', '/api/admin/*', '/admin', '/api/debug'],
+      ignore: ['/llms.txt', '/auth/github', '/auth', '/api/admin/*', '/admin/*', '/api/debug'],
     },
     experimental: {
       openAPI: true,
@@ -348,6 +348,8 @@ export default defineNuxtConfig({
       '/api/config': { redirect: { to: '/api-docs/config', statusCode: 301 } },
       // /api/glossary -> /api-docs/glossary
       '/api/glossary': { redirect: { to: '/api-docs/glossary', statusCode: 301 } },
+      // /guide/getting-started/unlighthouse-cli -> /guide/getting-started/installation
+      '/guide/getting-started/unlighthouse-cli': { redirect: { to: '/guide/getting-started/installation', statusCode: 301 } },
       // /api/index -> /api-docs/index
       '/api': { redirect: { to: '/api-docs', statusCode: 301 } },
     },

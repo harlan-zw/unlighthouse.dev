@@ -12,7 +12,7 @@ relatedPages:
     title: First Contentful Paint (FCP)
   - path: /glossary/lcp
     title: Largest Contentful Paint (LCP)
-  - path: /learn/lcp
+  - path: /learn-lighthouse/lcp
     title: LCP Guide
 ---
 

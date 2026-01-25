@@ -4,7 +4,7 @@ export const productMenu = computed(() => [
     label: 'Get Started',
     title: 'Get Started',
     icon: 'i-ph:book-open-duotone',
-    to: '/guide/getting-started/how-it-works',
+    to: '/guide/getting-started/installation',
   },
 ])
 

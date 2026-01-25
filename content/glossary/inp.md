@@ -8,7 +8,7 @@ keywords:
 navigation:
   title: "INP"
 relatedPages:
-  - path: /learn/inp
+  - path: /learn-lighthouse/inp
     title: INP Guide
   - path: /tools/cwv-checker
     title: Core Web Vitals Checker
@@ -56,4 +56,4 @@ While [93% of sites had good FID](https://web.dev/blog/inp-cwv), only [74% have 
 - Web Vitals Chrome extension
 - [TBT](/glossary/tbt) as lab proxy
 
-→ [Complete INP Guide](/learn/inp)
+→ [Complete INP Guide](/learn-lighthouse/inp)

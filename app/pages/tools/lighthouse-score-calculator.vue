@@ -867,7 +867,7 @@ function handleMetricUpdate(id: MetricId, value: number) {
               </p>
             </div>
             <div class="flex flex-wrap gap-2">
-              <UButton to="/guide/getting-started/unlighthouse-cli" color="white" size="sm">
+              <UButton to="/guide/getting-started/installation" color="white" size="sm">
                 Get Started
               </UButton>
               <UButton to="/learn-lighthouse/core-web-vitals" variant="outline" color="white" size="sm">

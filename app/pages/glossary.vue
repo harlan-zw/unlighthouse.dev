@@ -131,7 +131,7 @@ const otherTerms = computed(() =>
           <span class="text-amber-400">--site</span>
           <span class="text-gray-500">example.com</span>
         </div>
-        <UButton to="/guide/getting-started/unlighthouse-cli">
+        <UButton to="/guide/getting-started/installation">
           Get Started
         </UButton>
       </div>

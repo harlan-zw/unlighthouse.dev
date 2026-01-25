@@ -8,7 +8,7 @@ keywords:
 navigation:
   title: "CLS"
 relatedPages:
-  - path: /learn/cls
+  - path: /learn-lighthouse/cls
     title: CLS Guide
   - path: /tools/cwv-checker
     title: Core Web Vitals Checker
@@ -56,4 +56,4 @@ Layout shifts cause accidental clicks and lost reading position. [79% of mobile 
 - [PageSpeed Insights](https://pagespeed.web.dev/) (field data)
 - Web Vitals Chrome extension
 
-→ [Complete CLS Guide](/learn/cls)
+→ [Complete CLS Guide](/learn-lighthouse/cls)

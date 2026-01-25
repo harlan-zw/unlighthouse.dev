@@ -12,7 +12,7 @@ relatedPages:
     title: Total Blocking Time (TBT)
   - path: /glossary/inp
     title: Interaction to Next Paint (INP)
-  - path: /learn/inp
+  - path: /learn-lighthouse/inp
     title: INP Guide
 ---
 

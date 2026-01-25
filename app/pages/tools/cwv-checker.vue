@@ -249,12 +249,6 @@ const metricLabels = {
   ttfb: 'Time to First Byte',
 }
 
-const metricDescriptions = {
-  lcp: 'Measures loading performance. Good: ≤2.5s',
-  cls: 'Measures visual stability. Good: ≤0.1',
-  inp: 'Measures interactivity. Good: ≤200ms',
-}
-
 function getRatingIcon(rating: string) {
   if (rating === 'good')
     return 'i-heroicons-check-circle-solid'
@@ -741,7 +735,7 @@ const cwvMetrics = computed(() => {
                     </div>
                     <div class="flex gap-2 mt-4">
                       <UButton
-                        to="/guide/getting-started/unlighthouse-cli"
+                        to="/guide/getting-started/installation"
                         color="primary"
                         size="sm"
                       >

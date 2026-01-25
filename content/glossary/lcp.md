@@ -8,7 +8,7 @@ keywords:
 navigation:
   title: "LCP"
 relatedPages:
-  - path: /learn/lcp
+  - path: /learn-lighthouse/lcp
     title: LCP Guide
   - path: /tools/cwv-checker
     title: Core Web Vitals Checker
@@ -56,4 +56,4 @@ LCP is the [hardest Core Web Vital to pass](https://www.debugbear.com/blog/harde
 - [PageSpeed Insights](https://pagespeed.web.dev/) (field data)
 - Search Console Core Web Vitals report
 
-→ [Complete LCP Guide](/learn/lcp)
+→ [Complete LCP Guide](/learn-lighthouse/lcp)

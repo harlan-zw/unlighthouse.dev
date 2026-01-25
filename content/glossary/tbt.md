@@ -12,7 +12,7 @@ relatedPages:
     title: Interaction to Next Paint (INP)
   - path: /glossary/fcp
     title: First Contentful Paint (FCP)
-  - path: /learn/inp
+  - path: /learn-lighthouse/inp
     title: INP Guide
 ---
 
