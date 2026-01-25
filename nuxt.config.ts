@@ -138,7 +138,7 @@ export default defineNuxtConfig({
       processCSSVariables: true,
     },
     families: [
-      { name: 'Hubot Sans', provider: 'local', weight: [200, 900], stretch: '75% 125%', global: true },
+      { name: 'Hubot Sans', weight: [200, 900], stretch: '75% 125%', global: true },
     ],
   },
 
@@ -151,6 +151,10 @@ export default defineNuxtConfig({
       deployConfig: true,
       nodeCompat: true,
       wrangler: {
+        name: 'unlighthouse-dev',
+        account_id: '5904138d55ca25d5670dca6adf99894e',
+        compatibility_date: '2025-01-01',
+        compatibility_flags: ['nodejs_compat'],
         limits: {
           cpu_ms: 120_000, // 2 min for slow PSI calls
         },
@@ -165,6 +169,16 @@ export default defineNuxtConfig({
           //   zone_name: 'unlighthouse.dev',
           //   custom_domain: true,
           // },
+        ],
+        kv_namespaces: [
+          { binding: 'KV', id: '29fb5bd433c44a989ac1fbd72940f1e4' },
+          { binding: 'CACHE', id: '8f765d0c531c41edb94790f2d31d8dba' },
+        ],
+        d1_databases: [
+          { binding: 'DB', database_name: 'unlighthouse', database_id: '5274d98a-9e23-4a78-b9af-46444ec20b2a' },
+        ],
+        analytics_engine_datasets: [
+          { binding: 'TOOL_ANALYTICS', dataset: 'unlighthouse_tool_usage' },
         ],
         durable_objects: {
           bindings: [
@@ -209,7 +223,7 @@ export default defineNuxtConfig({
       autoSubfolderIndex: false,
       crawlLinks: true,
       routes: ['/', '/404.html'],
-      ignore: ['/auth/github', '/auth', '/admin', '/api/debug'],
+      ignore: ['/auth/github', '/auth', '/api/admin/*', '/admin', '/api/debug'],
     },
     experimental: {
       openAPI: true,
@@ -226,6 +240,10 @@ export default defineNuxtConfig({
         driver: 'cloudflare-kv-binding',
         binding: 'KV',
       },
+      // devStorage: {
+      //   cache: { driver: 'memory' },
+      //   kv: { driver: 'memory' },
+      // },
       fs: {
         driver: 'fs',
         base: '.data/kv',
