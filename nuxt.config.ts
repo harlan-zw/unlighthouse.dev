@@ -207,7 +207,6 @@ export default defineNuxtConfig({
     },
     prerender: {
       autoSubfolderIndex: false,
-      failOnError: false,
       crawlLinks: true,
       routes: ['/', '/404.html'],
       ignore: ['/auth/github', '/auth', '/admin', '/api/debug'],
@@ -226,6 +225,10 @@ export default defineNuxtConfig({
       kv: {
         driver: 'cloudflare-kv-binding',
         binding: 'KV',
+      },
+      fs: {
+        driver: 'fs',
+        base: '.data/kv',
       },
     },
   },

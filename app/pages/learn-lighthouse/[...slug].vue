@@ -48,7 +48,7 @@ const headline = computed(() => titleCase(getLastPathSegment(getPathSegments(rou
 defineOgImage('Docs', {
   title: page.value?.title,
   description: page.value?.description,
-  headline,
+  headline: headline.value,
 })
 
 const articlePublishedTime = computed(() => page.value?.publishedAt ? `${page.value.publishedAt}T12:00:00Z` : undefined)

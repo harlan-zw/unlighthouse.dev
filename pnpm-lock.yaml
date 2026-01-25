@@ -146,8 +146,8 @@ importers:
         specifier: ^2.5.3
         version: 2.5.3(magicast@0.5.1)
       nuxt-og-image:
-        specifier: ^6.0.0-beta.4
-        version: 6.0.0-beta.4(@resvg/resvg-js@2.6.2)(@resvg/resvg-wasm@2.6.2)(@unhead/vue@2.1.2(vue@3.5.27(typescript@5.9.3)))(playwright-core@1.57.0)(satori@0.18.3)(sharp@0.34.5)(tailwindcss@4.1.18)(unstorage@1.17.4(db0@0.3.4(better-sqlite3@12.6.2)(drizzle-orm@0.45.1(@cloudflare/workers-types@4.20260116.0)(@opentelemetry/api@1.9.0)(@types/pg@8.15.6)(better-sqlite3@12.6.2)))(ioredis@5.9.2))(vite@8.0.0-beta.2(@types/node@25.0.10)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))(vue@3.5.27(typescript@5.9.3))
+        specifier: ^6.0.0-beta.5
+        version: 6.0.0-beta.5(@resvg/resvg-js@2.6.2)(@resvg/resvg-wasm@2.6.2)(@unhead/vue@2.1.2(vue@3.5.27(typescript@5.9.3)))(playwright-core@1.57.0)(satori@0.18.3)(sharp@0.34.5)(tailwindcss@4.1.18)(unstorage@1.17.4(db0@0.3.4(better-sqlite3@12.6.2)(drizzle-orm@0.45.1(@cloudflare/workers-types@4.20260116.0)(@opentelemetry/api@1.9.0)(@types/pg@8.15.6)(better-sqlite3@12.6.2)))(ioredis@5.9.2))(vite@8.0.0-beta.2(@types/node@25.0.10)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))(vue@3.5.27(typescript@5.9.3))
       nuxt-skew-protection:
         specifier: ^0.7.5
         version: 0.7.5(@nuxtjs/robots@5.6.7(magicast@0.5.1)(vue@3.5.27(typescript@5.9.3))(zod@4.3.6))(db0@0.3.4(better-sqlite3@12.6.2)(drizzle-orm@0.45.1(@cloudflare/workers-types@4.20260116.0)(@opentelemetry/api@1.9.0)(@types/pg@8.15.6)(better-sqlite3@12.6.2)))(ioredis@5.9.2)(magicast@0.5.1)(vue@3.5.27(typescript@5.9.3))
@@ -6943,8 +6943,8 @@ packages:
       '@unhead/vue': ^2.0.5
       unstorage: ^1.15.0
 
-  nuxt-og-image@6.0.0-beta.4:
-    resolution: {integrity: sha512-NBX/eoV0N2SlnqYTYM2aipEfwvYewMe9cdx4ebuqY6+k5of31C4+7zF2xmply1wQ0gU9pmycPIHarwqzcsIJ3w==}
+  nuxt-og-image@6.0.0-beta.5:
+    resolution: {integrity: sha512-y7HqR7X0NqR/dbkSfRUKzCu64qUcsGu3we9iXQiRPeycvqVisgBvVxtFCzfhzEfgJyQXwK8hxwBuBcrYNPqoIA==}
     engines: {node: '>=18.0.0'}
     hasBin: true
     peerDependencies:
@@ -16917,7 +16917,7 @@ snapshots:
       - vite
       - vue
 
-  nuxt-og-image@6.0.0-beta.4(@resvg/resvg-js@2.6.2)(@resvg/resvg-wasm@2.6.2)(@unhead/vue@2.1.2(vue@3.5.27(typescript@5.9.3)))(playwright-core@1.57.0)(satori@0.18.3)(sharp@0.34.5)(tailwindcss@4.1.18)(unstorage@1.17.4(db0@0.3.4(better-sqlite3@12.6.2)(drizzle-orm@0.45.1(@cloudflare/workers-types@4.20260116.0)(@opentelemetry/api@1.9.0)(@types/pg@8.15.6)(better-sqlite3@12.6.2)))(ioredis@5.9.2))(vite@8.0.0-beta.2(@types/node@25.0.10)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))(vue@3.5.27(typescript@5.9.3)):
+  nuxt-og-image@6.0.0-beta.5(@resvg/resvg-js@2.6.2)(@resvg/resvg-wasm@2.6.2)(@unhead/vue@2.1.2(vue@3.5.27(typescript@5.9.3)))(playwright-core@1.57.0)(satori@0.18.3)(sharp@0.34.5)(tailwindcss@4.1.18)(unstorage@1.17.4(db0@0.3.4(better-sqlite3@12.6.2)(drizzle-orm@0.45.1(@cloudflare/workers-types@4.20260116.0)(@opentelemetry/api@1.9.0)(@types/pg@8.15.6)(better-sqlite3@12.6.2)))(ioredis@5.9.2))(vite@8.0.0-beta.2(@types/node@25.0.10)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))(vue@3.5.27(typescript@5.9.3)):
     dependencies:
       '@clack/prompts': 0.11.0
       '@nuxt/devtools-kit': 3.1.1(magicast@0.5.1)(vite@8.0.0-beta.2(@types/node@25.0.10)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))
