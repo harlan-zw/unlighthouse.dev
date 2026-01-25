@@ -19,5 +19,7 @@ sw.*
 .data
 .wrangler
 
+wrangler.toml
+
 # Claude context files
 .claude/context/
