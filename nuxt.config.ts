@@ -138,8 +138,8 @@ export default defineNuxtConfig({
       processCSSVariables: true,
     },
     families: [
-      { name: 'Hubot Sans', weight: [200, 900], stretch: '75% 125%', global: true },
-      { name: 'Nunito Sans', weight: [300, 700] },
+      { name: 'Hubot Sans', stretch: '75% 125%', global: true },
+      { name: 'Nunito Sans' },
     ],
   },
 
