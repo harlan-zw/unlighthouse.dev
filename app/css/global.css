@@ -2,7 +2,8 @@
 @import '@nuxt/ui';
 
 @theme {
-  --font-sans: 'Hubot Sans', sans-serif;
+  --font-sans: 'Nunito Sans', sans-serif;
+  --font-display: 'Hubot Sans', sans-serif;
   --font-mono: 'Fira Code', monospace;
 
   --color-neutral-50: oklch(98.4% 0.003 285);
@@ -36,6 +37,7 @@ p {
 
 h1, h2, h3, h4, h5, h6 {
   text-wrap: balance;
+  font-family: var(--font-display);
 }
 
 #root, #__nuxt {

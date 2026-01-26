@@ -139,6 +139,7 @@ export default defineNuxtConfig({
     },
     families: [
       { name: 'Hubot Sans', weight: [200, 900], stretch: '75% 125%', global: true },
+      { name: 'Nunito Sans', weight: [300, 700] },
     ],
   },
 
