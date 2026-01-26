@@ -60,7 +60,7 @@
     "nuxt-ai-ready": "^0.10.12",
     "nuxt-build-cache": "^0.1.1",
     "nuxt-lodash": "^2.5.3",
-    "nuxt-og-image": "^6.0.0-beta.5",
+    "nuxt-og-image": "^6.0.0-beta.6",
     "nuxt-skew-protection": "^0.7.5",
     "octokit": "^5.0.5",
     "ofetch": "^1.5.1",

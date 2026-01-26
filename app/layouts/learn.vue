@@ -166,6 +166,7 @@ const breadcrumbs = useBreadcrumbItems({
   rootSegment: '/learn-lighthouse',
   overrides: computed(() => {
     let currItem: NavItem | undefined
+    let currParent: NavItem | undefined
     let currSection: NavSection | undefined
     for (const section of navigation.value) {
       for (const item of section.items) {
@@ -178,6 +179,7 @@ const breadcrumbs = useBreadcrumbItems({
           const child = item.children.find(c => c.path === route.path)
           if (child) {
             currItem = child
+            currParent = item
             currSection = section
             break
           }
@@ -187,6 +189,7 @@ const breadcrumbs = useBreadcrumbItems({
     return [
       { icon: 'i-heroicons-academic-cap', label: 'Learn Lighthouse' },
       currSection ? { label: currSection.label } : false,
+      currParent ? { label: currParent.title, to: currParent.to || currParent.path } : false,
       { label: currItem?.title },
     ]
   }),
