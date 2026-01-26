@@ -11,7 +11,7 @@ export const users = sqliteTable('users', {
   updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 })
 
-export type ToolName = 'pagespeed-insights' | 'lcp' | 'cls' | 'inp' | 'cwv-check' | 'cwv-history' | 'ttfb-checker'
+export type ToolName = 'pagespeed-insights' | 'lcp' | 'cls' | 'inp' | 'cwv-check' | 'cwv-history' | 'ttfb-checker' | 'bulk-pagespeed' | 'cwv-compare' | 'lighthouse-report-viewer' | 'lighthouse-score-calculator'
 
 export const toolLookups = sqliteTable('tool_lookups', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),

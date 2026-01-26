@@ -22,6 +22,28 @@ defineOgImage('NuxtSeo', {
 
 const { report, error, loading, loadFromFile, loadFromText, clear } = useLighthouseReport()
 
+// Track tool usage
+const hasTrackedView = ref(false)
+onMounted(() => {
+  if (!hasTrackedView.value) {
+    hasTrackedView.value = true
+    $fetch('/api/tools/track', {
+      method: 'POST',
+      body: { tool: 'lighthouse-report-viewer', action: 'view' },
+    }).catch(() => {})
+  }
+})
+
+// Track when a report is loaded
+watch(report, (newReport) => {
+  if (newReport) {
+    $fetch('/api/tools/track', {
+      method: 'POST',
+      body: { tool: 'lighthouse-report-viewer', action: 'use' },
+    }).catch(() => {})
+  }
+})
+
 const dropzone = ref<HTMLElement | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
 const isDragging = ref(false)

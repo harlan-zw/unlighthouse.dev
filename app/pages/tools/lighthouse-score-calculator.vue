@@ -23,12 +23,25 @@ defineOgImage('NuxtSeo', {
 
 const calc = useLighthouseCalculator()
 
+// Track tool usage
+const hasTrackedView = ref(false)
+const hasTrackedUse = ref(false)
+
 // Sync from URL on mount
 onMounted(() => {
   calc.syncFromHash()
 
   // Listen for hash changes
   window.addEventListener('hashchange', calc.syncFromHash)
+
+  // Track view
+  if (!hasTrackedView.value) {
+    hasTrackedView.value = true
+    $fetch('/api/tools/track', {
+      method: 'POST',
+      body: { tool: 'lighthouse-score-calculator', action: 'view' },
+    }).catch(() => {})
+  }
 })
 
 onUnmounted(() => {
@@ -42,6 +55,15 @@ watch([calc.device, calc.values], () => {
   if (syncTimeout.value)
     clearTimeout(syncTimeout.value)
   syncTimeout.value = setTimeout(calc.syncToHash, 300)
+
+  // Track first use
+  if (!hasTrackedUse.value) {
+    hasTrackedUse.value = true
+    $fetch('/api/tools/track', {
+      method: 'POST',
+      body: { tool: 'lighthouse-score-calculator', action: 'use' },
+    }).catch(() => {})
+  }
 }, { deep: true })
 
 // Metric contributions for gauge
