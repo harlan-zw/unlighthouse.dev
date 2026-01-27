@@ -19,6 +19,7 @@ const learnLinks = [
   { label: 'CLS Fixes', icon: 'i-heroicons-arrows-pointing-out', to: '/learn-lighthouse/cls' },
   { label: 'INP Fixes', icon: 'i-heroicons-cursor-arrow-rays', to: '/learn-lighthouse/inp' },
   { label: 'Lighthouse CI', icon: 'i-heroicons-play-circle', to: '/learn-lighthouse/lighthouse-ci' },
+  { label: 'Playwright', icon: 'i-simple-icons-playwright', to: '/learn-lighthouse/playwright' },
   { label: 'Accessibility', icon: 'i-heroicons-eye', to: '/learn-lighthouse/accessibility' },
   { label: 'SEO', icon: 'i-heroicons-magnifying-glass', to: '/learn-lighthouse/seo' },
   { label: 'Best Practices', icon: 'i-heroicons-check-badge', to: '/learn-lighthouse/best-practices' },

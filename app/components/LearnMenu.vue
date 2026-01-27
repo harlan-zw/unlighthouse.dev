@@ -27,6 +27,7 @@ const learnCategories = [
     color: 'amber',
     items: [
       { label: 'Lighthouse CI', icon: 'i-heroicons-play-circle', to: '/learn-lighthouse/lighthouse-ci' },
+      { label: 'Playwright', icon: 'i-simple-icons-playwright', to: '/learn-lighthouse/playwright' },
       { label: 'PSI API', icon: 'i-heroicons-code-bracket', to: '/learn-lighthouse/pagespeed-insights-api' },
       { label: 'Bulk Testing', icon: 'i-heroicons-squares-2x2', to: '/learn-lighthouse/bulk-lighthouse-testing' },
     ],
