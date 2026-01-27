@@ -4,12 +4,12 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: 'Learn Lighthouse & Core Web Vitals',
+  title: 'Learn Google Lighthouse & Core Web Vitals',
   description: 'Guides and tutorials for improving your site\'s Core Web Vitals and performance. Master LCP, CLS, and INP with actionable fixes.',
 })
 
 defineOgImage('Docs', {
-  title: 'Learn Lighthouse',
+  title: 'Learn Google Lighthouse',
   description: 'Master Core Web Vitals with actionable guides',
   headline: 'Learn',
 })
@@ -63,7 +63,7 @@ const guides = [
 <template>
   <div class="py-8">
     <UPageHeader
-      title="Learn Lighthouse"
+      title="Learn Google Lighthouse"
       description="Guides and tutorials for improving your site's Core Web Vitals and performance. All guides include authoritative citations from Google and real-world statistics."
       :ui="{ title: 'text-3xl', description: 'text-lg max-w-2xl' }"
     />

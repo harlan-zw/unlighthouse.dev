@@ -188,7 +188,7 @@ const breadcrumbs = useBreadcrumbItems({
       }
     }
     return [
-      { icon: 'i-heroicons-academic-cap', label: 'Learn Lighthouse' },
+      { icon: 'i-heroicons-academic-cap', label: 'Learn Google Lighthouse' },
       currSection ? { label: currSection.label } : false,
       currParent ? { label: currParent.title, to: currParent.to || currParent.path } : false,
       { label: currItem?.title },
@@ -212,7 +212,7 @@ const breadcrumbs = useBreadcrumbItems({
                 <!-- Header -->
                 <div class="flex items-center gap-2 mb-4 px-1">
                   <UIcon name="i-heroicons-academic-cap" class="size-4 text-amber-500" />
-                  <span class="text-sm font-semibold text-[var(--ui-text-highlighted)]">Learn Lighthouse</span>
+                  <span class="text-sm font-semibold text-[var(--ui-text-highlighted)]">Learn Google Lighthouse</span>
                 </div>
 
                 <!-- Section Switcher -->
