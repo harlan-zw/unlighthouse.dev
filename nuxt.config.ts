@@ -145,7 +145,7 @@ export default defineNuxtConfig({
 
   nitro: {
     externals: {
-      external: ['agents/mcp'],
+      external: ['agents/mcp', 'drizzle-orm'],
     },
     preset: 'cloudflare-durable',
     cloudflare: {
