@@ -20,38 +20,34 @@ definePageMeta({
   },
 })
 
-useSeoMeta({
-  title: 'Core Web Vitals History - Track Field Performance Over Time',
-  description: 'Free Core Web Vitals history checker. View 25 weeks of LCP, CLS, INP trends from real Chrome users. Compare performance and get fix recommendations.',
-})
-
-defineOgImage('NuxtSeo', {
-  title: 'Core Web Vitals History',
-  description: 'Track real user performance over 25 weeks',
-  theme: '#6366f1',
-})
-
-useSchemaOrg([
+const faqs = [
   {
-    '@type': 'WebApplication',
-    'name': 'Core Web Vitals History Checker',
-    'description': 'Track Core Web Vitals performance over time with 25 weeks of historical data from real Chrome users',
-    'url': 'https://unlighthouse.dev/tools/cwv-history',
-    'applicationCategory': 'DeveloperApplication',
-    'operatingSystem': 'Web',
-    'offers': {
-      '@type': 'Offer',
-      'price': '0',
-      'priceCurrency': 'USD',
-    },
-    'featureList': [
-      '25-week historical trends',
-      'Core Web Vitals field metrics (LCP, CLS, INP)',
-      'Device segmentation (mobile/desktop)',
-      'Actionable fix recommendations',
-    ],
+    question: 'What is Core Web Vitals history data?',
+    answer: 'CrUX (Chrome User Experience Report) stores 25 weeks of real user performance data for sites with sufficient traffic. This historical data shows how your Core Web Vitals (LCP, CLS, INP) have changed over time, helping you track improvement or detect regressions.',
   },
-])
+  {
+    question: 'Where does this historical performance data come from?',
+    answer: 'Historical data comes from CrUX, Google\'s dataset of real Chrome user experiences. Google collects anonymized performance metrics from Chrome users who have opted in. The data represents the 75th percentile (p75) of real user experiences over 28-day rolling periods.',
+  },
+  {
+    question: 'Why don\'t I see historical data for my site?',
+    answer: 'CrUX only includes sites with sufficient traffic from Chrome users. New sites, low-traffic pages, or sites visited primarily by non-Chrome browsers may not have data. Origin-level data aggregates all pages and requires less traffic than URL-specific data.',
+  },
+  {
+    question: 'What can I learn from Core Web Vitals trends?',
+    answer: 'Trends help you: correlate performance changes with deployments, detect gradual degradation before users notice, measure the impact of optimizations over time, compare mobile vs desktop performance, and identify seasonal patterns affecting user experience.',
+  },
+  {
+    question: 'How often is CrUX historical data updated?',
+    answer: 'CrUX data is updated weekly with a new 28-day rolling window. Each data point represents the 75th percentile of user experiences during that collection period. This means changes you make today will start showing in the data within 1-4 weeks.',
+  },
+]
+
+useToolSeo({
+  title: 'Core Web Vitals History - Track Performance Over Time',
+  description: 'Free CrUX history viewer. Track 25 weeks of LCP, CLS, and INP trends from real Chrome users. Monitor Core Web Vitals changes over time.',
+  faqs,
+})
 
 type FormFactor = 'PHONE' | 'DESKTOP'
 type Mode = 'origin' | 'url'
@@ -851,47 +847,7 @@ function formatChartDate(date: string) {
     <!-- FAQ Section -->
     <section class="px-3 sm:px-6 lg:px-8 pb-16">
       <div class="max-w-4xl mx-auto">
-        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 text-center">
-          Frequently Asked Questions
-        </h2>
-
-        <div class="space-y-4">
-          <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-            <h3 class="font-semibold text-gray-900 dark:text-white">
-              What is CrUX data?
-            </h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-              The Chrome User Experience Report (CrUX) is a dataset of real user performance data from Chrome browsers. It's the same data Google uses for Core Web Vitals assessment in Search Console.
-            </p>
-          </div>
-
-          <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-            <h3 class="font-semibold text-gray-900 dark:text-white">
-              Why does my site have no data?
-            </h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-              CrUX requires a minimum number of Chrome users visiting your site. New sites, low-traffic sites, or sites that block tracking may not have enough data. Use lab data (Lighthouse) instead.
-            </p>
-          </div>
-
-          <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-            <h3 class="font-semibold text-gray-900 dark:text-white">
-              What's the difference between Origin and URL?
-            </h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-              Origin mode shows aggregated data for your entire domain (e.g., example.com). URL mode shows data for a specific page. Origin data is more reliable for low-traffic pages.
-            </p>
-          </div>
-
-          <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-            <h3 class="font-semibold text-gray-900 dark:text-white">
-              How often is CrUX data updated?
-            </h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-              CrUX data is collected daily but represents a 28-day rolling window. Changes to your site may take several weeks to appear in the data. History data goes back 25 weeks.
-            </p>
-          </div>
-        </div>
+        <ToolFaq :faqs="faqs" color="violet" />
       </div>
     </section>
   </div>

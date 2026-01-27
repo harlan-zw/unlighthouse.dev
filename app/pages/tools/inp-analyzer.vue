@@ -36,15 +36,33 @@ definePageMeta({
   },
 })
 
-useSeoMeta({
-  title: 'INP Analyzer - Test Interaction to Next Paint',
-  description: 'Analyze your page\'s Interaction to Next Paint (INP). Find long tasks, main thread blockers, and third-party scripts slowing down interactivity.',
-})
+const faqs = [
+  {
+    question: 'What is Interaction to Next Paint (INP)?',
+    answer: 'Interaction to Next Paint (INP) is a Core Web Vital that measures responsiveness. It tracks the delay between user interactions (clicks, taps, key presses) and the visual feedback. A good INP score is 200 milliseconds or less, indicating a responsive experience.',
+  },
+  {
+    question: 'How is INP different from First Input Delay (FID)?',
+    answer: 'INP replaced FID as a Core Web Vital in March 2024. While FID only measured the first interaction, INP measures ALL interactions throughout the page lifecycle and reports the worst one. This makes INP a more comprehensive measure of real-world interactivity.',
+  },
+  {
+    question: 'What causes poor INP scores?',
+    answer: 'Poor INP is typically caused by: long JavaScript tasks blocking the main thread, heavy third-party scripts (analytics, ads, widgets), unoptimized event handlers, layout thrashing from DOM manipulation, and large JavaScript bundles that take time to parse and execute.',
+  },
+  {
+    question: 'How do I improve my INP score?',
+    answer: 'To improve INP: break long tasks into smaller chunks using yield patterns, defer non-critical JavaScript, use code splitting to reduce bundle size, optimize event handlers to avoid forced layouts, move heavy computation to web workers, and audit third-party scripts for performance impact.',
+  },
+  {
+    question: 'Why does lab data show TBT instead of INP?',
+    answer: 'Total Blocking Time (TBT) is used as a lab proxy for INP because true INP requires real user interactions. TBT measures time spent on long tasks (>50ms) during page load, which correlates with interactivity. Field data from real users provides actual INP measurements.',
+  },
+]
 
-defineOgImage('NuxtSeo', {
-  title: 'INP Analyzer',
-  description: 'Test your Interaction to Next Paint score',
-  theme: '#06b6d4',
+useToolSeo({
+  title: 'INP Analyzer - Test Interaction to Next Paint',
+  description: 'Free INP testing tool. Analyze your Interaction to Next Paint score, find long tasks blocking the main thread, and improve responsiveness.',
+  faqs,
 })
 
 // Loading messages with tips - shown during PageSpeed API analysis
@@ -1046,8 +1064,11 @@ const insights = computed<InpInsight[]>(() => {
           </div>
         </div>
 
+        <!-- FAQ Section -->
+        <ToolFaq :faqs="faqs" color="cyan" />
+
         <!-- Related Tools -->
-        <div class="text-center">
+        <div class="text-center mt-12">
           <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">
             Related Tools
           </h3>

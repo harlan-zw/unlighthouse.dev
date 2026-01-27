@@ -11,38 +11,34 @@ definePageMeta({
   },
 })
 
-useSeoMeta({
-  title: 'TTFB Checker - Test Time to First Byte | Unlighthouse',
-  description: 'Free TTFB test tool. Check your server response time with real user data from Chrome. Compare field vs lab TTFB and get optimization tips.',
-})
-
-defineOgImage('NuxtSeo', {
-  title: 'TTFB Checker',
-  description: 'Test Time to First Byte with real user data',
-  theme: '#0ea5e9',
-})
-
-useSchemaOrg([
+const faqs = [
   {
-    '@type': 'WebApplication',
-    'name': 'TTFB Checker',
-    'description': 'Test Time to First Byte (TTFB) with real Chrome user data and lab measurements. Track server response time trends over 25 weeks.',
-    'url': 'https://unlighthouse.dev/tools/ttfb-checker',
-    'applicationCategory': 'DeveloperApplication',
-    'operatingSystem': 'Web',
-    'offers': {
-      '@type': 'Offer',
-      'price': '0',
-      'priceCurrency': 'USD',
-    },
-    'featureList': [
-      'Real user TTFB data (CrUX)',
-      'Lab TTFB measurement',
-      '25-week trend analysis',
-      'Mobile and desktop testing',
-    ],
+    question: 'What is Time to First Byte (TTFB)?',
+    answer: 'Time to First Byte (TTFB) measures how long it takes for the browser to receive the first byte of response from the server after making a request. It includes DNS lookup, TCP connection, TLS handshake, and server processing time. A good TTFB is under 800ms.',
   },
-])
+  {
+    question: 'Why is TTFB important for performance?',
+    answer: 'TTFB directly impacts all subsequent metrics like LCP and FCP. A slow server response delays everything—the browser can\'t start parsing HTML, downloading resources, or rendering content until TTFB completes. Improving TTFB creates a faster foundation for your entire page load.',
+  },
+  {
+    question: 'What causes slow TTFB?',
+    answer: 'Slow TTFB is typically caused by: slow server-side processing, database query delays, no server-side caching, distance between user and server (no CDN), unoptimized backend code, shared hosting resource limits, and cold starts on serverless functions.',
+  },
+  {
+    question: 'How do I improve my TTFB?',
+    answer: 'To improve TTFB: use a CDN to serve content closer to users, implement server-side caching (Redis, Varnish), optimize database queries, use edge rendering or SSR at the edge, upgrade hosting infrastructure, enable HTTP/2 or HTTP/3, and reduce server-side processing complexity.',
+  },
+  {
+    question: 'What is the difference between origin and URL TTFB in CrUX?',
+    answer: 'Origin TTFB is the aggregate across all pages on your domain from real Chrome users. URL TTFB is specific to a single page. Origin data has more samples and is more stable, while URL data shows page-specific performance but may have insufficient data for low-traffic pages.',
+  },
+]
+
+useToolSeo({
+  title: 'TTFB Checker - Test Time to First Byte',
+  description: 'Free TTFB test tool. Check your server response time with real Chrome user data (CrUX). Compare field vs lab TTFB and track trends over time.',
+  faqs,
+})
 
 type FormFactor = 'PHONE' | 'DESKTOP'
 type Mode = 'origin' | 'url'
@@ -670,50 +666,10 @@ const ttfbTips = [
     <!-- FAQ Section -->
     <section class="px-3 sm:px-6 lg:px-8 pb-16">
       <div class="max-w-4xl mx-auto">
-        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 text-center">
-          Frequently Asked Questions
-        </h2>
-
-        <div class="space-y-4">
-          <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-            <h3 class="font-semibold text-gray-900 dark:text-white">
-              What is TTFB?
-            </h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-              Time to First Byte (TTFB) measures how long it takes for a browser to receive the first byte of response from your server. It includes DNS lookup, TCP connection, SSL/TLS handshake, and server processing time.
-            </p>
-          </div>
-
-          <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-            <h3 class="font-semibold text-gray-900 dark:text-white">
-              What's a good TTFB?
-            </h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-              According to Google, a good TTFB is under 800ms. TTFB between 800-1800ms needs improvement, and over 1800ms is considered poor. Lower is always better for user experience.
-            </p>
-          </div>
-
-          <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-            <h3 class="font-semibold text-gray-900 dark:text-white">
-              Why does TTFB matter?
-            </h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-              TTFB is a foundational metric that affects all other performance metrics. A slow TTFB delays when the browser can start rendering content, directly impacting LCP and overall perceived performance.
-            </p>
-          </div>
-
-          <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-            <h3 class="font-semibold text-gray-900 dark:text-white">
-              Why is my field TTFB higher than lab?
-            </h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-              Field data represents real users who may be geographically distant from your servers, on slower networks, or visiting during peak traffic. Lab tests run from a fixed location under controlled conditions.
-            </p>
-          </div>
-        </div>
+        <ToolFaq :faqs="faqs" color="blue" />
 
         <!-- Related Resources -->
-        <div class="mt-10 text-center">
+        <div class="mt-12 text-center">
           <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">
             Learn More About Web Performance
           </h3>

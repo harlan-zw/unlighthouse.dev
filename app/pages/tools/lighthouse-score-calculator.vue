@@ -10,15 +10,33 @@ definePageMeta({
   },
 })
 
-useSeoMeta({
-  title: 'Lighthouse Score Calculator - How Lighthouse Calculates Performance',
-  description: 'Interactive calculator showing how Lighthouse calculates your performance score. Understand FCP, LCP, TBT, CLS, and Speed Index weights, thresholds, and scoring curves.',
-})
+const faqs = [
+  {
+    question: 'How does Lighthouse calculate the performance score?',
+    answer: 'Lighthouse calculates performance score as a weighted average of six metrics: First Contentful Paint (10%), Speed Index (10%), Largest Contentful Paint (25%), Total Blocking Time (30%), and Cumulative Layout Shift (25%). Each metric is scored 0-100 using log-normal curves based on real-world data from HTTPArchive.',
+  },
+  {
+    question: 'Why do my Lighthouse scores vary between runs?',
+    answer: 'Lighthouse scores can vary 5-10 points between runs due to: network conditions, server response time variations, third-party script loading, background processes on your device, and variability in JavaScript execution. Run multiple tests and use the median score for accuracy.',
+  },
+  {
+    question: 'What is a good Lighthouse performance score?',
+    answer: 'A score of 90-100 is considered good (green), 50-89 needs improvement (orange), and 0-49 is poor (red). Focus on reaching 90+ but don\'t obsess over perfect 100—the last few points have diminishing returns and normal variance makes it impractical.',
+  },
+  {
+    question: 'Which metrics have the biggest impact on Lighthouse score?',
+    answer: 'Total Blocking Time (30%) and Largest Contentful Paint (25%) together account for 55% of your score. CLS adds another 25%. To improve your score quickly, focus on reducing JavaScript execution time (TBT) and optimizing your largest above-the-fold element (LCP).',
+  },
+  {
+    question: 'Why is my PageSpeed Insights score different from Chrome DevTools?',
+    answer: 'PageSpeed Insights tests from Google\'s servers with a simulated mobile device, while Chrome DevTools uses your local machine and network. PSI also shows field data from real Chrome users (CrUX) which reflects actual user experience and may differ significantly from lab results.',
+  },
+]
 
-defineOgImage('NuxtSeo', {
-  title: 'Lighthouse Score Calculator',
-  description: 'Calculate your performance score interactively',
-  theme: '#a855f7',
+useToolSeo({
+  title: 'Lighthouse Score Calculator - How Performance Scores Work',
+  description: 'Interactive Lighthouse performance score calculator. Understand how FCP, LCP, TBT, CLS, and Speed Index weights and thresholds determine your score.',
+  faqs,
 })
 
 const calc = useLighthouseCalculator()
@@ -876,8 +894,11 @@ function handleMetricUpdate(id: MetricId, value: number) {
           </div>
         </div>
 
+        <!-- FAQ Section -->
+        <ToolFaq :faqs="faqs" color="violet" />
+
         <!-- CTA Section -->
-        <div class="relative rounded-xl bg-gradient-to-br from-violet-600 to-purple-700 p-6 overflow-hidden">
+        <div class="relative rounded-xl bg-gradient-to-br from-violet-600 to-purple-700 p-6 overflow-hidden mt-12">
           <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yLjIxLTEuNzktNC00LTRzLTQgMS43OS00IDQgMS43OSA0IDQgNCA0LTEuNzkgNC00eiIvPjwvZz48L2c+PC9zdmc+')] opacity-30" />
           <div class="relative flex flex-col md:flex-row items-center justify-between gap-4">
             <div>

@@ -9,15 +9,33 @@ definePageMeta({
   },
 })
 
-useSeoMeta({
-  title: 'Lighthouse Report Viewer - Upload & Analyze JSON Reports',
-  description: 'Upload your Lighthouse JSON report to visualize scores, metrics, and audits. Interactive viewer with dark mode and detailed breakdowns.',
-})
+const faqs = [
+  {
+    question: 'How do I view a Lighthouse JSON report?',
+    answer: 'Upload your Lighthouse JSON file by dragging and dropping it onto this page, clicking the upload area, or pasting the JSON content directly. The viewer will parse and display your performance scores, metrics, and audit results in an interactive format.',
+  },
+  {
+    question: 'How do I export a Lighthouse report as JSON?',
+    answer: 'In Chrome DevTools, run a Lighthouse audit then click "Save as JSON" in the report header. From the command line, run: npx lighthouse <url> --output=json --output-path=report.json. The PageSpeed Insights API also returns JSON that works with this viewer.',
+  },
+  {
+    question: 'What information does a Lighthouse JSON report contain?',
+    answer: 'Lighthouse reports include performance scores (0-100), Core Web Vitals metrics (LCP, CLS, TBT), detailed audit results for performance, accessibility, best practices, SEO, and PWA categories, plus timing data, screenshots, and optimization opportunities.',
+  },
+  {
+    question: 'Can I compare multiple Lighthouse reports?',
+    answer: 'This viewer shows one report at a time. For comparing reports over time, consider Lighthouse CI which stores historical data, or export multiple JSON reports and compare the metrics manually. The Unlighthouse CLI can scan your entire site and track changes.',
+  },
+  {
+    question: 'Why use a Lighthouse report viewer instead of the HTML report?',
+    answer: 'JSON reports are smaller, easier to store, and work better with automation. This viewer provides the same visual experience as HTML reports, with additional features like dark mode, better mobile support, and the ability to quickly inspect specific audits.',
+  },
+]
 
-defineOgImage('NuxtSeo', {
-  title: 'Lighthouse Report Viewer',
-  description: 'Upload and analyze Lighthouse JSON reports',
-  theme: '#a855f7',
+useToolSeo({
+  title: 'Lighthouse Report Viewer - Upload & Analyze JSON Reports',
+  description: 'Free Lighthouse JSON report viewer. Upload and visualize your Lighthouse audit results with interactive scores, metrics, and detailed breakdowns.',
+  faqs,
 })
 
 const { report, error, loading, loadFromFile, loadFromText, clear } = useLighthouseReport()
@@ -507,8 +525,11 @@ const categoryDisplayData = computed(() => {
           </div>
         </div>
 
+        <!-- FAQ Section -->
+        <ToolFaq :faqs="faqs" color="purple" />
+
         <!-- Related Tools -->
-        <div class="text-center">
+        <div class="text-center mt-12">
           <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
             Explore more Lighthouse tools
           </p>

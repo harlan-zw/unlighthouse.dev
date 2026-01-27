@@ -8,15 +8,33 @@ definePageMeta({
   },
 })
 
-useSeoMeta({
-  title: 'Bulk PageSpeed Test - Test Multiple URLs Free | Unlighthouse',
-  description: 'Test up to 10 URLs at once with our free bulk PageSpeed tool. Get Lighthouse performance scores for multiple pages instantly. No signup required.',
-})
+const faqs = [
+  {
+    question: 'What is bulk PageSpeed testing?',
+    answer: 'Bulk PageSpeed testing lets you analyze multiple URLs simultaneously using the PageSpeed Insights API. Instead of testing pages one at a time, you can submit up to 10 URLs and get Lighthouse performance scores, Core Web Vitals, and audit results for all pages at once.',
+  },
+  {
+    question: 'How do I use the PageSpeed Insights API for bulk testing?',
+    answer: 'The PageSpeed Insights API (pagespeedonline/v5/runpagespeed) accepts a URL parameter and returns Lighthouse results as JSON. This tool handles the API calls for you, but for programmatic access you can call the API directly with your own API key for higher rate limits.',
+  },
+  {
+    question: 'Is there a limit to bulk PageSpeed testing?',
+    answer: 'This free tool allows testing up to 10 URLs at once. The PageSpeed Insights API has rate limits (400 requests per day for anonymous users, 25,000 with an API key). For scanning entire sites with hundreds of pages, use Unlighthouse CLI instead.',
+  },
+  {
+    question: 'What metrics does bulk PageSpeed testing show?',
+    answer: 'Each URL gets a full Lighthouse audit including: Performance score (0-100), Core Web Vitals (LCP, CLS, TBT/INP), First Contentful Paint, Speed Index, and a pass/fail summary. Results help identify which pages need optimization.',
+  },
+  {
+    question: 'When should I use bulk testing vs full site scanning?',
+    answer: 'Use bulk testing for quick checks of specific pages like landing pages, product pages, or comparing competitor URLs. For comprehensive site-wide analysis with all pages automatically discovered, use Unlighthouse CLI which crawls your sitemap and tests every page.',
+  },
+]
 
-defineOgImage('NuxtSeo', {
-  title: 'Bulk PageSpeed Test',
-  description: 'Test multiple URLs at once',
-  theme: '#f59e0b',
+useToolSeo({
+  title: 'Bulk PageSpeed Insights Test - Test Multiple URLs Free',
+  description: 'Free bulk PageSpeed testing tool. Test up to 10 URLs at once with the PageSpeed Insights API. Get Lighthouse scores and Core Web Vitals for multiple pages.',
+  faqs,
 })
 
 // Loading messages composable
@@ -791,6 +809,11 @@ https://example.com/pricing"
 
       <!-- Feedback -->
       <ToolsToolFeedback v-if="summary" tool-id="bulk-pagespeed" :context="{ device, urlCount: summary.totalUrls }" />
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="max-w-4xl mt-12">
+      <ToolFaq :faqs="faqs" color="amber" />
     </div>
 
     <!-- Upsell Section -->

@@ -36,15 +36,33 @@ definePageMeta({
   },
 })
 
-useSeoMeta({
-  title: 'LCP Element Finder - Identify Your Largest Contentful Paint',
-  description: 'Find the LCP element on any page. See what\'s slowing down your Largest Contentful Paint and get actionable recommendations to improve it.',
-})
+const faqs = [
+  {
+    question: 'What is Largest Contentful Paint (LCP)?',
+    answer: 'Largest Contentful Paint (LCP) is a Core Web Vital that measures loading performance. It marks the time when the largest content element (usually an image or text block) becomes visible in the viewport. A good LCP score is 2.5 seconds or less.',
+  },
+  {
+    question: 'How do I find my LCP element?',
+    answer: 'This tool identifies your LCP element automatically by running a Lighthouse audit. It shows you exactly which element is your LCP—typically a hero image, video poster, or large text heading—along with timing breakdowns and optimization recommendations.',
+  },
+  {
+    question: 'Why is my LCP image lazy-loaded?',
+    answer: 'Lazy-loading your LCP image is a common mistake that significantly hurts performance. Images above the fold (visible without scrolling) should load immediately with fetchpriority="high" and never use loading="lazy". This tool detects if your LCP is incorrectly lazy-loaded.',
+  },
+  {
+    question: 'How do I improve my LCP score?',
+    answer: 'To improve LCP: preload your LCP image with <link rel="preload">, add fetchpriority="high" to the LCP element, use modern image formats (WebP/AVIF), optimize server response time (TTFB), remove render-blocking resources, and ensure the LCP element is in the initial HTML (not injected by JavaScript).',
+  },
+  {
+    question: 'What are the LCP sub-parts or phases?',
+    answer: 'LCP consists of four phases: Time to First Byte (TTFB), Resource Load Delay (time from TTFB until the browser starts loading the LCP resource), Resource Load Time (time to download the LCP resource), and Element Render Delay (time from download complete until the element is painted). Optimizing each phase improves overall LCP.',
+  },
+]
 
-defineOgImage('NuxtSeo', {
-  title: 'LCP Element Finder',
-  description: 'Identify your Largest Contentful Paint element',
-  theme: '#a855f7',
+useToolSeo({
+  title: 'LCP Element Finder - Identify Your Largest Contentful Paint',
+  description: 'Free LCP test tool. Find your Largest Contentful Paint element, see timing breakdowns, and get actionable recommendations to improve loading speed.',
+  faqs,
 })
 
 // Loading messages with tips - shown during PageSpeed API analysis
@@ -1707,8 +1725,11 @@ const insights = computed<LcpInsight[]>(() => {
           </div>
         </div>
 
+        <!-- FAQ Section -->
+        <ToolFaq :faqs="faqs" color="violet" />
+
         <!-- CTA Section -->
-        <div class="relative rounded-xl bg-gradient-to-br from-violet-600 to-purple-700 p-4 sm:p-6 overflow-hidden">
+        <div class="relative rounded-xl bg-gradient-to-br from-violet-600 to-purple-700 p-4 sm:p-6 overflow-hidden mt-12">
           <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yLjIxLTEuNzktNC00LTRzLTQgMS43OS00IDQgMS43OSA0IDQgNCA0LTEuNzkgNC00eiIvPjwvZz48L2c+PC9zdmc+')] opacity-30" />
           <div class="relative flex flex-col items-center text-center sm:text-left sm:flex-row sm:justify-between gap-4">
             <div>

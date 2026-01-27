@@ -9,70 +9,30 @@ definePageMeta({
   },
 })
 
-useSeoMeta({
+const faqs = [
+  {
+    question: 'What are Core Web Vitals?',
+    answer: 'Core Web Vitals are three metrics Google uses to measure user experience: LCP (loading speed), CLS (visual stability), and INP (interactivity). They are a confirmed ranking factor in Google Search.',
+  },
+  {
+    question: 'What is a good Core Web Vitals score?',
+    answer: 'Good scores are: LCP under 2.5 seconds, CLS under 0.1, and INP under 200 milliseconds. To pass Core Web Vitals, at least 75% of page loads must meet the "good" threshold for all three metrics.',
+  },
+  {
+    question: 'What\'s the difference between Lab and Field data?',
+    answer: 'Lab data is collected in a controlled environment (Lighthouse). Field data is from real users via the Chrome User Experience Report (CrUX). Field data is what Google uses for ranking, but lab data helps diagnose issues.',
+  },
+  {
+    question: 'Do Core Web Vitals affect SEO?',
+    answer: 'Yes. Core Web Vitals are a confirmed Google ranking factor as part of page experience signals. Pages that pass CWV may have a ranking advantage over those that don\'t, especially for competitive queries.',
+  },
+]
+
+useToolSeo({
   title: 'Core Web Vitals Test - Free CWV Checker',
   description: 'Check if your page passes Google\'s Core Web Vitals. Test LCP, CLS, and INP with lab and real user data. Free tool with actionable recommendations.',
+  faqs,
 })
-
-defineOgImage('NuxtSeo', {
-  title: 'Core Web Vitals Test',
-  description: 'Check LCP, CLS & INP',
-  theme: '#10b981',
-})
-
-// Schema.org structured data
-useSchemaOrg([
-  {
-    '@type': 'WebApplication',
-    'name': 'Core Web Vitals Checker',
-    'description': 'Test any URL against Google\'s Core Web Vitals thresholds',
-    'url': 'https://unlighthouse.dev/tools/cwv-checker',
-    'applicationCategory': 'DeveloperApplication',
-    'operatingSystem': 'Web',
-    'offers': {
-      '@type': 'Offer',
-      'price': '0',
-      'priceCurrency': 'USD',
-    },
-    'featureList': [
-      'LCP measurement',
-      'CLS measurement',
-      'INP measurement',
-      'Lab and field data',
-      'Mobile and desktop testing',
-      'Fix recommendations',
-    ],
-  },
-  {
-    '@type': 'FAQPage',
-    'mainEntity': [
-      {
-        '@type': 'Question',
-        'name': 'What are Core Web Vitals?',
-        'acceptedAnswer': {
-          '@type': 'Answer',
-          'text': 'Core Web Vitals are three metrics Google uses to measure user experience: LCP (loading speed), CLS (visual stability), and INP (interactivity). They are a confirmed ranking factor in Google Search.',
-        },
-      },
-      {
-        '@type': 'Question',
-        'name': 'What is a good Core Web Vitals score?',
-        'acceptedAnswer': {
-          '@type': 'Answer',
-          'text': 'Good scores are: LCP under 2.5 seconds, CLS under 0.1, and INP under 200 milliseconds. To pass Core Web Vitals, at least 75% of page loads must meet the good threshold for all three metrics.',
-        },
-      },
-      {
-        '@type': 'Question',
-        'name': 'Do Core Web Vitals affect SEO?',
-        'acceptedAnswer': {
-          '@type': 'Answer',
-          'text': 'Yes. Core Web Vitals are a confirmed Google ranking factor as part of page experience signals. Pages that pass CWV may have a ranking advantage over those that don\'t.',
-        },
-      },
-    ],
-  },
-])
 
 interface MetricResult {
   value: number
@@ -793,47 +753,7 @@ const cwvMetrics = computed(() => {
     <!-- FAQ Section -->
     <section class="px-3 sm:px-6 lg:px-8 pb-16">
       <div class="max-w-4xl mx-auto">
-        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 text-center">
-          Frequently Asked Questions
-        </h2>
-
-        <div class="space-y-4">
-          <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-            <h3 class="font-semibold text-gray-900 dark:text-white">
-              What are Core Web Vitals?
-            </h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-              Core Web Vitals are three metrics Google uses to measure user experience: LCP (loading speed), CLS (visual stability), and INP (interactivity). They are a confirmed ranking factor in Google Search.
-            </p>
-          </div>
-
-          <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-            <h3 class="font-semibold text-gray-900 dark:text-white">
-              What is a good Core Web Vitals score?
-            </h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-              Good scores are: LCP under 2.5 seconds, CLS under 0.1, and INP under 200 milliseconds. To pass Core Web Vitals, at least 75% of page loads must meet the "good" threshold for all three metrics.
-            </p>
-          </div>
-
-          <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-            <h3 class="font-semibold text-gray-900 dark:text-white">
-              What's the difference between Lab and Field data?
-            </h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-              Lab data is collected in a controlled environment (Lighthouse). Field data is from real users via the Chrome User Experience Report (CrUX). Field data is what Google uses for ranking, but lab data helps diagnose issues.
-            </p>
-          </div>
-
-          <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-            <h3 class="font-semibold text-gray-900 dark:text-white">
-              Do Core Web Vitals affect SEO?
-            </h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-              Yes. Core Web Vitals are a confirmed Google ranking factor as part of page experience signals. Pages that pass CWV may have a ranking advantage over those that don't, especially for competitive queries.
-            </p>
-          </div>
-        </div>
+        <ToolFaq :faqs="faqs" color="emerald" />
 
         <!-- Related Resources -->
         <div class="mt-10 text-center">

@@ -36,15 +36,33 @@ definePageMeta({
   },
 })
 
-useSeoMeta({
-  title: 'CLS Debugger - Find Layout Shift Culprits',
-  description: 'Identify which elements cause Cumulative Layout Shift on your page. See exactly what\'s moving and get fixes to stop the jank.',
-})
+const faqs = [
+  {
+    question: 'What is Cumulative Layout Shift (CLS)?',
+    answer: 'Cumulative Layout Shift (CLS) is a Core Web Vital that measures visual stability. It quantifies how much page content unexpectedly shifts during loading. A good CLS score is 0.1 or less, meaning minimal unexpected movement of visible elements.',
+  },
+  {
+    question: 'How do I find layout shift culprits on my page?',
+    answer: 'This CLS debugger identifies exactly which elements cause layout shifts by analyzing your page with Lighthouse. It shows you the specific DOM elements, their shift scores, and visual overlays highlighting problem areas. Common culprits include images without dimensions, ads, embeds, and dynamically injected content.',
+  },
+  {
+    question: 'What causes high CLS scores?',
+    answer: 'High CLS is typically caused by: images or videos without explicit width/height attributes, ads or embeds that resize after loading, web fonts causing FOUT/FOIT, dynamically injected content above existing content, and animations that trigger layout changes instead of using transform.',
+  },
+  {
+    question: 'How do I fix Cumulative Layout Shift issues?',
+    answer: 'To fix CLS: always set width and height on images and video elements, reserve space for ads and embeds with CSS aspect-ratio, use font-display: optional or swap with fallback fonts, avoid inserting content above existing content, and use CSS transforms for animations instead of properties that trigger layout.',
+  },
+  {
+    question: 'What is the difference between CLS in lab data vs field data?',
+    answer: 'Lab CLS measures layout shifts during initial page load in a controlled environment. Field CLS (from real users) captures shifts throughout the entire page session, including those from user interactions. Field data often shows higher CLS because it includes shifts from lazy-loaded content and user-triggered changes.',
+  },
+]
 
-defineOgImage('NuxtSeo', {
-  title: 'CLS Debugger',
-  description: 'Find layout shift culprits',
-  theme: '#0891b2',
+useToolSeo({
+  title: 'CLS Debugger - Find Layout Shift Culprits',
+  description: 'Free CLS testing tool to identify Cumulative Layout Shift culprits. Find exactly which elements cause layout shifts and get actionable fixes.',
+  faqs,
 })
 
 // Loading messages with tips - shown during PageSpeed API analysis
@@ -1052,8 +1070,11 @@ const insights = computed<ClsInsight[]>(() => {
           </div>
         </div>
 
+        <!-- FAQ Section -->
+        <ToolFaq :faqs="faqs" color="cyan" />
+
         <!-- Related Tools -->
-        <div class="text-center">
+        <div class="text-center mt-12">
           <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
             Explore more Core Web Vitals tools
           </p>
