@@ -393,10 +393,6 @@ export default defineNuxtConfig({
     '~/css/global.css',
   ],
 
-  ogImage: {
-    zeroRuntime: true,
-  },
-
   icon: {
     customCollections: [{
       prefix: 'custom',
