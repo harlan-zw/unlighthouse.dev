@@ -10,23 +10,23 @@ interface ToolSeoOptions {
   faqs?: FAQ[]
 }
 
-export function useToolSeo(options: ToolSeoOptions) {
+export function useToolSeo(opts: ToolSeoOptions) {
   useSeoMeta({
-    title: options.title,
-    description: options.description,
+    title: opts.title,
+    description: opts.description,
   })
 
   defineOgImage('NuxtSeo', {
-    title: options.title,
-    description: options.description,
+    title: opts.title,
+    description: opts.description,
     theme: '#10b981',
   })
 
   useSchemaOrg([
     {
       '@type': 'WebApplication',
-      'name': options.title,
-      'description': options.description,
+      'name': opts.title,
+      'description': opts.description,
       'url': useRequestURL().href,
       'applicationCategory': 'DeveloperApplication',
       'operatingSystem': 'Web',
@@ -39,11 +39,11 @@ export function useToolSeo(options: ToolSeoOptions) {
   ])
 
   // Add FAQ schema if provided
-  if (options.faqs?.length) {
+  if (opts.faqs?.length) {
     useSchemaOrg([
       {
         '@type': 'FAQPage',
-        'mainEntity': options.faqs.map(faq => ({
+        'mainEntity': opts.faqs.map(faq => ({
           '@type': 'Question',
           'name': faq.question,
           'acceptedAnswer': {
