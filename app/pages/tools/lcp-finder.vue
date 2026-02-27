@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { watchPausable } from '@vueuse/core'
-import { motion } from 'motion-v'
 
 // Loading messages composable
 function useLoadingMessages(messages: string[], interval = 800) {
@@ -551,7 +550,8 @@ const insights = computed<LcpInsight[]>(() => {
     <section class="relative pt-10 pb-6 lg:pt-12 lg:pb-8">
       <div class="max-w-4xl mx-auto px-6 text-center">
         <ClientOnly>
-          <motion.h1
+          <h1
+            v-motion
             :initial="{ opacity: 0, y: 20 }"
             :animate="{ opacity: 1, y: 0 }"
             :transition="{ duration: 0.4 }"
@@ -559,15 +559,16 @@ const insights = computed<LcpInsight[]>(() => {
           >
             LCP Element
             <span class="text-violet-600 dark:text-violet-400">Finder</span>
-          </motion.h1>
-          <motion.p
+          </h1>
+          <p
+            v-motion
             :initial="{ opacity: 0, y: 20 }"
             :animate="{ opacity: 1, y: 0 }"
             :transition="{ duration: 0.4, delay: 0.1 }"
             class="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto"
           >
             Identify which element is your Largest Contentful Paint and get actionable fixes.
-          </motion.p>
+          </p>
           <template #fallback>
             <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-[1.1] text-gray-900 dark:text-white mb-3">
               LCP Element
@@ -969,9 +970,10 @@ const insights = computed<LcpInsight[]>(() => {
                   </div>
 
                   <div v-else class="space-y-2">
-                    <motion.div
+                    <div
                       v-for="(opp, idx) in result.opportunities"
                       :key="opp.id"
+                      v-motion
                       :initial="{ opacity: 0, x: -10 }"
                       :animate="{ opacity: 1, x: 0 }"
                       :transition="{ duration: 0.2, delay: idx * 0.05 }"
@@ -995,7 +997,7 @@ const insights = computed<LcpInsight[]>(() => {
                           </p>
                         </div>
                       </div>
-                    </motion.div>
+                    </div>
                   </div>
                 </div>
               </div>

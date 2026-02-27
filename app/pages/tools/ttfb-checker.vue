@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import type { TTFBCheckResponse } from '~~/server/api/tools/ttfb-check.post'
 import { watchDebounced } from '@vueuse/core'
-import { motion } from 'motion-v'
-import { formatCruxMetricValue, metricDefinitions } from '~/utils/crux'
+import { metricDefinitions } from '~/utils/crux'
 
 definePageMeta({
   breadcrumb: {
@@ -220,7 +219,8 @@ const ttfbTips = [
     <section class="relative pt-10 pb-6 lg:pt-12 lg:pb-8">
       <div class="max-w-4xl mx-auto px-6 text-center">
         <ClientOnly>
-          <motion.h1
+          <h1
+            v-motion
             :initial="{ opacity: 0, y: 20 }"
             :animate="{ opacity: 1, y: 0 }"
             :transition="{ duration: 0.4 }"
@@ -228,15 +228,16 @@ const ttfbTips = [
           >
             TTFB
             <span class="text-sky-600 dark:text-sky-400">Checker</span>
-          </motion.h1>
-          <motion.p
+          </h1>
+          <p
+            v-motion
             :initial="{ opacity: 0, y: 20 }"
             :animate="{ opacity: 1, y: 0 }"
             :transition="{ duration: 0.4, delay: 0.1 }"
             class="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto"
           >
             Test Time to First Byte with real Chrome user data and lab measurements.
-          </motion.p>
+          </p>
           <template #fallback>
             <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-[1.1] text-gray-900 dark:text-white mb-3">
               TTFB
@@ -391,7 +392,8 @@ const ttfbTips = [
               <!-- Field vs Lab Comparison -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Field Data Card -->
-                <motion.div
+                <div
+                  v-motion
                   :initial="{ opacity: 0, y: 20 }"
                   :animate="{ opacity: 1, y: 0 }"
                   :transition="{ duration: 0.3 }"
@@ -432,10 +434,11 @@ const ttfbTips = [
                       Site may have insufficient Chrome traffic
                     </p>
                   </div>
-                </motion.div>
+                </div>
 
                 <!-- Lab Data Card -->
-                <motion.div
+                <div
+                  v-motion
                   :initial="{ opacity: 0, y: 20 }"
                   :animate="{ opacity: 1, y: 0 }"
                   :transition="{ duration: 0.3, delay: 0.1 }"
@@ -474,7 +477,7 @@ const ttfbTips = [
                       Try testing the URL directly
                     </p>
                   </div>
-                </motion.div>
+                </div>
               </div>
 
               <!-- Comparison Insight -->

@@ -10,7 +10,7 @@ export default defineNuxtConfig({
   modules: [
     '@nuxtjs/seo',
     '@nuxt/ui',
-    'motion-v/nuxt',
+    ['motion-v/nuxt', { directives: true }],
     '@nuxt/content',
     '@vueuse/nuxt',
     'nitro-cloudflare-dev',

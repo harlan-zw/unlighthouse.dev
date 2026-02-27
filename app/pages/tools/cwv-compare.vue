@@ -2,11 +2,9 @@
 import type { CWVCompareResponse, SiteComparison } from '~~/server/api/tools/cwv-compare.post'
 import type { CruxRating, MetricKey } from '~/utils/crux'
 import { watchDebounced } from '@vueuse/core'
-import { motion } from 'motion-v'
 import {
   allMetrics,
   formatCruxMetricValue,
-  getCruxRatingIcon,
   getMetricRating,
   metricDefinitions,
 } from '~/utils/crux'
@@ -316,7 +314,8 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
 
       <div class="max-w-5xl mx-auto px-6 text-center relative">
         <ClientOnly>
-          <motion.div
+          <div
+            v-motion
             :initial="{ opacity: 0, y: -10 }"
             :animate="{ opacity: 1, y: 0 }"
             :transition="{ duration: 0.3 }"
@@ -324,8 +323,9 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
           >
             <UIcon name="i-heroicons-trophy" class="w-3 h-3" />
             PERFORMANCE SHOWDOWN
-          </motion.div>
-          <motion.h1
+          </div>
+          <h1
+            v-motion
             :initial="{ opacity: 0, y: 20 }"
             :animate="{ opacity: 1, y: 0 }"
             :transition="{ duration: 0.4, delay: 0.05 }"
@@ -336,15 +336,16 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
               <span class="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 bg-clip-text text-transparent">Compare</span>
               <span class="absolute -bottom-1 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 rounded-full" />
             </span>
-          </motion.h1>
-          <motion.p
+          </h1>
+          <p
+            v-motion
             :initial="{ opacity: 0, y: 20 }"
             :animate="{ opacity: 1, y: 0 }"
             :transition="{ duration: 0.4, delay: 0.1 }"
             class="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-xl mx-auto font-medium"
           >
             Pit your site against competitors. Real Chrome user data. Clear winners.
-          </motion.p>
+          </p>
           <template #fallback>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-xs font-bold tracking-wider mb-4">
               <UIcon name="i-heroicons-trophy" class="w-3 h-3" />
@@ -510,8 +511,9 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
             <!-- Results -->
             <div v-if="result && !loading" class="p-4 sm:p-6 space-y-8">
               <!-- Overall Winner Banner -->
-              <motion.div
+              <div
                 v-if="result.winners.overall"
+                v-motion
                 :initial="{ opacity: 0, scale: 0.95 }"
                 :animate="{ opacity: 1, scale: 1 }"
                 :transition="{ duration: 0.4, delay: 0.1 }"
@@ -545,7 +547,7 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
                     </template>
                   </div>
                 </div>
-              </motion.div>
+              </div>
 
               <!-- Collection Period -->
               <div v-if="result.collectionPeriod" class="text-center text-xs text-gray-500 dark:text-gray-400">
@@ -568,7 +570,8 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
                   :key="metric"
                   class="relative"
                 >
-                  <motion.div
+                  <div
+                    v-motion
                     :initial="{ opacity: 0, x: -20 }"
                     :animate="{ opacity: 1, x: 0 }"
                     :transition="{ duration: 0.3 }"
@@ -621,8 +624,9 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
                               />
 
                               <!-- Value bar -->
-                              <motion.div
+                              <div
                                 v-if="comp.hasData && getMetricValue(comp, metric) !== undefined"
+                                v-motion
                                 :initial="{ width: 0 }"
                                 :animate="{ width: `${getBarWidth(comp, metric)}%` }"
                                 :transition="{ duration: 0.6, delay: idx * 0.1 }"
@@ -635,7 +639,7 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
                                 <span class="text-xs font-bold text-white drop-shadow-sm">
                                   {{ formatCruxMetricValue(metric, getMetricValue(comp, metric)) }}
                                 </span>
-                              </motion.div>
+                              </div>
 
                               <!-- No data -->
                               <div v-else class="absolute inset-0 flex items-center justify-center text-xs text-gray-500">
@@ -674,7 +678,7 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
                         </div>
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                 </div>
               </div>
 

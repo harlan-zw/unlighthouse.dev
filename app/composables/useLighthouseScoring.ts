@@ -77,7 +77,7 @@ function internalErf(x: number): number {
 
 // Attempt inverse error function via Newton's method
 function internalErfInv(x: number): number {
-  let z = Math.sqrt(-Math.log((1 - x) / 2))
+  const z = Math.sqrt(-Math.log((1 - x) / 2))
   const a = 0.147
   let y = ((2 / (Math.PI * a) + Math.log(1 - x * x) / 2) ** 2 - Math.log(1 - x * x) / a) ** 0.5 - (2 / (Math.PI * a) + Math.log(1 - x * x) / 2)
 

@@ -2,7 +2,6 @@
 import type { CWVHistoryResponse } from '~~/server/api/tools/cwv-history.post'
 import type { CruxRating, MetricKey } from '~/utils/crux'
 import { watchDebounced } from '@vueuse/core'
-import { motion } from 'motion-v'
 import {
   allMetrics,
   cwvMetrics,
@@ -326,7 +325,8 @@ function formatChartDate(date: string) {
     <section class="relative pt-10 pb-6 lg:pt-12 lg:pb-8">
       <div class="max-w-4xl mx-auto px-6 text-center">
         <ClientOnly>
-          <motion.h1
+          <h1
+            v-motion
             :initial="{ opacity: 0, y: 20 }"
             :animate="{ opacity: 1, y: 0 }"
             :transition="{ duration: 0.4 }"
@@ -334,15 +334,16 @@ function formatChartDate(date: string) {
           >
             Core Web Vitals
             <span class="text-indigo-600 dark:text-indigo-400">History</span>
-          </motion.h1>
-          <motion.p
+          </h1>
+          <p
+            v-motion
             :initial="{ opacity: 0, y: 20 }"
             :animate="{ opacity: 1, y: 0 }"
             :transition="{ duration: 0.4, delay: 0.1 }"
             class="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto"
           >
             Track real user performance over 25 weeks with Chrome UX Report data.
-          </motion.p>
+          </p>
           <template #fallback>
             <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-[1.1] text-gray-900 dark:text-white mb-3">
               Core Web Vitals
@@ -563,9 +564,10 @@ function formatChartDate(date: string) {
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <motion.div
+                  <div
                     v-for="(metric, idx) in currentMetrics"
                     :key="metric.key"
+                    v-motion
                     :initial="{ opacity: 0, y: 20 }"
                     :animate="{ opacity: 1, y: 0 }"
                     :transition="{ duration: 0.3, delay: idx * 0.1 }"
@@ -617,7 +619,7 @@ function formatChartDate(date: string) {
                     <div class="text-[10px] text-gray-500 mt-2">
                       Good: ≤{{ metric.good }}{{ metric.key === 'cls' ? '' : 'ms' }}
                     </div>
-                  </motion.div>
+                  </div>
                 </div>
               </div>
 

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { watchDebounced } from '@vueuse/core'
-import { motion } from 'motion-v'
 
 definePageMeta({
   breadcrumb: {
@@ -281,7 +280,8 @@ const cwvMetrics = computed(() => {
     <section class="relative pt-10 pb-6 lg:pt-12 lg:pb-8">
       <div class="max-w-4xl mx-auto px-6 text-center">
         <ClientOnly>
-          <motion.h1
+          <h1
+            v-motion
             :initial="{ opacity: 0, y: 20 }"
             :animate="{ opacity: 1, y: 0 }"
             :transition="{ duration: 0.4 }"
@@ -289,15 +289,16 @@ const cwvMetrics = computed(() => {
           >
             Core Web Vitals
             <span class="text-emerald-600 dark:text-emerald-400">Test</span>
-          </motion.h1>
-          <motion.p
+          </h1>
+          <p
+            v-motion
             :initial="{ opacity: 0, y: 20 }"
             :animate="{ opacity: 1, y: 0 }"
             :transition="{ duration: 0.4, delay: 0.1 }"
             class="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto"
           >
             Check if your page passes Google's Core Web Vitals with lab and real user data.
-          </motion.p>
+          </p>
           <template #fallback>
             <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-[1.1] text-gray-900 dark:text-white mb-3">
               Core Web Vitals
@@ -442,9 +443,10 @@ const cwvMetrics = computed(() => {
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <motion.div
+                  <div
                     v-for="(metric, idx) in cwvMetrics"
                     :key="metric.key"
+                    v-motion
                     :initial="{ opacity: 0, y: 20 }"
                     :animate="{ opacity: 1, y: 0 }"
                     :transition="{ duration: 0.3, delay: idx * 0.1 }"
@@ -495,7 +497,7 @@ const cwvMetrics = computed(() => {
                         :style="{ width: `${metric.percentiles.poor}%` }"
                       />
                     </div>
-                  </motion.div>
+                  </div>
                 </div>
               </div>
 

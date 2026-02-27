@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { MetricDefinition } from '~/composables/useLighthouseScoring'
-import { motion } from 'motion-v'
 import { calculateRating, formatMetricValue, getRatingColor } from '~/composables/useLighthouseScoring'
 
 const props = defineProps<{
@@ -110,7 +109,8 @@ const thresholds = computed(() => {
 
       <!-- Filled track -->
       <ClientOnly>
-        <motion.div
+        <div
+          v-motion
           class="absolute inset-y-0 left-0 flex items-center pointer-events-none"
           :style="{ width: `${normalizedValue * 100}%` }"
         >
@@ -121,7 +121,7 @@ const thresholds = computed(() => {
               boxShadow: `0 0 12px ${ratingColor}60`,
             }"
           />
-        </motion.div>
+        </div>
       </ClientOnly>
 
       <!-- Input slider -->
@@ -137,7 +137,8 @@ const thresholds = computed(() => {
 
       <!-- Thumb -->
       <ClientOnly>
-        <motion.div
+        <div
+          v-motion
           class="absolute top-1/2 -translate-y-1/2 pointer-events-none"
           :style="{ left: `calc(${normalizedValue * 100}% - 8px)` }"
         >
@@ -145,7 +146,7 @@ const thresholds = computed(() => {
             class="size-4 rounded-full border-2 border-white dark:border-[var(--ui-bg)] shadow-md transition-transform group-hover:scale-110"
             :style="{ backgroundColor: ratingColor }"
           />
-        </motion.div>
+        </div>
       </ClientOnly>
     </div>
 

@@ -1,31 +1,32 @@
 <script setup>
-import { computed } from "vue";
+import { computed } from 'vue'
+
 const props = defineProps({
-  colorMode: { type: String, required: false, default: "light" },
-  title: { type: String, required: false, default: "title" },
+  colorMode: { type: String, required: false, default: 'light' },
+  title: { type: String, required: false, default: 'title' },
   description: { type: String, required: false },
-  isPro: { type: Boolean, required: false }
-});
-const themeColor = computed(() => props.isPro ? "124, 58, 237" : "34, 197, 94");
+  isPro: { type: Boolean, required: false },
+})
+const themeColor = computed(() => props.isPro ? '124, 58, 237' : '34, 197, 94')
 </script>
 
 <template>
   <div
     class="w-full h-full flex flex-col justify-center items-center relative p-[60px]"
     :class="[
-  colorMode === 'light' ? ['bg-white', 'text-neutral-900'] : ['bg-neutral-900', 'text-neutral-50']
-]"
+      colorMode === 'light' ? ['bg-white', 'text-neutral-900'] : ['bg-neutral-900', 'text-neutral-50'],
+    ]"
   >
     <!-- Gradient background -->
     <div
       class="absolute inset-0" :style="{
-  backgroundImage: `radial-gradient(ellipse at bottom right, rgba(${themeColor}, 0.15) 0%, transparent 60%)`
-}"
+        backgroundImage: `radial-gradient(ellipse at bottom right, rgba(${themeColor}, 0.15) 0%, transparent 60%)`,
+      }"
     />
     <div
       class="absolute inset-0" :style="{
-  backgroundImage: `radial-gradient(ellipse at top left, rgba(${themeColor}, 0.1) 0%, transparent 50%)`
-}"
+        backgroundImage: `radial-gradient(ellipse at top left, rgba(${themeColor}, 0.1) 0%, transparent 50%)`,
+      }"
     />
 
     <div class="relative flex flex-col items-center text-center gap-8">

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { PerformanceMetric } from '~/types/lighthouse'
-import { getScoreBgClass, getScoreColorClass, getScoreRating } from '~/composables/useLighthouseReport'
+import { getScoreBgClass, getScoreColorClass } from '~/composables/useLighthouseReport'
 
 defineProps<{
   metrics: PerformanceMetric[]

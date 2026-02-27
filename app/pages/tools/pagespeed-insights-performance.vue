@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { watchPausable } from '@vueuse/core'
-import { motion } from 'motion-v'
 
 // Loading messages composable
 function useLoadingMessages(messages: string[], interval = 800) {
@@ -338,7 +337,8 @@ const totalResourceSize = computed(() => {
     <section class="relative pt-10 pb-6 lg:pt-12 lg:pb-8">
       <div class="max-w-4xl mx-auto px-6 text-center">
         <ClientOnly>
-          <motion.h1
+          <h1
+            v-motion
             :initial="{ opacity: 0, y: 20 }"
             :animate="{ opacity: 1, y: 0 }"
             :transition="{ duration: 0.4 }"
@@ -346,15 +346,16 @@ const totalResourceSize = computed(() => {
           >
             PageSpeed Insights
             <span class="text-blue-600 dark:text-blue-400">Performance</span>
-          </motion.h1>
-          <motion.p
+          </h1>
+          <p
+            v-motion
             :initial="{ opacity: 0, y: 20 }"
             :animate="{ opacity: 1, y: 0 }"
             :transition="{ duration: 0.4, delay: 0.1 }"
             class="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto"
           >
             Comprehensive performance analysis with Core Web Vitals, resource breakdown, and optimization opportunities.
-          </motion.p>
+          </p>
           <template #fallback>
             <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-[1.1] text-gray-900 dark:text-white mb-3">
               PageSpeed Insights
@@ -528,9 +529,10 @@ const totalResourceSize = computed(() => {
                   </h3>
                 </div>
                 <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
-                  <motion.div
+                  <div
                     v-for="(metric, idx) in result.metrics"
                     :key="metric.id"
+                    v-motion
                     :initial="{ opacity: 0, y: 10 }"
                     :animate="{ opacity: 1, y: 0 }"
                     :transition="{ duration: 0.2, delay: idx * 0.05 }"
@@ -557,7 +559,7 @@ const totalResourceSize = computed(() => {
                       <div class="flex-[1.5] bg-orange-400" />
                       <div class="flex-[2] bg-red-400" />
                     </div>
-                  </motion.div>
+                  </div>
                 </div>
               </div>
 

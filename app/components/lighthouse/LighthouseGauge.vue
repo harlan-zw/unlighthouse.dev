@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { motion } from 'motion-v'
 import { calculateRating, getScoreColor } from '~/composables/useLighthouseScoring'
 
 interface MetricContribution {
@@ -78,9 +77,10 @@ const ratingLabel = computed(() => {
         />
 
         <!-- Metric contribution arcs (outer ring) -->
-        <motion.circle
+        <circle
           v-for="(arc, i) in metricArcs"
           :key="arc.id"
+          v-motion
           :cx="center"
           :cy="center"
           :r="radius + strokeWidth + 4"
@@ -97,7 +97,8 @@ const ratingLabel = computed(() => {
         />
 
         <!-- Score arc (main) -->
-        <motion.circle
+        <circle
+          v-motion
           :cx="center"
           :cy="center"
           :r="radius"
@@ -115,7 +116,8 @@ const ratingLabel = computed(() => {
         />
 
         <!-- Score text -->
-        <motion.text
+        <text
+          v-motion
           :x="center"
           :y="center - 8"
           text-anchor="middle"
@@ -126,10 +128,11 @@ const ratingLabel = computed(() => {
           :transition="{ delay: 0.3 }"
         >
           {{ displayScore }}
-        </motion.text>
+        </text>
 
         <!-- Rating label -->
-        <motion.text
+        <text
+          v-motion
           :x="center"
           :y="center + 20"
           text-anchor="middle"
@@ -140,7 +143,7 @@ const ratingLabel = computed(() => {
           :transition="{ delay: 0.4 }"
         >
           {{ ratingLabel }}
-        </motion.text>
+        </text>
       </svg>
 
       <template #fallback>

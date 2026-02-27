@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { motion } from 'motion-v'
-
 definePageMeta({
   breadcrumb: {
     icon: 'i-heroicons-squares-2x2',
@@ -451,7 +449,8 @@ https://example.com/pricing"
 
     <!-- Progress State -->
     <div v-if="loading && results.length > 0" class="max-w-4xl">
-      <motion.div
+      <div
+        v-motion
         :initial="{ opacity: 0, y: 10 }"
         :animate="{ opacity: 1, y: 0 }"
         class="p-6 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800"
@@ -493,12 +492,13 @@ https://example.com/pricing"
         <p class="mt-4 text-xs text-amber-600 dark:text-amber-400">
           Processing 3 URLs at a time. Each URL takes up to 2 minutes for a full Lighthouse audit.
         </p>
-      </motion.div>
+      </div>
     </div>
 
     <!-- Initial Loading State (before results arrive) -->
     <div v-else-if="loading" class="max-w-4xl">
-      <motion.div
+      <div
+        v-motion
         :initial="{ opacity: 0, y: 10 }"
         :animate="{ opacity: 1, y: 0 }"
         class="p-6 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800"
@@ -517,7 +517,7 @@ https://example.com/pricing"
             </p>
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
 
     <!-- Error State -->
@@ -533,8 +533,9 @@ https://example.com/pricing"
     <!-- Results Section -->
     <div v-if="results.length > 0" class="max-w-5xl space-y-6">
       <!-- Summary Cards (only show when complete) -->
-      <motion.div
+      <div
         v-if="summary"
+        v-motion
         :initial="{ opacity: 0, y: 20 }"
         :animate="{ opacity: 1, y: 0 }"
         class="grid grid-cols-2 md:grid-cols-4 gap-3"
@@ -571,10 +572,11 @@ https://example.com/pricing"
             Poor (&lt;50)
           </div>
         </div>
-      </motion.div>
+      </div>
 
       <!-- Results Table -->
-      <motion.div
+      <div
+        v-motion
         :initial="{ opacity: 0, y: 20 }"
         :animate="{ opacity: 1, y: 0 }"
         :transition="{ delay: 0.1 }"
@@ -668,9 +670,10 @@ https://example.com/pricing"
               </tr>
             </thead>
             <tbody>
-              <motion.tr
+              <tr
                 v-for="(result, idx) in sortedResults"
                 :key="result.url"
+                v-motion
                 :initial="{ opacity: 0, x: -10 }"
                 :animate="{ opacity: 1, x: 0 }"
                 :transition="{ delay: idx * 0.05 }"
@@ -770,7 +773,7 @@ https://example.com/pricing"
                     />
                   </UTooltip>
                 </td>
-              </motion.tr>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -805,7 +808,7 @@ https://example.com/pricing"
             Re-test
           </UButton>
         </div>
-      </motion.div>
+      </div>
 
       <!-- Feedback -->
       <ToolsToolFeedback v-if="summary" tool-id="bulk-pagespeed" :context="{ device, urlCount: summary.totalUrls }" />
@@ -817,7 +820,8 @@ https://example.com/pricing"
     </div>
 
     <!-- Upsell Section -->
-    <motion.div
+    <div
+      v-motion
       :initial="{ opacity: 0, y: 20 }"
       :animate="{ opacity: 1, y: 0 }"
       :transition="{ delay: 0.2 }"
@@ -870,6 +874,6 @@ https://example.com/pricing"
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   </ToolPageLayout>
 </template>

@@ -23,3 +23,9 @@ wrangler.toml
 
 # Claude context files
 .claude/context/
+
+# Skilld references (recreated by `skilld install`)
+.skilld
+
+page-speed.dev
+lighthouse

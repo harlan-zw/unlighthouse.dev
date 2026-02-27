@@ -1,4 +1,4 @@
-import type { FormFactor, NormalizedCrUXCurrentResult, NormalizedCrUXHistoryResult } from '../../utils/crux'
+import type { FormFactor, NormalizedCrUXHistoryResult } from '../../utils/crux'
 import { trackToolLookup, trackToolUsage } from '../../utils/analytics'
 import { fetchCrUXCurrent, fetchCrUXHistory, normaliseCruxHistory, normalizeCruxCurrent } from '../../utils/crux'
 import { fetchPSI } from '../../utils/psi'

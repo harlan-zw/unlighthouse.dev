@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { watchPausable } from '@vueuse/core'
-import { motion } from 'motion-v'
 
 // Loading messages composable
 function useLoadingMessages(messages: string[], interval = 800) {
@@ -388,7 +387,8 @@ const insights = computed<InpInsight[]>(() => {
     <section class="relative pt-10 pb-6 lg:pt-12 lg:pb-8">
       <div class="max-w-4xl mx-auto px-6 text-center">
         <ClientOnly>
-          <motion.h1
+          <h1
+            v-motion
             :initial="{ opacity: 0, y: 20 }"
             :animate="{ opacity: 1, y: 0 }"
             :transition="{ duration: 0.4 }"
@@ -396,15 +396,16 @@ const insights = computed<InpInsight[]>(() => {
           >
             INP
             <span class="text-cyan-600 dark:text-cyan-400">Analyzer</span>
-          </motion.h1>
-          <motion.p
+          </h1>
+          <p
+            v-motion
             :initial="{ opacity: 0, y: 20 }"
             :animate="{ opacity: 1, y: 0 }"
             :transition="{ duration: 0.4, delay: 0.1 }"
             class="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto"
           >
             Find what's blocking your main thread and slowing down interactions.
-          </motion.p>
+          </p>
           <template #fallback>
             <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-[1.1] text-gray-900 dark:text-white mb-3">
               INP
@@ -707,9 +708,10 @@ const insights = computed<InpInsight[]>(() => {
                     </div>
                     <!-- Stacked bar -->
                     <div class="relative flex h-8 rounded overflow-hidden">
-                      <motion.div
+                      <div
                         v-for="(item, idx) in result.mainThread.items"
                         :key="item.group"
+                        v-motion
                         :initial="{ width: 0 }"
                         :animate="{ width: `${(item.duration / result.mainThread.total) * 100}%` }"
                         :transition="{ duration: 0.5, delay: idx * 0.05 }"
@@ -719,7 +721,7 @@ const insights = computed<InpInsight[]>(() => {
                         <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                           {{ item.label }}: {{ formatMs(item.duration) }}
                         </div>
-                      </motion.div>
+                      </div>
                     </div>
                   </div>
                   <!-- Legend -->
@@ -762,9 +764,10 @@ const insights = computed<InpInsight[]>(() => {
                   </div>
 
                   <div v-else class="space-y-2">
-                    <motion.div
+                    <div
                       v-for="(tp, idx) in result.thirdParties.slice(0, 5)"
                       :key="tp.entity"
+                      v-motion
                       :initial="{ opacity: 0, x: -10 }"
                       :animate="{ opacity: 1, x: 0 }"
                       :transition="{ duration: 0.2, delay: idx * 0.05 }"
@@ -791,7 +794,7 @@ const insights = computed<InpInsight[]>(() => {
                           </span>
                         </div>
                       </div>
-                    </motion.div>
+                    </div>
                   </div>
                 </div>
 
@@ -810,9 +813,10 @@ const insights = computed<InpInsight[]>(() => {
                   </div>
 
                   <div v-else class="space-y-2">
-                    <motion.div
+                    <div
                       v-for="(script, idx) in result.scripts.slice(0, 5)"
                       :key="script.url"
+                      v-motion
                       :initial="{ opacity: 0, x: -10 }"
                       :animate="{ opacity: 1, x: 0 }"
                       :transition="{ duration: 0.2, delay: idx * 0.05 }"
@@ -837,7 +841,7 @@ const insights = computed<InpInsight[]>(() => {
                           {{ formatMs(script.total) }}
                         </span>
                       </div>
-                    </motion.div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -849,9 +853,10 @@ const insights = computed<InpInsight[]>(() => {
                   <span class="text-sm font-semibold">Optimization Opportunities</span>
                 </div>
                 <div class="grid sm:grid-cols-2 gap-2">
-                  <motion.div
+                  <div
                     v-for="(opp, idx) in result.opportunities"
                     :key="opp.id"
+                    v-motion
                     :initial="{ opacity: 0, y: 10 }"
                     :animate="{ opacity: 1, y: 0 }"
                     :transition="{ duration: 0.2, delay: idx * 0.03 }"
@@ -875,7 +880,7 @@ const insights = computed<InpInsight[]>(() => {
                         </p>
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                 </div>
               </div>
 

@@ -1,5 +1,5 @@
 import { trackToolLookup, trackToolUsage } from '../../utils/analytics'
-import { detectFramework, extractOpportunities, extractScreenshot, fetchPSI } from '../../utils/psi'
+import { detectFramework, extractScreenshot, fetchPSI } from '../../utils/psi'
 import { checkFreeToolRateLimit } from '../../utils/rate-limit'
 
 export default defineCachedEventHandler(async (event) => {

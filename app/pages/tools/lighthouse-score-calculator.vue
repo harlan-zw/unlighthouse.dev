@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { MetricId } from '~/composables/useLighthouseScoring'
-import { motion } from 'motion-v'
 import { useLighthouseCalculator } from '~/composables/useLighthouseScoring'
 
 definePageMeta({
@@ -105,7 +104,8 @@ function handleMetricUpdate(id: MetricId, value: number) {
     <section class="relative pt-10 pb-6 lg:pt-12 lg:pb-8">
       <div class="max-w-4xl mx-auto px-6 text-center">
         <ClientOnly>
-          <motion.h1
+          <h1
+            v-motion
             :initial="{ opacity: 0, y: 20 }"
             :animate="{ opacity: 1, y: 0 }"
             :transition="{ duration: 0.4 }"
@@ -113,15 +113,16 @@ function handleMetricUpdate(id: MetricId, value: number) {
           >
             Lighthouse Score
             <span class="text-violet-600 dark:text-violet-400">Calculator</span>
-          </motion.h1>
-          <motion.p
+          </h1>
+          <p
+            v-motion
             :initial="{ opacity: 0, y: 20 }"
             :animate="{ opacity: 1, y: 0 }"
             :transition="{ duration: 0.4, delay: 0.1 }"
             class="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto"
           >
             See exactly how each metric contributes to your performance score.
-          </motion.p>
+          </p>
           <template #fallback>
             <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-[1.1] text-gray-900 dark:text-white mb-3">
               Lighthouse Score
