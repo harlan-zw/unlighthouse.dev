@@ -792,6 +792,27 @@ https://example.com/pricing"
       <ToolFaq :faqs="faqs" color="amber" />
     </div>
 
+    <!-- Related Guides -->
+    <div class="text-center mt-12">
+      <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+        Related Guides
+      </h3>
+      <div class="flex flex-wrap justify-center gap-2">
+        <UButton to="/learn-lighthouse/lcp" variant="ghost" size="sm">
+          <UIcon name="i-heroicons-academic-cap" class="w-4 h-4 mr-1" />
+          Fix LCP Issues
+        </UButton>
+        <UButton to="/learn-lighthouse/cls" variant="ghost" size="sm">
+          <UIcon name="i-heroicons-academic-cap" class="w-4 h-4 mr-1" />
+          Fix CLS Issues
+        </UButton>
+        <UButton to="/learn-lighthouse/bulk-lighthouse-testing" variant="ghost" size="sm">
+          <UIcon name="i-heroicons-book-open" class="w-4 h-4 mr-1" />
+          Bulk Testing Guide
+        </UButton>
+      </div>
+    </div>
+
     <!-- Upsell Section -->
     <div
       v-motion
