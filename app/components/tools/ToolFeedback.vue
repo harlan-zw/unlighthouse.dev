@@ -1,15 +1,13 @@
 <script lang="ts" setup>
 import type { FormSubmitEvent } from '#ui/types'
 import type { CommentFeedbackSchemaOutput, ThumbsFeedbackResponse } from '~~/types/schemas'
-import { useSessionStorage, useTimeoutFn } from '@vueuse/core'
+import { useTimeoutFn } from '@vueuse/core'
 import { CommentFeedbackSchema } from '~~/types/schemas'
 
 const props = defineProps<{
   toolId: string
   context?: Record<string, unknown>
 }>()
-
-const hidden = import.meta.client ? useSessionStorage('tool-feedback-hidden', false) : ref(false)
 
 const thumbSubmissionStatus = ref<false | 'loading' | 'submitted'>(false)
 const commentSubmissionStatus = ref<false | 'loading' | 'submitted'>(false)
@@ -60,15 +58,7 @@ async function onSubmit(event: FormSubmitEvent<CommentFeedbackSchemaOutput>) {
 </script>
 
 <template>
-  <UCard v-if="!hidden" class="mt-6 relative">
-    <UButton
-      variant="ghost"
-      color="neutral"
-      size="xs"
-      icon="i-carbon-close"
-      class="absolute top-2 right-2"
-      @click="hidden = true"
-    />
+  <UCard class="mt-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <div class="text-sm font-medium text-highlighted">

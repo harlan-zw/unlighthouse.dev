@@ -895,6 +895,9 @@ function handleMetricUpdate(id: MetricId, value: number) {
           </div>
         </div>
 
+        <!-- Feedback -->
+        <ToolsToolFeedback tool-id="lighthouse-score-calculator" :context="{}" />
+
         <!-- FAQ Section -->
         <ToolFaq :faqs="faqs" color="violet" />
 

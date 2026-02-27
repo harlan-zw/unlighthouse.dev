@@ -530,6 +530,9 @@ const categoryDisplayData = computed(() => {
           </div>
         </div>
 
+        <!-- Feedback -->
+        <ToolsToolFeedback tool-id="lighthouse-report-viewer" :context="{ hasReport: !!report }" />
+
         <!-- FAQ Section -->
         <ToolFaq :faqs="faqs" color="purple" />
 

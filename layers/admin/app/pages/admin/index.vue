@@ -166,6 +166,116 @@ function formatRelativeTime(date: Date): string {
   return date.toLocaleDateString()
 }
 
+// Feedback (D1 database)
+interface FeedbackEntry {
+  id: string
+  path: string
+  thumb: 'up' | 'down' | null
+  comment: string | null
+  metadata: Record<string, unknown> | null
+  userId: string | null
+  createdAt: number | string | Date
+}
+
+interface FeedbackResponse {
+  entries: FeedbackEntry[]
+  stats: { up: number, down: number }
+  byPath: Record<string, number>
+  commentCount: number
+  total: number
+}
+
+const { data: feedbackData, status: feedbackStatus } = useFetch<FeedbackResponse>('/api/admin/feedback')
+
+const feedbackPaths = computed(() => {
+  if (!feedbackData.value?.byPath)
+    return [{ value: 'all', label: 'All' }]
+  return [
+    { value: 'all', label: 'All' },
+    ...Object.keys(feedbackData.value.byPath).map(p => ({ value: p, label: p })),
+  ]
+})
+
+const activeFeedbackPath = ref('all')
+
+const filteredFeedback = computed(() => {
+  if (!feedbackData.value?.entries)
+    return []
+  if (activeFeedbackPath.value === 'all')
+    return feedbackData.value.entries
+  return feedbackData.value.entries.filter(e => e.path === activeFeedbackPath.value)
+})
+
+const feedbackColumns: TableColumn<FeedbackEntry>[] = [
+  {
+    accessorKey: 'path',
+    header: 'Path / Tool',
+    cell: ({ row }) => {
+      const path = row.original.path
+      const meta = getToolMeta(path)
+      return h('div', { class: 'flex items-center gap-2.5' }, [
+        h('div', { class: `w-8 h-8 rounded-lg bg-${meta.color}-500/10 flex items-center justify-center` }, [
+          h('span', { class: `${meta.icon} w-4 h-4 text-${meta.color}-500` }),
+        ]),
+        h('span', { class: 'font-medium text-[var(--ui-text-highlighted)] text-sm' }, meta.name),
+      ])
+    },
+  },
+  {
+    accessorKey: 'thumb',
+    header: 'Thumb',
+    cell: ({ row }) => {
+      const thumb = row.original.thumb
+      if (!thumb)
+        return h('span', { class: 'text-[var(--ui-text-dimmed)]' }, '—')
+      const icon = thumb === 'up' ? 'i-carbon-thumbs-up-filled' : 'i-carbon-thumbs-down-filled'
+      const color = thumb === 'up' ? 'text-emerald-500' : 'text-red-500'
+      return h('span', { class: `${icon} w-4 h-4 ${color}` })
+    },
+  },
+  {
+    accessorKey: 'comment',
+    header: 'Comment',
+    cell: ({ row }) => {
+      const comment = row.original.comment
+      if (!comment)
+        return h('span', { class: 'text-[var(--ui-text-dimmed)]' }, '—')
+      return h('span', { class: 'text-sm text-[var(--ui-text-muted)] max-w-xs truncate block' }, comment)
+    },
+  },
+  {
+    accessorKey: 'userId',
+    header: 'User',
+    cell: ({ row }) => {
+      const userId = row.original.userId
+      if (!userId) {
+        return h('span', { class: 'inline-flex items-center gap-1.5 text-xs text-[var(--ui-text-dimmed)]' }, [
+          h('span', { class: 'w-1.5 h-1.5 rounded-full bg-gray-400' }),
+          'Anonymous',
+        ])
+      }
+      return h('span', { class: 'inline-flex items-center gap-1.5 text-xs' }, [
+        h('span', { class: 'w-1.5 h-1.5 rounded-full bg-emerald-500' }),
+        h('code', { class: 'font-mono text-[var(--ui-primary)]' }, userId.slice(0, 8)),
+      ])
+    },
+  },
+  {
+    accessorKey: 'createdAt',
+    header: 'Time',
+    cell: ({ row }) => {
+      const raw = row.original.createdAt
+      const date = raw instanceof Date ? raw : new Date(typeof raw === 'number' ? raw * 1000 : raw)
+      if (Number.isNaN(date.getTime()))
+        return h('span', { class: 'text-[var(--ui-text-dimmed)]' }, '—')
+      return h('time', {
+        class: 'text-sm font-mono text-[var(--ui-text-muted)] tabular-nums',
+        datetime: date.toISOString(),
+      }, formatRelativeTime(date))
+    },
+  },
+]
+
 const statCards = computed(() => [
   {
     label: 'Total Events',
@@ -402,6 +512,117 @@ const statCards = computed(() => [
               <p v-else class="text-sm text-[var(--ui-text-dimmed)] text-center py-8">
                 No action data yet
               </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section: Feedback -->
+        <section>
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h2 class="text-lg font-semibold text-[var(--ui-text-highlighted)]">
+                User Feedback
+              </h2>
+              <p class="text-sm text-[var(--ui-text-dimmed)]">
+                Thumbs &amp; comments from D1
+              </p>
+            </div>
+            <div class="text-sm font-mono text-[var(--ui-text-dimmed)]">
+              {{ feedbackData?.total ?? 0 }} total
+            </div>
+          </div>
+
+          <!-- Feedback Summary Cards -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="p-4 rounded-xl bg-[var(--ui-bg-elevated)] border border-[var(--ui-border)]">
+              <p class="text-sm text-[var(--ui-text-muted)] mb-1">
+                Total
+              </p>
+              <p class="text-xl font-bold font-mono tabular-nums text-[var(--ui-text-highlighted)]">
+                {{ feedbackData?.total ?? 0 }}
+              </p>
+            </div>
+            <div class="p-4 rounded-xl bg-[var(--ui-bg-elevated)] border border-[var(--ui-border)]">
+              <p class="text-sm text-[var(--ui-text-muted)] mb-1">
+                Thumbs Up
+              </p>
+              <p class="text-xl font-bold font-mono tabular-nums text-emerald-500">
+                {{ feedbackData?.stats?.up ?? 0 }}
+              </p>
+            </div>
+            <div class="p-4 rounded-xl bg-[var(--ui-bg-elevated)] border border-[var(--ui-border)]">
+              <p class="text-sm text-[var(--ui-text-muted)] mb-1">
+                Thumbs Down
+              </p>
+              <p class="text-xl font-bold font-mono tabular-nums text-red-500">
+                {{ feedbackData?.stats?.down ?? 0 }}
+              </p>
+            </div>
+            <div class="p-4 rounded-xl bg-[var(--ui-bg-elevated)] border border-[var(--ui-border)]">
+              <p class="text-sm text-[var(--ui-text-muted)] mb-1">
+                Comments
+              </p>
+              <p class="text-xl font-bold font-mono tabular-nums text-[var(--ui-text-highlighted)]">
+                {{ feedbackData?.commentCount ?? 0 }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Filter Pills -->
+          <div class="flex flex-wrap gap-2 mb-5">
+            <button
+              v-for="fp in feedbackPaths"
+              :key="fp.value"
+              class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all"
+              :class="[
+                activeFeedbackPath === fp.value
+                  ? 'bg-[var(--ui-primary)] text-white shadow-lg shadow-[var(--ui-primary)]/25'
+                  : 'bg-[var(--ui-bg-elevated)] text-[var(--ui-text-muted)] hover:text-[var(--ui-text-highlighted)] border border-[var(--ui-border)] hover:border-[var(--ui-border-hover)]',
+              ]"
+              @click="activeFeedbackPath = fp.value"
+            >
+              <span>{{ fp.label }}</span>
+              <span
+                v-if="feedbackData?.byPath"
+                class="ml-0.5 px-2 py-0.5 rounded-md text-xs font-mono"
+                :class="activeFeedbackPath === fp.value ? 'bg-white/20' : 'bg-[var(--ui-bg)]'"
+              >
+                {{ fp.value === 'all' ? feedbackData.total : (feedbackData.byPath[fp.value] || 0) }}
+              </span>
+            </button>
+          </div>
+
+          <!-- Table -->
+          <div class="rounded-xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] overflow-hidden mb-10">
+            <UTable
+              v-if="feedbackStatus !== 'pending' && filteredFeedback.length"
+              :data="filteredFeedback"
+              :columns="feedbackColumns"
+            />
+
+            <div v-else-if="feedbackStatus === 'pending'" class="p-12">
+              <div class="flex flex-col items-center">
+                <div class="w-12 h-12 rounded-xl bg-[var(--ui-bg)] flex items-center justify-center mb-4">
+                  <UIcon name="i-carbon-renew" class="w-5 h-5 text-[var(--ui-text-dimmed)] animate-spin" />
+                </div>
+                <p class="text-sm text-[var(--ui-text-muted)]">
+                  Loading feedback...
+                </p>
+              </div>
+            </div>
+
+            <div v-else class="p-12">
+              <div class="flex flex-col items-center">
+                <div class="w-12 h-12 rounded-xl bg-[var(--ui-bg)] flex items-center justify-center mb-4">
+                  <UIcon name="i-carbon-chat" class="w-5 h-5 text-[var(--ui-text-dimmed)]" />
+                </div>
+                <p class="text-sm font-medium text-[var(--ui-text-highlighted)] mb-1">
+                  No feedback yet
+                </p>
+                <p class="text-xs text-[var(--ui-text-dimmed)]">
+                  User feedback will appear here
+                </p>
+              </div>
             </div>
           </div>
         </section>
