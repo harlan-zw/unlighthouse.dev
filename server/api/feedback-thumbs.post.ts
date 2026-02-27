@@ -20,6 +20,7 @@ export default defineEventHandler<Promise<ThumbsFeedbackResponse>>(async (event)
       thumb: thumbs,
       metadata: { ...context, toolId },
       userId: (session?.user as Record<string, string> | undefined)?.id || null,
+      sessionId: getSessionId(event),
     }).catch(err => console.error('Failed to save thumbs feedback:', err))
 
     const rows = await db.select({

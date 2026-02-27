@@ -16,6 +16,7 @@ export type ToolName = 'pagespeed-insights' | 'lcp' | 'cls' | 'inp' | 'cwv-check
 export const toolLookups = sqliteTable('tool_lookups', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
   userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
+  sessionId: text('session_id'),
   tool: text('tool').notNull().$type<ToolName>(),
   query: text('query').notNull(),
   strategy: text('strategy', { enum: ['mobile', 'desktop'] }),
@@ -24,6 +25,7 @@ export const toolLookups = sqliteTable('tool_lookups', {
 }, t => [
   index('tool_lookups_tool_idx').on(t.tool),
   index('tool_lookups_created_at_idx').on(t.createdAt),
+  index('tool_lookups_session_id_idx').on(t.sessionId),
 ])
 
 export const feedback = sqliteTable('feedback', {
@@ -33,8 +35,11 @@ export const feedback = sqliteTable('feedback', {
   comment: text('comment'),
   metadata: text('metadata', { mode: 'json' }).$type<Record<string, unknown>>(),
   userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
+  sessionId: text('session_id'),
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
-})
+}, t => [
+  index('feedback_session_id_idx').on(t.sessionId),
+])
 
 // Type exports
 export type User = typeof users.$inferSelect

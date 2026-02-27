@@ -88,10 +88,10 @@ async function onSubmit(event: FormSubmitEvent<CommentFeedbackSchemaOutput>) {
         </UTooltip>
       </template>
     </div>
-    <UCard v-if="thumbSubmissionStatus === 'submitted' && commentSubmissionStatus !== 'submitted'" class="mt-7">
+    <UCard v-if="commentSubmissionStatus !== 'submitted'" class="mt-7">
       <template #header>
         <div class="flex items-center justify-between">
-          Thank you for your feedback!
+          Anything that could be done better? :)
           <div>
             <UButton variant="ghost" color="neutral" @click="commentSubmissionStatus = 'submitted'">
               <UIcon name="i-carbon-close" class="w-4 h-4" />
@@ -102,7 +102,7 @@ async function onSubmit(event: FormSubmitEvent<CommentFeedbackSchemaOutput>) {
       <div class="mb-3">
         Help us improve this page. You can <NuxtLink :to="editLink" target="_blank" class="underline">
           edit this page
-        </NuxtLink> on GitHub or provide anonymous feedback below. Be nice :)
+        </NuxtLink> on GitHub or provide anonymous feedback below.
       </div>
       <UForm :schema="CommentFeedbackSchema" :state="state" class="space-y-4" :validate-on="['change']" @submit="onSubmit">
         <UFormField label="Comments" name="comment" class="mb-3">

@@ -49,6 +49,7 @@ const maxToolCount = computed(() => {
 interface ToolLookup {
   id: string
   user_id: string | null
+  session_id: string | null
   tool: 'pagespeed-insights' | 'lcp' | 'cls' | 'inp'
   query: string
   strategy: 'mobile' | 'desktop' | null
@@ -59,6 +60,8 @@ interface LookupResponse {
   lookups: ToolLookup[]
   stats: Record<string, number>
   total: number
+  topDomains: { query: string, count: number }[]
+  engagement: { repeat: number, single: number }
 }
 
 const { data: lookupData, status: lookupStatus } = useFetch<LookupResponse>('/api/admin/tool-lookups')
@@ -116,19 +119,16 @@ const lookupColumns: TableColumn<ToolLookup>[] = [
     },
   },
   {
-    accessorKey: 'user_id',
-    header: 'User',
+    accessorKey: 'session_id',
+    header: 'Session',
     cell: ({ row }) => {
+      const sessionId = row.original.session_id
       const userId = row.original.user_id
-      if (!userId) {
-        return h('span', { class: 'inline-flex items-center gap-1.5 text-xs text-[var(--ui-text-dimmed)]' }, [
-          h('span', { class: 'w-1.5 h-1.5 rounded-full bg-gray-400' }),
-          'Anonymous',
-        ])
-      }
+      if (!sessionId && !userId)
+        return h('span', { class: 'text-[var(--ui-text-dimmed)]' }, '—')
       return h('span', { class: 'inline-flex items-center gap-1.5 text-xs' }, [
-        h('span', { class: 'w-1.5 h-1.5 rounded-full bg-emerald-500' }),
-        h('code', { class: 'font-mono text-[var(--ui-primary)]' }, userId.slice(0, 8)),
+        h('span', { class: `w-1.5 h-1.5 rounded-full ${userId ? 'bg-emerald-500' : 'bg-gray-400'}` }),
+        h('code', { class: 'font-mono text-[var(--ui-text-muted)]' }, sessionId || userId!.slice(0, 8)),
       ])
     },
   },
@@ -174,6 +174,7 @@ interface FeedbackEntry {
   comment: string | null
   metadata: Record<string, unknown> | null
   userId: string | null
+  sessionId: string | null
   createdAt: number | string | Date
 }
 
@@ -183,6 +184,7 @@ interface FeedbackResponse {
   byPath: Record<string, number>
   commentCount: number
   total: number
+  thumbsByTool: { path: string, up: number, down: number, total: number }[]
 }
 
 const { data: feedbackData, status: feedbackStatus } = useFetch<FeedbackResponse>('/api/admin/feedback')
@@ -244,19 +246,16 @@ const feedbackColumns: TableColumn<FeedbackEntry>[] = [
     },
   },
   {
-    accessorKey: 'userId',
-    header: 'User',
+    accessorKey: 'sessionId',
+    header: 'Session',
     cell: ({ row }) => {
+      const sessionId = row.original.sessionId
       const userId = row.original.userId
-      if (!userId) {
-        return h('span', { class: 'inline-flex items-center gap-1.5 text-xs text-[var(--ui-text-dimmed)]' }, [
-          h('span', { class: 'w-1.5 h-1.5 rounded-full bg-gray-400' }),
-          'Anonymous',
-        ])
-      }
+      if (!sessionId && !userId)
+        return h('span', { class: 'text-[var(--ui-text-dimmed)]' }, '—')
       return h('span', { class: 'inline-flex items-center gap-1.5 text-xs' }, [
-        h('span', { class: 'w-1.5 h-1.5 rounded-full bg-emerald-500' }),
-        h('code', { class: 'font-mono text-[var(--ui-primary)]' }, userId.slice(0, 8)),
+        h('span', { class: `w-1.5 h-1.5 rounded-full ${userId ? 'bg-emerald-500' : 'bg-gray-400'}` }),
+        h('code', { class: 'font-mono text-[var(--ui-text-muted)]' }, sessionId || userId!.slice(0, 8)),
       ])
     },
   },
@@ -303,6 +302,58 @@ const statCards = computed(() => [
     isPercent: true,
   },
 ])
+
+// Insights (journeys + daily trends)
+interface InsightsResponse {
+  journeys: {
+    sessionId: string
+    lookups: { sessionId: string | null, tool: string, query: string, createdAt: number | string | Date }[]
+    feedback: { sessionId: string | null, path: string, thumb: string | null, createdAt: number | string | Date }[]
+    toolCount: number
+  }[]
+  dailyTrends: { day: string, count: number }[]
+}
+
+const { data: insightsData, status: insightsStatus } = useFetch<InsightsResponse>('/api/admin/insights')
+
+// Feedback rate per tool — combines lookupData.stats with feedbackData.thumbsByTool
+const feedbackRateByTool = computed(() => {
+  if (!lookupData.value?.stats || !feedbackData.value?.thumbsByTool)
+    return []
+  const lookupStats = lookupData.value.stats
+  return feedbackData.value.thumbsByTool.map((t) => {
+    const lookups = lookupStats[t.path] ?? 0
+    const rate = lookups > 0 ? ((t.total / lookups) * 100) : 0
+    return { ...t, lookups, rate: Math.round(rate * 10) / 10, meta: getToolMeta(t.path) }
+  }).sort((a, b) => b.total - a.total)
+})
+
+// Engagement computed
+const engagementTotal = computed(() => {
+  if (!lookupData.value?.engagement)
+    return 0
+  return lookupData.value.engagement.repeat + lookupData.value.engagement.single
+})
+
+// Daily trends
+const maxDailyCount = computed(() => {
+  if (!insightsData.value?.dailyTrends?.length)
+    return 1
+  return Math.max(...insightsData.value.dailyTrends.map(d => d.count))
+})
+
+// Top domains
+const topDomains = computed(() => lookupData.value?.topDomains?.slice(0, 15) ?? [])
+const maxDomainCount = computed(() => topDomains.value[0]?.count ?? 1)
+
+// Session journeys
+const expandedJourneys = ref(new Set<string>())
+function toggleJourney(id: string) {
+  if (expandedJourneys.value.has(id))
+    expandedJourneys.value.delete(id)
+  else
+    expandedJourneys.value.add(id)
+}
 </script>
 
 <template>
@@ -512,6 +563,307 @@ const statCards = computed(() => [
               <p v-else class="text-sm text-[var(--ui-text-dimmed)] text-center py-8">
                 No action data yet
               </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section: Tool Insights -->
+        <section>
+          <div class="mb-6">
+            <h2 class="text-lg font-semibold text-[var(--ui-text-highlighted)]">
+              Tool Insights
+            </h2>
+            <p class="text-sm text-[var(--ui-text-dimmed)]">
+              Feedback sentiment and session engagement
+            </p>
+          </div>
+
+          <div class="grid lg:grid-cols-2 gap-6">
+            <!-- Feedback Sentiment Per Tool -->
+            <div class="p-6 rounded-xl bg-[var(--ui-bg-elevated)] border border-[var(--ui-border)]">
+              <h3 class="text-sm font-medium text-[var(--ui-text-muted)] uppercase tracking-wider mb-5">
+                Feedback Sentiment Per Tool
+              </h3>
+              <div v-if="feedbackRateByTool.length" class="space-y-5">
+                <div v-for="tool in feedbackRateByTool" :key="tool.path">
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2.5">
+                      <div
+                        class="w-7 h-7 rounded-md flex items-center justify-center"
+                        :class="`bg-${tool.meta.color}-500/10`"
+                      >
+                        <UIcon
+                          :name="tool.meta.icon"
+                          class="w-3.5 h-3.5"
+                          :class="`text-${tool.meta.color}-500`"
+                        />
+                      </div>
+                      <span class="text-sm font-medium text-[var(--ui-text-highlighted)]">{{ tool.meta.name }}</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-xs font-mono tabular-nums text-[var(--ui-text-muted)]">
+                      <span>{{ tool.lookups }} lookups</span>
+                      <span>{{ tool.total }} feedback</span>
+                      <span class="text-[var(--ui-text-highlighted)]">{{ tool.rate }}%</span>
+                    </div>
+                  </div>
+                  <!-- Stacked bar -->
+                  <div class="h-2 rounded-full bg-[var(--ui-bg)] overflow-hidden flex">
+                    <div
+                      v-if="tool.total > 0"
+                      class="h-full bg-emerald-500 transition-all duration-500"
+                      :style="{ width: `${(tool.up / tool.total) * 100}%` }"
+                    />
+                    <div
+                      v-if="tool.total > 0"
+                      class="h-full bg-red-500 transition-all duration-500"
+                      :style="{ width: `${(tool.down / tool.total) * 100}%` }"
+                    />
+                  </div>
+                  <div class="flex justify-between mt-1 text-xs text-[var(--ui-text-dimmed)]">
+                    <span class="text-emerald-500">{{ tool.up }} up</span>
+                    <span class="text-red-500">{{ tool.down }} down</span>
+                  </div>
+                </div>
+              </div>
+              <p v-else class="text-sm text-[var(--ui-text-dimmed)] text-center py-8">
+                No feedback data yet
+              </p>
+            </div>
+
+            <!-- Engagement -->
+            <div class="p-6 rounded-xl bg-[var(--ui-bg-elevated)] border border-[var(--ui-border)]">
+              <h3 class="text-sm font-medium text-[var(--ui-text-muted)] uppercase tracking-wider mb-5">
+                Session Engagement
+              </h3>
+              <div v-if="lookupData?.engagement && engagementTotal > 0">
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                  <div class="p-4 rounded-lg bg-[var(--ui-bg)]">
+                    <p class="text-sm text-[var(--ui-text-muted)] mb-1">
+                      Repeat Sessions
+                    </p>
+                    <p class="text-2xl font-bold font-mono tabular-nums text-emerald-500">
+                      {{ lookupData.engagement.repeat }}
+                    </p>
+                    <p class="text-xs text-[var(--ui-text-dimmed)] mt-1">
+                      {{ ((lookupData.engagement.repeat / engagementTotal) * 100).toFixed(1) }}% of sessions
+                    </p>
+                  </div>
+                  <div class="p-4 rounded-lg bg-[var(--ui-bg)]">
+                    <p class="text-sm text-[var(--ui-text-muted)] mb-1">
+                      One-and-Done
+                    </p>
+                    <p class="text-2xl font-bold font-mono tabular-nums text-[var(--ui-text-highlighted)]">
+                      {{ lookupData.engagement.single }}
+                    </p>
+                    <p class="text-xs text-[var(--ui-text-dimmed)] mt-1">
+                      {{ ((lookupData.engagement.single / engagementTotal) * 100).toFixed(1) }}% of sessions
+                    </p>
+                  </div>
+                </div>
+                <!-- Visual bar -->
+                <div class="h-3 rounded-full bg-[var(--ui-bg)] overflow-hidden flex">
+                  <div
+                    class="h-full bg-emerald-500 transition-all duration-500"
+                    :style="{ width: `${(lookupData.engagement.repeat / engagementTotal) * 100}%` }"
+                  />
+                  <div
+                    class="h-full bg-gray-400 transition-all duration-500"
+                    :style="{ width: `${(lookupData.engagement.single / engagementTotal) * 100}%` }"
+                  />
+                </div>
+                <div class="flex justify-between mt-2 text-xs text-[var(--ui-text-dimmed)]">
+                  <span class="text-emerald-500">Repeat (2+ lookups)</span>
+                  <span>Single lookup</span>
+                </div>
+              </div>
+              <p v-else class="text-sm text-[var(--ui-text-dimmed)] text-center py-8">
+                No session data yet
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section: Daily Trends -->
+        <section>
+          <div class="mb-6">
+            <h2 class="text-lg font-semibold text-[var(--ui-text-highlighted)]">
+              Daily Trends
+            </h2>
+            <p class="text-sm text-[var(--ui-text-dimmed)]">
+              Lookups per day over the last 30 days
+            </p>
+          </div>
+
+          <div class="p-6 rounded-xl bg-[var(--ui-bg-elevated)] border border-[var(--ui-border)]">
+            <div v-if="insightsData?.dailyTrends?.length" class="flex items-end gap-1" style="height: 160px;">
+              <div
+                v-for="day in insightsData.dailyTrends"
+                :key="day.day"
+                class="group relative flex-1 flex flex-col items-center justify-end h-full"
+              >
+                <div
+                  class="w-full rounded-t bg-[var(--ui-primary)] transition-all duration-300 hover:opacity-80 min-h-[2px]"
+                  :style="{ height: `${Math.max((day.count / maxDailyCount) * 100, 1)}%` }"
+                />
+                <!-- Tooltip -->
+                <div class="absolute bottom-full mb-2 hidden group-hover:block z-10">
+                  <div class="bg-[var(--ui-bg-elevated)] border border-[var(--ui-border)] rounded-lg px-3 py-2 shadow-xl text-center whitespace-nowrap">
+                    <p class="text-xs font-mono text-[var(--ui-text-highlighted)]">
+                      {{ day.count }}
+                    </p>
+                    <p class="text-xs text-[var(--ui-text-dimmed)]">
+                      {{ day.day }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div v-else-if="insightsStatus === 'pending'" class="flex items-end gap-1" style="height: 160px;">
+              <div v-for="i in 30" :key="i" class="flex-1 bg-[var(--ui-bg)] rounded-t animate-pulse" :style="{ height: `${20 + Math.random() * 60}%` }" />
+            </div>
+            <p v-else class="text-sm text-[var(--ui-text-dimmed)] text-center py-8">
+              No trend data yet
+            </p>
+            <!-- X-axis labels -->
+            <div v-if="insightsData?.dailyTrends?.length" class="flex justify-between mt-2 text-xs text-[var(--ui-text-dimmed)] font-mono">
+              <span>{{ insightsData.dailyTrends[0]?.day }}</span>
+              <span>{{ insightsData.dailyTrends[insightsData.dailyTrends.length - 1]?.day }}</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section: Top Domains -->
+        <section>
+          <div class="mb-6">
+            <h2 class="text-lg font-semibold text-[var(--ui-text-highlighted)]">
+              Top Domains
+            </h2>
+            <p class="text-sm text-[var(--ui-text-dimmed)]">
+              Most queried domains across all tools
+            </p>
+          </div>
+
+          <div class="p-6 rounded-xl bg-[var(--ui-bg-elevated)] border border-[var(--ui-border)]">
+            <div v-if="topDomains.length" class="space-y-3">
+              <div v-for="(domain, i) in topDomains" :key="domain.query" class="flex items-center gap-4">
+                <span class="w-6 text-right text-xs font-mono tabular-nums text-[var(--ui-text-dimmed)]">{{ i + 1 }}</span>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between mb-1">
+                    <code class="text-sm font-mono text-[var(--ui-text-highlighted)] truncate">{{ domain.query }}</code>
+                    <span class="text-xs font-mono tabular-nums text-[var(--ui-text-muted)] ml-3 shrink-0">{{ domain.count }}</span>
+                  </div>
+                  <div class="h-1.5 rounded-full bg-[var(--ui-bg)] overflow-hidden">
+                    <div
+                      class="h-full rounded-full bg-[var(--ui-primary)] transition-all duration-500"
+                      :style="{ width: `${(domain.count / maxDomainCount) * 100}%` }"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p v-else class="text-sm text-[var(--ui-text-dimmed)] text-center py-8">
+              No domain data yet
+            </p>
+          </div>
+        </section>
+
+        <!-- Section: Session Journeys -->
+        <section>
+          <div class="mb-6">
+            <h2 class="text-lg font-semibold text-[var(--ui-text-highlighted)]">
+              Session Journeys
+            </h2>
+            <p class="text-sm text-[var(--ui-text-dimmed)]">
+              Tool usage patterns per session
+            </p>
+          </div>
+
+          <div class="rounded-xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] overflow-hidden">
+            <div v-if="insightsData?.journeys?.length" class="divide-y divide-[var(--ui-border)]">
+              <div v-for="journey in insightsData.journeys" :key="journey.sessionId">
+                <button
+                  class="w-full px-5 py-4 flex items-center gap-4 hover:bg-[var(--ui-bg)] transition-colors text-left"
+                  @click="toggleJourney(journey.sessionId)"
+                >
+                  <UIcon
+                    name="i-carbon-chevron-right"
+                    class="w-4 h-4 text-[var(--ui-text-dimmed)] transition-transform shrink-0"
+                    :class="{ 'rotate-90': expandedJourneys.has(journey.sessionId) }"
+                  />
+                  <code class="text-xs font-mono text-[var(--ui-text-muted)]">{{ journey.sessionId.slice(0, 12) }}</code>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-mono bg-[var(--ui-primary)]/10 text-[var(--ui-primary)]">
+                    {{ journey.toolCount }} tools
+                  </span>
+                  <div class="flex items-center gap-1.5 flex-1 min-w-0">
+                    <div
+                      v-for="(lookup, li) in journey.lookups.slice(0, 8)"
+                      :key="li"
+                      class="w-6 h-6 rounded flex items-center justify-center shrink-0"
+                      :class="`bg-${getToolMeta(lookup.tool).color}-500/10`"
+                      :title="getToolMeta(lookup.tool).name"
+                    >
+                      <UIcon :name="getToolMeta(lookup.tool).icon" class="w-3 h-3" :class="`text-${getToolMeta(lookup.tool).color}-500`" />
+                    </div>
+                    <span v-if="journey.lookups.length > 8" class="text-xs text-[var(--ui-text-dimmed)]">+{{ journey.lookups.length - 8 }}</span>
+                  </div>
+                  <div v-if="journey.feedback.length" class="flex items-center gap-1 shrink-0">
+                    <UIcon name="i-carbon-chat" class="w-3.5 h-3.5 text-[var(--ui-text-dimmed)]" />
+                    <span class="text-xs text-[var(--ui-text-dimmed)]">{{ journey.feedback.length }}</span>
+                  </div>
+                </button>
+                <!-- Expanded detail -->
+                <div v-if="expandedJourneys.has(journey.sessionId)" class="px-5 pb-4 pl-13 space-y-2">
+                  <div
+                    v-for="(lookup, li) in journey.lookups"
+                    :key="li"
+                    class="flex items-center gap-3 text-sm"
+                  >
+                    <div
+                      class="w-6 h-6 rounded flex items-center justify-center shrink-0"
+                      :class="`bg-${getToolMeta(lookup.tool).color}-500/10`"
+                    >
+                      <UIcon :name="getToolMeta(lookup.tool).icon" class="w-3 h-3" :class="`text-${getToolMeta(lookup.tool).color}-500`" />
+                    </div>
+                    <span class="text-[var(--ui-text-highlighted)]">{{ getToolMeta(lookup.tool).name }}</span>
+                    <code class="text-xs text-[var(--ui-text-muted)]">{{ lookup.query }}</code>
+                    <span class="text-xs text-[var(--ui-text-dimmed)] ml-auto">{{ formatRelativeTime(new Date(typeof lookup.createdAt === 'number' ? lookup.createdAt * 1000 : lookup.createdAt)) }}</span>
+                  </div>
+                  <div
+                    v-for="(fb, fi) in journey.feedback"
+                    :key="`fb-${fi}`"
+                    class="flex items-center gap-3 text-sm"
+                  >
+                    <div class="w-6 h-6 rounded flex items-center justify-center shrink-0 bg-gray-500/10">
+                      <UIcon :name="fb.thumb === 'up' ? 'i-carbon-thumbs-up-filled' : fb.thumb === 'down' ? 'i-carbon-thumbs-down-filled' : 'i-carbon-chat'" class="w-3 h-3" :class="fb.thumb === 'up' ? 'text-emerald-500' : fb.thumb === 'down' ? 'text-red-500' : 'text-[var(--ui-text-dimmed)]'" />
+                    </div>
+                    <span class="text-[var(--ui-text-muted)]">Feedback on {{ getToolMeta(fb.path).name }}</span>
+                    <span class="text-xs text-[var(--ui-text-dimmed)] ml-auto">{{ formatRelativeTime(new Date(typeof fb.createdAt === 'number' ? fb.createdAt * 1000 : fb.createdAt)) }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div v-else-if="insightsStatus === 'pending'" class="p-12">
+              <div class="flex flex-col items-center">
+                <div class="w-12 h-12 rounded-xl bg-[var(--ui-bg)] flex items-center justify-center mb-4">
+                  <UIcon name="i-carbon-renew" class="w-5 h-5 text-[var(--ui-text-dimmed)] animate-spin" />
+                </div>
+                <p class="text-sm text-[var(--ui-text-muted)]">
+                  Loading journeys...
+                </p>
+              </div>
+            </div>
+            <div v-else class="p-12">
+              <div class="flex flex-col items-center">
+                <div class="w-12 h-12 rounded-xl bg-[var(--ui-bg)] flex items-center justify-center mb-4">
+                  <UIcon name="i-carbon-flow" class="w-5 h-5 text-[var(--ui-text-dimmed)]" />
+                </div>
+                <p class="text-sm font-medium text-[var(--ui-text-highlighted)] mb-1">
+                  No session journeys
+                </p>
+                <p class="text-xs text-[var(--ui-text-dimmed)]">
+                  Session data will appear here
+                </p>
+              </div>
             </div>
           </div>
         </section>

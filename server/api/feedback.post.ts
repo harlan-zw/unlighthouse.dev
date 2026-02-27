@@ -17,6 +17,7 @@ export default defineEventHandler(async (event) => {
       comment,
       metadata: { ...context, toolId },
       userId: (session?.user as Record<string, string> | undefined)?.id || null,
+      sessionId: getSessionId(event),
     }).catch(err => console.error('Failed to save comment feedback:', err))
   }
 

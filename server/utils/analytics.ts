@@ -3,6 +3,18 @@ import type { ToolName } from '../database/schema'
 import { toolLookups } from '../database/schema'
 import { useDB } from './db'
 
+const SESSION_COOKIE = 'analytics-session'
+const SESSION_MAX_AGE = 60 * 60 * 24 * 365 // 1 year
+
+export function getSessionId(event: H3Event): string {
+  const existing = getCookie(event, SESSION_COOKIE)
+  if (existing)
+    return existing
+  const id = crypto.randomUUID().substring(0, 8)
+  setCookie(event, SESSION_COOKIE, id, { maxAge: SESSION_MAX_AGE, path: '/', httpOnly: true, sameSite: 'lax' })
+  return id
+}
+
 export interface AnalyticsDataPoint {
   blobs: string[]
   doubles: number[]
@@ -27,7 +39,7 @@ export async function trackToolUsage(
   if (!analytics)
     return
 
-  const sessionId = getCookie(event, 'analytics-session') || crypto.randomUUID()
+  const sessionId = getSessionId(event)
   const timestamp = Date.now()
 
   const dataPoint: AnalyticsDataPoint = {
@@ -81,6 +93,7 @@ export async function trackToolLookup(
 
   useDB(event).insert(toolLookups).values({
     userId: session?.user?.id || null,
+    sessionId: getSessionId(event),
     tool,
     query: domain,
     strategy,
