@@ -205,11 +205,11 @@ const ttfbFactors = [
 ]
 
 const ttfbTips = [
-  { icon: 'i-heroicons-cloud', label: 'Use a CDN', desc: 'Serve content closer to users' },
-  { icon: 'i-heroicons-archive-box', label: 'Enable server caching', desc: 'Cache database queries and pages' },
+  { icon: 'i-heroicons-cloud', label: 'Use a CDN', desc: 'Serve content closer to users', link: '/learn-lighthouse/lcp/slow-server-response' },
+  { icon: 'i-heroicons-archive-box', label: 'Enable server caching', desc: 'Cache database queries and pages', link: '/learn-lighthouse/lcp/slow-server-response' },
   { icon: 'i-heroicons-circle-stack', label: 'Optimize database', desc: 'Index queries, use connection pooling' },
   { icon: 'i-heroicons-bolt', label: 'Use HTTP/2 or HTTP/3', desc: 'Modern protocols reduce latency' },
-  { icon: 'i-heroicons-arrow-uturn-left', label: 'Reduce redirects', desc: 'Each redirect adds round-trip time' },
+  { icon: 'i-heroicons-arrow-uturn-left', label: 'Reduce redirects', desc: 'Each redirect adds round-trip time', link: '/learn-lighthouse/lcp/redirects' },
 ]
 </script>
 
@@ -631,22 +631,33 @@ const ttfbTips = [
                   </h3>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div
+                  <component
+                    :is="tip.link ? resolveComponent('NuxtLink') : 'div'"
                     v-for="tip in ttfbTips"
                     :key="tip.label"
+                    :to="tip.link"
                     class="flex items-start gap-3 p-3 rounded-lg bg-white/60 dark:bg-gray-800/60"
+                    :class="tip.link ? 'hover:bg-white dark:hover:bg-gray-800 transition-colors group' : ''"
                   >
                     <UIcon :name="tip.icon" class="w-5 h-5 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
                     <div>
                       <p class="text-sm font-medium text-gray-900 dark:text-white">
                         {{ tip.label }}
+                        <UIcon v-if="tip.link" name="i-heroicons-arrow-right" class="inline w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </p>
                       <p class="text-xs text-gray-600 dark:text-gray-400">
                         {{ tip.desc }}
                       </p>
                     </div>
-                  </div>
+                  </component>
                 </div>
+                <NuxtLink
+                  to="/glossary/ttfb"
+                  class="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 transition-colors"
+                >
+                  Learn more about TTFB
+                  <UIcon name="i-heroicons-arrow-right" class="w-4 h-4" />
+                </NuxtLink>
               </div>
 
               <!-- Feedback -->

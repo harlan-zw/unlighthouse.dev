@@ -71,6 +71,18 @@ const isDragging = ref(false)
 const pasteText = ref('')
 const showPasteModal = ref(false)
 
+function loadSample() {
+  loading.value = true
+  $fetch('/lighthouse-sample.json')
+    .then((data) => {
+      loadFromText(JSON.stringify(data))
+    })
+    .catch(() => {
+      error.value = 'Failed to load sample report'
+      loading.value = false
+    })
+}
+
 function handleDrop(e: DragEvent) {
   isDragging.value = false
   const file = e.dataTransfer?.files[0]
@@ -215,6 +227,10 @@ const categoryDisplayData = computed(() => {
                     <UButton variant="soft" size="sm" color="neutral" @click.stop="showPasteModal = true">
                       <UIcon name="i-heroicons-clipboard-document" class="w-4 h-4 mr-1" />
                       Paste JSON
+                    </UButton>
+                    <UButton variant="soft" size="sm" color="primary" @click.stop="loadSample">
+                      <UIcon name="i-heroicons-beaker" class="w-4 h-4 mr-1" />
+                      Load Sample
                     </UButton>
                   </div>
                 </div>
@@ -531,7 +547,7 @@ const categoryDisplayData = computed(() => {
         </div>
 
         <!-- Feedback -->
-        <ToolsToolFeedback tool-id="lighthouse-report-viewer" :context="{ hasReport: !!report }" />
+        <ToolFeedback tool-id="lighthouse-report-viewer" :context="{ hasReport: !!report }" />
 
         <!-- FAQ Section -->
         <ToolFaq :faqs="faqs" color="purple" />

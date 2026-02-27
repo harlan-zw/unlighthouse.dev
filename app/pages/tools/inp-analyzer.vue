@@ -901,7 +901,7 @@ const insights = computed<InpInsight[]>(() => {
               </div>
 
               <!-- Feedback -->
-              <ToolsToolFeedback tool-id="inp-analyzer" :context="{ url: urlInput, strategy }" />
+              <ToolFeedback tool-id="inp-analyzer" :context="{ url: urlInput, strategy }" />
             </div>
           </div>
         </div>

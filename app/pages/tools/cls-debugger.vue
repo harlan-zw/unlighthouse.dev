@@ -864,7 +864,7 @@ const insights = computed<ClsInsight[]>(() => {
               </div>
 
               <!-- Feedback -->
-              <ToolsToolFeedback tool-id="cls-debugger" :context="{ url: urlInput, strategy }" />
+              <ToolFeedback tool-id="cls-debugger" :context="{ url: urlInput, strategy }" />
             </div>
           </div>
         </div>

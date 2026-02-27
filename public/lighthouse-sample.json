@@ -1,0 +1,271 @@
+{
+  "lighthouseVersion": "12.0.0",
+  "requestedUrl": "https://example.com/",
+  "finalUrl": "https://example.com/",
+  "fetchTime": "2025-01-19T16:30:00.000Z",
+  "userAgent": "Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 Chrome/120.0.0.0 Mobile Safari/537.36",
+  "configSettings": {
+    "formFactor": "mobile",
+    "throttlingMethod": "simulate",
+    "screenEmulation": { "mobile": true }
+  },
+  "categories": {
+    "performance": {
+      "id": "performance",
+      "title": "Performance",
+      "score": 0.87,
+      "auditRefs": [
+        { "id": "first-contentful-paint", "weight": 10, "group": "metrics" },
+        { "id": "speed-index", "weight": 10, "group": "metrics" },
+        { "id": "largest-contentful-paint", "weight": 25, "group": "metrics" },
+        { "id": "total-blocking-time", "weight": 30, "group": "metrics" },
+        { "id": "cumulative-layout-shift", "weight": 25, "group": "metrics" },
+        { "id": "render-blocking-resources", "weight": 0, "group": "load-opportunities" },
+        { "id": "uses-responsive-images", "weight": 0, "group": "load-opportunities" },
+        { "id": "offscreen-images", "weight": 0, "group": "load-opportunities" },
+        { "id": "unminified-css", "weight": 0, "group": "diagnostics" },
+        { "id": "uses-long-cache-ttl", "weight": 0, "group": "diagnostics" },
+        { "id": "dom-size", "weight": 0, "group": "diagnostics" }
+      ]
+    },
+    "accessibility": {
+      "id": "accessibility",
+      "title": "Accessibility",
+      "score": 0.92,
+      "auditRefs": [
+        { "id": "color-contrast", "weight": 7 },
+        { "id": "image-alt", "weight": 10 },
+        { "id": "button-name", "weight": 10 }
+      ]
+    },
+    "best-practices": {
+      "id": "best-practices",
+      "title": "Best Practices",
+      "score": 1.0,
+      "auditRefs": [
+        { "id": "is-on-https", "weight": 5 },
+        { "id": "uses-http2", "weight": 1 }
+      ]
+    },
+    "seo": {
+      "id": "seo",
+      "title": "SEO",
+      "score": 0.95,
+      "auditRefs": [
+        { "id": "meta-description", "weight": 1 },
+        { "id": "document-title", "weight": 1 }
+      ]
+    }
+  },
+  "audits": {
+    "first-contentful-paint": {
+      "id": "first-contentful-paint",
+      "title": "First Contentful Paint",
+      "description": "First Contentful Paint marks the time at which the first text or image is painted.",
+      "score": 0.95,
+      "scoreDisplayMode": "numeric",
+      "displayValue": "1.2 s",
+      "numericValue": 1200,
+      "numericUnit": "millisecond"
+    },
+    "speed-index": {
+      "id": "speed-index",
+      "title": "Speed Index",
+      "description": "Speed Index shows how quickly the contents of a page are visibly populated.",
+      "score": 0.88,
+      "scoreDisplayMode": "numeric",
+      "displayValue": "2.8 s",
+      "numericValue": 2800,
+      "numericUnit": "millisecond"
+    },
+    "largest-contentful-paint": {
+      "id": "largest-contentful-paint",
+      "title": "Largest Contentful Paint",
+      "description": "Largest Contentful Paint marks the time at which the largest text or image is painted.",
+      "score": 0.82,
+      "scoreDisplayMode": "numeric",
+      "displayValue": "2.1 s",
+      "numericValue": 2100,
+      "numericUnit": "millisecond"
+    },
+    "total-blocking-time": {
+      "id": "total-blocking-time",
+      "title": "Total Blocking Time",
+      "description": "Sum of all time periods between FCP and Time to Interactive.",
+      "score": 0.91,
+      "scoreDisplayMode": "numeric",
+      "displayValue": "120 ms",
+      "numericValue": 120,
+      "numericUnit": "millisecond"
+    },
+    "cumulative-layout-shift": {
+      "id": "cumulative-layout-shift",
+      "title": "Cumulative Layout Shift",
+      "description": "Cumulative Layout Shift measures the movement of visible elements within the viewport.",
+      "score": 0.98,
+      "scoreDisplayMode": "numeric",
+      "displayValue": "0.02",
+      "numericValue": 0.02,
+      "numericUnit": "unitless"
+    },
+    "render-blocking-resources": {
+      "id": "render-blocking-resources",
+      "title": "Eliminate render-blocking resources",
+      "description": "Resources are blocking the first paint of your page. Consider delivering critical JS/CSS inline.",
+      "score": 0.65,
+      "scoreDisplayMode": "numeric",
+      "displayValue": "Potential savings of 450 ms",
+      "details": {
+        "type": "opportunity",
+        "headings": [
+          { "key": "url", "valueType": "url", "label": "URL" },
+          { "key": "totalBytes", "valueType": "bytes", "label": "Transfer Size" },
+          { "key": "wastedMs", "valueType": "timespanMs", "label": "Potential Savings" }
+        ],
+        "items": [
+          { "url": "https://example.com/styles/main.css", "totalBytes": 45000, "wastedMs": 250 },
+          { "url": "https://example.com/scripts/vendor.js", "totalBytes": 120000, "wastedMs": 200 }
+        ],
+        "overallSavingsMs": 450,
+        "overallSavingsBytes": 165000
+      }
+    },
+    "uses-responsive-images": {
+      "id": "uses-responsive-images",
+      "title": "Properly size images",
+      "description": "Serve images that are appropriately-sized to save cellular data and improve load time.",
+      "score": 0.7,
+      "scoreDisplayMode": "numeric",
+      "displayValue": "Potential savings of 120 KiB",
+      "details": {
+        "type": "opportunity",
+        "headings": [
+          { "key": "url", "valueType": "url", "label": "URL" },
+          { "key": "totalBytes", "valueType": "bytes", "label": "Resource Size" },
+          { "key": "wastedBytes", "valueType": "bytes", "label": "Potential Savings" }
+        ],
+        "items": [
+          { "url": "https://example.com/images/hero.jpg", "totalBytes": 250000, "wastedBytes": 80000 },
+          { "url": "https://example.com/images/logo.png", "totalBytes": 60000, "wastedBytes": 42000 }
+        ],
+        "overallSavingsBytes": 122000
+      }
+    },
+    "offscreen-images": {
+      "id": "offscreen-images",
+      "title": "Defer offscreen images",
+      "description": "Consider lazy-loading offscreen and hidden images after all critical resources have finished loading.",
+      "score": 0.85,
+      "scoreDisplayMode": "numeric",
+      "displayValue": "Potential savings of 80 KiB",
+      "details": {
+        "type": "opportunity",
+        "headings": [
+          { "key": "url", "valueType": "url", "label": "URL" },
+          { "key": "totalBytes", "valueType": "bytes", "label": "Resource Size" }
+        ],
+        "items": [
+          { "url": "https://example.com/images/footer-bg.jpg", "totalBytes": 82000 }
+        ],
+        "overallSavingsBytes": 82000
+      }
+    },
+    "unminified-css": {
+      "id": "unminified-css",
+      "title": "Minify CSS",
+      "description": "Minifying CSS files can reduce network payload sizes.",
+      "score": 1,
+      "scoreDisplayMode": "binary"
+    },
+    "uses-long-cache-ttl": {
+      "id": "uses-long-cache-ttl",
+      "title": "Serve static assets with an efficient cache policy",
+      "description": "A long cache lifetime can speed up repeat visits to your page.",
+      "score": 0.6,
+      "scoreDisplayMode": "numeric",
+      "displayValue": "12 resources found",
+      "details": {
+        "type": "table",
+        "headings": [
+          { "key": "url", "label": "URL" },
+          { "key": "cacheLifetimeMs", "label": "Cache TTL" }
+        ],
+        "items": [
+          { "url": "https://example.com/styles/main.css", "cacheLifetimeMs": 86400000 },
+          { "url": "https://example.com/scripts/app.js", "cacheLifetimeMs": 3600000 }
+        ]
+      }
+    },
+    "dom-size": {
+      "id": "dom-size",
+      "title": "Avoid an excessive DOM size",
+      "description": "A large DOM will increase memory usage and produce costly layout reflows.",
+      "score": 0.9,
+      "scoreDisplayMode": "numeric",
+      "displayValue": "245 elements",
+      "details": {
+        "type": "table",
+        "headings": [
+          { "key": "statistic", "label": "Statistic" },
+          { "key": "value", "label": "Value" }
+        ],
+        "items": [
+          { "statistic": "Total DOM Elements", "value": 245 },
+          { "statistic": "Maximum DOM Depth", "value": 8 },
+          { "statistic": "Maximum Child Elements", "value": 15 }
+        ]
+      }
+    },
+    "color-contrast": {
+      "id": "color-contrast",
+      "title": "Background and foreground colors have a sufficient contrast ratio",
+      "description": "Low-contrast text is difficult or impossible for many users to read.",
+      "score": 1,
+      "scoreDisplayMode": "binary"
+    },
+    "image-alt": {
+      "id": "image-alt",
+      "title": "Image elements have [alt] attributes",
+      "description": "Informative elements should aim for short, descriptive alternate text.",
+      "score": 1,
+      "scoreDisplayMode": "binary"
+    },
+    "button-name": {
+      "id": "button-name",
+      "title": "Buttons have an accessible name",
+      "description": "When a button doesn't have an accessible name, screen readers announce it as 'button'.",
+      "score": 1,
+      "scoreDisplayMode": "binary"
+    },
+    "is-on-https": {
+      "id": "is-on-https",
+      "title": "Uses HTTPS",
+      "description": "All sites should be protected with HTTPS.",
+      "score": 1,
+      "scoreDisplayMode": "binary"
+    },
+    "uses-http2": {
+      "id": "uses-http2",
+      "title": "Uses HTTP/2",
+      "description": "HTTP/2 offers many benefits over HTTP/1.1.",
+      "score": 1,
+      "scoreDisplayMode": "binary"
+    },
+    "meta-description": {
+      "id": "meta-description",
+      "title": "Document has a meta description",
+      "description": "Meta descriptions may be included in search results.",
+      "score": 1,
+      "scoreDisplayMode": "binary"
+    },
+    "document-title": {
+      "id": "document-title",
+      "title": "Document has a <title> element",
+      "description": "The title gives users insight into the page.",
+      "score": 1,
+      "scoreDisplayMode": "binary"
+    }
+  },
+  "timing": { "total": 8500 },
+  "runWarnings": []
+}

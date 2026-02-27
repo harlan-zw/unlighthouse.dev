@@ -47,6 +47,7 @@ const hasTrackedUse = ref(false)
 // Sync from URL on mount
 onMounted(() => {
   calc.syncFromHash()
+  updateShareUrl()
 
   // Listen for hash changes
   window.addEventListener('hashchange', calc.syncFromHash)
@@ -71,7 +72,10 @@ const syncTimeout = ref<ReturnType<typeof setTimeout> | null>(null)
 watch([calc.device, calc.values], () => {
   if (syncTimeout.value)
     clearTimeout(syncTimeout.value)
-  syncTimeout.value = setTimeout(calc.syncToHash, 300)
+  syncTimeout.value = setTimeout(() => {
+    calc.syncToHash()
+    updateShareUrl()
+  }, 300)
 
   // Track first use
   if (!hasTrackedUse.value) {
@@ -92,6 +96,13 @@ const metricContributions = computed(() =>
     score: calc.metricScores.value[m.id] || 0,
   })),
 )
+
+// Reactive share URL
+const shareUrl = ref('')
+function updateShareUrl() {
+  if (import.meta.client)
+    shareUrl.value = window.location.href
+}
 
 function handleMetricUpdate(id: MetricId, value: number) {
   calc.setMetricValue(id, value)
@@ -234,18 +245,13 @@ function handleMetricUpdate(id: MetricId, value: number) {
             </div>
 
             <!-- Share URL -->
-            <div class="px-3 sm:px-4 py-2 bg-gray-100 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-800">
+            <div class="px-3 sm:px-4 py-2 bg-gray-100 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-800">
               <div class="flex items-center gap-1.5 sm:gap-2">
                 <UIcon name="i-heroicons-link" class="w-3.5 h-3.5 text-gray-400 shrink-0" />
                 <span class="text-[10px] sm:text-xs text-gray-500 shrink-0">Share:</span>
-                <ClientOnly>
-                  <code class="flex-1 font-mono text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-500 truncate">
-                    {{ typeof window !== 'undefined' ? window.location.href : '' }}
-                  </code>
-                  <template #fallback>
-                    <span class="text-[10px] text-gray-400">Loading...</span>
-                  </template>
-                </ClientOnly>
+                <code class="flex-1 font-mono text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                  {{ shareUrl }}
+                </code>
               </div>
             </div>
           </div>
@@ -274,7 +280,7 @@ function handleMetricUpdate(id: MetricId, value: number) {
           </div>
 
           <!-- Right: Score Weights Visualization -->
-          <div class="relative bg-gray-900 rounded-xl p-4 overflow-hidden">
+          <div class="relative bg-gray-900 rounded-xl p-4 overflow-hidden ring-1 ring-gray-800 dark:ring-gray-700">
             <!-- Background glow effects -->
             <div class="absolute top-0 left-1/4 w-24 h-24 bg-violet-500/20 rounded-full blur-2xl" />
             <div class="absolute bottom-0 right-1/4 w-24 h-24 bg-violet-600/15 rounded-full blur-2xl" />
@@ -424,16 +430,16 @@ function handleMetricUpdate(id: MetricId, value: number) {
                 <line x1="40" y1="10" x2="40" y2="150" stroke="currentColor" class="text-gray-300 dark:text-gray-600" stroke-width="1" />
 
                 <!-- Y-axis labels (Score) -->
-                <text x="35" y="15" text-anchor="end" class="text-[9px] fill-gray-500">100</text>
-                <text x="35" y="38" text-anchor="end" class="text-[9px] fill-gray-500">90</text>
-                <text x="35" y="80" text-anchor="end" class="text-[9px] fill-gray-500">50</text>
-                <text x="35" y="150" text-anchor="end" class="text-[9px] fill-gray-500">0</text>
+                <text x="35" y="15" text-anchor="end" class="text-[9px] fill-gray-500 dark:fill-gray-400">100</text>
+                <text x="35" y="38" text-anchor="end" class="text-[9px] fill-gray-500 dark:fill-gray-400">90</text>
+                <text x="35" y="80" text-anchor="end" class="text-[9px] fill-gray-500 dark:fill-gray-400">50</text>
+                <text x="35" y="150" text-anchor="end" class="text-[9px] fill-gray-500 dark:fill-gray-400">0</text>
 
                 <!-- X-axis labels (LCP in seconds) -->
-                <text x="40" y="165" text-anchor="middle" class="text-[9px] fill-gray-500">0s</text>
-                <text x="115" y="165" text-anchor="middle" class="text-[9px] fill-green-600 font-medium">2.5s</text>
-                <text x="170" y="165" text-anchor="middle" class="text-[9px] fill-orange-500 font-medium">4.0s</text>
-                <text x="250" y="165" text-anchor="middle" class="text-[9px] fill-gray-500">8s</text>
+                <text x="40" y="165" text-anchor="middle" class="text-[9px] fill-gray-500 dark:fill-gray-400">0s</text>
+                <text x="115" y="165" text-anchor="middle" class="text-[9px] fill-green-600 dark:fill-green-400 font-medium">2.5s</text>
+                <text x="170" y="165" text-anchor="middle" class="text-[9px] fill-orange-500 dark:fill-orange-400 font-medium">4.0s</text>
+                <text x="250" y="165" text-anchor="middle" class="text-[9px] fill-gray-500 dark:fill-gray-400">8s</text>
 
                 <!-- Scoring curve (log-normal shape) -->
                 <path
@@ -447,7 +453,7 @@ function handleMetricUpdate(id: MetricId, value: number) {
                 <!-- p10 marker (score 90) -->
                 <circle cx="115" cy="35" r="4" fill="#22c55e" />
                 <line x1="115" y1="35" x2="115" y2="150" stroke="#22c55e" stroke-width="1" stroke-dasharray="4,4" />
-                <text x="115" y="178" text-anchor="middle" class="text-[8px] fill-green-600 font-medium">p10 = 90</text>
+                <text x="115" y="178" text-anchor="middle" class="text-[8px] fill-green-600 dark:fill-green-400 font-medium">p10 = 90</text>
 
                 <!-- Median marker (score 50) -->
                 <circle cx="170" cy="80" r="4" fill="#f59e0b" />
@@ -458,7 +464,7 @@ function handleMetricUpdate(id: MetricId, value: number) {
                 <text x="165" y="8" text-anchor="middle" class="text-[10px] fill-gray-600 dark:fill-gray-400 font-medium">Score</text>
                 <text x="290" y="178" text-anchor="end" class="text-[10px] fill-gray-600 dark:fill-gray-400 font-medium">Metric Value →</text>
               </svg>
-              <div class="flex justify-center gap-4 mt-2 text-[10px]">
+              <div class="flex justify-center gap-4 mt-2 text-[10px] text-gray-600 dark:text-gray-400">
                 <span class="flex items-center gap-1">
                   <span class="w-2 h-2 rounded-full bg-green-500" />
                   Good
@@ -475,7 +481,7 @@ function handleMetricUpdate(id: MetricId, value: number) {
             </div>
           </div>
 
-          <p class="text-[11px] text-gray-500 dark:text-gray-500 pt-3 mt-3 border-t border-gray-200 dark:border-gray-700">
+          <p class="text-[11px] text-gray-500 dark:text-gray-400 pt-3 mt-3 border-t border-gray-200 dark:border-gray-700">
             Source: <a href="https://developer.chrome.com/docs/lighthouse/performance/performance-scoring" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">Chrome Developers - Lighthouse Performance Scoring</a>
           </p>
         </div>
@@ -896,7 +902,7 @@ function handleMetricUpdate(id: MetricId, value: number) {
         </div>
 
         <!-- Feedback -->
-        <ToolsToolFeedback tool-id="lighthouse-score-calculator" :context="{}" />
+        <ToolFeedback tool-id="lighthouse-score-calculator" :context="{}" />
 
         <!-- FAQ Section -->
         <ToolFaq :faqs="faqs" color="violet" />

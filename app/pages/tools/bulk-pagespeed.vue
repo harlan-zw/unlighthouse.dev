@@ -784,7 +784,7 @@ https://example.com/pricing"
       </div>
 
       <!-- Feedback -->
-      <ToolsToolFeedback v-if="summary" tool-id="bulk-pagespeed" :context="{ device, urlCount: summary.totalUrls }" />
+      <ToolFeedback v-if="summary" tool-id="bulk-pagespeed" :context="{ device, urlCount: summary.totalUrls }" />
     </div>
 
     <!-- FAQ Section -->
