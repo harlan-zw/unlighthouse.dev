@@ -61,7 +61,7 @@ export default ({
     },
     colors: {
       primary: 'violet',
-      neutral: 'slate',
+      neutral: 'mauve',
       pro: 'violet',
     },
     separator: {
