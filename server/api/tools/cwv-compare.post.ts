@@ -51,14 +51,6 @@ const thresholds = {
   ttfb: { good: 800, poor: 1800 },
 }
 
-function getRating(metric: keyof typeof thresholds, value: number): 'good' | 'needs-improvement' | 'poor' {
-  if (value <= thresholds[metric].good)
-    return 'good'
-  if (value <= thresholds[metric].poor)
-    return 'needs-improvement'
-  return 'poor'
-}
-
 function passesMetric(metric: keyof typeof thresholds, value: number | undefined): boolean {
   return value !== undefined && value <= thresholds[metric].good
 }

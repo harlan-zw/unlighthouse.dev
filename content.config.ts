@@ -49,36 +49,6 @@ function resolvableUnlighthouseCollection() {
 }
 
 // Local content collections
-const blog = defineCollection(asSeoCollection({
-  schema,
-  type: 'page',
-  source: {
-    include: '**/*.md',
-    cwd: 'content/blog',
-    prefix: '/blog',
-  },
-}))
-
-const cloud = defineCollection(asSeoCollection({
-  schema,
-  type: 'page',
-  source: {
-    include: '**/*.md',
-    cwd: 'content/cloud',
-    prefix: '/cloud',
-  },
-}))
-
-const tools = defineCollection(asSeoCollection({
-  schema,
-  type: 'page',
-  source: {
-    include: '**/*.md',
-    cwd: 'content/tools',
-    prefix: '/tools',
-  },
-}))
-
 const glossary = defineCollection(asSeoCollection({
   schema,
   type: 'page',
@@ -96,36 +66,6 @@ const learnLighthouse = defineCollection(asSeoCollection({
     include: '**/*.md',
     cwd: 'content/learn-lighthouse',
     prefix: '/learn-lighthouse',
-  },
-}))
-
-const compare = defineCollection(asSeoCollection({
-  schema,
-  type: 'page',
-  source: {
-    include: '**/*.md',
-    cwd: 'content/compare',
-    prefix: '/compare',
-  },
-}))
-
-const automation = defineCollection(asSeoCollection({
-  schema,
-  type: 'page',
-  source: {
-    include: '**/*.md',
-    cwd: 'content/automation',
-    prefix: '/automation',
-  },
-}))
-
-const frameworks = defineCollection(asSeoCollection({
-  schema,
-  type: 'page',
-  source: {
-    include: '**/*.md',
-    cwd: 'content/frameworks',
-    prefix: '/frameworks',
   },
 }))
 

@@ -1,4 +1,3 @@
-/* eslint-disable */
 <script lang="ts">
 import type { AvatarProps, LinkProps } from '#ui/types'
 import type { DynamicSlots, PartialString } from '#ui/types/utils'
@@ -21,9 +20,9 @@ const props = defineProps<BreadcrumbProps<T>>()
 
 const slots = defineSlots<BreadcrumbSlots<T>>()
 
-const appConfig = _appConfig as AppConfig & { ui: { breadcrumb: Partial<typeof theme> } }
+const _config = _appConfig as AppConfig & { ui: { breadcrumb: Partial<typeof theme> } }
 
-const breadcrumb = tv({ extend: tv(theme), ...(appConfig.ui?.breadcrumb || {}) })
+const breadcrumb = tv({ extend: tv(theme), ...(_config.ui?.breadcrumb || {}) })
 
 export interface BreadcrumbItem extends Omit<LinkProps, 'raw' | 'custom'> {
   label?: string
@@ -55,7 +54,7 @@ export type BreadcrumbSlots<T extends { slot?: string }> = {
   'item-leading': SlotProps<T>
   'item-label': SlotProps<T>
   'item-trailing': SlotProps<T>
-  'separator': (props?: {}) => any
+  'separator': (props?: Record<string, never>) => any
 } & DynamicSlots<T, SlotProps<T>>
 
 const appConfig = useAppConfig()

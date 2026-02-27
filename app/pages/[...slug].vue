@@ -16,7 +16,7 @@ if (!page.value?.id) {
 }
 
 // Handle client-side navigation
-watch(() => route.path, async (newPath) => {
+watch(() => route.path, async () => {
   const data = await useCurrentDocPage()
   page.value = data.page.value
   surround.value = data.surround.value

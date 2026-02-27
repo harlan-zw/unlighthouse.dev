@@ -2,7 +2,7 @@
 const props = withDefaults(defineProps<{
   title?: string
   icon?: string
-  color: 'violet' | 'blue' | 'green' | 'purple' | 'cyan' | 'red' | 'orange' | 'emerald' | 'amber'
+  color?: 'violet' | 'blue' | 'green' | 'purple' | 'cyan' | 'red' | 'orange' | 'emerald' | 'amber'
   to?: string
 }>(), {
   color: 'violet',

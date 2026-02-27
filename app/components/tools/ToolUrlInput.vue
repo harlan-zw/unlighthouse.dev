@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const props = defineProps<{
+defineProps<{
   placeholder?: string
   loading?: boolean
   loadingText?: string

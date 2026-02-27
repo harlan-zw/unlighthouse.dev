@@ -297,7 +297,6 @@ const insights = computed<InpInsight[]>(() => {
 
   const items: InpInsight[] = []
   const tbtScore = result.value.tbt.score
-  const tbtValue = result.value.tbt.value
   const taskMetrics = result.value.taskMetrics
   const thirdParties = result.value.thirdParties
   const framework = result.value.framework

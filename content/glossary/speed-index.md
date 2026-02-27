@@ -1,10 +1,14 @@
 ---
-title: "What is Speed Index?"
-description: "Speed Index measures visual loading progress. Learn what it is, thresholds, and how to improve it."
+title: "What is Speed Index? Thresholds & Scores"
+description: "Speed Index measures how fast visible content fills the viewport. Mobile threshold: 3.4s (good). Desktop: 1.3s. Accounts for 10% of Lighthouse score."
 keywords:
   - what is speed index
   - speed index meaning
   - speed index definition
+  - speed index lighthouse
+  - speed index good score
+  - speed index threshold
+  - speed index vs lcp
 navigation:
   title: "Speed Index"
 relatedPages:

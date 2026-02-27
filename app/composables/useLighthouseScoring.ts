@@ -77,7 +77,6 @@ function internalErf(x: number): number {
 
 // Attempt inverse error function via Newton's method
 function internalErfInv(x: number): number {
-  const z = Math.sqrt(-Math.log((1 - x) / 2))
   const a = 0.147
   let y = ((2 / (Math.PI * a) + Math.log(1 - x * x) / 2) ** 2 - Math.log(1 - x * x) / a) ** 0.5 - (2 / (Math.PI * a) + Math.log(1 - x * x) / 2)
 
@@ -93,16 +92,6 @@ function internalErfInv(x: number): number {
   }
 
   return y
-}
-
-// Derive point of diminishing returns from p10
-function derivePodrFromP10(median: number, p10: number): number {
-  // podr is the value at which the log-normal CDF equals 0.9 (i.e., 10th percentile from top)
-  // For log-normal: ln(podr) = mu + sigma * z_0.9
-  // We know: ln(p10) = mu + sigma * z_0.9 and ln(median) = mu
-  // So: sigma = (ln(median) - ln(p10)) / (z_0.9 - z_0.5)
-  // z_0.9 ≈ 1.282, z_0.5 = 0
-  return p10
 }
 
 // Calculate score (0-1) from metric value using log-normal distribution
@@ -177,7 +166,6 @@ export function getScoreColor(score: number): string {
     return '#22c55e' // green
   if (score >= 0.5) {
     // Interpolate between orange and green
-    const t = (score - 0.5) / 0.4
     return score >= 0.7 ? '#84cc16' : '#f97316' // lime or orange
   }
   return '#ef4444' // red

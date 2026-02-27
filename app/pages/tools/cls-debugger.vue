@@ -59,8 +59,8 @@ const faqs = [
 ]
 
 useToolSeo({
-  title: 'CLS Debugger - Find Layout Shift Culprits',
-  description: 'Free CLS testing tool to identify Cumulative Layout Shift culprits. Find exactly which elements cause layout shifts and get actionable fixes.',
+  title: 'CLS Debugger - Free Layout Shift Testing Tool',
+  description: 'Free CLS testing tool. Enter a URL to find which elements cause Cumulative Layout Shift and get actionable fixes. No signup required.',
   faqs,
 })
 
@@ -251,10 +251,6 @@ function formatScore(score: number) {
   return score.toFixed(3)
 }
 
-function formatMs(ms: number) {
-  return ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${Math.round(ms)}ms`
-}
-
 // Calculate position on threshold bar (0-100%)
 const thresholdPosition = computed(() => {
   if (!result.value)
@@ -271,13 +267,6 @@ const thresholdPosition = computed(() => {
     const cappedCls = Math.min(cls, 0.5)
     return 65 + ((cappedCls - 0.25) / 0.25) * 35
   }
-})
-
-// Get total shift score from top elements
-const totalShiftScore = computed(() => {
-  if (!result.value?.shiftElements.length)
-    return 0
-  return result.value.shiftElements.reduce((sum, el) => sum + el.score, 0)
 })
 
 // Severity color helper

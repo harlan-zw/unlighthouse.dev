@@ -32,8 +32,8 @@ const faqs = [
 ]
 
 useToolSeo({
-  title: 'Lighthouse Report Viewer - Upload & Analyze JSON Reports',
-  description: 'Free Lighthouse JSON report viewer. Upload and visualize your Lighthouse audit results with interactive scores, metrics, and detailed breakdowns.',
+  title: 'Lighthouse Report Viewer - JSON Report Analyzer',
+  description: 'Free Lighthouse JSON report viewer. Upload or paste your Lighthouse JSON to visualize scores, metrics, and audit details. Works with PageSpeed API output.',
   faqs,
 })
 

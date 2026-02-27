@@ -112,7 +112,6 @@ async function addToCart() {
   isProcessing.value = true
   showFeedback.value = false
   mainThreadBlocks.value = []
-  const startTime = performance.now()
 
   const scenario = selectedScenario.value
   const totalDuration = scenario.blocks.reduce((sum, b) => sum + b.duration, 0)

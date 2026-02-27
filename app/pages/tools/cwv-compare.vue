@@ -158,9 +158,17 @@ function isWinner(comp: SiteComparison, metric: MetricKey): boolean {
   return result.value?.winners[metric] === comp.url
 }
 
+// Overall winner considers Core Web Vitals pass rate and combined metric performance.
 function isOverallWinner(comp: SiteComparison): boolean {
   return result.value?.winners.overall === comp.url
 }
+
+const siteColors = [
+  { stroke: 'rgb(249 115 22)', fill: 'rgba(249, 115, 22, 0.15)', class: 'text-orange-500', bg: 'bg-orange-500' },
+  { stroke: 'rgb(59 130 246)', fill: 'rgba(59, 130, 246, 0.15)', class: 'text-blue-500', bg: 'bg-blue-500' },
+  { stroke: 'rgb(168 85 247)', fill: 'rgba(168, 85, 247, 0.15)', class: 'text-purple-500', bg: 'bg-purple-500' },
+  { stroke: 'rgb(20 184 166)', fill: 'rgba(20, 184, 166, 0.15)', class: 'text-teal-500', bg: 'bg-teal-500' },
+]
 
 // Chart data for trend comparison
 const trendChartData = computed(() => {
@@ -235,13 +243,6 @@ const trendChartData = computed(() => {
     def,
   }
 })
-
-const siteColors = [
-  { stroke: 'rgb(249 115 22)', fill: 'rgba(249, 115, 22, 0.15)', class: 'text-orange-500', bg: 'bg-orange-500' },
-  { stroke: 'rgb(59 130 246)', fill: 'rgba(59, 130, 246, 0.15)', class: 'text-blue-500', bg: 'bg-blue-500' },
-  { stroke: 'rgb(168 85 247)', fill: 'rgba(168, 85, 247, 0.15)', class: 'text-purple-500', bg: 'bg-purple-500' },
-  { stroke: 'rgb(20 184 166)', fill: 'rgba(20, 184, 166, 0.15)', class: 'text-teal-500', bg: 'bg-teal-500' },
-]
 
 const ratingColors: Record<CruxRating | 'null', { bg: string, border: string, text: string, badge: string }> = {
   'good': {
@@ -540,7 +541,7 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
                     </div>
                   </div>
                   <div class="flex items-center gap-2">
-                    <template v-for="(comp, idx) in result.comparisons.filter(c => c.url === result!.winners.overall)" :key="comp.url">
+                    <template v-for="comp in result.comparisons.filter(c => c.url === result!.winners.overall)" :key="comp.url">
                       <div class="px-4 py-2 rounded-xl bg-white/20 backdrop-blur-sm text-white text-sm font-bold">
                         {{ comp.cwvScore }}/3 CWV Passed
                       </div>
@@ -787,7 +788,7 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
                       <line x1="0" :y1="trendChartData.poorY" x2="100" :y2="trendChartData.poorY" stroke="rgb(239 68 68)" stroke-width="0.3" stroke-dasharray="2,2" />
 
                       <!-- Site lines -->
-                      <template v-for="(series, idx) in trendChartData.series" :key="series.url">
+                      <template v-for="series in trendChartData.series" :key="series.url">
                         <path
                           v-if="series.path"
                           :d="series.path"
@@ -819,7 +820,7 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
                   <!-- Legend -->
                   <div class="flex flex-wrap items-center justify-center gap-4 mt-4">
                     <div
-                      v-for="(series, idx) in trendChartData.series"
+                      v-for="series in trendChartData.series"
                       :key="series.url"
                       class="flex items-center gap-2"
                     >

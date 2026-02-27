@@ -40,7 +40,7 @@ const toolsNav = computed(() => resourcesMenu.value.find(i => i.label === 'Tools
         </template>
       </UNavigationMenu>
       <UNavigationMenu :ui="{ viewport: 'min-w-[680px]' }" :items="[toolsNav]" class="hidden lg:flex justify-center">
-        <template #item-content="{ item }">
+        <template #item-content>
           <ToolsMenu />
         </template>
       </UNavigationMenu>

@@ -1,6 +1,6 @@
 import { parseURL, withHttps } from 'ufo'
 
-const VALID_URL_RE = /^(https?:\/\/)?[a-zA-Z0-9][-a-zA-Z0-9]*(\.[a-zA-Z0-9][-a-zA-Z0-9]*)+(\/\S*)?$/
+const VALID_URL_RE = /^(?:https?:\/\/)?[a-zA-Z0-9][-a-zA-Z0-9]*(?:\.[a-zA-Z0-9][-a-zA-Z0-9]*)+(?:\/\S*)?$/
 
 export function isValidUrl(url: string) {
   return VALID_URL_RE.test(url)
