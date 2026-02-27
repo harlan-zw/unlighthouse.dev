@@ -1,6 +1,6 @@
 ---
-title: "What is Speed Index? Thresholds & Scores"
-description: "Speed Index measures how fast visible content fills the viewport. Mobile threshold: 3.4s (good). Desktop: 1.3s. Accounts for 10% of Lighthouse score."
+title: "Speed Index: What It Is, Good Scores & How to Improve"
+description: "Speed Index measures how fast visible content fills the viewport. Good score: ≤3.4s mobile, ≤1.3s desktop. 10% of Lighthouse performance score. Learn thresholds and fixes."
 keywords:
   - what is speed index
   - speed index meaning
@@ -9,6 +9,10 @@ keywords:
   - speed index good score
   - speed index threshold
   - speed index vs lcp
+  - speed index test
+  - speed index score
+  - improve speed index
+  - lighthouse speed index
 navigation:
   title: "Speed Index"
 relatedPages:
@@ -16,6 +20,10 @@ relatedPages:
     title: First Contentful Paint (FCP)
   - path: /glossary/lcp
     title: Largest Contentful Paint (LCP)
+  - path: /tools/lighthouse-score-calculator
+    title: Lighthouse Score Calculator
+  - path: /learn-lighthouse/lcp/render-blocking-resources
+    title: Fix Render-Blocking Resources
 ---
 
 Speed Index measures how quickly visible content populates the viewport during load. It captures overall visual loading experience rather than a single moment, contributing 10% to your Lighthouse score.

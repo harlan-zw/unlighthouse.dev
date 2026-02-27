@@ -7,13 +7,13 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: 'Performance Tools - Lighthouse Calculators & Analyzers',
-  description: 'Free web performance tools: Lighthouse score calculator, Core Web Vitals analyzers, and more.',
+  title: 'Free Lighthouse & Core Web Vitals Tools',
+  description: 'Free bulk Core Web Vitals checker, Lighthouse score calculator, CLS debugger, LCP finder, and more. Test multiple pages at once with no signup.',
 })
 
 defineOgImage('NuxtSeo', {
-  title: 'Performance Tools',
-  description: 'Free Lighthouse calculators and analyzers',
+  title: 'Free Lighthouse & CWV Tools',
+  description: 'Bulk testing, score calculators, and CWV analyzers',
   theme: '#a855f7',
 })
 

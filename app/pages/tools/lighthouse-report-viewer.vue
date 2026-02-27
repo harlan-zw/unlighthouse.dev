@@ -29,11 +29,15 @@ const faqs = [
     question: 'Why use a Lighthouse report viewer instead of the HTML report?',
     answer: 'JSON reports are smaller, easier to store, and work better with automation. This viewer provides the same visual experience as HTML reports, with additional features like dark mode, better mobile support, and the ability to quickly inspect specific audits.',
   },
+  {
+    question: 'Is this Lighthouse viewer free?',
+    answer: 'Yes, this Lighthouse JSON viewer is completely free with no signup required. Your report data stays in your browser and is never uploaded to any server. Use it as often as you need for viewing and analyzing Lighthouse reports.',
+  },
 ]
 
 useToolSeo({
-  title: 'Lighthouse Report Viewer - JSON Report Analyzer',
-  description: 'Free Lighthouse JSON report viewer. Upload or paste your Lighthouse JSON to visualize scores, metrics, and audit details. Works with PageSpeed API output.',
+  title: 'Free Lighthouse Viewer - View JSON Reports Online',
+  description: 'Free online Lighthouse viewer. Upload or paste Lighthouse JSON to view scores, Core Web Vitals, and audit details. Works with PageSpeed Insights API output and Chrome DevTools exports.',
   faqs,
 })
 

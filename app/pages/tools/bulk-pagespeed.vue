@@ -30,8 +30,8 @@ const faqs = [
 ]
 
 useToolSeo({
-  title: 'Bulk PageSpeed Insights Test - Test Multiple URLs Free',
-  description: 'Free bulk PageSpeed testing tool. Test up to 10 URLs at once with the PageSpeed Insights API. Get Lighthouse scores and Core Web Vitals for multiple pages.',
+  title: 'Bulk PageSpeed & Core Web Vitals Test - Free Multi-URL Tool',
+  description: 'Free bulk Core Web Vitals and PageSpeed test. Check LCP, CLS, INP for up to 10 URLs at once. Get Lighthouse scores and CWV pass/fail for multiple pages.',
   faqs,
 })
 
@@ -814,13 +814,7 @@ https://example.com/pricing"
     </div>
 
     <!-- Upsell Section -->
-    <div
-      v-motion
-      :initial="{ opacity: 0, y: 20 }"
-      :animate="{ opacity: 1, y: 0 }"
-      :transition="{ delay: 0.2 }"
-      class="max-w-4xl mt-12"
-    >
+    <div class="max-w-4xl mt-12">
       <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-transparent border border-amber-200 dark:border-amber-800/50 p-6 md:p-8">
         <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-amber-500/10 to-transparent rounded-full blur-3xl -mr-32 -mt-32" />
 
