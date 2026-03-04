@@ -35,7 +35,7 @@ const sectionConfig: Record<string, { label: string, description: string, icon: 
     label: 'Automation',
     description: 'CI/CD & APIs',
     icon: 'i-heroicons-cog-6-tooth',
-    paths: ['lighthouse-ci', 'playwright', 'pagespeed-insights-api', 'bulk-lighthouse-testing'],
+    paths: ['lighthouse-ci', 'playwright', 'pagespeed-insights-api', 'pagespeed-insights-vs-lighthouse', 'bulk-lighthouse-testing'],
   },
 }
 
@@ -51,6 +51,7 @@ const itemConfig: Record<string, { icon: string, title: string }> = {
   'lighthouse-ci': { icon: 'i-heroicons-play-circle', title: 'Lighthouse CI' },
   'playwright': { icon: 'i-simple-icons-playwright', title: 'Playwright' },
   'pagespeed-insights-api': { icon: 'i-heroicons-code-bracket', title: 'PSI API' },
+  'pagespeed-insights-vs-lighthouse': { icon: 'i-heroicons-scale', title: 'PSI vs Lighthouse' },
   'bulk-lighthouse-testing': { icon: 'i-heroicons-squares-2x2', title: 'Bulk Testing' },
 }
 

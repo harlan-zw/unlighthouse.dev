@@ -33,11 +33,15 @@ const faqs = [
     question: 'Is this Lighthouse viewer free?',
     answer: 'Yes, this Lighthouse JSON viewer is completely free with no signup required. Your report data stays in your browser and is never uploaded to any server. Use it as often as you need for viewing and analyzing Lighthouse reports.',
   },
+  {
+    question: 'How do I view a Lighthouse report online?',
+    answer: 'Use this free Lighthouse report viewer to view reports online. Upload a JSON file, paste JSON content, or load a sample report. The viewer displays all scores, Core Web Vitals metrics, performance opportunities, and audit results in an interactive format—no installation required.',
+  },
 ]
 
 useToolSeo({
-  title: 'Free Lighthouse Viewer - View JSON Reports Online',
-  description: 'Free online Lighthouse viewer. Upload or paste Lighthouse JSON to view scores, Core Web Vitals, and audit details. Works with PageSpeed Insights API output and Chrome DevTools exports.',
+  title: 'Lighthouse Report Viewer - Analyze JSON Reports Online Free',
+  description: 'Free Lighthouse JSON viewer and report analyzer. Upload or paste Lighthouse JSON to view scores, Core Web Vitals, and audit details. Works with PageSpeed Insights API output and Chrome DevTools exports.',
   faqs,
 })
 
@@ -148,7 +152,7 @@ const categoryDisplayData = computed(() => {
             :transition="{ duration: 0.4, delay: 0.1 }"
             class="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto"
           >
-            Upload a Lighthouse JSON report to explore scores, metrics, and audits interactively.
+            Upload or paste a Lighthouse JSON report to analyze scores, Core Web Vitals, and audits interactively.
           </p>
           <template #fallback>
             <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-[1.1] text-gray-900 dark:text-white mb-3">
@@ -156,7 +160,7 @@ const categoryDisplayData = computed(() => {
               <span class="text-violet-600 dark:text-violet-400">Viewer</span>
             </h1>
             <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
-              Upload a Lighthouse JSON report to explore scores, metrics, and audits interactively.
+              Upload or paste a Lighthouse JSON report to analyze scores, Core Web Vitals, and audits interactively.
             </p>
           </template>
         </ClientOnly>
@@ -224,11 +228,11 @@ const categoryDisplayData = computed(() => {
                     or click to browse files
                   </p>
                   <div class="flex flex-wrap justify-center gap-2">
-                    <UButton variant="soft" size="sm" color="neutral" @click.stop="showPasteModal = true">
+                    <UButton variant="soft" size="sm" color="primary" @click.stop="showPasteModal = true">
                       <UIcon name="i-heroicons-clipboard-document" class="w-4 h-4 mr-1" />
                       Paste JSON
                     </UButton>
-                    <UButton variant="soft" size="sm" color="primary" @click.stop="loadSample">
+                    <UButton variant="soft" size="sm" color="neutral" @click.stop="loadSample">
                       <UIcon name="i-heroicons-beaker" class="w-4 h-4 mr-1" />
                       Load Sample
                     </UButton>
@@ -569,6 +573,14 @@ const categoryDisplayData = computed(() => {
             <UButton to="/learn-lighthouse" variant="outline" size="sm" class="gap-2">
               <UIcon name="i-heroicons-academic-cap" class="w-4 h-4" />
               Learn Lighthouse
+            </UButton>
+            <UButton to="/learn-lighthouse/core-web-vitals" variant="outline" size="sm" class="gap-2">
+              <UIcon name="i-heroicons-chart-bar" class="w-4 h-4" />
+              Core Web Vitals Guide
+            </UButton>
+            <UButton to="/learn-lighthouse/pagespeed-insights-vs-lighthouse" variant="outline" size="sm" class="gap-2">
+              <UIcon name="i-heroicons-scale" class="w-4 h-4" />
+              PSI vs Lighthouse
             </UButton>
           </div>
         </div>

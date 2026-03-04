@@ -29,6 +29,7 @@ const learnCategories = [
       { label: 'Lighthouse CI', icon: 'i-heroicons-play-circle', to: '/learn-lighthouse/lighthouse-ci' },
       { label: 'Playwright', icon: 'i-simple-icons-playwright', to: '/learn-lighthouse/playwright' },
       { label: 'PSI API', icon: 'i-heroicons-code-bracket', to: '/learn-lighthouse/pagespeed-insights-api' },
+      { label: 'PSI vs Lighthouse', icon: 'i-heroicons-scale', to: '/learn-lighthouse/pagespeed-insights-vs-lighthouse' },
       { label: 'Bulk Testing', icon: 'i-heroicons-squares-2x2', to: '/learn-lighthouse/bulk-lighthouse-testing' },
     ],
   },

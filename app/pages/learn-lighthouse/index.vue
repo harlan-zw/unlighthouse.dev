@@ -4,8 +4,8 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: 'Learn Google Lighthouse & Core Web Vitals',
-  description: 'Guides and tutorials for improving your site\'s Core Web Vitals and performance. Master LCP, CLS, and INP with actionable fixes.',
+  title: 'Learn Lighthouse & Web Vitals: Performance Guides',
+  description: 'Free guides to improve Lighthouse scores and Core Web Vitals. Fix LCP, CLS, INP, accessibility, and SEO audits with actionable tutorials and tools.',
 })
 
 defineOgImage('Docs', {
@@ -56,6 +56,75 @@ const guides = [
     description: 'Test every page, not just the homepage.',
     icon: 'i-heroicons-document-magnifying-glass',
     to: '/learn-lighthouse/bulk-lighthouse-testing',
+  },
+  {
+    title: 'Lighthouse CI',
+    description: 'Automate audits in your CI/CD pipeline with @lhci/cli.',
+    icon: 'i-heroicons-command-line',
+    to: '/learn-lighthouse/lighthouse-ci',
+  },
+  {
+    title: 'PageSpeed Insights API',
+    description: 'Fetch Lighthouse data programmatically with Node.js or Python.',
+    icon: 'i-heroicons-code-bracket',
+    to: '/learn-lighthouse/pagespeed-insights-api',
+  },
+  {
+    title: 'PSI vs Lighthouse',
+    description: 'Why scores differ between PageSpeed Insights and local Lighthouse.',
+    icon: 'i-heroicons-scale',
+    to: '/learn-lighthouse/pagespeed-insights-vs-lighthouse',
+  },
+  {
+    title: 'Lighthouse with Playwright',
+    description: 'Run audits on authenticated pages and SPAs.',
+    icon: 'i-heroicons-play',
+    to: '/learn-lighthouse/playwright',
+  },
+]
+
+const categories = [
+  {
+    title: 'SEO Audits',
+    description: 'All 8 Lighthouse SEO checks explained with fixes.',
+    icon: 'i-heroicons-magnifying-glass',
+    to: '/learn-lighthouse/seo',
+    color: 'text-cyan-500',
+  },
+  {
+    title: 'Accessibility',
+    description: '16 audit guides covering ARIA, contrast, and screen readers.',
+    icon: 'i-heroicons-eye',
+    to: '/learn-lighthouse/accessibility',
+    color: 'text-violet-500',
+  },
+  {
+    title: 'Best Practices',
+    description: 'HTTPS, console errors, deprecated APIs, and more.',
+    icon: 'i-heroicons-shield-check',
+    to: '/learn-lighthouse/best-practices',
+    color: 'text-amber-500',
+  },
+]
+
+const tools = [
+  {
+    title: 'Bulk PageSpeed Test',
+    description: 'Test multiple URLs at once with the PageSpeed Insights API.',
+    icon: 'i-heroicons-bolt',
+    to: '/tools/bulk-pagespeed',
+  },
+  {
+    title: 'Core Web Vitals Checker',
+    description: 'Check if a page passes all three Core Web Vitals.',
+    icon: 'i-heroicons-check-badge',
+    to: '/tools/cwv-checker',
+  },
+  {
+    title: 'CWV Comparison',
+    description: 'Compare Core Web Vitals across 2-4 sites side-by-side.',
+    icon: 'i-heroicons-scale',
+    to: '/tools/cwv-compare',
   },
 ]
 </script>
@@ -109,7 +178,7 @@ const guides = [
 
     <div class="mt-16">
       <h2 class="text-xl font-semibold mb-6">
-        Additional Guides
+        Guides
       </h2>
 
       <div class="grid md:grid-cols-2 gap-6">
@@ -128,6 +197,60 @@ const guides = [
             </h3>
             <p class="text-sm text-[var(--ui-text-muted)]">
               {{ guide.description }}
+            </p>
+          </div>
+        </NuxtLink>
+      </div>
+    </div>
+
+    <div class="mt-16">
+      <h2 class="text-xl font-semibold mb-6">
+        Audit Categories
+      </h2>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <NuxtLink
+          v-for="cat in categories"
+          :key="cat.title"
+          :to="cat.to"
+          class="group flex items-start gap-4 p-6 rounded-xl border border-[var(--ui-border)] bg-[var(--ui-bg)] hover:border-[var(--ui-border-accented)] transition-all"
+        >
+          <div class="p-2 rounded-lg bg-current/10" :class="[cat.color]">
+            <UIcon :name="cat.icon" class="size-5" :class="cat.color" />
+          </div>
+          <div>
+            <h3 class="font-semibold mb-1 group-hover:text-[var(--ui-primary)] transition-colors">
+              {{ cat.title }}
+            </h3>
+            <p class="text-sm text-[var(--ui-text-muted)]">
+              {{ cat.description }}
+            </p>
+          </div>
+        </NuxtLink>
+      </div>
+    </div>
+
+    <div class="mt-16">
+      <h2 class="text-xl font-semibold mb-6">
+        Free Tools
+      </h2>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <NuxtLink
+          v-for="tool in tools"
+          :key="tool.title"
+          :to="tool.to"
+          class="group flex items-start gap-4 p-6 rounded-xl border border-[var(--ui-border)] bg-[var(--ui-bg)] hover:border-[var(--ui-border-accented)] transition-all"
+        >
+          <div class="p-2 rounded-lg bg-emerald-500/10">
+            <UIcon :name="tool.icon" class="size-5 text-emerald-500" />
+          </div>
+          <div>
+            <h3 class="font-semibold mb-1 group-hover:text-[var(--ui-primary)] transition-colors">
+              {{ tool.title }}
+            </h3>
+            <p class="text-sm text-[var(--ui-text-muted)]">
+              {{ tool.description }}
             </p>
           </div>
         </NuxtLink>

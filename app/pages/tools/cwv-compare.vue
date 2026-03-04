@@ -16,39 +16,30 @@ definePageMeta({
   },
 })
 
-useSeoMeta({
-  title: 'Core Web Vitals Comparison - Benchmark Against Competitors',
-  description: 'Compare Core Web Vitals across multiple websites. See how your LCP, CLS, and INP stack up against competitors with real Chrome user data.',
-})
-
-defineOgImage('NuxtSeo', {
-  title: 'Core Web Vitals Comparison',
-  description: 'Benchmark your site against competitors',
-  theme: '#f97316',
-})
-
-useSchemaOrg([
+const faqs = [
   {
-    '@type': 'WebApplication',
-    'name': 'Core Web Vitals Comparison Tool',
-    'description': 'Compare Core Web Vitals performance across multiple websites using real Chrome user data',
-    'url': 'https://unlighthouse.dev/tools/cwv-compare',
-    'applicationCategory': 'DeveloperApplication',
-    'operatingSystem': 'Web',
-    'offers': {
-      '@type': 'Offer',
-      'price': '0',
-      'priceCurrency': 'USD',
-    },
-    'featureList': [
-      'Compare 2-4 websites side-by-side',
-      'Real user field data (CrUX)',
-      'Core Web Vitals metrics comparison',
-      'Trend overlay visualization',
-      'Automatic winner detection',
-    ],
+    question: 'What data is being compared?',
+    answer: 'This tool compares real user performance data from the Chrome User Experience Report (CrUX). It shows P75 values—the experience of 75% of your users.',
   },
-])
+  {
+    question: 'Why is there no data for a site?',
+    answer: 'Sites need sufficient Chrome traffic to appear in CrUX. New sites, low-traffic sites, or sites blocking data collection won\'t have field data available.',
+  },
+  {
+    question: 'How is the winner determined?',
+    answer: 'For each metric, the site with the lowest (fastest/best) P75 value wins. Overall winner prioritizes Core Web Vitals pass rate, then combined metric performance.',
+  },
+  {
+    question: 'Can I share this comparison?',
+    answer: 'Yes! The URL updates as you compare sites. Copy and share the URL to show others the same comparison results.',
+  },
+]
+
+useToolSeo({
+  title: 'Bulk Core Web Vitals Test - Compare CWV Across Sites',
+  description: 'Bulk test and compare Core Web Vitals across multiple websites. See how your LCP, CLS, and INP stack up against competitors with real Chrome user data.',
+  faqs,
+})
 
 type FormFactor = 'PHONE' | 'DESKTOP'
 
@@ -924,51 +915,7 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
     <!-- FAQ Section -->
     <section class="px-3 sm:px-6 lg:px-8 pb-16">
       <div class="max-w-5xl mx-auto">
-        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 text-center">
-          Frequently Asked Questions
-        </h2>
-
-        <div class="grid sm:grid-cols-2 gap-4">
-          <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-            <h3 class="font-semibold text-gray-900 dark:text-white">
-              What data is being compared?
-            </h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-              This tool compares real user performance data from the Chrome User Experience Report (CrUX).
-              It shows P75 values—the experience of 75% of your users.
-            </p>
-          </div>
-
-          <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-            <h3 class="font-semibold text-gray-900 dark:text-white">
-              Why is there no data for a site?
-            </h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-              Sites need sufficient Chrome traffic to appear in CrUX. New sites, low-traffic sites, or
-              sites blocking data collection won't have field data available.
-            </p>
-          </div>
-
-          <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-            <h3 class="font-semibold text-gray-900 dark:text-white">
-              How is the winner determined?
-            </h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-              For each metric, the site with the lowest (fastest/best) P75 value wins. Overall winner
-              prioritizes Core Web Vitals pass rate, then combined metric performance.
-            </p>
-          </div>
-
-          <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-            <h3 class="font-semibold text-gray-900 dark:text-white">
-              Can I share this comparison?
-            </h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-              Yes! The URL updates as you compare sites. Copy and share the URL to show others
-              the same comparison results.
-            </p>
-          </div>
-        </div>
+        <ToolFaq :faqs="faqs" color="orange" />
 
         <!-- Related Resources -->
         <div class="mt-10 text-center">

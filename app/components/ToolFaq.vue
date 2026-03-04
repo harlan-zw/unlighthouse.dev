@@ -29,7 +29,7 @@ const colorClasses = computed(() => {
 
 <template>
   <section class="mt-16">
-    <ToolsToolSectionHeader title="Frequently Asked Questions" icon="i-carbon-help" :color="color" />
+    <ToolSectionHeader title="Frequently Asked Questions" icon="i-carbon-help" :color="color" />
 
     <div class="space-y-3">
       <details

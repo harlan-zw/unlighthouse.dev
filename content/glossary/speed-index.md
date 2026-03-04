@@ -1,12 +1,14 @@
 ---
-title: "Speed Index: What It Is, Good Scores & How to Improve"
-description: "Speed Index measures how fast visible content fills the viewport. Good score: ≤3.4s mobile, ≤1.3s desktop. 10% of Lighthouse performance score. Learn thresholds and fixes."
+title: "What Is Speed Index in PageSpeed Insights & Lighthouse?"
+description: "Speed Index measures how fast visible content fills the viewport. Good score: ≤3.4s mobile, ≤1.3s desktop. 10% of Lighthouse performance score. Thresholds, tools, and fixes."
 keywords:
   - what is speed index
   - what is speed index in lighthouse
+  - what is speed index in pagespeed insights
   - speed index meaning
   - speed index definition
   - speed index lighthouse
+  - speed index pagespeed insights
   - speed index good score
   - speed index threshold
   - speed index vs lcp
@@ -71,9 +73,10 @@ Speed Index complements FCP and LCP by measuring the experience between these po
 ## Measure Speed Index
 
 - Lighthouse in Chrome DevTools
-- [PageSpeed Insights](https://pagespeed.web.dev/)
+- [PageSpeed Insights](https://pagespeed.web.dev/) — Speed Index appears in the "Diagnostics" section of PageSpeed Insights results
 - WebPageTest (original source of the metric)
+- [Unlighthouse Bulk PageSpeed Test](/tools/bulk-pagespeed) — test Speed Index across your entire site
 
 ::note
-Speed Index is a lab metric, not a Core Web Vital. Focus on [LCP](/glossary/lcp), [CLS](/glossary/cls), and [INP](/glossary/inp) for search ranking impact.
+Speed Index is a lab metric, not a Core Web Vital. Focus on [LCP](/glossary/lcp), [CLS](/glossary/cls), and [INP](/glossary/inp) for search ranking impact. Use the [Lighthouse Score Calculator](/tools/lighthouse-score-calculator) to see how Speed Index (10% weight) affects your overall score.
 ::

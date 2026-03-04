@@ -24,6 +24,7 @@ const learnLinks = [
   { label: 'SEO', icon: 'i-heroicons-magnifying-glass', to: '/learn-lighthouse/seo' },
   { label: 'Best Practices', icon: 'i-heroicons-check-badge', to: '/learn-lighthouse/best-practices' },
   { label: 'PageSpeed API', icon: 'i-heroicons-code-bracket', to: '/learn-lighthouse/pagespeed-insights-api' },
+  { label: 'PSI vs Lighthouse', icon: 'i-heroicons-scale', to: '/learn-lighthouse/pagespeed-insights-vs-lighthouse' },
 ]
 
 const toolsLinks = [
@@ -36,6 +37,9 @@ const toolsLinks = [
   { label: 'CLS Debugger', icon: 'i-heroicons-arrows-pointing-out', to: '/tools/cls-debugger' },
   { label: 'PSI Performance', icon: 'i-heroicons-chart-bar', to: '/tools/pagespeed-insights-performance' },
   { label: 'Report Viewer', icon: 'i-heroicons-document-chart-bar', to: '/tools/lighthouse-report-viewer' },
+  { label: 'HAR Viewer', icon: 'i-heroicons-document-magnifying-glass', to: '/tools/har-viewer' },
+  { label: 'JSON Size Analyzer', icon: 'i-heroicons-code-bracket-square', to: '/tools/json-size' },
+  { label: 'Page Size Checker', icon: 'i-heroicons-scale', to: '/tools/page-size' },
 ]
 </script>
 

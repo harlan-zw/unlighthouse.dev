@@ -979,6 +979,35 @@ const totalResourceSize = computed(() => {
 
               <!-- Feedback -->
               <ToolFeedback tool-id="pagespeed-insights" :context="{ url: urlInput, strategy }" />
+
+              <!-- Related Guides -->
+              <div class="text-center mt-12">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+                  Related Guides
+                </h3>
+                <div class="flex flex-wrap justify-center gap-2">
+                  <UButton to="/learn-lighthouse/core-web-vitals" variant="ghost" size="sm">
+                    <UIcon name="i-heroicons-academic-cap" class="w-4 h-4 mr-1" />
+                    Core Web Vitals Guide
+                  </UButton>
+                  <UButton to="/learn-lighthouse/lcp" variant="ghost" size="sm">
+                    <UIcon name="i-heroicons-photo" class="w-4 h-4 mr-1" />
+                    Fix LCP
+                  </UButton>
+                  <UButton to="/learn-lighthouse/cls" variant="ghost" size="sm">
+                    <UIcon name="i-heroicons-arrows-pointing-out" class="w-4 h-4 mr-1" />
+                    Fix CLS
+                  </UButton>
+                  <UButton to="/learn-lighthouse/inp" variant="ghost" size="sm">
+                    <UIcon name="i-heroicons-cursor-arrow-rays" class="w-4 h-4 mr-1" />
+                    Fix INP
+                  </UButton>
+                  <UButton to="/learn-lighthouse/pagespeed-insights-vs-lighthouse" variant="ghost" size="sm">
+                    <UIcon name="i-heroicons-scale" class="w-4 h-4 mr-1" />
+                    PSI vs Lighthouse
+                  </UButton>
+                </div>
+              </div>
             </div>
 
             <!-- Empty state -->

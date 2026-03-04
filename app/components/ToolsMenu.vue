@@ -19,6 +19,7 @@ const toolCategories = [
       { label: 'CWV History', icon: 'i-heroicons-chart-bar', to: '/tools/cwv-history' },
       { label: 'CWV Compare', icon: 'i-heroicons-scale', to: '/tools/cwv-compare' },
       { label: 'TTFB Checker', icon: 'i-heroicons-clock', to: '/tools/ttfb-checker' },
+      { label: 'Page Size', icon: 'i-heroicons-scale', to: '/tools/page-size' },
     ],
   },
   {
@@ -30,6 +31,8 @@ const toolCategories = [
       { label: 'Report Viewer', icon: 'i-heroicons-document-chart-bar', to: '/tools/lighthouse-report-viewer' },
       { label: 'Bulk PageSpeed', icon: 'i-heroicons-squares-2x2', to: '/tools/bulk-pagespeed' },
       { label: 'PSI Performance', icon: 'i-heroicons-chart-bar', to: '/tools/pagespeed-insights-performance' },
+      { label: 'HAR Viewer', icon: 'i-heroicons-document-magnifying-glass', to: '/tools/har-viewer' },
+      { label: 'JSON Size', icon: 'i-heroicons-code-bracket-square', to: '/tools/json-size' },
     ],
   },
 ]

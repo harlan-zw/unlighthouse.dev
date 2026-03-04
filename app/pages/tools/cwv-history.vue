@@ -846,6 +846,33 @@ function formatChartDate(date: string) {
       </div>
     </section>
 
+    <!-- Related Resources -->
+    <section class="px-3 sm:px-6 lg:px-8 py-8">
+      <div class="max-w-4xl mx-auto text-center">
+        <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+          Optimize Your Core Web Vitals
+        </h3>
+        <div class="flex flex-wrap justify-center gap-2">
+          <UButton to="/learn-lighthouse/core-web-vitals" variant="ghost" size="sm">
+            <UIcon name="i-heroicons-academic-cap" class="w-4 h-4 mr-1" />
+            Full Guide
+          </UButton>
+          <UButton to="/learn-lighthouse/lcp" variant="ghost" size="sm">
+            <UIcon name="i-heroicons-photo" class="w-4 h-4 mr-1" />
+            Fix LCP
+          </UButton>
+          <UButton to="/learn-lighthouse/cls" variant="ghost" size="sm">
+            <UIcon name="i-heroicons-arrows-pointing-out" class="w-4 h-4 mr-1" />
+            Fix CLS
+          </UButton>
+          <UButton to="/learn-lighthouse/inp" variant="ghost" size="sm">
+            <UIcon name="i-heroicons-cursor-arrow-rays" class="w-4 h-4 mr-1" />
+            Fix INP
+          </UButton>
+        </div>
+      </div>
+    </section>
+
     <!-- FAQ Section -->
     <section class="px-3 sm:px-6 lg:px-8 pb-16">
       <div class="max-w-4xl mx-auto">

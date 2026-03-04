@@ -99,6 +99,30 @@ const tools = [
     metrics: ['CLS', 'Core Web Vital'],
   },
   {
+    title: 'HAR File Viewer',
+    description: 'Analyze HTTP Archive files with network waterfall, request timing, resource breakdown, and protocol distribution. Entirely client-side.',
+    icon: 'i-heroicons-document-magnifying-glass',
+    to: '/tools/har-viewer',
+    color: 'teal',
+    metrics: ['Network Waterfall', 'Request Analysis', 'Performance'],
+  },
+  {
+    title: 'JSON Size Analyzer',
+    description: 'Calculate JSON payload size with minification savings, gzip/brotli estimates, key contributions, and duplicate key analysis. Entirely client-side.',
+    icon: 'i-heroicons-code-bracket-square',
+    to: '/tools/json-size',
+    color: 'teal',
+    metrics: ['Size Analysis', 'Minification', 'Compression'],
+  },
+  {
+    title: 'Page Size Checker',
+    description: 'Test page weight with resource breakdown, third-party analysis, unused code detection, and HTTP Archive percentile comparison.',
+    icon: 'i-heroicons-scale',
+    to: '/tools/page-size',
+    color: 'sky',
+    metrics: ['Page Weight', 'Resources', 'Third Parties'],
+  },
+  {
     title: 'PageSpeed Insights Performance',
     description: 'Get detailed PageSpeed Insights performance data with field and lab metrics.',
     icon: 'i-heroicons-chart-bar',
@@ -138,6 +162,7 @@ const tools = [
               'hover:border-emerald-300 dark:hover:border-emerald-700': tool.color === 'emerald',
               'hover:border-indigo-300 dark:hover:border-indigo-700': tool.color === 'indigo',
               'hover:border-sky-300 dark:hover:border-sky-700': tool.color === 'sky',
+              'hover:border-teal-300 dark:hover:border-teal-700': tool.color === 'teal',
               'hover:border-orange-300 dark:hover:border-orange-700': tool.color === 'orange',
               'hover:border-violet-300 dark:hover:border-violet-700': tool.color === 'violet' || !tool.color,
             }"
@@ -150,6 +175,7 @@ const tools = [
                   'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400': tool.color === 'emerald',
                   'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400': tool.color === 'indigo',
                   'bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400': tool.color === 'sky',
+                  'bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400': tool.color === 'teal',
                   'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400': tool.color === 'orange',
                   'bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400': tool.color === 'violet' || !tool.color,
                 }"
@@ -164,6 +190,7 @@ const tools = [
                     'group-hover:text-emerald-600 dark:group-hover:text-emerald-400': tool.color === 'emerald',
                     'group-hover:text-indigo-600 dark:group-hover:text-indigo-400': tool.color === 'indigo',
                     'group-hover:text-sky-600 dark:group-hover:text-sky-400': tool.color === 'sky',
+                    'group-hover:text-teal-600 dark:group-hover:text-teal-400': tool.color === 'teal',
                     'group-hover:text-orange-600 dark:group-hover:text-orange-400': tool.color === 'orange',
                     'group-hover:text-violet-600 dark:group-hover:text-violet-400': tool.color === 'violet' || !tool.color,
                   }"
@@ -191,6 +218,7 @@ const tools = [
                   'group-hover:text-emerald-500': tool.color === 'emerald',
                   'group-hover:text-indigo-500': tool.color === 'indigo',
                   'group-hover:text-sky-500': tool.color === 'sky',
+                  'group-hover:text-teal-500': tool.color === 'teal',
                   'group-hover:text-orange-500': tool.color === 'orange',
                   'group-hover:text-violet-500': tool.color === 'violet' || !tool.color,
                 }"

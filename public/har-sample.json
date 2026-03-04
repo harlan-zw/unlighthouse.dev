@@ -1,0 +1,679 @@
+{
+  "log": {
+    "version": "1.2",
+    "creator": {
+      "name": "Unlighthouse Sample",
+      "version": "1.0"
+    },
+    "pages": [
+      {
+        "id": "page_1",
+        "title": "Example E-commerce Homepage",
+        "startedDateTime": "2026-03-01T10:00:00.000Z",
+        "pageTimings": {
+          "onContentLoad": 1200,
+          "onLoad": 3400
+        }
+      }
+    ],
+    "entries": [
+      {
+        "startedDateTime": "2026-03-01T10:00:00.000Z",
+        "time": 320,
+        "request": {
+          "method": "GET",
+          "url": "https://example.com/",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "accept", "value": "text/html" },
+            { "name": "accept-encoding", "value": "gzip, deflate, br" }
+          ],
+          "queryString": [],
+          "headersSize": 200,
+          "bodySize": 0
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "content-type", "value": "text/html; charset=utf-8" },
+            { "name": "content-encoding", "value": "br" },
+            { "name": "cache-control", "value": "no-cache" },
+            { "name": "server-timing", "value": "db;dur=45, render;dur=120" }
+          ],
+          "content": {
+            "size": 45200,
+            "mimeType": "text/html; charset=utf-8"
+          },
+          "redirectURL": "",
+          "headersSize": 300,
+          "bodySize": 12800
+        },
+        "timings": {
+          "blocked": 2,
+          "dns": 15,
+          "connect": 35,
+          "ssl": 28,
+          "send": 1,
+          "wait": 185,
+          "receive": 54
+        },
+        "_protocol": "h2",
+        "_resourceType": "document",
+        "_transferSize": 12800
+      },
+      {
+        "startedDateTime": "2026-03-01T10:00:00.320Z",
+        "time": 85,
+        "request": {
+          "method": "GET",
+          "url": "https://example.com/assets/main.css",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "accept", "value": "text/css" }
+          ],
+          "queryString": [],
+          "headersSize": 150,
+          "bodySize": 0
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "content-type", "value": "text/css" },
+            { "name": "content-encoding", "value": "br" },
+            { "name": "cache-control", "value": "public, max-age=31536000, immutable" }
+          ],
+          "content": {
+            "size": 89400,
+            "mimeType": "text/css"
+          },
+          "redirectURL": "",
+          "headersSize": 250,
+          "bodySize": 18200
+        },
+        "timings": {
+          "blocked": 5,
+          "dns": 0,
+          "connect": 0,
+          "ssl": 0,
+          "send": 1,
+          "wait": 42,
+          "receive": 37
+        },
+        "_protocol": "h2",
+        "_resourceType": "stylesheet",
+        "_transferSize": 18200
+      },
+      {
+        "startedDateTime": "2026-03-01T10:00:00.325Z",
+        "time": 120,
+        "request": {
+          "method": "GET",
+          "url": "https://example.com/assets/app.js",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "accept", "value": "*/*" }
+          ],
+          "queryString": [],
+          "headersSize": 150,
+          "bodySize": 0
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "content-type", "value": "application/javascript" },
+            { "name": "content-encoding", "value": "br" },
+            { "name": "cache-control", "value": "public, max-age=31536000, immutable" }
+          ],
+          "content": {
+            "size": 245000,
+            "mimeType": "application/javascript"
+          },
+          "redirectURL": "",
+          "headersSize": 250,
+          "bodySize": 68500
+        },
+        "timings": {
+          "blocked": 3,
+          "dns": 0,
+          "connect": 0,
+          "ssl": 0,
+          "send": 1,
+          "wait": 55,
+          "receive": 61
+        },
+        "_protocol": "h2",
+        "_resourceType": "script",
+        "_transferSize": 68500
+      },
+      {
+        "startedDateTime": "2026-03-01T10:00:00.330Z",
+        "time": 95,
+        "request": {
+          "method": "GET",
+          "url": "https://example.com/assets/vendor.js",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "accept", "value": "*/*" }
+          ],
+          "queryString": [],
+          "headersSize": 150,
+          "bodySize": 0
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "content-type", "value": "application/javascript" },
+            { "name": "content-encoding", "value": "br" }
+          ],
+          "content": {
+            "size": 185000,
+            "mimeType": "application/javascript"
+          },
+          "redirectURL": "",
+          "headersSize": 200,
+          "bodySize": 52000
+        },
+        "timings": {
+          "blocked": 2,
+          "dns": 0,
+          "connect": 0,
+          "ssl": 0,
+          "send": 1,
+          "wait": 48,
+          "receive": 44
+        },
+        "_protocol": "h2",
+        "_resourceType": "script",
+        "_transferSize": 52000
+      },
+      {
+        "startedDateTime": "2026-03-01T10:00:00.450Z",
+        "time": 180,
+        "request": {
+          "method": "GET",
+          "url": "https://example.com/images/hero-banner.webp",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "accept", "value": "image/webp,image/*" }
+          ],
+          "queryString": [],
+          "headersSize": 150,
+          "bodySize": 0
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "content-type", "value": "image/webp" },
+            { "name": "cache-control", "value": "public, max-age=86400" }
+          ],
+          "content": {
+            "size": 156000,
+            "mimeType": "image/webp"
+          },
+          "redirectURL": "",
+          "headersSize": 200,
+          "bodySize": 156000
+        },
+        "timings": {
+          "blocked": 8,
+          "dns": 0,
+          "connect": 0,
+          "ssl": 0,
+          "send": 1,
+          "wait": 65,
+          "receive": 106
+        },
+        "_protocol": "h2",
+        "_resourceType": "image",
+        "_transferSize": 156000
+      },
+      {
+        "startedDateTime": "2026-03-01T10:00:00.460Z",
+        "time": 140,
+        "request": {
+          "method": "GET",
+          "url": "https://example.com/images/product-1.webp",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "accept", "value": "image/webp,image/*" }
+          ],
+          "queryString": [],
+          "headersSize": 150,
+          "bodySize": 0
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "content-type", "value": "image/webp" },
+            { "name": "cache-control", "value": "public, max-age=86400" }
+          ],
+          "content": {
+            "size": 42000,
+            "mimeType": "image/webp"
+          },
+          "redirectURL": "",
+          "headersSize": 200,
+          "bodySize": 42000
+        },
+        "timings": {
+          "blocked": 12,
+          "dns": 0,
+          "connect": 0,
+          "ssl": 0,
+          "send": 1,
+          "wait": 58,
+          "receive": 69
+        },
+        "_protocol": "h2",
+        "_resourceType": "image",
+        "_transferSize": 42000
+      },
+      {
+        "startedDateTime": "2026-03-01T10:00:00.465Z",
+        "time": 110,
+        "request": {
+          "method": "GET",
+          "url": "https://example.com/images/product-2.webp",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "accept", "value": "image/webp,image/*" }
+          ],
+          "queryString": [],
+          "headersSize": 150,
+          "bodySize": 0
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "content-type", "value": "image/webp" }
+          ],
+          "content": {
+            "size": 38000,
+            "mimeType": "image/webp"
+          },
+          "redirectURL": "",
+          "headersSize": 150,
+          "bodySize": 38000
+        },
+        "timings": {
+          "blocked": 10,
+          "dns": 0,
+          "connect": 0,
+          "ssl": 0,
+          "send": 1,
+          "wait": 52,
+          "receive": 47
+        },
+        "_protocol": "h2",
+        "_resourceType": "image",
+        "_transferSize": 38000
+      },
+      {
+        "startedDateTime": "2026-03-01T10:00:00.400Z",
+        "time": 75,
+        "request": {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "accept", "value": "text/css" }
+          ],
+          "queryString": [],
+          "headersSize": 200,
+          "bodySize": 0
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "content-type", "value": "text/css" },
+            { "name": "cache-control", "value": "private, max-age=86400" }
+          ],
+          "content": {
+            "size": 1200,
+            "mimeType": "text/css"
+          },
+          "redirectURL": "",
+          "headersSize": 200,
+          "bodySize": 980
+        },
+        "timings": {
+          "blocked": 2,
+          "dns": 18,
+          "connect": 22,
+          "ssl": 15,
+          "send": 1,
+          "wait": 12,
+          "receive": 5
+        },
+        "_protocol": "h2",
+        "_resourceType": "stylesheet",
+        "_transferSize": 980
+      },
+      {
+        "startedDateTime": "2026-03-01T10:00:00.480Z",
+        "time": 90,
+        "request": {
+          "method": "GET",
+          "url": "https://fonts.gstatic.com/s/inter/v18/regular.woff2",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "accept", "value": "*/*" }
+          ],
+          "queryString": [],
+          "headersSize": 150,
+          "bodySize": 0
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "content-type", "value": "font/woff2" },
+            { "name": "cache-control", "value": "public, max-age=31536000" }
+          ],
+          "content": {
+            "size": 24500,
+            "mimeType": "font/woff2"
+          },
+          "redirectURL": "",
+          "headersSize": 200,
+          "bodySize": 24500
+        },
+        "timings": {
+          "blocked": 5,
+          "dns": 0,
+          "connect": 0,
+          "ssl": 0,
+          "send": 1,
+          "wait": 38,
+          "receive": 46
+        },
+        "_protocol": "h2",
+        "_resourceType": "font",
+        "_transferSize": 24500
+      },
+      {
+        "startedDateTime": "2026-03-01T10:00:00.490Z",
+        "time": 85,
+        "request": {
+          "method": "GET",
+          "url": "https://fonts.gstatic.com/s/inter/v18/semibold.woff2",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "accept", "value": "*/*" }
+          ],
+          "queryString": [],
+          "headersSize": 150,
+          "bodySize": 0
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "content-type", "value": "font/woff2" },
+            { "name": "cache-control", "value": "public, max-age=31536000" }
+          ],
+          "content": {
+            "size": 25200,
+            "mimeType": "font/woff2"
+          },
+          "redirectURL": "",
+          "headersSize": 200,
+          "bodySize": 25200
+        },
+        "timings": {
+          "blocked": 4,
+          "dns": 0,
+          "connect": 0,
+          "ssl": 0,
+          "send": 1,
+          "wait": 35,
+          "receive": 45
+        },
+        "_protocol": "h2",
+        "_resourceType": "font",
+        "_transferSize": 25200
+      },
+      {
+        "startedDateTime": "2026-03-01T10:00:00.500Z",
+        "time": 210,
+        "request": {
+          "method": "GET",
+          "url": "https://www.googletagmanager.com/gtag/js?id=G-EXAMPLE123",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "accept", "value": "*/*" }
+          ],
+          "queryString": [
+            { "name": "id", "value": "G-EXAMPLE123" }
+          ],
+          "headersSize": 200,
+          "bodySize": 0
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "content-type", "value": "application/javascript" },
+            { "name": "content-encoding", "value": "gzip" }
+          ],
+          "content": {
+            "size": 98500,
+            "mimeType": "application/javascript"
+          },
+          "redirectURL": "",
+          "headersSize": 250,
+          "bodySize": 35200
+        },
+        "timings": {
+          "blocked": 5,
+          "dns": 25,
+          "connect": 30,
+          "ssl": 22,
+          "send": 1,
+          "wait": 82,
+          "receive": 45
+        },
+        "_protocol": "h2",
+        "_resourceType": "script",
+        "_transferSize": 35200
+      },
+      {
+        "startedDateTime": "2026-03-01T10:00:00.720Z",
+        "time": 155,
+        "request": {
+          "method": "GET",
+          "url": "https://www.google-analytics.com/analytics.js",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "accept", "value": "*/*" }
+          ],
+          "queryString": [],
+          "headersSize": 150,
+          "bodySize": 0
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "content-type", "value": "application/javascript" },
+            { "name": "content-encoding", "value": "gzip" },
+            { "name": "cache-control", "value": "public, max-age=7200" }
+          ],
+          "content": {
+            "size": 45800,
+            "mimeType": "application/javascript"
+          },
+          "redirectURL": "",
+          "headersSize": 220,
+          "bodySize": 19600
+        },
+        "timings": {
+          "blocked": 3,
+          "dns": 0,
+          "connect": 0,
+          "ssl": 0,
+          "send": 1,
+          "wait": 95,
+          "receive": 56
+        },
+        "_protocol": "h2",
+        "_resourceType": "script",
+        "_transferSize": 19600
+      },
+      {
+        "startedDateTime": "2026-03-01T10:00:00.600Z",
+        "time": 95,
+        "request": {
+          "method": "GET",
+          "url": "https://example.com/api/products?featured=true&limit=8",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "accept", "value": "application/json" }
+          ],
+          "queryString": [
+            { "name": "featured", "value": "true" },
+            { "name": "limit", "value": "8" }
+          ],
+          "headersSize": 180,
+          "bodySize": 0
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "content-type", "value": "application/json" },
+            { "name": "content-encoding", "value": "br" }
+          ],
+          "content": {
+            "size": 8400,
+            "mimeType": "application/json"
+          },
+          "redirectURL": "",
+          "headersSize": 200,
+          "bodySize": 2100
+        },
+        "timings": {
+          "blocked": 2,
+          "dns": 0,
+          "connect": 0,
+          "ssl": 0,
+          "send": 1,
+          "wait": 78,
+          "receive": 14
+        },
+        "_protocol": "h2",
+        "_resourceType": "script",
+        "_transferSize": 2100
+      },
+      {
+        "startedDateTime": "2026-03-01T10:00:00.700Z",
+        "time": 65,
+        "request": {
+          "method": "GET",
+          "url": "https://example.com/images/logo.svg",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "accept", "value": "image/svg+xml" }
+          ],
+          "queryString": [],
+          "headersSize": 150,
+          "bodySize": 0
+        },
+        "response": {
+          "status": 304,
+          "statusText": "Not Modified",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "content-type", "value": "image/svg+xml" },
+            { "name": "cache-control", "value": "public, max-age=31536000, immutable" }
+          ],
+          "content": {
+            "size": 3200,
+            "mimeType": "image/svg+xml"
+          },
+          "redirectURL": "",
+          "headersSize": 150,
+          "bodySize": 0
+        },
+        "timings": {
+          "blocked": 2,
+          "dns": 0,
+          "connect": 0,
+          "ssl": 0,
+          "send": 1,
+          "wait": 45,
+          "receive": 17
+        },
+        "_protocol": "h2",
+        "_resourceType": "image",
+        "_transferSize": 0,
+        "_fromCache": true
+      },
+      {
+        "startedDateTime": "2026-03-01T10:00:00.710Z",
+        "time": 55,
+        "request": {
+          "method": "GET",
+          "url": "https://example.com/favicon.ico",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "accept", "value": "image/*" }
+          ],
+          "queryString": [],
+          "headersSize": 120,
+          "bodySize": 0
+        },
+        "response": {
+          "status": 304,
+          "statusText": "Not Modified",
+          "httpVersion": "h2",
+          "headers": [
+            { "name": "content-type", "value": "image/x-icon" },
+            { "name": "cache-control", "value": "public, max-age=31536000" }
+          ],
+          "content": {
+            "size": 4286,
+            "mimeType": "image/x-icon"
+          },
+          "redirectURL": "",
+          "headersSize": 150,
+          "bodySize": 0
+        },
+        "timings": {
+          "blocked": 2,
+          "dns": 0,
+          "connect": 0,
+          "ssl": 0,
+          "send": 1,
+          "wait": 38,
+          "receive": 14
+        },
+        "_protocol": "h2",
+        "_resourceType": "image",
+        "_transferSize": 0,
+        "_fromCache": true
+      }
+    ]
+  }
+}

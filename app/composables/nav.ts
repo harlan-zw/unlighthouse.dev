@@ -70,6 +70,12 @@ export const resourcesMenu = computed(() => [
         icon: 'i-heroicons-code-bracket',
         to: '/learn-lighthouse/pagespeed-insights-api',
       },
+      {
+        label: 'PSI vs Lighthouse',
+        title: 'PageSpeed Insights vs Lighthouse',
+        icon: 'i-heroicons-scale',
+        to: '/learn-lighthouse/pagespeed-insights-vs-lighthouse',
+      },
     ],
   },
   {
@@ -131,6 +137,24 @@ export const resourcesMenu = computed(() => [
         title: 'Lighthouse Report Viewer',
         icon: 'i-heroicons-document-chart-bar',
         to: '/tools/lighthouse-report-viewer',
+      },
+      {
+        label: 'HAR Viewer',
+        title: 'HAR File Viewer',
+        icon: 'i-heroicons-document-magnifying-glass',
+        to: '/tools/har-viewer',
+      },
+      {
+        label: 'JSON Size',
+        title: 'JSON Size Analyzer',
+        icon: 'i-heroicons-code-bracket-square',
+        to: '/tools/json-size',
+      },
+      {
+        label: 'Page Size',
+        title: 'Page Size Checker',
+        icon: 'i-heroicons-scale',
+        to: '/tools/page-size',
       },
     ],
   },
