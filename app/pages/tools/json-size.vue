@@ -210,11 +210,12 @@ const keyBarColors = ['bg-teal-500', 'bg-cyan-500', 'bg-blue-500', 'bg-indigo-50
       <!-- Input Area -->
       <div class="p-4 sm:p-6">
         <div class="relative">
-          <textarea
+          <UTextarea
             v-model="inputText"
             placeholder="Paste your JSON here..."
-            class="w-full h-48 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 text-sm font-mono text-gray-900 dark:text-white placeholder-gray-400 resize-y focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+            :rows="8"
             spellcheck="false"
+            :ui="{ root: 'w-full', base: 'font-mono text-sm resize-y' }"
           />
           <div v-if="!inputText" class="absolute bottom-4 left-4">
             <UButton variant="soft" size="sm" color="neutral" @click="loadSample">

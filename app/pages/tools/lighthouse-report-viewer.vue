@@ -526,7 +526,7 @@ const categoryDisplayData = computed(() => {
             v-model="pasteText"
             placeholder="Paste your Lighthouse JSON here..."
             :rows="10"
-            class="font-mono text-xs"
+            :ui="{ root: 'w-full', base: 'font-mono text-xs' }"
           />
           <div class="flex justify-end gap-2 mt-4">
             <UButton variant="ghost" @click="showPasteModal = false">

@@ -299,7 +299,7 @@ https://example.com/products
 https://example.com/contact
 https://example.com/blog
 https://example.com/pricing"
-              class="font-mono text-sm min-h-[200px]"
+              :ui="{ root: 'w-full', base: 'font-mono text-sm min-h-[200px]' }"
               :disabled="loading"
               autoresize
             />
