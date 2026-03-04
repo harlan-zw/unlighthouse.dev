@@ -1,33 +1,4 @@
 <script setup lang="ts">
-import { watchPausable } from '@vueuse/core'
-
-// Loading messages composable
-function useLoadingMessages(messages: string[], interval = 800) {
-  const current = ref(messages[0])
-  let timer: ReturnType<typeof setInterval> | null = null
-  let idx = 0
-
-  function start() {
-    idx = 0
-    current.value = messages[0]
-    timer = setInterval(() => {
-      idx = (idx + 1) % messages.length
-      current.value = messages[idx]
-    }, interval)
-  }
-
-  function stop() {
-    if (timer) {
-      clearInterval(timer)
-      timer = null
-    }
-  }
-
-  onUnmounted(stop)
-
-  return { current, start, stop }
-}
-
 definePageMeta({
   breadcrumb: {
     icon: 'i-heroicons-photo',
@@ -64,6 +35,8 @@ useToolSeo({
   faqs,
 })
 
+const { trackUse } = useToolTracking('lcp-finder')
+
 // Loading messages with tips - shown during PageSpeed API analysis
 const { current: loadingMessage, start: startMessages, stop: stopMessages } = useLoadingMessages([
   'Connecting to PageSpeed Insights API...',
@@ -84,8 +57,6 @@ const { current: loadingMessage, start: startMessages, stop: stopMessages } = us
 ], 3000)
 
 // State
-const route = useRoute()
-const router = useRouter()
 const urlInput = ref('')
 const strategy = ref<'mobile' | 'desktop'>('mobile')
 const loading = ref(false)
@@ -93,7 +64,8 @@ const error = ref<string | null>(null)
 const result = ref<LcpResult | null>(null)
 const screenshotRef = ref<HTMLElement | null>(null)
 const loadingContainerRef = ref<HTMLElement | null>(null)
-const showFloatingLoader = ref(false)
+
+const { showFloatingLoader } = useFloatingLoader(loading, loadingContainerRef)
 
 // LCP Phases visualization state
 const lcpPhaseMode = ref<'image' | 'text'>('image')
@@ -220,57 +192,11 @@ watch(lcpPhaseMode, () => {
   animationProgress.value = []
 })
 
-// URL syncing - read from query on mount, auto-analyze if present
-onMounted(() => {
-  const urlParam = route.query.url as string
-  const strategyParam = route.query.strategy as string
-  if (strategyParam === 'desktop')
-    strategy.value = 'desktop'
-  if (urlParam) {
-    urlInput.value = decodeURIComponent(urlParam)
-    loading.value = true
-    analyze()
-  }
-
-  // Scroll handler for floating loader
-  const handleScroll = () => {
-    if (!loading.value || !loadingContainerRef.value) {
-      showFloatingLoader.value = false
-      return
-    }
-    const rect = loadingContainerRef.value.getBoundingClientRect()
-    showFloatingLoader.value = rect.bottom < 0
-  }
-
-  window.addEventListener('scroll', handleScroll, { passive: true })
-  onUnmounted(() => window.removeEventListener('scroll', handleScroll))
+const { syncParam } = useToolUrlSync(urlInput, {
+  extraParams: { strategy: strategy as Ref<string> },
+  onReady: () => analyze(),
 })
-
-// Debounce URL updates to query string
-watchPausable(
-  urlInput,
-  (newUrl) => {
-    if (newUrl) {
-      router.replace({ query: { ...route.query, url: encodeURIComponent(newUrl) } })
-    }
-    else {
-      const { url: _, ...rest } = route.query
-      router.replace({ query: rest })
-    }
-  },
-  { debounce: 500 },
-)
-
-// Sync strategy to URL
-watch(strategy, (newStrategy) => {
-  if (newStrategy === 'desktop') {
-    router.replace({ query: { ...route.query, strategy: 'desktop' } })
-  }
-  else {
-    const { strategy: _, ...rest } = route.query
-    router.replace({ query: rest })
-  }
-})
+syncParam('strategy', strategy as Ref<string>, 'mobile')
 
 // Auto-scroll screenshot to LCP element
 function scrollToLcpElement() {
@@ -366,6 +292,7 @@ function analyze() {
   })
     .then((data) => {
       result.value = data
+      trackUse()
     })
     .catch((err) => {
       error.value = err.data?.message || err.message || 'Failed to analyze URL'
@@ -374,10 +301,6 @@ function analyze() {
       loading.value = false
       stopMessages()
     })
-}
-
-function formatMs(ms: number) {
-  return ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${Math.round(ms)}ms`
 }
 
 // Calculate position on threshold bar (0-100%)
@@ -546,486 +469,396 @@ const insights = computed<LcpInsight[]>(() => {
 
 <template>
   <div class="min-h-screen">
-    <!-- Hero -->
-    <section class="relative pt-10 pb-6 lg:pt-12 lg:pb-8">
-      <div class="max-w-4xl mx-auto px-6 text-center">
-        <ClientOnly>
-          <h1
-            v-motion
-            :initial="{ opacity: 0, y: 20 }"
-            :animate="{ opacity: 1, y: 0 }"
-            :transition="{ duration: 0.4 }"
-            class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-[1.1] text-gray-900 dark:text-white mb-3"
-          >
-            LCP Element
-            <span class="text-violet-600 dark:text-violet-400">Finder</span>
-          </h1>
-          <p
-            v-motion
-            :initial="{ opacity: 0, y: 20 }"
-            :animate="{ opacity: 1, y: 0 }"
-            :transition="{ duration: 0.4, delay: 0.1 }"
-            class="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto"
-          >
-            Identify which element is your Largest Contentful Paint and get actionable fixes.
-          </p>
-          <template #fallback>
-            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-[1.1] text-gray-900 dark:text-white mb-3">
-              LCP Element
-              <span class="text-violet-600 dark:text-violet-400">Finder</span>
-            </h1>
-            <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
-              Identify which element is your Largest Contentful Paint and get actionable fixes.
-            </p>
-          </template>
-        </ClientOnly>
-      </div>
-    </section>
+    <ToolPageHero
+      title="LCP Element"
+      accent="Finder"
+      description="Identify which element is your Largest Contentful Paint and get actionable fixes."
+      color="violet"
+    />
 
-    <!-- Tool Section -->
-    <section class="px-3 sm:px-6 lg:px-8 pb-12">
-      <div class="max-w-5xl mx-auto">
-        <div class="relative">
-          <!-- Glow effect -->
-          <div class="absolute -inset-4 bg-gradient-to-b from-violet-500/10 via-violet-500/5 to-transparent rounded-3xl blur-3xl pointer-events-none" />
-
-          <div class="relative bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl overflow-hidden shadow-xl ring-1 ring-gray-200 dark:ring-gray-800">
-            <!-- Header -->
-            <div class="flex items-center gap-2 px-4 sm:px-6 py-3 border-b border-gray-200 dark:border-gray-800">
-              <UIcon name="i-heroicons-photo" class="w-4 h-4 text-violet-500" />
-              <span class="text-sm font-semibold">LCP Analysis</span>
-              <span class="px-1.5 py-0.5 text-[10px] font-medium bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded">Core Web Vital</span>
-            </div>
-
-            <!-- Input -->
-            <div class="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-800">
-              <form class="flex flex-col gap-3" @submit.prevent="analyze">
-                <UInput
-                  v-model="urlInput"
-                  placeholder="Enter URL (e.g., example.com)"
-                  size="lg"
-                  class="flex-1"
-                  icon="i-heroicons-globe-alt"
-                  :disabled="loading"
-                />
-                <div class="flex gap-2 justify-between sm:justify-start">
-                  <!-- Mobile/Desktop Toggle -->
-                  <div class="inline-flex rounded-lg border border-gray-200 dark:border-gray-700 p-0.5 bg-gray-100 dark:bg-gray-800">
-                    <button
-                      type="button"
-                      class="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-md text-sm font-medium transition-colors" :class="[
-                        strategy === 'mobile'
-                          ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
-                          : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300',
-                      ]"
-                      :disabled="loading"
-                      @click="strategy = 'mobile'"
-                    >
-                      <UIcon name="i-heroicons-device-phone-mobile" class="w-5 h-5" />
-                    </button>
-                    <button
-                      type="button"
-                      class="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-md text-sm font-medium transition-colors" :class="[
-                        strategy === 'desktop'
-                          ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
-                          : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300',
-                      ]"
-                      :disabled="loading"
-                      @click="strategy = 'desktop'"
-                    >
-                      <UIcon name="i-heroicons-computer-desktop" class="w-5 h-5" />
-                    </button>
-                  </div>
-                  <UButton
-                    type="submit"
-                    size="lg"
-                    :disabled="!urlInput.trim() || loading"
-                    class="bg-violet-600 hover:bg-violet-500 text-white font-medium flex-1 sm:flex-none"
-                  >
-                    <span class="sm:hidden">Find LCP</span>
-                    <span class="hidden sm:inline">Find LCP Element</span>
-                  </UButton>
-                </div>
-              </form>
-            </div>
-
-            <!-- Loading State -->
-            <div v-if="loading" ref="loadingContainerRef" class="p-6 text-center">
-              <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800">
-                <UIcon name="i-heroicons-arrow-path" class="w-4 h-4 text-violet-500 animate-spin" />
-                <span class="text-sm text-violet-700 dark:text-violet-300">{{ loadingMessage }}</span>
-              </div>
-              <p class="mt-4 text-xs text-gray-500">
-                This can take up to 2 minutes. Learn more about LCP below while we analyze your page.
-              </p>
-              <UIcon name="i-heroicons-chevron-down" class="w-5 h-5 text-gray-400 mx-auto mt-2 animate-bounce" />
-            </div>
-
-            <!-- Error -->
-            <UAlert
-              v-if="error"
-              color="error"
-              variant="subtle"
-              icon="i-heroicons-exclamation-circle"
-              class="mx-4 sm:mx-6 my-4"
+    <ToolCard icon="i-heroicons-photo" title="LCP Analysis" color="violet">
+      <!-- Input -->
+      <div class="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-800">
+        <form class="flex flex-col gap-3" @submit.prevent="analyze">
+          <UInput
+            v-model="urlInput"
+            placeholder="Enter URL (e.g., example.com)"
+            size="lg"
+            class="flex-1"
+            icon="i-heroicons-globe-alt"
+            :disabled="loading"
+          />
+          <div class="flex gap-2 justify-between sm:justify-start">
+            <!-- Mobile/Desktop Toggle -->
+            <ToolDeviceToggle v-model="strategy" :disabled="loading" />
+            <UButton
+              type="submit"
+              size="lg"
+              :disabled="!urlInput.trim() || loading"
+              class="bg-violet-600 hover:bg-violet-500 text-white font-medium flex-1 sm:flex-none"
             >
-              <template #title>
-                {{ error }}
-              </template>
-            </UAlert>
+              <span class="sm:hidden">Find LCP</span>
+              <span class="hidden sm:inline">Find LCP Element</span>
+            </UButton>
+          </div>
+        </form>
+      </div>
 
-            <!-- Results -->
-            <div v-if="result" class="p-4 sm:p-6">
-              <!-- Hero: Screenshot + LCP Info side by side -->
-              <div v-if="result.screenshot && result.element?.boundingRect" class="flex flex-col sm:flex-row gap-4 mb-6">
-                <!-- Screenshot -->
-                <div class="sm:w-1/2 flex justify-center">
-                  <div
-                    ref="screenshotRef"
-                    class="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-800 max-h-[350px] overflow-y-auto w-full"
-                    :style="{ maxWidth: `${result.screenshot.width}px` }"
-                  >
-                    <div class="relative w-full">
-                      <img
-                        :src="result.screenshot.data"
-                        alt="Page screenshot"
-                        :width="result.screenshot.width"
-                        :height="result.screenshot.height"
-                        class="w-full h-auto block"
-                      >
-                      <!-- LCP Element Highlight Overlay - uses percentages for scaling -->
-                      <div
-                        class="absolute border-2 border-violet-500 bg-violet-500/20 rounded-sm pointer-events-none"
-                        :style="{
-                          top: `${(result.element.boundingRect.top / result.screenshot.height) * 100}%`,
-                          left: `${(result.element.boundingRect.left / result.screenshot.width) * 100}%`,
-                          width: `${(result.element.boundingRect.width / result.screenshot.width) * 100}%`,
-                          height: `${(result.element.boundingRect.height / result.screenshot.height) * 100}%`,
-                        }"
-                      >
-                        <span class="absolute -top-5 left-0 px-1.5 py-0.5 text-[9px] font-medium bg-violet-500 text-white rounded whitespace-nowrap">
-                          LCP
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+      <ToolLoadingPill v-if="loading" :message="loadingMessage" color="violet" hint="This can take up to 2 minutes. The API runs a full Lighthouse audit." />
 
-                <!-- LCP Info Card -->
-                <div class="sm:w-1/2 flex flex-col justify-center">
-                  <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 space-y-4">
-                    <!-- Score + Time -->
-                    <div class="flex items-center gap-4">
-                      <div
-                        class="w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-bold shadow-lg shrink-0"
-                        :class="{
-                          'bg-green-500': result.lcp.score >= 90,
-                          'bg-orange-500': result.lcp.score >= 50 && result.lcp.score < 90,
-                          'bg-red-500': result.lcp.score < 50,
-                        }"
-                      >
-                        {{ Math.round(result.lcp.score) }}
-                      </div>
-                      <div>
-                        <div
-                          class="text-2xl font-bold tabular-nums"
-                          :class="{
-                            'text-green-600 dark:text-green-400': result.lcp.score >= 90,
-                            'text-orange-600 dark:text-orange-400': result.lcp.score >= 50 && result.lcp.score < 90,
-                            'text-red-600 dark:text-red-400': result.lcp.score < 50,
-                          }"
-                        >
-                          {{ result.lcp.displayValue }}
-                        </div>
-                        <div class="text-xs text-gray-500">
-                          Largest Contentful Paint
-                        </div>
-                      </div>
-                    </div>
+      <!-- Error -->
+      <ToolError :error="error" />
 
-                    <!-- Element Info -->
-                    <div class="border-t border-gray-200 dark:border-gray-700 pt-3">
-                      <div class="flex items-center gap-2 mb-2 flex-wrap">
-                        <span class="px-1.5 py-0.5 text-[10px] font-medium bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded">
-                          {{ result.element.type }}
-                        </span>
-                        <code class="text-xs text-gray-600 dark:text-gray-400">&lt;{{ result.element.tagName }}&gt;</code>
-                        <span
-                          v-if="result.framework" class="px-1.5 py-0.5 text-[10px] font-medium rounded flex items-center gap-1" :class="{
-                            'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300': result.framework === 'nuxt',
-                            'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300': result.framework === 'next',
-                            'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300': result.framework === 'vite',
-                          }"
-                        >
-                          <UIcon v-if="result.framework === 'nuxt'" name="i-logos-nuxt-icon" class="w-3 h-3" />
-                          <UIcon v-else-if="result.framework === 'next'" name="i-logos-nextjs-icon" class="w-3 h-3" />
-                          <UIcon v-else-if="result.framework === 'vite'" name="i-logos-vitejs" class="w-3 h-3" />
-                          {{ result.framework === 'nuxt' ? 'Nuxt' : result.framework === 'next' ? 'Next.js' : 'Vite' }}
-                        </span>
-                      </div>
-                      <p class="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">
-                        {{ result.element.snippet }}
-                      </p>
-                      <code v-if="result.element.selector" class="block mt-2 text-[10px] text-violet-600 dark:text-violet-400 truncate">
-                        {{ result.element.selector }}
-                      </code>
-                    </div>
-
-                    <!-- Discovery Checklist (if image) -->
-                    <div v-if="result.discovery" class="border-t border-gray-200 dark:border-gray-700 pt-3 space-y-1.5">
-                      <div class="flex items-center gap-2 text-xs">
-                        <UIcon
-                          :name="result.discovery.eagerlyLoaded ? 'i-heroicons-check-circle' : 'i-heroicons-x-circle'"
-                          :class="result.discovery.eagerlyLoaded ? 'text-green-500' : 'text-red-500'"
-                          class="w-4 h-4"
-                        />
-                        <span :class="result.discovery.eagerlyLoaded ? 'text-gray-600 dark:text-gray-400' : 'text-red-600 dark:text-red-400'">
-                          {{ result.discovery.eagerlyLoaded ? 'Not lazy loaded' : 'Remove loading="lazy"' }}
-                        </span>
-                      </div>
-                      <div class="flex items-center gap-2 text-xs">
-                        <UIcon
-                          :name="result.discovery.requestDiscoverable ? 'i-heroicons-check-circle' : 'i-heroicons-x-circle'"
-                          :class="result.discovery.requestDiscoverable ? 'text-green-500' : 'text-red-500'"
-                          class="w-4 h-4"
-                        />
-                        <span :class="result.discovery.requestDiscoverable ? 'text-gray-600 dark:text-gray-400' : 'text-red-600 dark:text-red-400'">
-                          {{ result.discovery.requestDiscoverable ? 'Discoverable in HTML' : 'Add preload' }}
-                        </span>
-                      </div>
-                      <div class="flex items-center gap-2 text-xs">
-                        <UIcon
-                          :name="result.discovery.priorityHinted ? 'i-heroicons-check-circle' : 'i-heroicons-x-circle'"
-                          :class="result.discovery.priorityHinted ? 'text-green-500' : 'text-orange-500'"
-                          class="w-4 h-4"
-                        />
-                        <span :class="result.discovery.priorityHinted ? 'text-gray-600 dark:text-gray-400' : 'text-orange-600 dark:text-orange-400'">
-                          {{ result.discovery.priorityHinted ? 'Has fetchpriority="high"' : 'Add fetchpriority="high"' }}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+      <!-- Results -->
+      <div v-if="result" class="p-4 sm:p-6">
+        <!-- Hero: Screenshot + LCP Info side by side -->
+        <div v-if="result.screenshot && result.element?.boundingRect" class="flex flex-col sm:flex-row gap-4 mb-6">
+          <!-- Screenshot -->
+          <div class="sm:w-1/2 flex justify-center">
+            <div
+              ref="screenshotRef"
+              class="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-800 max-h-[350px] overflow-y-auto w-full"
+              :style="{ maxWidth: `${result.screenshot.width}px` }"
+            >
+              <div class="relative w-full">
+                <img
+                  :src="result.screenshot.data"
+                  alt="Page screenshot"
+                  :width="result.screenshot.width"
+                  :height="result.screenshot.height"
+                  class="w-full h-auto block"
+                >
+                <!-- LCP Element Highlight Overlay - uses percentages for scaling -->
+                <div
+                  class="absolute border-2 border-violet-500 bg-violet-500/20 rounded-sm pointer-events-none"
+                  :style="{
+                    top: `${(result.element.boundingRect.top / result.screenshot.height) * 100}%`,
+                    left: `${(result.element.boundingRect.left / result.screenshot.width) * 100}%`,
+                    width: `${(result.element.boundingRect.width / result.screenshot.width) * 100}%`,
+                    height: `${(result.element.boundingRect.height / result.screenshot.height) * 100}%`,
+                  }"
+                >
+                  <span class="absolute -top-5 left-0 px-1.5 py-0.5 text-[9px] font-medium bg-violet-500 text-white rounded whitespace-nowrap">
+                    LCP
+                  </span>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <!-- Insights Section -->
-              <div v-if="insights.length" class="mb-6">
-                <div class="flex items-center gap-2 mb-3">
-                  <UIcon name="i-heroicons-light-bulb" class="w-4 h-4 text-violet-500" />
-                  <span class="text-sm font-semibold">Insights</span>
+          <!-- LCP Info Card -->
+          <div class="sm:w-1/2 flex flex-col justify-center">
+            <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 space-y-4">
+              <!-- Score + Time -->
+              <div class="flex items-center gap-4">
+                <div
+                  class="w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-bold shadow-lg shrink-0"
+                  :class="{
+                    'bg-green-500': result.lcp.score >= 90,
+                    'bg-orange-500': result.lcp.score >= 50 && result.lcp.score < 90,
+                    'bg-red-500': result.lcp.score < 50,
+                  }"
+                >
+                  {{ Math.round(result.lcp.score) }}
                 </div>
-                <div class="space-y-2">
+                <div>
                   <div
-                    v-for="(insight, idx) in insights"
-                    :key="idx"
-                    class="p-3 rounded-lg border"
+                    class="text-2xl font-bold tabular-nums"
                     :class="{
-                      'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800': insight.type === 'positive',
-                      'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800': insight.type === 'info',
-                      'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800': insight.type === 'warning',
+                      'text-green-600 dark:text-green-400': result.lcp.score >= 90,
+                      'text-orange-600 dark:text-orange-400': result.lcp.score >= 50 && result.lcp.score < 90,
+                      'text-red-600 dark:text-red-400': result.lcp.score < 50,
                     }"
                   >
-                    <div class="flex items-start gap-3">
-                      <UIcon
-                        :name="insight.icon"
-                        class="w-5 h-5 shrink-0 mt-0.5"
-                        :class="{
-                          'text-green-500': insight.type === 'positive',
-                          'text-blue-500': insight.type === 'info',
-                          'text-orange-500': insight.type === 'warning',
-                        }"
-                      />
-                      <div>
-                        <p
-                          class="text-sm font-medium"
-                          :class="{
-                            'text-green-800 dark:text-green-200': insight.type === 'positive',
-                            'text-blue-800 dark:text-blue-200': insight.type === 'info',
-                            'text-orange-800 dark:text-orange-200': insight.type === 'warning',
-                          }"
-                        >
-                          {{ insight.title }}
-                        </p>
-                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
-                          {{ insight.description }}
-                        </p>
-                      </div>
-                    </div>
+                    {{ result.lcp.displayValue }}
+                  </div>
+                  <div class="text-xs text-gray-500">
+                    Largest Contentful Paint
                   </div>
                 </div>
               </div>
 
-              <!-- CrUX Field Data -->
-              <div class="mb-6">
-                <ToolsCruxFieldDataCard
-                  metric="lcp"
-                  :url="urlInput"
-                  :form-factor="strategy === 'mobile' ? 'PHONE' : 'DESKTOP'"
-                  :lab-value="result.lcp.value"
-                  :lab-display-value="result.lcp.displayValue"
-                />
+              <!-- Element Info -->
+              <div class="border-t border-gray-200 dark:border-gray-700 pt-3">
+                <div class="flex items-center gap-2 mb-2 flex-wrap">
+                  <span class="px-1.5 py-0.5 text-[10px] font-medium bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded">
+                    {{ result.element.type }}
+                  </span>
+                  <code class="text-xs text-gray-600 dark:text-gray-400">&lt;{{ result.element.tagName }}&gt;</code>
+                  <span
+                    v-if="result.framework" class="px-1.5 py-0.5 text-[10px] font-medium rounded flex items-center gap-1" :class="{
+                      'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300': result.framework === 'nuxt',
+                      'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300': result.framework === 'next',
+                      'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300': result.framework === 'vite',
+                    }"
+                  >
+                    <UIcon v-if="result.framework === 'nuxt'" name="i-logos-nuxt-icon" class="w-3 h-3" />
+                    <UIcon v-else-if="result.framework === 'next'" name="i-logos-nextjs-icon" class="w-3 h-3" />
+                    <UIcon v-else-if="result.framework === 'vite'" name="i-logos-vitejs" class="w-3 h-3" />
+                    {{ result.framework === 'nuxt' ? 'Nuxt' : result.framework === 'next' ? 'Next.js' : 'Vite' }}
+                  </span>
+                </div>
+                <p class="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">
+                  {{ result.element.snippet }}
+                </p>
+                <code v-if="result.element.selector" class="block mt-2 text-[10px] text-violet-600 dark:text-violet-400 truncate">
+                  {{ result.element.selector }}
+                </code>
               </div>
 
-              <div class="grid lg:grid-cols-2 gap-6">
-                <!-- Left: Timing & Threshold -->
-                <div class="space-y-5">
-                  <!-- Threshold Bar -->
-                  <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50">
-                    <div class="flex items-center gap-2 mb-3">
-                      <UIcon name="i-heroicons-chart-bar" class="w-4 h-4 text-violet-500" />
-                      <span class="text-sm font-semibold">LCP Threshold</span>
-                    </div>
-                    <div class="relative">
-                      <div class="flex h-3 rounded-full overflow-hidden shadow-inner">
-                        <div class="flex-[2.5] bg-gradient-to-r from-green-400 to-green-500" />
-                        <div class="flex-[1.5] bg-gradient-to-r from-orange-400 to-orange-500" />
-                        <div class="flex-[2] bg-gradient-to-r from-red-400 to-red-500" />
-                      </div>
-                      <!-- Position indicator -->
-                      <div
-                        class="absolute top-0 -translate-x-1/2 transition-all duration-500"
-                        :style="{ left: `${thresholdPosition}%` }"
-                      >
-                        <div class="flex flex-col items-center">
-                          <div
-                            class="w-4 h-4 rounded-full border-2 border-white dark:border-gray-800 shadow-md flex items-center justify-center"
-                            :class="{
-                              'bg-green-500': result.lcp.score >= 90,
-                              'bg-orange-500': result.lcp.score >= 50 && result.lcp.score < 90,
-                              'bg-red-500': result.lcp.score < 50,
-                            }"
-                          />
-                          <div class="w-0.5 h-2 bg-gray-400 dark:bg-gray-600" />
-                          <span class="text-[10px] font-bold tabular-nums mt-0.5">{{ result.lcp.displayValue }}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="flex justify-between mt-6 text-[10px] text-gray-500">
-                      <span>0s</span>
-                      <span class="text-green-600 font-medium">≤2.5s Good</span>
-                      <span class="text-orange-500">4.0s</span>
-                      <span class="text-red-500">Poor</span>
-                    </div>
-                  </div>
-
-                  <!-- LCP Timing Breakdown -->
-                  <div v-if="result.phases?.length" class="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-                    <div class="px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800">
-                      <div class="flex items-center gap-2">
-                        <UIcon name="i-heroicons-clock" class="w-4 h-4 text-violet-500" />
-                        <span class="text-sm font-semibold">Time Breakdown</span>
-                      </div>
-                    </div>
-                    <div class="p-4">
-                      <!-- Stacked bar visualization -->
-                      <div class="flex h-6 rounded-lg overflow-hidden mb-3">
-                        <div
-                          v-for="(phase, idx) in result.phases"
-                          :key="phase.id"
-                          :style="{ width: `${(phase.duration / result.lcp.value) * 100}%` }"
-                          :class="[
-                            idx === 0 ? 'bg-blue-500' : idx === 1 ? 'bg-orange-500' : idx === 2 ? 'bg-green-500' : 'bg-purple-500',
-                          ]"
-                          class="min-w-[2px]"
-                        />
-                      </div>
-                      <!-- Legend -->
-                      <div class="space-y-1.5">
-                        <div
-                          v-for="(phase, idx) in result.phases"
-                          :key="phase.id"
-                          class="flex items-center justify-between text-xs"
-                        >
-                          <div class="flex items-center gap-2">
-                            <span
-                              :class="[
-                                idx === 0 ? 'bg-blue-500' : idx === 1 ? 'bg-orange-500' : idx === 2 ? 'bg-green-500' : 'bg-purple-500',
-                              ]"
-                              class="w-2.5 h-2.5 rounded-full"
-                            />
-                            <span class="text-gray-600 dark:text-gray-400">{{ phase.label }}</span>
-                          </div>
-                          <span class="font-medium tabular-nums">{{ formatMs(phase.duration) }}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+              <!-- Discovery Checklist (if image) -->
+              <div v-if="result.discovery" class="border-t border-gray-200 dark:border-gray-700 pt-3 space-y-1.5">
+                <div class="flex items-center gap-2 text-xs">
+                  <UIcon
+                    :name="result.discovery.eagerlyLoaded ? 'i-heroicons-check-circle' : 'i-heroicons-x-circle'"
+                    :class="result.discovery.eagerlyLoaded ? 'text-green-500' : 'text-red-500'"
+                    class="w-4 h-4"
+                  />
+                  <span :class="result.discovery.eagerlyLoaded ? 'text-gray-600 dark:text-gray-400' : 'text-red-600 dark:text-red-400'">
+                    {{ result.discovery.eagerlyLoaded ? 'Not lazy loaded' : 'Remove loading="lazy"' }}
+                  </span>
                 </div>
-
-                <!-- Right: Opportunities -->
-                <div>
-                  <div class="flex items-center gap-2 mb-3">
-                    <UIcon name="i-heroicons-light-bulb" class="w-4 h-4 text-orange-500" />
-                    <span class="text-sm font-semibold">Opportunities</span>
-                  </div>
-
-                  <div v-if="result.opportunities.length === 0" class="text-center py-8 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/30">
-                    <UIcon name="i-heroicons-check-circle" class="w-8 h-8 text-green-500 mx-auto mb-2" />
-                    <p class="text-sm text-gray-600 dark:text-gray-400">
-                      No major opportunities found.
-                    </p>
-                    <p class="text-xs text-gray-500 mt-1">
-                      Your LCP is well optimized!
-                    </p>
-                  </div>
-
-                  <div v-else class="space-y-2">
-                    <div
-                      v-for="(opp, idx) in result.opportunities"
-                      :key="opp.id"
-                      v-motion
-                      :initial="{ opacity: 0, x: -10 }"
-                      :animate="{ opacity: 1, x: 0 }"
-                      :transition="{ duration: 0.2, delay: idx * 0.05 }"
-                      class="p-3 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-orange-300 dark:hover:border-orange-800 transition-colors"
-                    >
-                      <div class="flex items-start gap-3">
-                        <div
-                          v-if="opp.savings?.ms"
-                          class="shrink-0 px-2 py-1 rounded-md bg-orange-100 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-800/50"
-                        >
-                          <span class="text-sm font-bold text-orange-700 dark:text-orange-300 tabular-nums">
-                            -{{ formatMs(opp.savings.ms) }}
-                          </span>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                          <p class="text-sm font-medium text-gray-900 dark:text-white leading-snug">
-                            {{ opp.title }}
-                          </p>
-                          <p v-if="opp.displayValue" class="text-xs text-gray-500 mt-1">
-                            {{ opp.displayValue }}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                <div class="flex items-center gap-2 text-xs">
+                  <UIcon
+                    :name="result.discovery.requestDiscoverable ? 'i-heroicons-check-circle' : 'i-heroicons-x-circle'"
+                    :class="result.discovery.requestDiscoverable ? 'text-green-500' : 'text-red-500'"
+                    class="w-4 h-4"
+                  />
+                  <span :class="result.discovery.requestDiscoverable ? 'text-gray-600 dark:text-gray-400' : 'text-red-600 dark:text-red-400'">
+                    {{ result.discovery.requestDiscoverable ? 'Discoverable in HTML' : 'Add preload' }}
+                  </span>
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                  <UIcon
+                    :name="result.discovery.priorityHinted ? 'i-heroicons-check-circle' : 'i-heroicons-x-circle'"
+                    :class="result.discovery.priorityHinted ? 'text-green-500' : 'text-orange-500'"
+                    class="w-4 h-4"
+                  />
+                  <span :class="result.discovery.priorityHinted ? 'text-gray-600 dark:text-gray-400' : 'text-orange-600 dark:text-orange-400'">
+                    {{ result.discovery.priorityHinted ? 'Has fetchpriority="high"' : 'Add fetchpriority="high"' }}
+                  </span>
                 </div>
               </div>
-
-              <!-- CTA Banner -->
-              <div class="mt-6 p-3 sm:p-4 rounded-xl bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 border border-violet-200 dark:border-violet-800">
-                <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
-                  <div class="text-center sm:text-left">
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">
-                      Want the full performance report?
-                    </p>
-                    <p class="text-xs text-gray-500">
-                      See all Core Web Vitals and optimization opportunities
-                    </p>
-                  </div>
-                  <UButton :to="`/tools/pagespeed-insights-performance?url=${encodeURIComponent(urlInput)}`" size="sm" class="w-full sm:w-auto">
-                    View Full Report
-                  </UButton>
-                </div>
-              </div>
-
-              <!-- Feedback -->
-              <ToolFeedback tool-id="lcp-finder" :context="{ url: urlInput, strategy }" />
             </div>
           </div>
         </div>
+
+        <!-- Insights Section -->
+        <div v-if="insights.length" class="mb-6">
+          <div class="flex items-center gap-2 mb-3">
+            <UIcon name="i-heroicons-light-bulb" class="w-4 h-4 text-violet-500" />
+            <span class="text-sm font-semibold">Insights</span>
+          </div>
+          <div class="space-y-2">
+            <div
+              v-for="(insight, idx) in insights"
+              :key="idx"
+              class="p-3 rounded-lg border"
+              :class="{
+                'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800': insight.type === 'positive',
+                'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800': insight.type === 'info',
+                'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800': insight.type === 'warning',
+              }"
+            >
+              <div class="flex items-start gap-3">
+                <UIcon
+                  :name="insight.icon"
+                  class="w-5 h-5 shrink-0 mt-0.5"
+                  :class="{
+                    'text-green-500': insight.type === 'positive',
+                    'text-blue-500': insight.type === 'info',
+                    'text-orange-500': insight.type === 'warning',
+                  }"
+                />
+                <div>
+                  <p
+                    class="text-sm font-medium"
+                    :class="{
+                      'text-green-800 dark:text-green-200': insight.type === 'positive',
+                      'text-blue-800 dark:text-blue-200': insight.type === 'info',
+                      'text-orange-800 dark:text-orange-200': insight.type === 'warning',
+                    }"
+                  >
+                    {{ insight.title }}
+                  </p>
+                  <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                    {{ insight.description }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CrUX Field Data -->
+        <div class="mb-6">
+          <ToolsCruxFieldDataCard
+            metric="lcp"
+            :url="urlInput"
+            :form-factor="strategy === 'mobile' ? 'PHONE' : 'DESKTOP'"
+            :lab-value="result.lcp.value"
+            :lab-display-value="result.lcp.displayValue"
+          />
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-6">
+          <!-- Left: Timing & Threshold -->
+          <div class="space-y-5">
+            <!-- Threshold Bar -->
+            <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50">
+              <div class="flex items-center gap-2 mb-3">
+                <UIcon name="i-heroicons-chart-bar" class="w-4 h-4 text-violet-500" />
+                <span class="text-sm font-semibold">LCP Threshold</span>
+              </div>
+              <div class="relative">
+                <div class="flex h-3 rounded-full overflow-hidden shadow-inner">
+                  <div class="flex-[2.5] bg-gradient-to-r from-green-400 to-green-500" />
+                  <div class="flex-[1.5] bg-gradient-to-r from-orange-400 to-orange-500" />
+                  <div class="flex-[2] bg-gradient-to-r from-red-400 to-red-500" />
+                </div>
+                <!-- Position indicator -->
+                <div
+                  class="absolute top-0 -translate-x-1/2 transition-all duration-500"
+                  :style="{ left: `${thresholdPosition}%` }"
+                >
+                  <div class="flex flex-col items-center">
+                    <div
+                      class="w-4 h-4 rounded-full border-2 border-white dark:border-gray-800 shadow-md flex items-center justify-center"
+                      :class="{
+                        'bg-green-500': result.lcp.score >= 90,
+                        'bg-orange-500': result.lcp.score >= 50 && result.lcp.score < 90,
+                        'bg-red-500': result.lcp.score < 50,
+                      }"
+                    />
+                    <div class="w-0.5 h-2 bg-gray-400 dark:bg-gray-600" />
+                    <span class="text-[10px] font-bold tabular-nums mt-0.5">{{ result.lcp.displayValue }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex justify-between mt-6 text-[10px] text-gray-500">
+                <span>0s</span>
+                <span class="text-green-600 font-medium">≤2.5s Good</span>
+                <span class="text-orange-500">4.0s</span>
+                <span class="text-red-500">Poor</span>
+              </div>
+            </div>
+
+            <!-- LCP Timing Breakdown -->
+            <div v-if="result.phases?.length" class="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+              <div class="px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800">
+                <div class="flex items-center gap-2">
+                  <UIcon name="i-heroicons-clock" class="w-4 h-4 text-violet-500" />
+                  <span class="text-sm font-semibold">Time Breakdown</span>
+                </div>
+              </div>
+              <div class="p-4">
+                <!-- Stacked bar visualization -->
+                <div class="flex h-6 rounded-lg overflow-hidden mb-3">
+                  <div
+                    v-for="(phase, idx) in result.phases"
+                    :key="phase.id"
+                    :style="{ width: `${(phase.duration / result.lcp.value) * 100}%` }"
+                    :class="[
+                      idx === 0 ? 'bg-blue-500' : idx === 1 ? 'bg-orange-500' : idx === 2 ? 'bg-green-500' : 'bg-purple-500',
+                    ]"
+                    class="min-w-[2px]"
+                  />
+                </div>
+                <!-- Legend -->
+                <div class="space-y-1.5">
+                  <div
+                    v-for="(phase, idx) in result.phases"
+                    :key="phase.id"
+                    class="flex items-center justify-between text-xs"
+                  >
+                    <div class="flex items-center gap-2">
+                      <span
+                        :class="[
+                          idx === 0 ? 'bg-blue-500' : idx === 1 ? 'bg-orange-500' : idx === 2 ? 'bg-green-500' : 'bg-purple-500',
+                        ]"
+                        class="w-2.5 h-2.5 rounded-full"
+                      />
+                      <span class="text-gray-600 dark:text-gray-400">{{ phase.label }}</span>
+                    </div>
+                    <span class="font-medium tabular-nums">{{ formatMs(phase.duration) }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Opportunities -->
+          <div>
+            <div class="flex items-center gap-2 mb-3">
+              <UIcon name="i-heroicons-light-bulb" class="w-4 h-4 text-orange-500" />
+              <span class="text-sm font-semibold">Opportunities</span>
+            </div>
+
+            <div v-if="result.opportunities.length === 0" class="text-center py-8 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/30">
+              <UIcon name="i-heroicons-check-circle" class="w-8 h-8 text-green-500 mx-auto mb-2" />
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                No major opportunities found.
+              </p>
+              <p class="text-xs text-gray-500 mt-1">
+                Your LCP is well optimized!
+              </p>
+            </div>
+
+            <div v-else class="space-y-2">
+              <div
+                v-for="(opp, idx) in result.opportunities"
+                :key="opp.id"
+                v-motion
+                :initial="{ opacity: 0, x: -10 }"
+                :animate="{ opacity: 1, x: 0 }"
+                :transition="{ duration: 0.2, delay: idx * 0.05 }"
+                class="p-3 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-orange-300 dark:hover:border-orange-800 transition-colors"
+              >
+                <div class="flex items-start gap-3">
+                  <div
+                    v-if="opp.savings?.ms"
+                    class="shrink-0 px-2 py-1 rounded-md bg-orange-100 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-800/50"
+                  >
+                    <span class="text-sm font-bold text-orange-700 dark:text-orange-300 tabular-nums">
+                      -{{ formatMs(opp.savings.ms) }}
+                    </span>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 dark:text-white leading-snug">
+                      {{ opp.title }}
+                    </p>
+                    <p v-if="opp.displayValue" class="text-xs text-gray-500 mt-1">
+                      {{ opp.displayValue }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA Banner -->
+        <div class="mt-6 p-3 sm:p-4 rounded-xl bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 border border-violet-200 dark:border-violet-800">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="text-center sm:text-left">
+              <p class="text-sm font-medium text-gray-900 dark:text-white">
+                Want the full performance report?
+              </p>
+              <p class="text-xs text-gray-500">
+                See all Core Web Vitals and optimization opportunities
+              </p>
+            </div>
+            <UButton :to="`/tools/pagespeed-insights-performance?url=${encodeURIComponent(urlInput)}`" size="sm" class="w-full sm:w-auto">
+              View Full Report
+            </UButton>
+          </div>
+        </div>
+
+        <!-- Feedback -->
+        <ToolFeedback tool-id="lcp-finder" :context="{ url: urlInput, strategy }" />
       </div>
-    </section>
+      <ToolEmptyState v-if="!result && !loading && !error" icon="i-heroicons-photo" message="Enter a URL to find the LCP element" />
+    </ToolCard>
 
     <!-- Educational Content -->
     <section class="px-3 sm:px-6 lg:px-8 pb-12">
@@ -1755,29 +1588,7 @@ const insights = computed<LcpInsight[]>(() => {
       </div>
     </section>
 
-    <!-- Floating Loading Indicator -->
-    <Teleport to="body">
-      <Transition
-        enter-active-class="transition duration-200 ease-out"
-        enter-from-class="opacity-0 translate-y-4"
-        enter-to-class="opacity-100 translate-y-0"
-        leave-active-class="transition duration-150 ease-in"
-        leave-from-class="opacity-100 translate-y-0"
-        leave-to-class="opacity-0 translate-y-4"
-      >
-        <div
-          v-if="showFloatingLoader"
-          class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3 rounded-full bg-white dark:bg-gray-800 shadow-xl ring-1 ring-gray-200 dark:ring-gray-700"
-        >
-          <div class="relative">
-            <div class="w-5 h-5 rounded-full border-2 border-violet-200 dark:border-violet-800" />
-            <div class="absolute inset-0 w-5 h-5 rounded-full border-2 border-transparent border-t-violet-500 animate-spin" />
-          </div>
-          <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ loadingMessage }}</span>
-          <span class="text-xs text-gray-400">~2 min</span>
-        </div>
-      </Transition>
-    </Teleport>
+    <ToolFloatingLoader :show="showFloatingLoader" :message="loadingMessage" />
   </div>
 </template>
 

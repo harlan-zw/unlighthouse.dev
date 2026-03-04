@@ -40,26 +40,13 @@ useToolSeo({
 
 const calc = useLighthouseCalculator()
 
-// Track tool usage
-const hasTrackedView = ref(false)
-const hasTrackedUse = ref(false)
+const { trackUse } = useToolTracking('lighthouse-score-calculator')
 
 // Sync from URL on mount
 onMounted(() => {
   calc.syncFromHash()
   updateShareUrl()
-
-  // Listen for hash changes
   window.addEventListener('hashchange', calc.syncFromHash)
-
-  // Track view
-  if (!hasTrackedView.value) {
-    hasTrackedView.value = true
-    $fetch('/api/tools/track', {
-      method: 'POST',
-      body: { tool: 'lighthouse-score-calculator', action: 'view' },
-    }).catch(() => {})
-  }
 })
 
 onUnmounted(() => {
@@ -77,14 +64,7 @@ watch([calc.device, calc.values], () => {
     updateShareUrl()
   }, 300)
 
-  // Track first use
-  if (!hasTrackedUse.value) {
-    hasTrackedUse.value = true
-    $fetch('/api/tools/track', {
-      method: 'POST',
-      body: { tool: 'lighthouse-score-calculator', action: 'use' },
-    }).catch(() => {})
-  }
+  trackUse()
 }, { deep: true })
 
 // Metric contributions for gauge
@@ -111,41 +91,7 @@ function handleMetricUpdate(id: MetricId, value: number) {
 
 <template>
   <div class="min-h-screen">
-    <!-- Hero -->
-    <section class="relative pt-10 pb-6 lg:pt-12 lg:pb-8">
-      <div class="max-w-4xl mx-auto px-6 text-center">
-        <ClientOnly>
-          <h1
-            v-motion
-            :initial="{ opacity: 0, y: 20 }"
-            :animate="{ opacity: 1, y: 0 }"
-            :transition="{ duration: 0.4 }"
-            class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-[1.1] text-gray-900 dark:text-white mb-3"
-          >
-            Lighthouse Score
-            <span class="text-violet-600 dark:text-violet-400">Calculator</span>
-          </h1>
-          <p
-            v-motion
-            :initial="{ opacity: 0, y: 20 }"
-            :animate="{ opacity: 1, y: 0 }"
-            :transition="{ duration: 0.4, delay: 0.1 }"
-            class="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto"
-          >
-            See exactly how each metric contributes to your performance score.
-          </p>
-          <template #fallback>
-            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-[1.1] text-gray-900 dark:text-white mb-3">
-              Lighthouse Score
-              <span class="text-violet-600 dark:text-violet-400">Calculator</span>
-            </h1>
-            <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
-              See exactly how each metric contributes to your performance score.
-            </p>
-          </template>
-        </ClientOnly>
-      </div>
-    </section>
+    <ToolPageHero title="Lighthouse Score" accent="Calculator" description="See exactly how each metric contributes to your performance score." color="violet" />
 
     <!-- Calculator -->
     <section class="px-3 sm:px-6 lg:px-8 pb-12">

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { LighthouseAudit } from '~/types/lighthouse'
-import { formatBytes, formatMs, getScoreBgClass, getScoreRating } from '~/composables/useLighthouseReport'
+import { getScoreBgClass, getScoreRating } from '~/composables/useLighthouseReport'
 
 const props = defineProps<{
   audits: LighthouseAudit[]

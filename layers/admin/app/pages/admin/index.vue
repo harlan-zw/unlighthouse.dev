@@ -30,7 +30,15 @@ const toolMetadata: Record<string, { name: string, icon: string, color: string }
   'lcp': { name: 'LCP Finder', icon: 'i-carbon-image', color: 'blue' },
   'cls': { name: 'CLS Debugger', icon: 'i-carbon-move', color: 'amber' },
   'inp': { name: 'INP Analyzer', icon: 'i-carbon-touch-interaction', color: 'violet' },
-  'lighthouse-report-viewer': { name: 'Report Viewer', icon: 'i-carbon-document', color: 'rose' },
+  'cwv-check': { name: 'CWV Checker', icon: 'i-carbon-chart-evaluation', color: 'teal' },
+  'cwv-history': { name: 'CWV History', icon: 'i-carbon-chart-line', color: 'indigo' },
+  'cwv-compare': { name: 'CWV Compare', icon: 'i-carbon-compare', color: 'purple' },
+  'ttfb-checker': { name: 'TTFB Checker', icon: 'i-carbon-timer', color: 'orange' },
+  'bulk-pagespeed': { name: 'Bulk PageSpeed', icon: 'i-carbon-batch-job', color: 'lime' },
+  'page-size': { name: 'Page Size', icon: 'i-carbon-scale', color: 'sky' },
+  'har-viewer': { name: 'HAR Viewer', icon: 'i-carbon-document', color: 'rose' },
+  'json-size': { name: 'JSON Size', icon: 'i-carbon-json', color: 'pink' },
+  'lighthouse-report-viewer': { name: 'Report Viewer', icon: 'i-carbon-report', color: 'red' },
   'lighthouse-score-calculator': { name: 'Score Calculator', icon: 'i-carbon-calculator', color: 'cyan' },
 }
 

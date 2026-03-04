@@ -4,6 +4,8 @@ import { trackToolUsage } from '../../utils/analytics'
 const validTools: ToolName[] = [
   'lighthouse-report-viewer',
   'lighthouse-score-calculator',
+  'har-viewer',
+  'json-size',
 ]
 
 export default defineEventHandler(async (event) => {

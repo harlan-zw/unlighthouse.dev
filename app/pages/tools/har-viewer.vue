@@ -43,25 +43,10 @@ useToolSeo({
 
 const { report, error, loading, loadFromFile, loadFromText, clear } = useHarReport()
 
-// Track tool usage
-const hasTrackedView = ref(false)
-onMounted(() => {
-  if (!hasTrackedView.value) {
-    hasTrackedView.value = true
-    $fetch('/api/tools/track', {
-      method: 'POST',
-      body: { tool: 'har-viewer', action: 'view' },
-    }).catch(() => {})
-  }
-})
-
+const { trackUse } = useToolTracking('har-viewer')
 watch(report, (r) => {
-  if (r) {
-    $fetch('/api/tools/track', {
-      method: 'POST',
-      body: { tool: 'har-viewer', action: 'use' },
-    }).catch(() => {})
-  }
+  if (r)
+    trackUse()
 })
 
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -104,20 +89,6 @@ function loadSample() {
       error.value = 'Failed to load sample HAR file'
       loading.value = false
     })
-}
-
-function formatBytes(bytes: number) {
-  if (bytes >= 1048576)
-    return `${(bytes / 1048576).toFixed(1)} MB`
-  if (bytes >= 1024)
-    return `${(bytes / 1024).toFixed(0)} KB`
-  return `${bytes} B`
-}
-
-function formatMs(ms: number) {
-  if (ms >= 1000)
-    return `${(ms / 1000).toFixed(1)}s`
-  return `${Math.round(ms)}ms`
 }
 
 function truncateUrl(url: string, maxLen = 60): string {
@@ -227,501 +198,445 @@ function getTimingPhaseWidths(entry: ParsedHarEntry) {
 
 <template>
   <div class="min-h-screen">
-    <!-- Hero -->
-    <section class="relative pt-10 pb-6 lg:pt-12 lg:pb-8">
-      <div class="max-w-4xl mx-auto px-6 text-center">
-        <ClientOnly>
-          <h1
-            v-motion
-            :initial="{ opacity: 0, y: 20 }"
-            :animate="{ opacity: 1, y: 0 }"
-            :transition="{ duration: 0.4 }"
-            class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-[1.1] text-gray-900 dark:text-white mb-3"
-          >
-            HAR File
-            <span class="text-teal-600 dark:text-teal-400">Viewer</span>
-          </h1>
-          <p
-            v-motion
-            :initial="{ opacity: 0, y: 20 }"
-            :animate="{ opacity: 1, y: 0 }"
-            :transition="{ duration: 0.4, delay: 0.1 }"
-            class="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto"
-          >
-            Upload a HAR file to analyze network requests, waterfall timing, and resource breakdown. Entirely client-side.
-          </p>
-          <template #fallback>
-            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-[1.1] text-gray-900 dark:text-white mb-3">
-              HAR File
-              <span class="text-teal-600 dark:text-teal-400">Viewer</span>
-            </h1>
-            <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
-              Upload a HAR file to analyze network requests, waterfall timing, and resource breakdown. Entirely client-side.
-            </p>
-          </template>
-        </ClientOnly>
+    <ToolPageHero title="HAR File" accent="Viewer" description="Upload a HAR file to analyze network requests, waterfall timing, and resource breakdown. Entirely client-side." color="teal" />
+
+    <ToolCard icon="i-heroicons-document-magnifying-glass" title="HAR File Analyzer" color="teal" max-width="max-w-5xl">
+      <div v-if="report" class="flex items-center justify-end gap-1 sm:gap-2 px-4 sm:px-6 py-2">
+        <span class="px-2 py-0.5 text-[10px] font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-full">
+          HAR {{ report.version }}
+        </span>
+        <span class="px-2 py-0.5 text-[10px] font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-full">
+          {{ report.totalRequests }} requests
+        </span>
+        <UButton variant="ghost" color="neutral" size="xs" @click="clear">
+          <UIcon name="i-heroicons-x-mark" class="w-4 h-4" />
+          <span class="hidden sm:inline">Clear</span>
+        </UButton>
       </div>
-    </section>
 
-    <!-- Upload / Results -->
-    <section class="px-3 sm:px-6 lg:px-8 pb-12">
-      <div class="max-w-5xl mx-auto">
-        <div class="relative">
-          <div class="absolute -inset-4 bg-gradient-to-b from-teal-500/10 via-teal-500/5 to-transparent rounded-3xl blur-3xl pointer-events-none" />
+      <!-- Upload Zone -->
+      <div v-if="!report && !loading" class="p-6">
+        <div
+          class="relative border-2 border-dashed rounded-xl p-8 sm:p-12 text-center transition-all cursor-pointer"
+          :class="isDragging
+            ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20'
+            : 'border-gray-300 dark:border-gray-700 hover:border-teal-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'"
+          @dragover.prevent="isDragging = true"
+          @dragleave.prevent="isDragging = false"
+          @drop.prevent="handleDrop"
+          @click="fileInput?.click()"
+        >
+          <input
+            ref="fileInput"
+            type="file"
+            accept=".har,.json,application/json"
+            class="hidden"
+            @change="handleFileSelect"
+          >
 
-          <div class="relative bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl overflow-hidden shadow-xl ring-1 ring-gray-200 dark:ring-gray-800">
-            <!-- Header -->
-            <div class="flex items-center justify-between gap-2 px-4 sm:px-6 py-3 border-b border-gray-200 dark:border-gray-800">
-              <div class="flex items-center gap-2">
-                <UIcon name="i-heroicons-document-magnifying-glass" class="w-4 h-4 text-teal-500" />
-                <span class="text-sm font-semibold">HAR Viewer</span>
-              </div>
-              <div v-if="report" class="flex items-center gap-1 sm:gap-2">
-                <span class="px-2 py-0.5 text-[10px] font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-full">
-                  HAR {{ report.version }}
-                </span>
-                <span class="px-2 py-0.5 text-[10px] font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-full">
-                  {{ report.totalRequests }} requests
-                </span>
-                <UButton variant="ghost" color="neutral" size="xs" @click="clear">
-                  <UIcon name="i-heroicons-x-mark" class="w-4 h-4" />
-                  <span class="hidden sm:inline">Clear</span>
-                </UButton>
-              </div>
+          <div class="flex flex-col items-center">
+            <div class="w-16 h-16 rounded-2xl bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center mb-4">
+              <UIcon name="i-heroicons-arrow-up-tray" class="w-8 h-8 text-teal-500" />
             </div>
+            <p class="text-base font-medium text-gray-900 dark:text-white mb-2">
+              Drop your HAR file here
+            </p>
+            <p class="text-sm text-gray-500 mb-4">
+              or click to browse files
+            </p>
+            <div class="flex flex-wrap justify-center gap-2">
+              <UButton variant="soft" size="sm" color="primary" @click.stop="showPasteModal = true">
+                <UIcon name="i-heroicons-clipboard-document" class="w-4 h-4 mr-1" />
+                Paste JSON
+              </UButton>
+              <UButton variant="soft" size="sm" color="neutral" @click.stop="loadSample">
+                <UIcon name="i-heroicons-beaker" class="w-4 h-4 mr-1" />
+                Load Sample
+              </UButton>
+            </div>
+          </div>
+        </div>
 
-            <!-- Upload Zone -->
-            <div v-if="!report && !loading" class="p-6">
+        <div class="mt-6 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
+          <p class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+            How to export a HAR file:
+          </p>
+          <ol class="text-xs text-gray-600 dark:text-gray-400 space-y-1 list-decimal list-inside">
+            <li>Open Chrome DevTools (F12) → Network tab</li>
+            <li>Reload the page to capture all requests</li>
+            <li>Right-click the request list → "Save all as HAR with content"</li>
+          </ol>
+        </div>
+      </div>
+
+      <ToolLoadingPill v-if="loading" message="Parsing HAR file..." color="teal" />
+
+      <!-- Error -->
+      <UAlert
+        v-if="error"
+        color="error"
+        variant="subtle"
+        icon="i-heroicons-exclamation-circle"
+        class="mx-4 sm:mx-6 my-4"
+      >
+        <template #title>
+          {{ error }}
+        </template>
+      </UAlert>
+
+      <!-- Results -->
+      <div v-if="report" class="p-4 sm:p-6 space-y-6">
+        <!-- Page Info -->
+        <div v-if="report.pages.length" class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+          <div class="flex items-center gap-2 min-w-0">
+            <UIcon name="i-heroicons-globe-alt" class="w-4 h-4 text-gray-400 shrink-0" />
+            <span class="text-sm text-gray-700 dark:text-gray-300 truncate">{{ report.pages[0].title }}</span>
+          </div>
+        </div>
+
+        <!-- Summary Stats -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
+            <p class="text-lg font-bold text-gray-900 dark:text-white">
+              {{ report.totalRequests }}
+            </p>
+            <p class="text-xs text-gray-500">
+              Requests
+            </p>
+          </div>
+          <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
+            <p class="text-lg font-bold text-gray-900 dark:text-white">
+              {{ formatBytes(report.totalTransferSize) }}
+            </p>
+            <p class="text-xs text-gray-500">
+              Transfer Size
+            </p>
+          </div>
+          <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
+            <p class="text-lg font-bold text-gray-900 dark:text-white">
+              {{ formatMs(report.totalTime) }}
+            </p>
+            <p class="text-xs text-gray-500">
+              Total Time
+            </p>
+          </div>
+          <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
+            <p class="text-lg font-bold text-gray-900 dark:text-white">
+              {{ report.domainBreakdown.length }}
+            </p>
+            <p class="text-xs text-gray-500">
+              Domains
+            </p>
+          </div>
+          <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
+            <p class="text-lg font-bold text-gray-900 dark:text-white">
+              {{ (report.cacheStats.hitRate * 100).toFixed(0) }}%
+            </p>
+            <p class="text-xs text-gray-500">
+              Cache Hit Rate
+            </p>
+          </div>
+          <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
+            <p class="text-lg font-bold text-gray-900 dark:text-white">
+              {{ formatBytes(report.totalSize) }}
+            </p>
+            <p class="text-xs text-gray-500">
+              Uncompressed
+            </p>
+          </div>
+        </div>
+
+        <!-- Waterfall Chart -->
+        <div>
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+            <UIcon name="i-heroicons-bars-3" class="w-4 h-4 text-teal-500" />
+            Network Waterfall
+            <span class="text-xs font-normal text-gray-500">(first {{ waterfallEntries.length }} requests)</span>
+          </h2>
+
+          <!-- Timing legend -->
+          <div class="flex flex-wrap gap-3 mb-3">
+            <div v-for="(color, phase) in timingColors" :key="phase" class="flex items-center gap-1">
+              <div class="w-3 h-2 rounded-sm" :class="[color]" />
+              <span class="text-[10px] text-gray-500 capitalize">{{ phase === 'wait' ? 'TTFB' : phase }}</span>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
+            <div class="min-w-[700px]">
               <div
-                class="relative border-2 border-dashed rounded-xl p-8 sm:p-12 text-center transition-all cursor-pointer"
-                :class="isDragging
-                  ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20'
-                  : 'border-gray-300 dark:border-gray-700 hover:border-teal-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'"
-                @dragover.prevent="isDragging = true"
-                @dragleave.prevent="isDragging = false"
-                @drop.prevent="handleDrop"
-                @click="fileInput?.click()"
+                v-for="(entry, idx) in waterfallEntries"
+                :key="idx"
+                class="flex items-center gap-2 px-3 py-1 border-b border-gray-100 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/30 text-xs"
               >
-                <input
-                  ref="fileInput"
-                  type="file"
-                  accept=".har,.json,application/json"
-                  class="hidden"
-                  @change="handleFileSelect"
-                >
-
-                <div class="flex flex-col items-center">
-                  <div class="w-16 h-16 rounded-2xl bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center mb-4">
-                    <UIcon name="i-heroicons-arrow-up-tray" class="w-8 h-8 text-teal-500" />
-                  </div>
-                  <p class="text-base font-medium text-gray-900 dark:text-white mb-2">
-                    Drop your HAR file here
-                  </p>
-                  <p class="text-sm text-gray-500 mb-4">
-                    or click to browse files
-                  </p>
-                  <div class="flex flex-wrap justify-center gap-2">
-                    <UButton variant="soft" size="sm" color="primary" @click.stop="showPasteModal = true">
-                      <UIcon name="i-heroicons-clipboard-document" class="w-4 h-4 mr-1" />
-                      Paste JSON
-                    </UButton>
-                    <UButton variant="soft" size="sm" color="neutral" @click.stop="loadSample">
-                      <UIcon name="i-heroicons-beaker" class="w-4 h-4 mr-1" />
-                      Load Sample
-                    </UButton>
-                  </div>
-                </div>
-              </div>
-
-              <div class="mt-6 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
-                <p class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  How to export a HAR file:
-                </p>
-                <ol class="text-xs text-gray-600 dark:text-gray-400 space-y-1 list-decimal list-inside">
-                  <li>Open Chrome DevTools (F12) → Network tab</li>
-                  <li>Reload the page to capture all requests</li>
-                  <li>Right-click the request list → "Save all as HAR with content"</li>
-                </ol>
-              </div>
-            </div>
-
-            <!-- Loading -->
-            <div v-if="loading" class="p-12 text-center">
-              <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-teal-500 animate-spin mx-auto mb-4" />
-              <p class="text-sm text-gray-600 dark:text-gray-400">
-                Parsing HAR file...
-              </p>
-            </div>
-
-            <!-- Error -->
-            <UAlert
-              v-if="error"
-              color="error"
-              variant="subtle"
-              icon="i-heroicons-exclamation-circle"
-              class="mx-4 sm:mx-6 my-4"
-            >
-              <template #title>
-                {{ error }}
-              </template>
-            </UAlert>
-
-            <!-- Results -->
-            <div v-if="report" class="p-4 sm:p-6 space-y-6">
-              <!-- Page Info -->
-              <div v-if="report.pages.length" class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
-                <div class="flex items-center gap-2 min-w-0">
-                  <UIcon name="i-heroicons-globe-alt" class="w-4 h-4 text-gray-400 shrink-0" />
-                  <span class="text-sm text-gray-700 dark:text-gray-300 truncate">{{ report.pages[0].title }}</span>
-                </div>
-              </div>
-
-              <!-- Summary Stats -->
-              <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
-                  <p class="text-lg font-bold text-gray-900 dark:text-white">
-                    {{ report.totalRequests }}
-                  </p>
-                  <p class="text-xs text-gray-500">
-                    Requests
-                  </p>
-                </div>
-                <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
-                  <p class="text-lg font-bold text-gray-900 dark:text-white">
-                    {{ formatBytes(report.totalTransferSize) }}
-                  </p>
-                  <p class="text-xs text-gray-500">
-                    Transfer Size
-                  </p>
-                </div>
-                <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
-                  <p class="text-lg font-bold text-gray-900 dark:text-white">
-                    {{ formatMs(report.totalTime) }}
-                  </p>
-                  <p class="text-xs text-gray-500">
-                    Total Time
-                  </p>
-                </div>
-                <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
-                  <p class="text-lg font-bold text-gray-900 dark:text-white">
-                    {{ report.domainBreakdown.length }}
-                  </p>
-                  <p class="text-xs text-gray-500">
-                    Domains
-                  </p>
-                </div>
-                <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
-                  <p class="text-lg font-bold text-gray-900 dark:text-white">
-                    {{ (report.cacheStats.hitRate * 100).toFixed(0) }}%
-                  </p>
-                  <p class="text-xs text-gray-500">
-                    Cache Hit Rate
-                  </p>
-                </div>
-                <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
-                  <p class="text-lg font-bold text-gray-900 dark:text-white">
-                    {{ formatBytes(report.totalSize) }}
-                  </p>
-                  <p class="text-xs text-gray-500">
-                    Uncompressed
-                  </p>
-                </div>
-              </div>
-
-              <!-- Waterfall Chart -->
-              <div>
-                <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                  <UIcon name="i-heroicons-bars-3" class="w-4 h-4 text-teal-500" />
-                  Network Waterfall
-                  <span class="text-xs font-normal text-gray-500">(first {{ waterfallEntries.length }} requests)</span>
-                </h2>
-
-                <!-- Timing legend -->
-                <div class="flex flex-wrap gap-3 mb-3">
-                  <div v-for="(color, phase) in timingColors" :key="phase" class="flex items-center gap-1">
-                    <div class="w-3 h-2 rounded-sm" :class="[color]" />
-                    <span class="text-[10px] text-gray-500 capitalize">{{ phase === 'wait' ? 'TTFB' : phase }}</span>
-                  </div>
+                <!-- URL + status -->
+                <div class="w-[280px] shrink-0 flex items-center gap-2 min-w-0">
+                  <span class="px-1.5 py-0.5 rounded text-[10px] font-mono shrink-0" :class="[getStatusBadgeClass(entry.status)]">
+                    {{ entry.status }}
+                  </span>
+                  <span class="truncate text-gray-700 dark:text-gray-300 font-mono" :title="entry.url">
+                    {{ truncateUrl(entry.url, 40) }}
+                  </span>
                 </div>
 
-                <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
-                  <div class="min-w-[700px]">
+                <!-- Timing bar -->
+                <div class="flex-1 h-5 relative bg-gray-100 dark:bg-gray-800 rounded-sm overflow-hidden">
+                  <div
+                    class="absolute top-0 h-full flex rounded-sm overflow-hidden"
+                    :style="getTimingBarStyle(entry)"
+                  >
                     <div
-                      v-for="(entry, idx) in waterfallEntries"
-                      :key="idx"
-                      class="flex items-center gap-2 px-3 py-1 border-b border-gray-100 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/30 text-xs"
-                    >
-                      <!-- URL + status -->
-                      <div class="w-[280px] shrink-0 flex items-center gap-2 min-w-0">
-                        <span class="px-1.5 py-0.5 rounded text-[10px] font-mono shrink-0" :class="[getStatusBadgeClass(entry.status)]">
-                          {{ entry.status }}
-                        </span>
-                        <span class="truncate text-gray-700 dark:text-gray-300 font-mono" :title="entry.url">
-                          {{ truncateUrl(entry.url, 40) }}
-                        </span>
-                      </div>
-
-                      <!-- Timing bar -->
-                      <div class="flex-1 h-5 relative bg-gray-100 dark:bg-gray-800 rounded-sm overflow-hidden">
-                        <div
-                          class="absolute top-0 h-full flex rounded-sm overflow-hidden"
-                          :style="getTimingBarStyle(entry)"
-                        >
-                          <div
-                            v-for="phase in getTimingPhaseWidths(entry)"
-                            :key="phase.phase"
-                            :class="phase.color"
-                            :style="{ width: phase.width }"
-                            class="h-full"
-                          />
-                        </div>
-                      </div>
-
-                      <!-- Time -->
-                      <div class="w-[60px] shrink-0 text-right text-gray-500 font-mono">
-                        {{ formatMs(entry.time) }}
-                      </div>
-                    </div>
+                      v-for="phase in getTimingPhaseWidths(entry)"
+                      :key="phase.phase"
+                      :class="phase.color"
+                      :style="{ width: phase.width }"
+                      class="h-full"
+                    />
                   </div>
                 </div>
-              </div>
 
-              <!-- Resource Breakdown -->
-              <div>
-                <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                  <UIcon name="i-heroicons-chart-pie" class="w-4 h-4 text-teal-500" />
-                  Resource Breakdown
-                </h2>
-
-                <!-- Stacked bar -->
-                <div class="h-4 rounded-full overflow-hidden flex mb-4">
-                  <div
-                    v-for="res in report.resourceBreakdown"
-                    :key="res.type"
-                    :class="resourceColors[res.type] || 'bg-gray-400'"
-                    :style="{ width: `${(res.size / report.totalTransferSize) * 100}%` }"
-                    class="h-full"
-                    :title="`${res.label}: ${formatBytes(res.size)}`"
-                  />
-                </div>
-
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                  <div
-                    v-for="res in report.resourceBreakdown"
-                    :key="res.type"
-                    class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700"
-                  >
-                    <div class="flex items-center gap-2 mb-1">
-                      <div class="w-2.5 h-2.5 rounded-full" :class="[resourceColors[res.type] || 'bg-gray-400']" />
-                      <span class="text-xs font-medium text-gray-900 dark:text-white">{{ res.label }}</span>
-                    </div>
-                    <p class="text-sm font-bold text-gray-900 dark:text-white">
-                      {{ formatBytes(res.size) }}
-                    </p>
-                    <p class="text-[10px] text-gray-500">
-                      {{ res.count }} {{ res.count === 1 ? 'request' : 'requests' }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Request Table -->
-              <div>
-                <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                  <UIcon name="i-heroicons-table-cells" class="w-4 h-4 text-teal-500" />
-                  All Requests
-                </h2>
-
-                <div class="rounded-lg border border-gray-200 dark:border-gray-800 overflow-x-auto">
-                  <table class="w-full text-xs">
-                    <thead class="bg-gray-50 dark:bg-gray-800/50">
-                      <tr>
-                        <th class="text-left p-2 font-medium text-gray-600 dark:text-gray-400 cursor-pointer hover:text-gray-900 dark:hover:text-white" @click="toggleSort('url')">
-                          <span class="flex items-center gap-1">URL <UIcon :name="getSortIcon('url')" class="w-3 h-3" /></span>
-                        </th>
-                        <th class="text-left p-2 font-medium text-gray-600 dark:text-gray-400 cursor-pointer hover:text-gray-900 dark:hover:text-white w-16" @click="toggleSort('status')">
-                          <span class="flex items-center gap-1">Status <UIcon :name="getSortIcon('status')" class="w-3 h-3" /></span>
-                        </th>
-                        <th class="text-left p-2 font-medium text-gray-600 dark:text-gray-400 w-20">
-                          Type
-                        </th>
-                        <th class="text-right p-2 font-medium text-gray-600 dark:text-gray-400 cursor-pointer hover:text-gray-900 dark:hover:text-white w-20" @click="toggleSort('size')">
-                          <span class="flex items-center justify-end gap-1">Size <UIcon :name="getSortIcon('size')" class="w-3 h-3" /></span>
-                        </th>
-                        <th class="text-right p-2 font-medium text-gray-600 dark:text-gray-400 cursor-pointer hover:text-gray-900 dark:hover:text-white w-20" @click="toggleSort('time')">
-                          <span class="flex items-center justify-end gap-1">Time <UIcon :name="getSortIcon('time')" class="w-3 h-3" /></span>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <template v-for="(entry, idx) in sortedEntries" :key="idx">
-                        <tr
-                          class="border-t border-gray-100 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/30 cursor-pointer"
-                          @click="expandedEntry = expandedEntry === idx ? null : idx"
-                        >
-                          <td class="p-2 font-mono truncate max-w-[300px]" :title="entry.url">
-                            <div class="flex items-center gap-1">
-                              <UIcon
-                                :name="expandedEntry === idx ? 'i-heroicons-chevron-down' : 'i-heroicons-chevron-right'"
-                                class="w-3 h-3 shrink-0 text-gray-400"
-                              />
-                              <span class="truncate">{{ truncateUrl(entry.url, 50) }}</span>
-                            </div>
-                          </td>
-                          <td class="p-2">
-                            <span class="px-1.5 py-0.5 rounded text-[10px] font-mono" :class="[getStatusBadgeClass(entry.status)]">
-                              {{ entry.status }}
-                            </span>
-                          </td>
-                          <td class="p-2">
-                            <span class="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-[10px] font-medium text-gray-600 dark:text-gray-400">
-                              {{ entry.type }}
-                            </span>
-                          </td>
-                          <td class="p-2 text-right font-mono text-gray-600 dark:text-gray-400">
-                            {{ formatBytes(entry.transferSize) }}
-                          </td>
-                          <td class="p-2 text-right font-mono text-gray-600 dark:text-gray-400">
-                            {{ formatMs(entry.time) }}
-                          </td>
-                        </tr>
-
-                        <!-- Expanded details -->
-                        <tr v-if="expandedEntry === idx" class="bg-gray-50 dark:bg-gray-800/30">
-                          <td colspan="5" class="p-3">
-                            <div class="space-y-3">
-                              <!-- Full URL -->
-                              <div>
-                                <p class="text-[10px] font-medium text-gray-500 mb-1">
-                                  Full URL
-                                </p>
-                                <p class="text-xs font-mono text-gray-700 dark:text-gray-300 break-all">
-                                  {{ entry.url }}
-                                </p>
-                              </div>
-
-                              <!-- Timing breakdown -->
-                              <div>
-                                <p class="text-[10px] font-medium text-gray-500 mb-1">
-                                  Timing
-                                </p>
-                                <div class="flex flex-wrap gap-2">
-                                  <span
-                                    v-for="(val, phase) in entry.timings"
-                                    :key="phase"
-                                    class="px-2 py-0.5 rounded text-[10px] font-mono"
-                                    :class="val > 0 ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' : 'text-gray-400'"
-                                  >
-                                    {{ phase }}: {{ formatMs(val) }}
-                                  </span>
-                                </div>
-                              </div>
-
-                              <!-- Info row -->
-                              <div class="flex flex-wrap gap-4 text-[10px] text-gray-500">
-                                <span>Method: <strong class="text-gray-700 dark:text-gray-300">{{ entry.method }}</strong></span>
-                                <span>Protocol: <strong class="text-gray-700 dark:text-gray-300">{{ entry.protocol }}</strong></span>
-                                <span>Domain: <strong class="text-gray-700 dark:text-gray-300">{{ entry.domain }}</strong></span>
-                                <span v-if="entry.fromCache" class="text-green-600 dark:text-green-400">From Cache</span>
-                                <span>Uncompressed: <strong class="text-gray-700 dark:text-gray-300">{{ formatBytes(entry.size) }}</strong></span>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      </template>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <!-- Domain Breakdown -->
-              <div>
-                <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                  <UIcon name="i-heroicons-server-stack" class="w-4 h-4 text-teal-500" />
-                  Domain Breakdown
-                </h2>
-                <div class="space-y-2">
-                  <div
-                    v-for="domain in report.domainBreakdown.slice(0, 10)"
-                    :key="domain.domain"
-                    class="flex items-center gap-3 p-2 rounded-lg bg-gray-50 dark:bg-gray-800/50"
-                  >
-                    <div class="flex-1 min-w-0">
-                      <p class="text-xs font-medium text-gray-900 dark:text-white truncate">
-                        {{ domain.domain }}
-                      </p>
-                      <div class="flex items-center gap-2 mt-1">
-                        <div class="flex-1 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-                          <div
-                            class="h-full rounded-full bg-teal-500"
-                            :style="{ width: `${(domain.size / report.domainBreakdown[0].size) * 100}%` }"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div class="text-right shrink-0">
-                      <p class="text-xs font-bold text-gray-900 dark:text-white">
-                        {{ formatBytes(domain.size) }}
-                      </p>
-                      <p class="text-[10px] text-gray-500">
-                        {{ domain.count }} reqs
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Protocol Breakdown -->
-              <div>
-                <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                  <UIcon name="i-heroicons-signal" class="w-4 h-4 text-teal-500" />
-                  Protocol Distribution
-                </h2>
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  <div
-                    v-for="proto in report.protocolBreakdown"
-                    :key="proto.protocol"
-                    class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 text-center"
-                  >
-                    <p class="text-sm font-bold text-gray-900 dark:text-white uppercase">
-                      {{ proto.protocol }}
-                    </p>
-                    <p class="text-lg font-bold text-teal-600 dark:text-teal-400">
-                      {{ proto.count }}
-                    </p>
-                    <p class="text-[10px] text-gray-500">
-                      {{ ((proto.count / report.totalRequests) * 100).toFixed(0) }}% of requests
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Related Tools CTA -->
-              <div class="p-4 rounded-xl bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/30 border border-teal-200 dark:border-teal-800">
-                <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
-                  <div class="text-center sm:text-left">
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">
-                      Want to analyze performance further?
-                    </p>
-                    <p class="text-xs text-gray-500">
-                      Use our Lighthouse tools for deeper performance insights
-                    </p>
-                  </div>
-                  <div class="flex flex-wrap gap-2">
-                    <UButton to="/tools/pagespeed-insights-performance" variant="outline" size="sm">
-                      PageSpeed Insights
-                    </UButton>
-                    <UButton to="/tools/lighthouse-report-viewer" variant="outline" size="sm">
-                      Lighthouse Viewer
-                    </UButton>
-                  </div>
+                <!-- Time -->
+                <div class="w-[60px] shrink-0 text-right text-gray-500 font-mono">
+                  {{ formatMs(entry.time) }}
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Resource Breakdown -->
+        <div>
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+            <UIcon name="i-heroicons-chart-pie" class="w-4 h-4 text-teal-500" />
+            Resource Breakdown
+          </h2>
+
+          <!-- Stacked bar -->
+          <div class="h-4 rounded-full overflow-hidden flex mb-4">
+            <div
+              v-for="res in report.resourceBreakdown"
+              :key="res.type"
+              :class="resourceColors[res.type] || 'bg-gray-400'"
+              :style="{ width: `${(res.size / report.totalTransferSize) * 100}%` }"
+              class="h-full"
+              :title="`${res.label}: ${formatBytes(res.size)}`"
+            />
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            <div
+              v-for="res in report.resourceBreakdown"
+              :key="res.type"
+              class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700"
+            >
+              <div class="flex items-center gap-2 mb-1">
+                <div class="w-2.5 h-2.5 rounded-full" :class="[resourceColors[res.type] || 'bg-gray-400']" />
+                <span class="text-xs font-medium text-gray-900 dark:text-white">{{ res.label }}</span>
+              </div>
+              <p class="text-sm font-bold text-gray-900 dark:text-white">
+                {{ formatBytes(res.size) }}
+              </p>
+              <p class="text-[10px] text-gray-500">
+                {{ res.count }} {{ res.count === 1 ? 'request' : 'requests' }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Request Table -->
+        <div>
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+            <UIcon name="i-heroicons-table-cells" class="w-4 h-4 text-teal-500" />
+            All Requests
+          </h2>
+
+          <div class="rounded-lg border border-gray-200 dark:border-gray-800 overflow-x-auto">
+            <table class="w-full text-xs">
+              <thead class="bg-gray-50 dark:bg-gray-800/50">
+                <tr>
+                  <th class="text-left p-2 font-medium text-gray-600 dark:text-gray-400 cursor-pointer hover:text-gray-900 dark:hover:text-white" @click="toggleSort('url')">
+                    <span class="flex items-center gap-1">URL <UIcon :name="getSortIcon('url')" class="w-3 h-3" /></span>
+                  </th>
+                  <th class="text-left p-2 font-medium text-gray-600 dark:text-gray-400 cursor-pointer hover:text-gray-900 dark:hover:text-white w-16" @click="toggleSort('status')">
+                    <span class="flex items-center gap-1">Status <UIcon :name="getSortIcon('status')" class="w-3 h-3" /></span>
+                  </th>
+                  <th class="text-left p-2 font-medium text-gray-600 dark:text-gray-400 w-20">
+                    Type
+                  </th>
+                  <th class="text-right p-2 font-medium text-gray-600 dark:text-gray-400 cursor-pointer hover:text-gray-900 dark:hover:text-white w-20" @click="toggleSort('size')">
+                    <span class="flex items-center justify-end gap-1">Size <UIcon :name="getSortIcon('size')" class="w-3 h-3" /></span>
+                  </th>
+                  <th class="text-right p-2 font-medium text-gray-600 dark:text-gray-400 cursor-pointer hover:text-gray-900 dark:hover:text-white w-20" @click="toggleSort('time')">
+                    <span class="flex items-center justify-end gap-1">Time <UIcon :name="getSortIcon('time')" class="w-3 h-3" /></span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <template v-for="(entry, idx) in sortedEntries" :key="idx">
+                  <tr
+                    class="border-t border-gray-100 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/30 cursor-pointer"
+                    @click="expandedEntry = expandedEntry === idx ? null : idx"
+                  >
+                    <td class="p-2 font-mono truncate max-w-[300px]" :title="entry.url">
+                      <div class="flex items-center gap-1">
+                        <UIcon
+                          :name="expandedEntry === idx ? 'i-heroicons-chevron-down' : 'i-heroicons-chevron-right'"
+                          class="w-3 h-3 shrink-0 text-gray-400"
+                        />
+                        <span class="truncate">{{ truncateUrl(entry.url, 50) }}</span>
+                      </div>
+                    </td>
+                    <td class="p-2">
+                      <span class="px-1.5 py-0.5 rounded text-[10px] font-mono" :class="[getStatusBadgeClass(entry.status)]">
+                        {{ entry.status }}
+                      </span>
+                    </td>
+                    <td class="p-2">
+                      <span class="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-[10px] font-medium text-gray-600 dark:text-gray-400">
+                        {{ entry.type }}
+                      </span>
+                    </td>
+                    <td class="p-2 text-right font-mono text-gray-600 dark:text-gray-400">
+                      {{ formatBytes(entry.transferSize) }}
+                    </td>
+                    <td class="p-2 text-right font-mono text-gray-600 dark:text-gray-400">
+                      {{ formatMs(entry.time) }}
+                    </td>
+                  </tr>
+
+                  <!-- Expanded details -->
+                  <tr v-if="expandedEntry === idx" class="bg-gray-50 dark:bg-gray-800/30">
+                    <td colspan="5" class="p-3">
+                      <div class="space-y-3">
+                        <!-- Full URL -->
+                        <div>
+                          <p class="text-[10px] font-medium text-gray-500 mb-1">
+                            Full URL
+                          </p>
+                          <p class="text-xs font-mono text-gray-700 dark:text-gray-300 break-all">
+                            {{ entry.url }}
+                          </p>
+                        </div>
+
+                        <!-- Timing breakdown -->
+                        <div>
+                          <p class="text-[10px] font-medium text-gray-500 mb-1">
+                            Timing
+                          </p>
+                          <div class="flex flex-wrap gap-2">
+                            <span
+                              v-for="(val, phase) in entry.timings"
+                              :key="phase"
+                              class="px-2 py-0.5 rounded text-[10px] font-mono"
+                              :class="val > 0 ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' : 'text-gray-400'"
+                            >
+                              {{ phase }}: {{ formatMs(val) }}
+                            </span>
+                          </div>
+                        </div>
+
+                        <!-- Info row -->
+                        <div class="flex flex-wrap gap-4 text-[10px] text-gray-500">
+                          <span>Method: <strong class="text-gray-700 dark:text-gray-300">{{ entry.method }}</strong></span>
+                          <span>Protocol: <strong class="text-gray-700 dark:text-gray-300">{{ entry.protocol }}</strong></span>
+                          <span>Domain: <strong class="text-gray-700 dark:text-gray-300">{{ entry.domain }}</strong></span>
+                          <span v-if="entry.fromCache" class="text-green-600 dark:text-green-400">From Cache</span>
+                          <span>Uncompressed: <strong class="text-gray-700 dark:text-gray-300">{{ formatBytes(entry.size) }}</strong></span>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Domain Breakdown -->
+        <div>
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+            <UIcon name="i-heroicons-server-stack" class="w-4 h-4 text-teal-500" />
+            Domain Breakdown
+          </h2>
+          <div class="space-y-2">
+            <div
+              v-for="domain in report.domainBreakdown.slice(0, 10)"
+              :key="domain.domain"
+              class="flex items-center gap-3 p-2 rounded-lg bg-gray-50 dark:bg-gray-800/50"
+            >
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-medium text-gray-900 dark:text-white truncate">
+                  {{ domain.domain }}
+                </p>
+                <div class="flex items-center gap-2 mt-1">
+                  <div class="flex-1 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                    <div
+                      class="h-full rounded-full bg-teal-500"
+                      :style="{ width: `${(domain.size / report.domainBreakdown[0].size) * 100}%` }"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div class="text-right shrink-0">
+                <p class="text-xs font-bold text-gray-900 dark:text-white">
+                  {{ formatBytes(domain.size) }}
+                </p>
+                <p class="text-[10px] text-gray-500">
+                  {{ domain.count }} reqs
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Protocol Breakdown -->
+        <div>
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+            <UIcon name="i-heroicons-signal" class="w-4 h-4 text-teal-500" />
+            Protocol Distribution
+          </h2>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div
+              v-for="proto in report.protocolBreakdown"
+              :key="proto.protocol"
+              class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 text-center"
+            >
+              <p class="text-sm font-bold text-gray-900 dark:text-white uppercase">
+                {{ proto.protocol }}
+              </p>
+              <p class="text-lg font-bold text-teal-600 dark:text-teal-400">
+                {{ proto.count }}
+              </p>
+              <p class="text-[10px] text-gray-500">
+                {{ ((proto.count / report.totalRequests) * 100).toFixed(0) }}% of requests
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Related Tools CTA -->
+        <div class="p-4 rounded-xl bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/30 border border-teal-200 dark:border-teal-800">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="text-center sm:text-left">
+              <p class="text-sm font-medium text-gray-900 dark:text-white">
+                Want to analyze performance further?
+              </p>
+              <p class="text-xs text-gray-500">
+                Use our Lighthouse tools for deeper performance insights
+              </p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <UButton to="/tools/pagespeed-insights-performance" variant="outline" size="sm">
+                PageSpeed Insights
+              </UButton>
+              <UButton to="/tools/lighthouse-report-viewer" variant="outline" size="sm">
+                Lighthouse Viewer
+              </UButton>
+            </div>
+          </div>
+        </div>
       </div>
-    </section>
+    </ToolCard>
 
     <!-- Educational Content -->
     <section v-if="!report" class="px-3 sm:px-6 lg:px-8 pb-12">

@@ -10,7 +10,7 @@ defineProps<{
     color="error"
     variant="subtle"
     icon="i-heroicons-exclamation-circle"
-    class="mb-8"
+    class="mx-4 sm:mx-6 my-4"
   >
     <template #title>
       {{ error }}

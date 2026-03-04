@@ -35,6 +35,8 @@ useToolSeo({
   faqs,
 })
 
+const { trackUse } = useToolTracking('bulk-pagespeed')
+
 interface MetricResult {
   value: number
   displayValue: string
@@ -134,46 +136,6 @@ function toggleSort(column: typeof sortColumn.value) {
   }
 }
 
-function getScoreColor(score: number | null) {
-  if (score === null)
-    return 'text-gray-400'
-  if (score >= 90)
-    return 'text-green-500'
-  if (score >= 50)
-    return 'text-orange-500'
-  return 'text-red-500'
-}
-
-function getScoreBg(score: number | null) {
-  if (score === null)
-    return 'bg-gray-200 dark:bg-gray-700'
-  if (score >= 90)
-    return 'bg-green-500'
-  if (score >= 50)
-    return 'bg-orange-500'
-  return 'bg-red-500'
-}
-
-function getRatingColor(rating: string | undefined) {
-  if (!rating)
-    return 'text-gray-400'
-  if (rating === 'good')
-    return 'text-green-500'
-  if (rating === 'needs-improvement')
-    return 'text-orange-500'
-  return 'text-red-500'
-}
-
-function getRatingDot(rating: string | undefined) {
-  if (!rating)
-    return 'bg-gray-400'
-  if (rating === 'good')
-    return 'bg-green-500'
-  if (rating === 'needs-improvement')
-    return 'bg-orange-500'
-  return 'bg-red-500'
-}
-
 function formatUrl(url: string) {
   return url.replace(/^https?:\/\//, '').replace(/\/$/, '')
 }
@@ -267,6 +229,7 @@ async function runTest() {
           else if (data.type === 'complete') {
             summary.value = data.summary
             loading.value = false
+            trackUse()
           }
         }
       }
@@ -308,560 +271,515 @@ function exportJSON() {
   const exportData = { results: results.value, summary: summary.value, device: device.value, timestamp: Date.now() }
   downloadFile(JSON.stringify(exportData, null, 2), 'bulk-pagespeed-results.json', 'application/json')
 }
-
-function downloadFile(content: string, filename: string, type: string) {
-  const blob = new Blob([content], { type })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  a.click()
-  URL.revokeObjectURL(url)
-}
 </script>
 
 <template>
-  <ToolPageLayout color-scheme="amber">
-    <!-- Hero Section -->
-    <ToolHero
-      title="Bulk PageSpeed Test"
-      description="Test up to 10 URLs at once with Google's PageSpeed Insights API. Get Lighthouse performance scores, Core Web Vitals, and optimization insights for multiple pages simultaneously."
-      prefix="$ unlighthouse bulk-test"
-      color-scheme="amber"
+  <div class="min-h-screen">
+    <ToolPageHero
+      title="Bulk PageSpeed"
+      accent="Test"
+      description="Test up to 10 URLs at once with Google's PageSpeed Insights API. Get Lighthouse performance scores, Core Web Vitals, and optimization insights."
+      color="amber"
     />
 
-    <!-- Input Section -->
-    <ToolInputGlow :loading="loading" color-scheme="amber">
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Enter URLs <span class="text-gray-400">(one per line, max 10)</span>
-          </label>
-          <UTextarea
-            v-model="urlInput"
-            :rows="10"
-            placeholder="https://example.com
+    <ToolCard icon="i-heroicons-squares-2x2" title="Bulk PageSpeed Test" color="amber" max-width="max-w-5xl">
+      <!-- Input -->
+      <div class="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-800">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Enter URLs <span class="text-gray-400">(one per line, max 10)</span>
+            </label>
+            <UTextarea
+              v-model="urlInput"
+              :rows="10"
+              placeholder="https://example.com
 https://example.com/about
 https://example.com/products
 https://example.com/contact
 https://example.com/blog
 https://example.com/pricing"
-            class="font-mono text-sm min-h-[200px]"
-            :disabled="loading"
-            autoresize
-          />
-          <div class="mt-2 flex items-center justify-between">
-            <span class="text-xs text-gray-500 dark:text-gray-400">
-              {{ urlCount }}/10 URLs
-            </span>
-            <div class="flex gap-2">
-              <UButton
-                size="xs"
-                variant="ghost"
-                color="neutral"
-                icon="i-heroicons-clipboard-document"
-                :disabled="loading"
-                @click="pasteFromClipboard"
-              >
-                Paste
-              </UButton>
-              <UButton
-                size="xs"
-                variant="ghost"
-                color="neutral"
-                icon="i-heroicons-x-mark"
-                :disabled="loading || !urlInput"
-                @click="urlInput = ''"
-              >
-                Clear
-              </UButton>
-            </div>
-          </div>
-        </div>
-
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div class="flex items-center gap-2">
-            <span class="text-sm text-gray-600 dark:text-gray-400">Device:</span>
-            <div class="inline-flex rounded-lg border border-gray-200 dark:border-gray-700 p-0.5 bg-gray-100 dark:bg-gray-800">
-              <button
-                type="button"
-                class="px-3 py-1.5 rounded-md text-sm font-medium transition-all flex items-center gap-1.5"
-                :class="[device === 'mobile' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300']"
-                :disabled="loading"
-                @click="device = 'mobile'"
-              >
-                <UIcon name="i-heroicons-device-phone-mobile" class="w-4 h-4" />
-                Mobile
-              </button>
-              <button
-                type="button"
-                class="px-3 py-1.5 rounded-md text-sm font-medium transition-all flex items-center gap-1.5"
-                :class="[device === 'desktop' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300']"
-                :disabled="loading"
-                @click="device = 'desktop'"
-              >
-                <UIcon name="i-heroicons-computer-desktop" class="w-4 h-4" />
-                Desktop
-              </button>
-            </div>
-          </div>
-
-          <UButton
-            size="lg"
-            :loading="loading"
-            :disabled="urlCount === 0 || loading"
-            class="bg-amber-600 hover:bg-amber-500 text-white font-medium w-full sm:w-auto"
-            @click="runTest"
-          >
-            <UIcon name="i-heroicons-bolt" class="w-4 h-4" />
-            Run Bulk Test
-          </UButton>
-        </div>
-      </div>
-    </ToolInputGlow>
-
-    <!-- Progress State -->
-    <div v-if="loading && results.length > 0" class="max-w-4xl">
-      <div
-        v-motion
-        :initial="{ opacity: 0, y: 10 }"
-        :animate="{ opacity: 1, y: 0 }"
-        class="p-6 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800"
-      >
-        <!-- Progress bar -->
-        <div class="mb-4">
-          <div class="flex justify-between text-sm mb-2">
-            <span class="font-medium text-amber-900 dark:text-amber-100">
-              Testing {{ progressStats.total }} URLs
-            </span>
-            <span class="text-amber-700 dark:text-amber-300">
-              {{ progressStats.completed }}/{{ progressStats.total }} complete
-            </span>
-          </div>
-          <div class="h-2 bg-amber-200 dark:bg-amber-800 rounded-full overflow-hidden">
-            <div
-              class="h-full bg-amber-500 transition-all duration-300"
-              :style="{ width: `${(progressStats.completed / progressStats.total) * 100}%` }"
+              class="font-mono text-sm min-h-[200px]"
+              :disabled="loading"
+              autoresize
             />
-          </div>
-        </div>
-
-        <!-- Status breakdown -->
-        <div class="flex flex-wrap gap-4 text-sm">
-          <div class="flex items-center gap-2">
-            <div class="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-            <span class="text-amber-700 dark:text-amber-300">{{ progressStats.processing }} processing</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <div class="w-2 h-2 rounded-full bg-gray-400" />
-            <span class="text-gray-600 dark:text-gray-400">{{ progressStats.queued }} queued</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <div class="w-2 h-2 rounded-full bg-green-500" />
-            <span class="text-gray-600 dark:text-gray-400">{{ progressStats.completed }} done</span>
-          </div>
-        </div>
-
-        <p class="mt-4 text-xs text-amber-600 dark:text-amber-400">
-          Processing 3 URLs at a time. Each URL takes up to 2 minutes for a full Lighthouse audit.
-        </p>
-      </div>
-    </div>
-
-    <!-- Initial Loading State (before results arrive) -->
-    <div v-else-if="loading" class="max-w-4xl">
-      <div
-        v-motion
-        :initial="{ opacity: 0, y: 10 }"
-        :animate="{ opacity: 1, y: 0 }"
-        class="p-6 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800"
-      >
-        <div class="flex items-center gap-4">
-          <div class="relative">
-            <div class="w-12 h-12 rounded-full border-4 border-amber-200 dark:border-amber-800" />
-            <div class="absolute inset-0 w-12 h-12 rounded-full border-4 border-t-amber-500 animate-spin" />
-          </div>
-          <div class="flex-1">
-            <p class="font-medium text-amber-900 dark:text-amber-100">
-              Starting bulk test...
-            </p>
-            <p class="text-sm text-amber-700 dark:text-amber-300 mt-1">
-              Connecting to PageSpeed Insights API
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Error State -->
-    <UAlert
-      v-if="error"
-      color="error"
-      variant="subtle"
-      icon="i-heroicons-exclamation-circle"
-      class="max-w-4xl"
-      :title="error"
-    />
-
-    <!-- Results Section -->
-    <div v-if="results.length > 0" class="max-w-5xl space-y-6">
-      <!-- Summary Cards (only show when complete) -->
-      <div
-        v-if="summary"
-        v-motion
-        :initial="{ opacity: 0, y: 20 }"
-        :animate="{ opacity: 1, y: 0 }"
-        class="grid grid-cols-2 md:grid-cols-4 gap-3"
-      >
-        <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-center">
-          <div class="text-3xl font-bold tabular-nums" :class="getScoreColor(summary.avgPerformance)">
-            {{ summary.avgPerformance }}
-          </div>
-          <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            Avg. Performance
-          </div>
-        </div>
-        <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-center">
-          <div class="text-3xl font-bold text-green-500 tabular-nums">
-            {{ summary.goodCount }}
-          </div>
-          <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            Good (90+)
-          </div>
-        </div>
-        <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-center">
-          <div class="text-3xl font-bold text-orange-500 tabular-nums">
-            {{ summary.needsWorkCount }}
-          </div>
-          <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            Needs Work (50-89)
-          </div>
-        </div>
-        <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-center">
-          <div class="text-3xl font-bold text-red-500 tabular-nums">
-            {{ summary.poorCount }}
-          </div>
-          <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            Poor (&lt;50)
-          </div>
-        </div>
-      </div>
-
-      <!-- Results Table -->
-      <div
-        v-motion
-        :initial="{ opacity: 0, y: 20 }"
-        :animate="{ opacity: 1, y: 0 }"
-        :transition="{ delay: 0.1 }"
-        class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden"
-      >
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead>
-              <tr class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800">
-                <th
-                  class="text-left px-4 py-3 font-medium text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                  @click="toggleSort('url')"
+            <div class="mt-2 flex items-center justify-between">
+              <span class="text-xs text-gray-500 dark:text-gray-400">
+                {{ urlCount }}/10 URLs
+              </span>
+              <div class="flex gap-2">
+                <UButton
+                  size="xs"
+                  variant="ghost"
+                  color="neutral"
+                  icon="i-heroicons-clipboard-document"
+                  :disabled="loading"
+                  @click="pasteFromClipboard"
                 >
-                  <div class="flex items-center gap-1">
-                    URL
-                    <UIcon
-                      v-if="sortColumn === 'url'"
-                      :name="sortDirection === 'asc' ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
-                      class="w-3 h-3"
-                    />
-                  </div>
-                </th>
-                <th
-                  class="text-center px-3 py-3 font-medium text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                  @click="toggleSort('performance')"
+                  Paste
+                </UButton>
+                <UButton
+                  size="xs"
+                  variant="ghost"
+                  color="neutral"
+                  icon="i-heroicons-x-mark"
+                  :disabled="loading || !urlInput"
+                  @click="urlInput = ''"
                 >
-                  <div class="flex items-center justify-center gap-1">
-                    Perf
-                    <UIcon
-                      v-if="sortColumn === 'performance'"
-                      :name="sortDirection === 'asc' ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
-                      class="w-3 h-3"
-                    />
-                  </div>
-                </th>
-                <th
-                  class="text-center px-3 py-3 font-medium text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors hidden sm:table-cell"
-                  @click="toggleSort('lcp')"
-                >
-                  <div class="flex items-center justify-center gap-1">
-                    LCP
-                    <UIcon
-                      v-if="sortColumn === 'lcp'"
-                      :name="sortDirection === 'asc' ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
-                      class="w-3 h-3"
-                    />
-                  </div>
-                </th>
-                <th
-                  class="text-center px-3 py-3 font-medium text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors hidden sm:table-cell"
-                  @click="toggleSort('cls')"
-                >
-                  <div class="flex items-center justify-center gap-1">
-                    CLS
-                    <UIcon
-                      v-if="sortColumn === 'cls'"
-                      :name="sortDirection === 'asc' ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
-                      class="w-3 h-3"
-                    />
-                  </div>
-                </th>
-                <th
-                  class="text-center px-3 py-3 font-medium text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors hidden md:table-cell"
-                  @click="toggleSort('fcp')"
-                >
-                  <div class="flex items-center justify-center gap-1">
-                    FCP
-                    <UIcon
-                      v-if="sortColumn === 'fcp'"
-                      :name="sortDirection === 'asc' ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
-                      class="w-3 h-3"
-                    />
-                  </div>
-                </th>
-                <th
-                  class="text-center px-3 py-3 font-medium text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors hidden md:table-cell"
-                  @click="toggleSort('tbt')"
-                >
-                  <div class="flex items-center justify-center gap-1">
-                    TBT
-                    <UIcon
-                      v-if="sortColumn === 'tbt'"
-                      :name="sortDirection === 'asc' ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
-                      class="w-3 h-3"
-                    />
-                  </div>
-                </th>
-                <th class="text-center px-3 py-3 font-medium text-gray-700 dark:text-gray-300">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="(result, idx) in sortedResults"
-                :key="result.url"
-                v-motion
-                :initial="{ opacity: 0, x: -10 }"
-                :animate="{ opacity: 1, x: 0 }"
-                :transition="{ delay: idx * 0.05 }"
-                class="border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors"
-              >
-                <td class="px-4 py-3">
-                  <a
-                    :href="result.url"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="text-amber-600 dark:text-amber-400 hover:underline font-mono text-xs truncate block max-w-[200px] md:max-w-[300px]"
-                    :title="result.url"
-                  >
-                    {{ formatUrl(result.url) }}
-                  </a>
-                </td>
-                <td class="px-3 py-3 text-center">
-                  <div
-                    v-if="result.status === 'success' && result.performance !== null"
-                    class="inline-flex items-center justify-center w-10 h-10 rounded-full font-bold text-white text-sm"
-                    :class="getScoreBg(result.performance)"
-                  >
-                    {{ result.performance }}
-                  </div>
-                  <div
-                    v-else-if="result.status === 'processing'"
-                    class="inline-flex items-center justify-center w-10 h-10 rounded-full border-2 border-amber-300 dark:border-amber-700"
-                  >
-                    <UIcon name="i-heroicons-arrow-path" class="w-5 h-5 text-amber-500 animate-spin" />
-                  </div>
-                  <span v-else class="text-gray-400">—</span>
-                </td>
-                <td class="px-3 py-3 text-center hidden sm:table-cell">
-                  <div v-if="result.lcp" class="flex items-center justify-center gap-1">
-                    <span :class="getRatingDot(result.lcp.rating)" class="w-1.5 h-1.5 rounded-full" />
-                    <span :class="getRatingColor(result.lcp.rating)" class="text-xs tabular-nums">
-                      {{ result.lcp.displayValue }}
-                    </span>
-                  </div>
-                  <span v-else class="text-gray-400">—</span>
-                </td>
-                <td class="px-3 py-3 text-center hidden sm:table-cell">
-                  <div v-if="result.cls" class="flex items-center justify-center gap-1">
-                    <span :class="getRatingDot(result.cls.rating)" class="w-1.5 h-1.5 rounded-full" />
-                    <span :class="getRatingColor(result.cls.rating)" class="text-xs tabular-nums">
-                      {{ result.cls.displayValue }}
-                    </span>
-                  </div>
-                  <span v-else class="text-gray-400">—</span>
-                </td>
-                <td class="px-3 py-3 text-center hidden md:table-cell">
-                  <div v-if="result.fcp" class="flex items-center justify-center gap-1">
-                    <span :class="getRatingDot(result.fcp.rating)" class="w-1.5 h-1.5 rounded-full" />
-                    <span :class="getRatingColor(result.fcp.rating)" class="text-xs tabular-nums">
-                      {{ result.fcp.displayValue }}
-                    </span>
-                  </div>
-                  <span v-else class="text-gray-400">—</span>
-                </td>
-                <td class="px-3 py-3 text-center hidden md:table-cell">
-                  <div v-if="result.tbt" class="flex items-center justify-center gap-1">
-                    <span :class="getRatingDot(result.tbt.rating)" class="w-1.5 h-1.5 rounded-full" />
-                    <span :class="getRatingColor(result.tbt.rating)" class="text-xs tabular-nums">
-                      {{ result.tbt.displayValue }}
-                    </span>
-                  </div>
-                  <span v-else class="text-gray-400">—</span>
-                </td>
-                <td class="px-3 py-3 text-center">
-                  <!-- Queued -->
-                  <span
-                    v-if="result.status === 'queued'"
-                    class="inline-flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400"
-                  >
-                    <span class="w-2 h-2 rounded-full bg-gray-400" />
-                    Queued
-                  </span>
-                  <!-- Processing -->
-                  <span
-                    v-else-if="result.status === 'processing'"
-                    class="inline-flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400"
-                  >
-                    <UIcon name="i-heroicons-arrow-path" class="w-4 h-4 animate-spin" />
-                    Testing
-                  </span>
-                  <!-- Success -->
-                  <UIcon
-                    v-else-if="result.status === 'success'"
-                    name="i-heroicons-check-circle"
-                    class="w-5 h-5 text-green-500"
-                  />
-                  <!-- Error -->
-                  <UTooltip v-else :text="result.error || 'Failed'">
-                    <UIcon
-                      name="i-heroicons-x-circle"
-                      class="w-5 h-5 text-red-500"
-                    />
-                  </UTooltip>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Export Actions -->
-        <div class="px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-800 flex flex-wrap gap-2">
-          <UButton
-            size="sm"
-            variant="outline"
-            color="neutral"
-            icon="i-heroicons-document-arrow-down"
-            @click="exportCSV"
-          >
-            Export CSV
-          </UButton>
-          <UButton
-            size="sm"
-            variant="outline"
-            color="neutral"
-            icon="i-heroicons-code-bracket"
-            @click="exportJSON"
-          >
-            Export JSON
-          </UButton>
-          <UButton
-            size="sm"
-            variant="outline"
-            color="neutral"
-            icon="i-heroicons-arrow-path"
-            @click="runTest"
-          >
-            Re-test
-          </UButton>
-        </div>
-      </div>
-
-      <!-- Feedback -->
-      <ToolFeedback v-if="summary" tool-id="bulk-pagespeed" :context="{ device, urlCount: summary.totalUrls }" />
-    </div>
-
-    <!-- FAQ Section -->
-    <div class="max-w-4xl mt-12">
-      <ToolFaq :faqs="faqs" color="amber" />
-    </div>
-
-    <!-- Related Guides -->
-    <div class="text-center mt-12">
-      <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">
-        Related Guides
-      </h3>
-      <div class="flex flex-wrap justify-center gap-2">
-        <UButton to="/learn-lighthouse/lcp" variant="ghost" size="sm">
-          <UIcon name="i-heroicons-academic-cap" class="w-4 h-4 mr-1" />
-          Fix LCP Issues
-        </UButton>
-        <UButton to="/learn-lighthouse/cls" variant="ghost" size="sm">
-          <UIcon name="i-heroicons-academic-cap" class="w-4 h-4 mr-1" />
-          Fix CLS Issues
-        </UButton>
-        <UButton to="/learn-lighthouse/bulk-lighthouse-testing" variant="ghost" size="sm">
-          <UIcon name="i-heroicons-book-open" class="w-4 h-4 mr-1" />
-          Bulk Testing Guide
-        </UButton>
-      </div>
-    </div>
-
-    <!-- Upsell Section -->
-    <div class="max-w-4xl mt-12">
-      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-transparent border border-amber-200 dark:border-amber-800/50 p-6 md:p-8">
-        <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-amber-500/10 to-transparent rounded-full blur-3xl -mr-32 -mt-32" />
-
-        <div class="relative">
-          <div class="flex items-center gap-2 mb-4">
-            <div class="p-2 rounded-lg bg-amber-500/20">
-              <UIcon name="i-heroicons-rocket-launch" class="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                  Clear
+                </UButton>
+              </div>
             </div>
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white">
-              Need to scan your entire site?
-            </h3>
           </div>
 
-          <p class="text-gray-600 dark:text-gray-400 mb-6 max-w-xl">
-            Unlighthouse automatically discovers and audits hundreds of pages on your site. Get comprehensive performance insights with a single command.
-          </p>
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-gray-600 dark:text-gray-400">Device:</span>
+              <ToolDeviceToggle v-model="device" :disabled="loading" show-labels />
+            </div>
 
-          <div class="bg-gray-900 dark:bg-black rounded-lg p-4 mb-6 font-mono text-sm">
-            <span class="text-gray-500">$</span>
-            <span class="text-amber-400"> npx</span>
-            <span class="text-white"> unlighthouse</span>
-            <span class="text-green-400"> --site</span>
-            <span class="text-cyan-400"> example.com</span>
-          </div>
-
-          <div class="flex flex-col sm:flex-row gap-3">
             <UButton
-              to="/guide/getting-started"
               size="lg"
-              class="bg-amber-600 hover:bg-amber-500 text-white w-full sm:w-auto justify-center"
-              trailing-icon="i-heroicons-arrow-right"
+              :loading="loading"
+              :disabled="urlCount === 0 || loading"
+              class="bg-amber-600 hover:bg-amber-500 text-white font-medium w-full sm:w-auto"
+              @click="runTest"
             >
-              Try Unlighthouse CLI (Free)
+              <UIcon name="i-heroicons-bolt" class="w-4 h-4" />
+              Run Bulk Test
             </UButton>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress State -->
+      <div v-if="loading && results.length > 0" class="p-4 sm:p-6">
+        <div
+          v-motion
+          :initial="{ opacity: 0, y: 10 }"
+          :animate="{ opacity: 1, y: 0 }"
+          class="p-6 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800"
+        >
+          <!-- Progress bar -->
+          <div class="mb-4">
+            <div class="flex justify-between text-sm mb-2">
+              <span class="font-medium text-amber-900 dark:text-amber-100">
+                Testing {{ progressStats.total }} URLs
+              </span>
+              <span class="text-amber-700 dark:text-amber-300">
+                {{ progressStats.completed }}/{{ progressStats.total }} complete
+              </span>
+            </div>
+            <div class="h-2 bg-amber-200 dark:bg-amber-800 rounded-full overflow-hidden">
+              <div
+                class="h-full bg-amber-500 transition-all duration-300"
+                :style="{ width: `${(progressStats.completed / progressStats.total) * 100}%` }"
+              />
+            </div>
+          </div>
+
+          <!-- Status breakdown -->
+          <div class="flex flex-wrap gap-4 text-sm">
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              <span class="text-amber-700 dark:text-amber-300">{{ progressStats.processing }} processing</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 rounded-full bg-gray-400" />
+              <span class="text-gray-600 dark:text-gray-400">{{ progressStats.queued }} queued</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 rounded-full bg-green-500" />
+              <span class="text-gray-600 dark:text-gray-400">{{ progressStats.completed }} done</span>
+            </div>
+          </div>
+
+          <p class="mt-4 text-xs text-amber-600 dark:text-amber-400">
+            Processing 3 URLs at a time. Each URL takes up to 2 minutes for a full Lighthouse audit.
+          </p>
+        </div>
+      </div>
+
+      <!-- Initial Loading State (before results arrive) -->
+      <ToolLoadingPill v-else-if="loading" message="Starting bulk test..." color="amber" hint="Connecting to PageSpeed Insights API" />
+
+      <!-- Error -->
+      <UAlert
+        v-if="error"
+        color="error"
+        variant="subtle"
+        icon="i-heroicons-exclamation-circle"
+        class="mx-4 sm:mx-6 my-4"
+        :title="error"
+      />
+
+      <!-- Results Section -->
+      <div v-if="results.length > 0" class="space-y-6">
+        <!-- Summary Cards (only show when complete) -->
+        <div
+          v-if="summary"
+          v-motion
+          :initial="{ opacity: 0, y: 20 }"
+          :animate="{ opacity: 1, y: 0 }"
+          class="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 sm:p-6 pb-0"
+        >
+          <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-center">
+            <div class="text-3xl font-bold tabular-nums" :class="getScoreColor(summary.avgPerformance)">
+              {{ summary.avgPerformance }}
+            </div>
+            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Avg. Performance
+            </div>
+          </div>
+          <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-center">
+            <div class="text-3xl font-bold text-green-500 tabular-nums">
+              {{ summary.goodCount }}
+            </div>
+            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Good (90+)
+            </div>
+          </div>
+          <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-center">
+            <div class="text-3xl font-bold text-orange-500 tabular-nums">
+              {{ summary.needsWorkCount }}
+            </div>
+            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Needs Work (50-89)
+            </div>
+          </div>
+          <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-center">
+            <div class="text-3xl font-bold text-red-500 tabular-nums">
+              {{ summary.poorCount }}
+            </div>
+            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Poor (&lt;50)
+            </div>
+          </div>
+        </div>
+
+        <!-- Results Table -->
+        <div
+          v-motion
+          :initial="{ opacity: 0, y: 20 }"
+          :animate="{ opacity: 1, y: 0 }"
+          :transition="{ delay: 0.1 }"
+        >
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800">
+                  <th
+                    class="text-left px-4 py-3 font-medium text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    @click="toggleSort('url')"
+                  >
+                    <div class="flex items-center gap-1">
+                      URL
+                      <UIcon
+                        v-if="sortColumn === 'url'"
+                        :name="sortDirection === 'asc' ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
+                        class="w-3 h-3"
+                      />
+                    </div>
+                  </th>
+                  <th
+                    class="text-center px-3 py-3 font-medium text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    @click="toggleSort('performance')"
+                  >
+                    <div class="flex items-center justify-center gap-1">
+                      Perf
+                      <UIcon
+                        v-if="sortColumn === 'performance'"
+                        :name="sortDirection === 'asc' ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
+                        class="w-3 h-3"
+                      />
+                    </div>
+                  </th>
+                  <th
+                    class="text-center px-3 py-3 font-medium text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors hidden sm:table-cell"
+                    @click="toggleSort('lcp')"
+                  >
+                    <div class="flex items-center justify-center gap-1">
+                      LCP
+                      <UIcon
+                        v-if="sortColumn === 'lcp'"
+                        :name="sortDirection === 'asc' ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
+                        class="w-3 h-3"
+                      />
+                    </div>
+                  </th>
+                  <th
+                    class="text-center px-3 py-3 font-medium text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors hidden sm:table-cell"
+                    @click="toggleSort('cls')"
+                  >
+                    <div class="flex items-center justify-center gap-1">
+                      CLS
+                      <UIcon
+                        v-if="sortColumn === 'cls'"
+                        :name="sortDirection === 'asc' ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
+                        class="w-3 h-3"
+                      />
+                    </div>
+                  </th>
+                  <th
+                    class="text-center px-3 py-3 font-medium text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors hidden md:table-cell"
+                    @click="toggleSort('fcp')"
+                  >
+                    <div class="flex items-center justify-center gap-1">
+                      FCP
+                      <UIcon
+                        v-if="sortColumn === 'fcp'"
+                        :name="sortDirection === 'asc' ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
+                        class="w-3 h-3"
+                      />
+                    </div>
+                  </th>
+                  <th
+                    class="text-center px-3 py-3 font-medium text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors hidden md:table-cell"
+                    @click="toggleSort('tbt')"
+                  >
+                    <div class="flex items-center justify-center gap-1">
+                      TBT
+                      <UIcon
+                        v-if="sortColumn === 'tbt'"
+                        :name="sortDirection === 'asc' ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
+                        class="w-3 h-3"
+                      />
+                    </div>
+                  </th>
+                  <th class="text-center px-3 py-3 font-medium text-gray-700 dark:text-gray-300">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="(result, idx) in sortedResults"
+                  :key="result.url"
+                  v-motion
+                  :initial="{ opacity: 0, x: -10 }"
+                  :animate="{ opacity: 1, x: 0 }"
+                  :transition="{ delay: idx * 0.05 }"
+                  class="border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors"
+                >
+                  <td class="px-4 py-3">
+                    <a
+                      :href="result.url"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="text-amber-600 dark:text-amber-400 hover:underline font-mono text-xs truncate block max-w-[200px] md:max-w-[300px]"
+                      :title="result.url"
+                    >
+                      {{ formatUrl(result.url) }}
+                    </a>
+                  </td>
+                  <td class="px-3 py-3 text-center">
+                    <div
+                      v-if="result.status === 'success' && result.performance !== null"
+                      class="inline-flex items-center justify-center w-10 h-10 rounded-full font-bold text-white text-sm"
+                      :class="getScoreBg(result.performance)"
+                    >
+                      {{ result.performance }}
+                    </div>
+                    <div
+                      v-else-if="result.status === 'processing'"
+                      class="inline-flex items-center justify-center w-10 h-10 rounded-full border-2 border-amber-300 dark:border-amber-700"
+                    >
+                      <UIcon name="i-heroicons-arrow-path" class="w-5 h-5 text-amber-500 animate-spin" />
+                    </div>
+                    <span v-else class="text-gray-400">—</span>
+                  </td>
+                  <td class="px-3 py-3 text-center hidden sm:table-cell">
+                    <div v-if="result.lcp" class="flex items-center justify-center gap-1">
+                      <span :class="getRatingDot(result.lcp.rating)" class="w-1.5 h-1.5 rounded-full" />
+                      <span :class="getRatingColor(result.lcp.rating)" class="text-xs tabular-nums">
+                        {{ result.lcp.displayValue }}
+                      </span>
+                    </div>
+                    <span v-else class="text-gray-400">—</span>
+                  </td>
+                  <td class="px-3 py-3 text-center hidden sm:table-cell">
+                    <div v-if="result.cls" class="flex items-center justify-center gap-1">
+                      <span :class="getRatingDot(result.cls.rating)" class="w-1.5 h-1.5 rounded-full" />
+                      <span :class="getRatingColor(result.cls.rating)" class="text-xs tabular-nums">
+                        {{ result.cls.displayValue }}
+                      </span>
+                    </div>
+                    <span v-else class="text-gray-400">—</span>
+                  </td>
+                  <td class="px-3 py-3 text-center hidden md:table-cell">
+                    <div v-if="result.fcp" class="flex items-center justify-center gap-1">
+                      <span :class="getRatingDot(result.fcp.rating)" class="w-1.5 h-1.5 rounded-full" />
+                      <span :class="getRatingColor(result.fcp.rating)" class="text-xs tabular-nums">
+                        {{ result.fcp.displayValue }}
+                      </span>
+                    </div>
+                    <span v-else class="text-gray-400">—</span>
+                  </td>
+                  <td class="px-3 py-3 text-center hidden md:table-cell">
+                    <div v-if="result.tbt" class="flex items-center justify-center gap-1">
+                      <span :class="getRatingDot(result.tbt.rating)" class="w-1.5 h-1.5 rounded-full" />
+                      <span :class="getRatingColor(result.tbt.rating)" class="text-xs tabular-nums">
+                        {{ result.tbt.displayValue }}
+                      </span>
+                    </div>
+                    <span v-else class="text-gray-400">—</span>
+                  </td>
+                  <td class="px-3 py-3 text-center">
+                    <!-- Queued -->
+                    <span
+                      v-if="result.status === 'queued'"
+                      class="inline-flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400"
+                    >
+                      <span class="w-2 h-2 rounded-full bg-gray-400" />
+                      Queued
+                    </span>
+                    <!-- Processing -->
+                    <span
+                      v-else-if="result.status === 'processing'"
+                      class="inline-flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400"
+                    >
+                      <UIcon name="i-heroicons-arrow-path" class="w-4 h-4 animate-spin" />
+                      Testing
+                    </span>
+                    <!-- Success -->
+                    <UIcon
+                      v-else-if="result.status === 'success'"
+                      name="i-heroicons-check-circle"
+                      class="w-5 h-5 text-green-500"
+                    />
+                    <!-- Error -->
+                    <UTooltip v-else :text="result.error || 'Failed'">
+                      <UIcon
+                        name="i-heroicons-x-circle"
+                        class="w-5 h-5 text-red-500"
+                      />
+                    </UTooltip>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Export Actions -->
+          <div class="px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-800 flex flex-wrap gap-2">
             <UButton
-              to="/cloud"
-              size="lg"
+              size="sm"
               variant="outline"
               color="neutral"
-              class="w-full sm:w-auto justify-center"
+              icon="i-heroicons-document-arrow-down"
+              @click="exportCSV"
             >
-              <UIcon name="i-heroicons-cloud" class="w-4 h-4" />
-              Schedule with Cloud
+              Export CSV
+            </UButton>
+            <UButton
+              size="sm"
+              variant="outline"
+              color="neutral"
+              icon="i-heroicons-code-bracket"
+              @click="exportJSON"
+            >
+              Export JSON
+            </UButton>
+            <UButton
+              size="sm"
+              variant="outline"
+              color="neutral"
+              icon="i-heroicons-arrow-path"
+              @click="runTest"
+            >
+              Re-test
+            </UButton>
+          </div>
+        </div>
+
+        <!-- Feedback -->
+        <div class="px-4 sm:px-6 pb-4">
+          <ToolFeedback v-if="summary" tool-id="bulk-pagespeed" :context="{ device, urlCount: summary.totalUrls }" />
+        </div>
+      </div>
+
+      <ToolEmptyState v-if="!results.length && !loading && !error" icon="i-heroicons-squares-2x2" message="Enter URLs to run a bulk PageSpeed test" hint="Test up to 10 URLs at once" />
+    </ToolCard>
+
+    <!-- FAQ Section -->
+    <section class="px-3 sm:px-6 lg:px-8 pb-16">
+      <div class="max-w-4xl mx-auto">
+        <ToolFaq :faqs="faqs" color="amber" />
+
+        <!-- Related Guides -->
+        <div class="mt-10 text-center">
+          <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+            Related Guides
+          </h3>
+          <div class="flex flex-wrap justify-center gap-2">
+            <UButton to="/learn-lighthouse/lcp" variant="ghost" size="sm">
+              <UIcon name="i-heroicons-academic-cap" class="w-4 h-4 mr-1" />
+              Fix LCP Issues
+            </UButton>
+            <UButton to="/learn-lighthouse/cls" variant="ghost" size="sm">
+              <UIcon name="i-heroicons-academic-cap" class="w-4 h-4 mr-1" />
+              Fix CLS Issues
+            </UButton>
+            <UButton to="/learn-lighthouse/bulk-lighthouse-testing" variant="ghost" size="sm">
+              <UIcon name="i-heroicons-book-open" class="w-4 h-4 mr-1" />
+              Bulk Testing Guide
             </UButton>
           </div>
         </div>
       </div>
-    </div>
-  </ToolPageLayout>
+    </section>
+
+    <!-- Upsell Section -->
+    <section class="px-3 sm:px-6 lg:px-8 pb-16">
+      <div class="max-w-4xl mx-auto">
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-transparent border border-amber-200 dark:border-amber-800/50 p-6 md:p-8">
+          <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-amber-500/10 to-transparent rounded-full blur-3xl -mr-32 -mt-32" />
+
+          <div class="relative">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="p-2 rounded-lg bg-amber-500/20">
+                <UIcon name="i-heroicons-rocket-launch" class="w-5 h-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white">
+                Need to scan your entire site?
+              </h3>
+            </div>
+
+            <p class="text-gray-600 dark:text-gray-400 mb-6 max-w-xl">
+              Unlighthouse automatically discovers and audits hundreds of pages on your site. Get comprehensive performance insights with a single command.
+            </p>
+
+            <div class="bg-gray-900 dark:bg-black rounded-lg p-4 mb-6 font-mono text-sm">
+              <span class="text-gray-500">$</span>
+              <span class="text-amber-400"> npx</span>
+              <span class="text-white"> unlighthouse</span>
+              <span class="text-green-400"> --site</span>
+              <span class="text-cyan-400"> example.com</span>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+              <UButton
+                to="/guide/getting-started"
+                size="lg"
+                class="bg-amber-600 hover:bg-amber-500 text-white w-full sm:w-auto justify-center"
+                trailing-icon="i-heroicons-arrow-right"
+              >
+                Try Unlighthouse CLI (Free)
+              </UButton>
+              <UButton
+                to="/cloud"
+                size="lg"
+                variant="outline"
+                color="neutral"
+                class="w-full sm:w-auto justify-center"
+              >
+                <UIcon name="i-heroicons-cloud" class="w-4 h-4" />
+                Schedule with Cloud
+              </UButton>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
 </template>

@@ -232,22 +232,6 @@ export function useLighthouseReport() {
   }
 }
 
-// Formatting helpers
-export function formatBytes(bytes: number): string {
-  if (bytes === 0)
-    return '0 B'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return `${Number.parseFloat((bytes / k ** i).toFixed(1))} ${sizes[i]}`
-}
-
-export function formatMs(ms: number): string {
-  if (ms >= 1000)
-    return `${(ms / 1000).toFixed(1)} s`
-  return `${Math.round(ms)} ms`
-}
-
 export function getScoreRating(score: number | null): 'pass' | 'average' | 'fail' | 'unknown' {
   if (score === null)
     return 'unknown'

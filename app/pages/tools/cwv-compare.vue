@@ -1,13 +1,6 @@
 <script setup lang="ts">
 import type { CWVCompareResponse, SiteComparison } from '~~/server/api/tools/cwv-compare.post'
-import type { CruxRating, MetricKey } from '~/utils/crux'
 import { watchDebounced } from '@vueuse/core'
-import {
-  allMetrics,
-  formatCruxMetricValue,
-  getMetricRating,
-  metricDefinitions,
-} from '~/utils/crux'
 
 definePageMeta({
   breadcrumb: {
@@ -41,13 +34,14 @@ useToolSeo({
   faqs,
 })
 
-type FormFactor = 'PHONE' | 'DESKTOP'
+const { trackUse } = useToolTracking('cwv-compare')
 
 const route = useRoute()
 const router = useRouter()
 
 const urls = ref<string[]>(['', ''])
 const formFactor = ref<FormFactor>('PHONE')
+const { device: deviceToggle } = useFormFactorBridge(formFactor)
 const loading = ref(false)
 const error = ref<string | null>(null)
 const result = ref<CWVCompareResponse | null>(null)
@@ -121,6 +115,7 @@ function compare() {
   })
     .then((data) => {
       result.value = data
+      trackUse()
     })
     .catch((err) => {
       error.value = err.data?.message || err.message || 'Failed to fetch comparison data'
@@ -235,33 +230,6 @@ const trendChartData = computed(() => {
   }
 })
 
-const ratingColors: Record<CruxRating | 'null', { bg: string, border: string, text: string, badge: string }> = {
-  'good': {
-    bg: 'bg-emerald-50 dark:bg-emerald-900/20',
-    border: 'border-emerald-500',
-    text: 'text-emerald-600 dark:text-emerald-400',
-    badge: 'bg-emerald-500',
-  },
-  'needs-improvement': {
-    bg: 'bg-amber-50 dark:bg-amber-900/20',
-    border: 'border-amber-500',
-    text: 'text-amber-600 dark:text-amber-400',
-    badge: 'bg-amber-500',
-  },
-  'poor': {
-    bg: 'bg-red-50 dark:bg-red-900/20',
-    border: 'border-red-500',
-    text: 'text-red-600 dark:text-red-400',
-    badge: 'bg-red-500',
-  },
-  'null': {
-    bg: 'bg-gray-50 dark:bg-gray-800/50',
-    border: 'border-gray-300 dark:border-gray-600',
-    text: 'text-gray-500 dark:text-gray-400',
-    badge: 'bg-gray-500',
-  },
-}
-
 function formatChartDate(date: string) {
   const d = new Date(date)
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
@@ -290,7 +258,6 @@ function getBarWidth(comp: SiteComparison, metric: MetricKey): number {
   return Math.min(100, (value / maxDisplay) * 100)
 }
 
-const cwvMetrics: MetricKey[] = ['lcp', 'cls', 'inp']
 const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
 </script>
 
@@ -434,28 +401,7 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
                   <!-- Device toggle -->
                   <div class="flex items-center gap-3">
                     <span class="text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider">Device:</span>
-                    <div class="inline-flex rounded-xl border border-gray-200 dark:border-gray-700 p-1 bg-gray-100 dark:bg-gray-800">
-                      <button
-                        type="button"
-                        class="px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2"
-                        :class="[formFactor === 'PHONE' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300']"
-                        :disabled="loading"
-                        @click="formFactor = 'PHONE'"
-                      >
-                        <UIcon name="i-heroicons-device-phone-mobile" class="w-4 h-4" />
-                        Mobile
-                      </button>
-                      <button
-                        type="button"
-                        class="px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2"
-                        :class="[formFactor === 'DESKTOP' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300']"
-                        :disabled="loading"
-                        @click="formFactor = 'DESKTOP'"
-                      >
-                        <UIcon name="i-heroicons-computer-desktop" class="w-4 h-4" />
-                        Desktop
-                      </button>
-                    </div>
+                    <ToolDeviceToggle v-model="deviceToggle" :disabled="loading" show-labels />
                   </div>
 
                   <UButton
@@ -488,17 +434,7 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
             </div>
 
             <!-- Error -->
-            <UAlert
-              v-if="error"
-              color="error"
-              variant="subtle"
-              icon="i-heroicons-exclamation-circle"
-              class="mx-4 sm:mx-6 my-4"
-            >
-              <template #title>
-                {{ error }}
-              </template>
-            </UAlert>
+            <ToolError :error="error" />
 
             <!-- Results -->
             <div v-if="result && !loading" class="p-4 sm:p-6 space-y-8">
@@ -889,6 +825,42 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
                   Winners are determined by the lowest (best) P75 value for each metric. Overall winner considers
                   Core Web Vitals pass rate and combined metric performance.
                 </p>
+              </div>
+
+              <!-- Upsell -->
+              <div class="p-4 sm:p-6 rounded-xl bg-gradient-to-br from-violet-50 to-indigo-50 dark:from-violet-900/20 dark:to-indigo-900/20 border border-violet-200 dark:border-violet-800">
+                <div class="flex items-start gap-4">
+                  <div class="shrink-0 w-12 h-12 rounded-xl bg-violet-100 dark:bg-violet-900/50 flex items-center justify-center">
+                    <UIcon name="i-heroicons-magnifying-glass-circle" class="w-6 h-6 text-violet-600 dark:text-violet-400" />
+                  </div>
+                  <div class="flex-1">
+                    <h3 class="font-semibold text-gray-900 dark:text-white">
+                      Go deeper with full-site audits
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      Compare performance across all pages on each site with Unlighthouse CLI:
+                    </p>
+                    <div class="mt-3 p-3 rounded-lg bg-gray-900 dark:bg-black font-mono text-sm text-emerald-400">
+                      npx unlighthouse --site {{ urls.filter(u => u.trim())[0] || 'example.com' }}
+                    </div>
+                    <div class="flex gap-2 mt-4">
+                      <UButton
+                        to="/guide/getting-started/installation"
+                        color="primary"
+                        size="sm"
+                      >
+                        Scan Entire Site (Free)
+                      </UButton>
+                      <UButton
+                        to="/cloud"
+                        variant="outline"
+                        size="sm"
+                      >
+                        Schedule Recurring Audits
+                      </UButton>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <!-- Feedback -->

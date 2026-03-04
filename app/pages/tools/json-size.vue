@@ -43,20 +43,9 @@ useToolSeo({
   faqs,
 })
 
-// Track tool usage
-const hasTrackedView = ref(false)
-onMounted(() => {
-  if (!hasTrackedView.value) {
-    hasTrackedView.value = true
-    $fetch('/api/tools/track', {
-      method: 'POST',
-      body: { tool: 'json-size', action: 'view' },
-    }).catch(() => {})
-  }
-})
+const { trackUse, resetUseTracking } = useToolTracking('json-size')
 
 const inputText = ref('')
-const hasTrackedUse = ref(false)
 
 const charCount = computed(() => inputText.value.length)
 
@@ -100,13 +89,7 @@ const analysis = computed<Analysis | null>(() => {
   error.value = ''
 
   // Track first successful analysis
-  if (!hasTrackedUse.value) {
-    hasTrackedUse.value = true
-    $fetch('/api/tools/track', {
-      method: 'POST',
-      body: { tool: 'json-size', action: 'use' },
-    }).catch(() => {})
-  }
+  trackUse()
 
   const rawSize = new Blob([text]).size
   const minifiedText = JSON.stringify(parsed)
@@ -179,18 +162,10 @@ const analysis = computed<Analysis | null>(() => {
   }
 })
 
-function formatBytes(bytes: number) {
-  if (bytes >= 1048576)
-    return `${(bytes / 1048576).toFixed(1)} MB`
-  if (bytes >= 1024)
-    return `${(bytes / 1024).toFixed(1)} KB`
-  return `${bytes} B`
-}
-
 function clearInput() {
   inputText.value = ''
   error.value = ''
-  hasTrackedUse.value = false
+  resetUseTracking()
 }
 
 const copied = ref(false)
@@ -219,305 +194,255 @@ const keyBarColors = ['bg-teal-500', 'bg-cyan-500', 'bg-blue-500', 'bg-indigo-50
 
 <template>
   <div class="min-h-screen">
-    <!-- Hero -->
-    <section class="relative pt-10 pb-6 lg:pt-12 lg:pb-8">
-      <div class="max-w-4xl mx-auto px-6 text-center">
-        <ClientOnly>
-          <h1
-            v-motion
-            :initial="{ opacity: 0, y: 20 }"
-            :animate="{ opacity: 1, y: 0 }"
-            :transition="{ duration: 0.4 }"
-            class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-[1.1] text-gray-900 dark:text-white mb-3"
-          >
-            JSON Size
-            <span class="text-teal-600 dark:text-teal-400">Analyzer</span>
-          </h1>
-          <p
-            v-motion
-            :initial="{ opacity: 0, y: 20 }"
-            :animate="{ opacity: 1, y: 0 }"
-            :transition="{ duration: 0.4, delay: 0.1 }"
-            class="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto"
-          >
-            Paste JSON to analyze size, minification savings, compression estimates, and key contributions. Entirely client-side.
-          </p>
-          <template #fallback>
-            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-[1.1] text-gray-900 dark:text-white mb-3">
-              JSON Size
-              <span class="text-teal-600 dark:text-teal-400">Analyzer</span>
-            </h1>
-            <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
-              Paste JSON to analyze size, minification savings, compression estimates, and key contributions. Entirely client-side.
-            </p>
-          </template>
-        </ClientOnly>
+    <ToolPageHero title="JSON Size" accent="Analyzer" description="Paste JSON to analyze size, minification savings, compression estimates, and key contributions. Entirely client-side." color="teal" />
+
+    <ToolCard icon="i-heroicons-code-bracket-square" title="JSON Size Analysis" color="teal" max-width="max-w-5xl">
+      <div class="flex items-center justify-end gap-2 px-4 sm:px-6 py-2">
+        <span v-if="charCount > 0" class="px-2 py-0.5 text-[10px] font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-full">
+          {{ charCount.toLocaleString() }} chars
+        </span>
+        <UButton v-if="inputText" variant="ghost" color="neutral" size="xs" @click="clearInput">
+          <UIcon name="i-heroicons-x-mark" class="w-4 h-4" />
+          <span class="hidden sm:inline">Clear</span>
+        </UButton>
       </div>
-    </section>
 
-    <!-- Main Content -->
-    <section class="px-3 sm:px-6 lg:px-8 pb-12">
-      <div class="max-w-5xl mx-auto">
+      <!-- Input Area -->
+      <div class="p-4 sm:p-6">
         <div class="relative">
-          <div class="absolute -inset-4 bg-gradient-to-b from-teal-500/10 via-teal-500/5 to-transparent rounded-3xl blur-3xl pointer-events-none" />
+          <textarea
+            v-model="inputText"
+            placeholder="Paste your JSON here..."
+            class="w-full h-48 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 text-sm font-mono text-gray-900 dark:text-white placeholder-gray-400 resize-y focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+            spellcheck="false"
+          />
+          <div v-if="!inputText" class="absolute bottom-4 left-4">
+            <UButton variant="soft" size="sm" color="neutral" @click="loadSample">
+              <UIcon name="i-heroicons-beaker" class="w-4 h-4 mr-1" />
+              Load Sample
+            </UButton>
+          </div>
+        </div>
+      </div>
 
-          <div class="relative bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl overflow-hidden shadow-xl ring-1 ring-gray-200 dark:ring-gray-800">
-            <!-- Header -->
-            <div class="flex items-center justify-between gap-2 px-4 sm:px-6 py-3 border-b border-gray-200 dark:border-gray-800">
-              <div class="flex items-center gap-2">
-                <UIcon name="i-heroicons-code-bracket-square" class="w-4 h-4 text-teal-500" />
-                <span class="text-sm font-semibold">JSON Size Analyzer</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span v-if="charCount > 0" class="px-2 py-0.5 text-[10px] font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-full">
-                  {{ charCount.toLocaleString() }} chars
-                </span>
-                <UButton v-if="inputText" variant="ghost" color="neutral" size="xs" @click="clearInput">
-                  <UIcon name="i-heroicons-x-mark" class="w-4 h-4" />
-                  <span class="hidden sm:inline">Clear</span>
-                </UButton>
-              </div>
+      <!-- Error -->
+      <UAlert
+        v-if="error && !analysis"
+        color="error"
+        variant="subtle"
+        icon="i-heroicons-exclamation-circle"
+        class="mx-4 sm:mx-6 mb-4"
+      >
+        <template #title>
+          {{ error }}
+        </template>
+      </UAlert>
+
+      <!-- Analysis Results -->
+      <div v-if="analysis" class="px-4 sm:px-6 pb-6 space-y-6">
+        <!-- Summary Stats Grid -->
+        <div
+          v-motion
+          :initial="{ opacity: 0, y: 20 }"
+          :animate="{ opacity: 1, y: 0 }"
+          :transition="{ duration: 0.3 }"
+        >
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+            <UIcon name="i-heroicons-chart-bar" class="w-4 h-4 text-teal-500" />
+            Size Summary
+          </h2>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
+              <p class="text-lg font-bold text-gray-900 dark:text-white">
+                {{ formatBytes(analysis.rawSize) }}
+              </p>
+              <p class="text-xs text-gray-500">
+                Raw Size
+              </p>
             </div>
-
-            <!-- Input Area -->
-            <div class="p-4 sm:p-6">
-              <div class="relative">
-                <textarea
-                  v-model="inputText"
-                  placeholder="Paste your JSON here..."
-                  class="w-full h-48 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 text-sm font-mono text-gray-900 dark:text-white placeholder-gray-400 resize-y focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                  spellcheck="false"
-                />
-                <div v-if="!inputText" class="absolute bottom-4 left-4">
-                  <UButton variant="soft" size="sm" color="neutral" @click="loadSample">
-                    <UIcon name="i-heroicons-beaker" class="w-4 h-4 mr-1" />
-                    Load Sample
-                  </UButton>
-                </div>
-              </div>
+            <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
+              <p class="text-lg font-bold text-gray-900 dark:text-white">
+                {{ formatBytes(analysis.minifiedSize) }}
+              </p>
+              <p class="text-xs text-gray-500">
+                Minified
+              </p>
             </div>
+            <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
+              <p class="text-lg font-bold text-gray-900 dark:text-white">
+                {{ formatBytes(analysis.gzipEstimate) }}
+              </p>
+              <p class="text-xs text-gray-500">
+                Gzip Est.
+              </p>
+            </div>
+            <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
+              <p class="text-lg font-bold text-gray-900 dark:text-white">
+                {{ formatBytes(analysis.brotliEstimate) }}
+              </p>
+              <p class="text-xs text-gray-500">
+                Brotli Est.
+              </p>
+            </div>
+          </div>
+        </div>
 
-            <!-- Error -->
-            <UAlert
-              v-if="error && !analysis"
-              color="error"
-              variant="subtle"
-              icon="i-heroicons-exclamation-circle"
-              class="mx-4 sm:mx-6 mb-4"
+        <!-- Savings + Structure -->
+        <div
+          v-motion
+          :initial="{ opacity: 0, y: 20 }"
+          :animate="{ opacity: 1, y: 0 }"
+          :transition="{ duration: 0.3, delay: 0.1 }"
+          class="grid grid-cols-2 sm:grid-cols-4 gap-3"
+        >
+          <div class="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-center">
+            <p class="text-lg font-bold text-green-700 dark:text-green-400">
+              {{ analysis.savingsPercent.toFixed(1) }}%
+            </p>
+            <p class="text-xs text-green-600 dark:text-green-500">
+              Savings
+            </p>
+          </div>
+          <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
+            <p class="text-lg font-bold text-gray-900 dark:text-white">
+              {{ analysis.maxDepth }}
+            </p>
+            <p class="text-xs text-gray-500">
+              Max Depth
+            </p>
+          </div>
+          <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
+            <p class="text-lg font-bold text-gray-900 dark:text-white">
+              {{ analysis.keyCount.toLocaleString() }}
+            </p>
+            <p class="text-xs text-gray-500">
+              Total Keys
+            </p>
+          </div>
+          <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
+            <p class="text-lg font-bold text-gray-900 dark:text-white">
+              {{ analysis.uniqueKeys }}
+            </p>
+            <p class="text-xs text-gray-500">
+              Unique Keys
+            </p>
+          </div>
+        </div>
+
+        <!-- Duplicate key bytes -->
+        <div v-if="analysis.duplicateKeyBytes > 0" class="p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+          <div class="flex items-center gap-2">
+            <UIcon name="i-heroicons-exclamation-triangle" class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+            <p class="text-sm text-amber-800 dark:text-amber-300">
+              <strong>{{ formatBytes(analysis.duplicateKeyBytes) }}</strong> wasted on duplicate key names across repeated objects
+            </p>
+          </div>
+        </div>
+
+        <!-- Top-Level Key Contributions -->
+        <div
+          v-if="analysis.topLevelKeys.length > 1"
+          v-motion
+          :initial="{ opacity: 0, y: 20 }"
+          :animate="{ opacity: 1, y: 0 }"
+          :transition="{ duration: 0.3, delay: 0.2 }"
+        >
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+            <UIcon name="i-heroicons-chart-pie" class="w-4 h-4 text-teal-500" />
+            Size by Key
+          </h2>
+
+          <!-- Stacked bar -->
+          <div class="h-4 rounded-full overflow-hidden flex mb-4">
+            <div
+              v-for="(key, idx) in analysis.topLevelKeys"
+              :key="key.key"
+              :class="keyBarColors[idx % keyBarColors.length]"
+              :style="{ width: `${key.percent}%` }"
+              class="h-full"
+              :title="`${key.key}: ${formatBytes(key.size)}`"
+            />
+          </div>
+
+          <!-- Key list -->
+          <div class="space-y-2">
+            <div
+              v-for="(key, idx) in analysis.topLevelKeys"
+              :key="key.key"
+              class="flex items-center gap-3 p-2 rounded-lg bg-gray-50 dark:bg-gray-800/50"
             >
-              <template #title>
-                {{ error }}
-              </template>
-            </UAlert>
-
-            <!-- Analysis Results -->
-            <div v-if="analysis" class="px-4 sm:px-6 pb-6 space-y-6">
-              <!-- Summary Stats Grid -->
-              <div
-                v-motion
-                :initial="{ opacity: 0, y: 20 }"
-                :animate="{ opacity: 1, y: 0 }"
-                :transition="{ duration: 0.3 }"
-              >
-                <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                  <UIcon name="i-heroicons-chart-bar" class="w-4 h-4 text-teal-500" />
-                  Size Summary
-                </h2>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
-                    <p class="text-lg font-bold text-gray-900 dark:text-white">
-                      {{ formatBytes(analysis.rawSize) }}
-                    </p>
-                    <p class="text-xs text-gray-500">
-                      Raw Size
-                    </p>
-                  </div>
-                  <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
-                    <p class="text-lg font-bold text-gray-900 dark:text-white">
-                      {{ formatBytes(analysis.minifiedSize) }}
-                    </p>
-                    <p class="text-xs text-gray-500">
-                      Minified
-                    </p>
-                  </div>
-                  <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
-                    <p class="text-lg font-bold text-gray-900 dark:text-white">
-                      {{ formatBytes(analysis.gzipEstimate) }}
-                    </p>
-                    <p class="text-xs text-gray-500">
-                      Gzip Est.
-                    </p>
-                  </div>
-                  <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
-                    <p class="text-lg font-bold text-gray-900 dark:text-white">
-                      {{ formatBytes(analysis.brotliEstimate) }}
-                    </p>
-                    <p class="text-xs text-gray-500">
-                      Brotli Est.
-                    </p>
+              <div class="w-2.5 h-2.5 rounded-full shrink-0" :class="keyBarColors[idx % keyBarColors.length]" />
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-medium font-mono text-gray-900 dark:text-white truncate">
+                  {{ key.key }}
+                </p>
+                <div class="flex items-center gap-2 mt-1">
+                  <div class="flex-1 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                    <div
+                      class="h-full rounded-full"
+                      :class="keyBarColors[idx % keyBarColors.length]"
+                      :style="{ width: `${key.percent}%` }"
+                    />
                   </div>
                 </div>
               </div>
-
-              <!-- Savings + Structure -->
-              <div
-                v-motion
-                :initial="{ opacity: 0, y: 20 }"
-                :animate="{ opacity: 1, y: 0 }"
-                :transition="{ duration: 0.3, delay: 0.1 }"
-                class="grid grid-cols-2 sm:grid-cols-4 gap-3"
-              >
-                <div class="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-center">
-                  <p class="text-lg font-bold text-green-700 dark:text-green-400">
-                    {{ analysis.savingsPercent.toFixed(1) }}%
-                  </p>
-                  <p class="text-xs text-green-600 dark:text-green-500">
-                    Savings
-                  </p>
-                </div>
-                <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
-                  <p class="text-lg font-bold text-gray-900 dark:text-white">
-                    {{ analysis.maxDepth }}
-                  </p>
-                  <p class="text-xs text-gray-500">
-                    Max Depth
-                  </p>
-                </div>
-                <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
-                  <p class="text-lg font-bold text-gray-900 dark:text-white">
-                    {{ analysis.keyCount.toLocaleString() }}
-                  </p>
-                  <p class="text-xs text-gray-500">
-                    Total Keys
-                  </p>
-                </div>
-                <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
-                  <p class="text-lg font-bold text-gray-900 dark:text-white">
-                    {{ analysis.uniqueKeys }}
-                  </p>
-                  <p class="text-xs text-gray-500">
-                    Unique Keys
-                  </p>
-                </div>
-              </div>
-
-              <!-- Duplicate key bytes -->
-              <div v-if="analysis.duplicateKeyBytes > 0" class="p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
-                <div class="flex items-center gap-2">
-                  <UIcon name="i-heroicons-exclamation-triangle" class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
-                  <p class="text-sm text-amber-800 dark:text-amber-300">
-                    <strong>{{ formatBytes(analysis.duplicateKeyBytes) }}</strong> wasted on duplicate key names across repeated objects
-                  </p>
-                </div>
-              </div>
-
-              <!-- Top-Level Key Contributions -->
-              <div
-                v-if="analysis.topLevelKeys.length > 1"
-                v-motion
-                :initial="{ opacity: 0, y: 20 }"
-                :animate="{ opacity: 1, y: 0 }"
-                :transition="{ duration: 0.3, delay: 0.2 }"
-              >
-                <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                  <UIcon name="i-heroicons-chart-pie" class="w-4 h-4 text-teal-500" />
-                  Size by Key
-                </h2>
-
-                <!-- Stacked bar -->
-                <div class="h-4 rounded-full overflow-hidden flex mb-4">
-                  <div
-                    v-for="(key, idx) in analysis.topLevelKeys"
-                    :key="key.key"
-                    :class="keyBarColors[idx % keyBarColors.length]"
-                    :style="{ width: `${key.percent}%` }"
-                    class="h-full"
-                    :title="`${key.key}: ${formatBytes(key.size)}`"
-                  />
-                </div>
-
-                <!-- Key list -->
-                <div class="space-y-2">
-                  <div
-                    v-for="(key, idx) in analysis.topLevelKeys"
-                    :key="key.key"
-                    class="flex items-center gap-3 p-2 rounded-lg bg-gray-50 dark:bg-gray-800/50"
-                  >
-                    <div class="w-2.5 h-2.5 rounded-full shrink-0" :class="keyBarColors[idx % keyBarColors.length]" />
-                    <div class="flex-1 min-w-0">
-                      <p class="text-xs font-medium font-mono text-gray-900 dark:text-white truncate">
-                        {{ key.key }}
-                      </p>
-                      <div class="flex items-center gap-2 mt-1">
-                        <div class="flex-1 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-                          <div
-                            class="h-full rounded-full"
-                            :class="keyBarColors[idx % keyBarColors.length]"
-                            :style="{ width: `${key.percent}%` }"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div class="text-right shrink-0">
-                      <p class="text-xs font-bold text-gray-900 dark:text-white">
-                        {{ formatBytes(key.size) }}
-                      </p>
-                      <p class="text-[10px] text-gray-500">
-                        {{ key.percent.toFixed(1) }}%
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Minified Output -->
-              <div
-                v-motion
-                :initial="{ opacity: 0, y: 20 }"
-                :animate="{ opacity: 1, y: 0 }"
-                :transition="{ duration: 0.3, delay: 0.25 }"
-              >
-                <div class="flex items-center justify-between mb-3">
-                  <h2 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                    <UIcon name="i-heroicons-code-bracket" class="w-4 h-4 text-teal-500" />
-                    Minified Output
-                  </h2>
-                  <UButton variant="soft" size="xs" color="primary" @click="copyMinified">
-                    <UIcon :name="copied ? 'i-heroicons-check' : 'i-heroicons-clipboard-document'" class="w-3.5 h-3.5 mr-1" />
-                    {{ copied ? 'Copied' : 'Copy' }}
-                  </UButton>
-                </div>
-                <div class="relative rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 overflow-hidden">
-                  <pre class="p-4 text-xs font-mono text-gray-700 dark:text-gray-300 overflow-x-auto max-h-48 whitespace-pre-wrap break-all">{{ analysis.minifiedText }}</pre>
-                </div>
-              </div>
-
-              <!-- Related Tools CTA -->
-              <div class="p-4 rounded-xl bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/30 border border-teal-200 dark:border-teal-800">
-                <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
-                  <div class="text-center sm:text-left">
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">
-                      Analyze your full page performance
-                    </p>
-                    <p class="text-xs text-gray-500">
-                      Check how JSON payloads impact your Lighthouse score
-                    </p>
-                  </div>
-                  <div class="flex flex-wrap gap-2">
-                    <UButton to="/tools/page-size" variant="outline" size="sm">
-                      Page Size Checker
-                    </UButton>
-                    <UButton to="/tools/har-viewer" variant="outline" size="sm">
-                      HAR Viewer
-                    </UButton>
-                  </div>
-                </div>
+              <div class="text-right shrink-0">
+                <p class="text-xs font-bold text-gray-900 dark:text-white">
+                  {{ formatBytes(key.size) }}
+                </p>
+                <p class="text-[10px] text-gray-500">
+                  {{ key.percent.toFixed(1) }}%
+                </p>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Minified Output -->
+        <div
+          v-motion
+          :initial="{ opacity: 0, y: 20 }"
+          :animate="{ opacity: 1, y: 0 }"
+          :transition="{ duration: 0.3, delay: 0.25 }"
+        >
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              <UIcon name="i-heroicons-code-bracket" class="w-4 h-4 text-teal-500" />
+              Minified Output
+            </h2>
+            <UButton variant="soft" size="xs" color="primary" @click="copyMinified">
+              <UIcon :name="copied ? 'i-heroicons-check' : 'i-heroicons-clipboard-document'" class="w-3.5 h-3.5 mr-1" />
+              {{ copied ? 'Copied' : 'Copy' }}
+            </UButton>
+          </div>
+          <div class="relative rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <pre class="p-4 text-xs font-mono text-gray-700 dark:text-gray-300 overflow-x-auto max-h-48 whitespace-pre-wrap break-all">{{ analysis.minifiedText }}</pre>
+          </div>
+        </div>
+
+        <!-- Related Tools CTA -->
+        <div class="p-4 rounded-xl bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/30 border border-teal-200 dark:border-teal-800">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="text-center sm:text-left">
+              <p class="text-sm font-medium text-gray-900 dark:text-white">
+                Analyze your full page performance
+              </p>
+              <p class="text-xs text-gray-500">
+                Check how JSON payloads impact your Lighthouse score
+              </p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <UButton to="/tools/page-size" variant="outline" size="sm">
+                Page Size Checker
+              </UButton>
+              <UButton to="/tools/har-viewer" variant="outline" size="sm">
+                HAR Viewer
+              </UButton>
+            </div>
+          </div>
+        </div>
       </div>
-    </section>
+    </ToolCard>
 
     <!-- Educational Content (when no analysis) -->
     <section v-if="!analysis" class="px-3 sm:px-6 lg:px-8 pb-12">

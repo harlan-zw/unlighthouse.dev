@@ -1,33 +1,4 @@
 <script setup lang="ts">
-import { watchPausable } from '@vueuse/core'
-
-// Loading messages composable
-function useLoadingMessages(messages: string[], interval = 800) {
-  const current = ref(messages[0])
-  let timer: ReturnType<typeof setInterval> | null = null
-  let idx = 0
-
-  function start() {
-    idx = 0
-    current.value = messages[0]
-    timer = setInterval(() => {
-      idx = (idx + 1) % messages.length
-      current.value = messages[idx]
-    }, interval)
-  }
-
-  function stop() {
-    if (timer) {
-      clearInterval(timer)
-      timer = null
-    }
-  }
-
-  onUnmounted(stop)
-
-  return { current, start, stop }
-}
-
 definePageMeta({
   breadcrumb: {
     icon: 'i-heroicons-scale',
@@ -68,6 +39,8 @@ useToolSeo({
   faqs,
 })
 
+const { trackUse } = useToolTracking('page-size')
+
 const { current: loadingMessage, start: startMessages, stop: stopMessages } = useLoadingMessages([
   'Connecting to PageSpeed Insights API...',
   'Tip: The median page weighs 2.5 MB on mobile',
@@ -84,15 +57,12 @@ const { current: loadingMessage, start: startMessages, stop: stopMessages } = us
 ], 3000)
 
 // State
-const route = useRoute()
-const router = useRouter()
 const urlInput = ref('')
 const strategy = ref<'mobile' | 'desktop'>('mobile')
 const loading = ref(false)
 const error = ref<string | null>(null)
 const result = ref<PageSizeResult | null>(null)
 const loadingContainerRef = ref<HTMLElement | null>(null)
-const showFloatingLoader = ref(false)
 
 interface PageSizeResult {
   url: string
@@ -114,54 +84,12 @@ interface PageSizeResult {
   screenshot: { data: string, width: number, height: number } | null
 }
 
-// URL syncing
-onMounted(() => {
-  const urlParam = route.query.url as string
-  const strategyParam = route.query.strategy as string
-  if (strategyParam === 'desktop')
-    strategy.value = 'desktop'
-  if (urlParam) {
-    urlInput.value = decodeURIComponent(urlParam)
-    loading.value = true
-    analyze()
-  }
-
-  const handleScroll = () => {
-    if (!loading.value || !loadingContainerRef.value) {
-      showFloatingLoader.value = false
-      return
-    }
-    const rect = loadingContainerRef.value.getBoundingClientRect()
-    showFloatingLoader.value = rect.bottom < 0
-  }
-
-  window.addEventListener('scroll', handleScroll, { passive: true })
-  onUnmounted(() => window.removeEventListener('scroll', handleScroll))
+const { showFloatingLoader } = useFloatingLoader(loading, loadingContainerRef)
+const { syncParam } = useToolUrlSync(urlInput, {
+  extraParams: { strategy: strategy as Ref<string> },
+  onReady: () => analyze(),
 })
-
-watchPausable(
-  urlInput,
-  (newUrl) => {
-    if (newUrl) {
-      router.replace({ query: { ...route.query, url: encodeURIComponent(newUrl) } })
-    }
-    else {
-      const { url: _, ...rest } = route.query
-      router.replace({ query: rest })
-    }
-  },
-  { debounce: 500 },
-)
-
-watch(strategy, (newStrategy) => {
-  if (newStrategy === 'desktop') {
-    router.replace({ query: { ...route.query, strategy: 'desktop' } })
-  }
-  else {
-    const { strategy: _, ...rest } = route.query
-    router.replace({ query: rest })
-  }
-})
+syncParam('strategy', strategy as Ref<string>, 'mobile')
 
 function analyze() {
   if (!urlInput.value.trim())
@@ -177,6 +105,7 @@ function analyze() {
   })
     .then((data) => {
       result.value = data
+      trackUse()
     })
     .catch((err) => {
       error.value = err.data?.message || err.message || 'Failed to analyze URL'
@@ -185,14 +114,6 @@ function analyze() {
       loading.value = false
       stopMessages()
     })
-}
-
-function formatBytes(bytes: number) {
-  if (bytes >= 1048576)
-    return `${(bytes / 1048576).toFixed(1)} MB`
-  if (bytes >= 1024)
-    return `${(bytes / 1024).toFixed(1)} KB`
-  return `${bytes} B`
 }
 
 function getWeightColor(bytes: number): string {
@@ -302,446 +223,353 @@ const visualResources = computed(() => {
 
 <template>
   <div class="min-h-screen">
-    <!-- Floating Loader -->
-    <Teleport to="body">
-      <Transition name="slide-down">
+    <ToolFloatingLoader :show="loading && showFloatingLoader" :message="loadingMessage" />
+
+    <ToolPageHero
+      title="Page Size"
+      accent="Checker"
+      description="Analyze page weight, resource breakdown, third-party scripts, and unused code with real Lighthouse data."
+      color="green"
+    />
+
+    <ToolCard icon="i-heroicons-scale" title="Page Size Analysis" color="green" max-width="max-w-5xl">
+      <!-- Input -->
+      <div class="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-800">
+        <form class="flex flex-col gap-3" @submit.prevent="analyze">
+          <UInput
+            v-model="urlInput"
+            placeholder="Enter URL (e.g., example.com)"
+            size="lg"
+            class="flex-1"
+            icon="i-heroicons-globe-alt"
+            :disabled="loading"
+          />
+          <div class="flex gap-2 justify-between sm:justify-start">
+            <ToolDeviceToggle v-model="strategy" :disabled="loading" />
+            <UButton type="submit" :loading="loading" color="primary" size="sm">
+              <UIcon name="i-heroicons-magnifying-glass" class="w-4 h-4 mr-1" />
+              Check Size
+            </UButton>
+          </div>
+        </form>
+      </div>
+
+      <!-- Loading -->
+      <ToolLoadingPill v-if="loading" :message="loadingMessage" color="green" hint="This can take up to 2 minutes. The API runs a full Lighthouse audit." />
+
+      <!-- Error -->
+      <ToolError :error="error" />
+
+      <!-- Empty State -->
+      <ToolEmptyState v-if="!result && !loading && !error" icon="i-heroicons-scale" message="Enter a URL to check page size" />
+
+      <!-- Results -->
+      <div v-if="result" class="p-4 sm:p-6 space-y-6">
+        <!-- URL info -->
+        <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 flex items-center gap-2 min-w-0">
+          <UIcon name="i-heroicons-globe-alt" class="w-4 h-4 text-gray-400 shrink-0" />
+          <span class="text-sm text-gray-700 dark:text-gray-300 truncate">{{ result.fetchedUrl }}</span>
+          <span class="px-2 py-0.5 text-[10px] font-medium bg-gray-100 dark:bg-gray-800 text-gray-500 rounded-full shrink-0">
+            {{ result.strategy }}
+          </span>
+        </div>
+
+        <!-- Hero Stat: Total Page Weight -->
         <div
-          v-if="loading && showFloatingLoader"
-          class="fixed top-4 left-1/2 -translate-x-1/2 z-50"
+          v-motion
+          :initial="{ opacity: 0, y: 20 }"
+          :animate="{ opacity: 1, y: 0 }"
+          :transition="{ duration: 0.3 }"
+          class="text-center p-6 rounded-xl bg-gradient-to-b from-gray-50 to-white dark:from-gray-800/50 dark:to-gray-900 border border-gray-200 dark:border-gray-800"
         >
-          <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white dark:bg-gray-900 shadow-lg border border-cyan-200 dark:border-cyan-800">
-            <UIcon name="i-heroicons-arrow-path" class="w-4 h-4 text-cyan-500 animate-spin" />
-            <span class="text-sm text-cyan-700 dark:text-cyan-300">{{ loadingMessage }}</span>
+          <p class="text-5xl sm:text-6xl font-black tracking-tight" :class="getWeightColor(result.totalSize)">
+            {{ formatBytes(result.totalSize) }}
+          </p>
+          <p class="text-sm text-gray-500 mt-2">
+            Total Transfer Size
+          </p>
+          <div class="mt-3 inline-flex items-center gap-2">
+            <span
+              class="px-3 py-1 rounded-full text-xs font-semibold text-white"
+              :class="getWeightBg(result.totalSize)"
+            >
+              {{ getWeightLabel(result.totalSize) }}
+            </span>
+            <span class="text-xs text-gray-500">
+              {{ getPercentilePosition(result.totalSize).percentile }} of all websites
+            </span>
           </div>
         </div>
-      </Transition>
-    </Teleport>
 
-    <!-- Hero -->
-    <section class="relative pt-10 pb-6 lg:pt-12 lg:pb-8">
-      <div class="max-w-4xl mx-auto px-6 text-center">
-        <ClientOnly>
-          <h1
-            v-motion
-            :initial="{ opacity: 0, y: 20 }"
-            :animate="{ opacity: 1, y: 0 }"
-            :transition="{ duration: 0.4 }"
-            class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-[1.1] text-gray-900 dark:text-white mb-3"
-          >
-            Page Size
-            <span class="text-cyan-600 dark:text-cyan-400">Checker</span>
-          </h1>
-          <p
-            v-motion
-            :initial="{ opacity: 0, y: 20 }"
-            :animate="{ opacity: 1, y: 0 }"
-            :transition="{ duration: 0.4, delay: 0.1 }"
-            class="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto"
-          >
-            Analyze page weight, resource breakdown, third-party scripts, and unused code with real Lighthouse data.
-          </p>
-          <template #fallback>
-            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-[1.1] text-gray-900 dark:text-white mb-3">
-              Page Size
-              <span class="text-cyan-600 dark:text-cyan-400">Checker</span>
-            </h1>
-            <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
-              Analyze page weight, resource breakdown, third-party scripts, and unused code with real Lighthouse data.
+        <!-- Percentile Comparison -->
+        <div
+          v-motion
+          :initial="{ opacity: 0, y: 20 }"
+          :animate="{ opacity: 1, y: 0 }"
+          :transition="{ duration: 0.3, delay: 0.1 }"
+        >
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+            <UIcon name="i-heroicons-chart-bar" class="w-4 h-4 text-cyan-500" />
+            HTTP Archive Comparison
+          </h2>
+          <div class="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+            <!-- Percentile scale -->
+            <div class="relative h-6 mb-2">
+              <div class="absolute inset-x-0 top-1/2 -translate-y-1/2 h-2 rounded-full bg-gradient-to-r from-green-400 via-orange-400 to-red-500" />
+              <!-- Your position marker -->
+              <div
+                class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-white border-2 border-gray-900 dark:border-white shadow-md z-10"
+                :style="{ left: `${Math.min(getPercentilePosition(result.totalSize).position, 95)}%` }"
+              />
+            </div>
+            <div class="flex justify-between text-[10px] text-gray-500 mt-1">
+              <span v-for="p in httpArchivePercentiles" :key="p.label" class="text-center">
+                <span class="block font-medium">{{ p.label }}</span>
+                <span>{{ formatBytes(p.kb * 1024) }}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Summary Stats -->
+        <div
+          v-motion
+          :initial="{ opacity: 0, y: 20 }"
+          :animate="{ opacity: 1, y: 0 }"
+          :transition="{ duration: 0.3, delay: 0.15 }"
+          class="grid grid-cols-2 sm:grid-cols-4 gap-3"
+        >
+          <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
+            <p class="text-lg font-bold text-gray-900 dark:text-white">
+              {{ result.totalRequests }}
             </p>
-          </template>
-        </ClientOnly>
-      </div>
-    </section>
+            <p class="text-xs text-gray-500">
+              Requests
+            </p>
+          </div>
+          <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
+            <p class="text-lg font-bold text-gray-900 dark:text-white">
+              {{ formatBytes(result.totalUncompressedSize) }}
+            </p>
+            <p class="text-xs text-gray-500">
+              Uncompressed
+            </p>
+          </div>
+          <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
+            <p class="text-lg font-bold text-gray-900 dark:text-white">
+              {{ result.compressionRatio.toFixed(1) }}x
+            </p>
+            <p class="text-xs text-gray-500">
+              Compression Ratio
+            </p>
+          </div>
+          <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
+            <p class="text-lg font-bold" :class="result.performanceScore >= 90 ? 'text-green-500' : result.performanceScore >= 50 ? 'text-orange-500' : 'text-red-500'">
+              {{ result.performanceScore }}
+            </p>
+            <p class="text-xs text-gray-500">
+              Perf Score
+            </p>
+          </div>
+        </div>
 
-    <!-- Tool Section -->
-    <section class="px-3 sm:px-6 lg:px-8 pb-12">
-      <div class="max-w-5xl mx-auto">
-        <div class="relative">
-          <div class="absolute -inset-4 bg-gradient-to-b from-cyan-500/10 via-cyan-500/5 to-transparent rounded-3xl blur-3xl pointer-events-none" />
+        <!-- Resource Breakdown -->
+        <div
+          v-motion
+          :initial="{ opacity: 0, y: 20 }"
+          :animate="{ opacity: 1, y: 0 }"
+          :transition="{ duration: 0.3, delay: 0.2 }"
+        >
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+            <UIcon name="i-heroicons-chart-pie" class="w-4 h-4 text-cyan-500" />
+            Resource Breakdown
+          </h2>
 
-          <div class="relative bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl overflow-hidden shadow-xl ring-1 ring-gray-200 dark:ring-gray-800">
-            <!-- Header -->
-            <div class="flex items-center gap-2 px-4 sm:px-6 py-3 border-b border-gray-200 dark:border-gray-800">
-              <UIcon name="i-heroicons-scale" class="w-4 h-4 text-cyan-500" />
-              <span class="text-sm font-semibold">Page Size Checker</span>
-              <span class="px-1.5 py-0.5 text-[10px] font-medium bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 rounded">Lighthouse</span>
-            </div>
+          <!-- Stacked bar -->
+          <div class="h-4 rounded-full overflow-hidden flex mb-4">
+            <div
+              v-for="res in visualResources"
+              :key="res.type"
+              :class="resourceColors[res.type] || 'bg-gray-400'"
+              :style="{ width: `${(res.size / result.totalSize) * 100}%` }"
+              class="h-full"
+              :title="`${res.label}: ${formatBytes(res.size)}`"
+            />
+          </div>
 
-            <!-- Input -->
-            <div class="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-800">
-              <form class="flex flex-col gap-3" @submit.prevent="analyze">
-                <UInput
-                  v-model="urlInput"
-                  placeholder="Enter URL (e.g., example.com)"
-                  size="lg"
-                  class="flex-1"
-                  icon="i-heroicons-globe-alt"
-                  :disabled="loading"
-                />
-                <div class="flex gap-2 justify-between sm:justify-start">
-                  <div class="inline-flex rounded-lg border border-gray-200 dark:border-gray-700 p-0.5 bg-gray-100 dark:bg-gray-800">
-                    <button
-                      type="button"
-                      class="px-3 py-1 rounded-md text-xs font-medium transition-all"
-                      :class="strategy === 'mobile'
-                        ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
-                        : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'"
-                      @click="strategy = 'mobile'"
-                    >
-                      <UIcon name="i-heroicons-device-phone-mobile" class="w-3.5 h-3.5 mr-1 inline-block align-[-2px]" />
-                      Mobile
-                    </button>
-                    <button
-                      type="button"
-                      class="px-3 py-1 rounded-md text-xs font-medium transition-all"
-                      :class="strategy === 'desktop'
-                        ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
-                        : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'"
-                      @click="strategy = 'desktop'"
-                    >
-                      <UIcon name="i-heroicons-computer-desktop" class="w-3.5 h-3.5 mr-1 inline-block align-[-2px]" />
-                      Desktop
-                    </button>
-                  </div>
-                  <UButton type="submit" :loading="loading" color="primary" size="sm">
-                    <UIcon name="i-heroicons-magnifying-glass" class="w-4 h-4 mr-1" />
-                    Check Size
-                  </UButton>
-                </div>
-              </form>
-            </div>
-
-            <!-- Loading -->
-            <div v-if="loading" ref="loadingContainerRef" class="p-12 text-center">
-              <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-cyan-500 animate-spin mx-auto mb-4" />
-              <p class="text-sm text-gray-600 dark:text-gray-400">
-                {{ loadingMessage }}
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            <div
+              v-for="res in visualResources"
+              :key="res.type"
+              class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700"
+            >
+              <div class="flex items-center gap-2 mb-1">
+                <div class="w-2.5 h-2.5 rounded-full" :class="[resourceColors[res.type] || 'bg-gray-400']" />
+                <span class="text-xs font-medium text-gray-900 dark:text-white">{{ res.label }}</span>
+              </div>
+              <p class="text-sm font-bold text-gray-900 dark:text-white">
+                {{ formatBytes(res.size) }}
+              </p>
+              <p class="text-[10px] text-gray-500">
+                {{ res.count }} {{ res.count === 1 ? 'request' : 'requests' }} · {{ result.totalSize > 0 ? ((res.size / result.totalSize) * 100).toFixed(0) : 0 }}%
               </p>
             </div>
+          </div>
+        </div>
 
-            <!-- Error -->
-            <UAlert
-              v-if="error"
-              color="error"
-              variant="subtle"
-              icon="i-heroicons-exclamation-circle"
-              class="mx-4 sm:mx-6 my-4"
+        <!-- Largest Resources -->
+        <div
+          v-if="result.largestResources.length"
+          v-motion
+          :initial="{ opacity: 0, y: 20 }"
+          :animate="{ opacity: 1, y: 0 }"
+          :transition="{ duration: 0.3, delay: 0.25 }"
+        >
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+            <UIcon name="i-heroicons-arrow-trending-up" class="w-4 h-4 text-cyan-500" />
+            Largest Resources
+          </h2>
+          <div class="rounded-lg border border-gray-200 dark:border-gray-800 overflow-x-auto">
+            <table class="w-full text-xs">
+              <thead class="bg-gray-50 dark:bg-gray-800/50">
+                <tr>
+                  <th class="text-left p-2 font-medium text-gray-600 dark:text-gray-400">
+                    URL
+                  </th>
+                  <th class="text-right p-2 font-medium text-gray-600 dark:text-gray-400 w-24">
+                    Size
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="(res, idx) in result.largestResources"
+                  :key="idx"
+                  class="border-t border-gray-100 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors"
+                >
+                  <td class="p-2 font-mono truncate max-w-[400px]" :title="res.url">
+                    {{ truncateUrl(res.url) }}
+                  </td>
+                  <td class="p-2 text-right font-mono text-gray-600 dark:text-gray-400">
+                    {{ formatBytes(res.size) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Third-Party Weight -->
+        <div
+          v-if="result.thirdPartyDomains.length"
+          v-motion
+          :initial="{ opacity: 0, y: 20 }"
+          :animate="{ opacity: 1, y: 0 }"
+          :transition="{ duration: 0.3, delay: 0.3 }"
+        >
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+            <UIcon name="i-heroicons-server-stack" class="w-4 h-4 text-cyan-500" />
+            Third-Party Weight
+            <span class="text-xs font-normal text-gray-500">{{ result.thirdPartyPercent.toFixed(0) }}% of total</span>
+          </h2>
+          <div class="space-y-2">
+            <div
+              v-for="tp in result.thirdPartyDomains"
+              :key="tp.entity"
+              class="flex items-center gap-3 p-2 rounded-lg bg-gray-50 dark:bg-gray-800/50"
             >
-              <template #title>
-                {{ error }}
-              </template>
-            </UAlert>
-
-            <!-- Results -->
-            <div v-if="result" class="p-4 sm:p-6 space-y-6">
-              <!-- URL info -->
-              <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 flex items-center gap-2 min-w-0">
-                <UIcon name="i-heroicons-globe-alt" class="w-4 h-4 text-gray-400 shrink-0" />
-                <span class="text-sm text-gray-700 dark:text-gray-300 truncate">{{ result.fetchedUrl }}</span>
-                <span class="px-2 py-0.5 text-[10px] font-medium bg-gray-100 dark:bg-gray-800 text-gray-500 rounded-full shrink-0">
-                  {{ result.strategy }}
-                </span>
-              </div>
-
-              <!-- Hero Stat: Total Page Weight -->
-              <div
-                v-motion
-                :initial="{ opacity: 0, y: 20 }"
-                :animate="{ opacity: 1, y: 0 }"
-                :transition="{ duration: 0.3 }"
-                class="text-center p-6 rounded-xl bg-gradient-to-b from-gray-50 to-white dark:from-gray-800/50 dark:to-gray-900 border border-gray-200 dark:border-gray-800"
-              >
-                <p class="text-5xl sm:text-6xl font-black tracking-tight" :class="getWeightColor(result.totalSize)">
-                  {{ formatBytes(result.totalSize) }}
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-medium text-gray-900 dark:text-white truncate">
+                  {{ tp.entity }}
                 </p>
-                <p class="text-sm text-gray-500 mt-2">
-                  Total Transfer Size
-                </p>
-                <div class="mt-3 inline-flex items-center gap-2">
-                  <span
-                    class="px-3 py-1 rounded-full text-xs font-semibold text-white"
-                    :class="getWeightBg(result.totalSize)"
-                  >
-                    {{ getWeightLabel(result.totalSize) }}
-                  </span>
-                  <span class="text-xs text-gray-500">
-                    {{ getPercentilePosition(result.totalSize).percentile }} of all websites
-                  </span>
-                </div>
-              </div>
-
-              <!-- Percentile Comparison -->
-              <div
-                v-motion
-                :initial="{ opacity: 0, y: 20 }"
-                :animate="{ opacity: 1, y: 0 }"
-                :transition="{ duration: 0.3, delay: 0.1 }"
-              >
-                <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                  <UIcon name="i-heroicons-chart-bar" class="w-4 h-4 text-cyan-500" />
-                  HTTP Archive Comparison
-                </h2>
-                <div class="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50">
-                  <!-- Percentile scale -->
-                  <div class="relative h-6 mb-2">
-                    <div class="absolute inset-x-0 top-1/2 -translate-y-1/2 h-2 rounded-full bg-gradient-to-r from-green-400 via-orange-400 to-red-500" />
-                    <!-- Your position marker -->
+                <div class="flex items-center gap-2 mt-1">
+                  <div class="flex-1 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
                     <div
-                      class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-white border-2 border-gray-900 dark:border-white shadow-md z-10"
-                      :style="{ left: `${Math.min(getPercentilePosition(result.totalSize).position, 95)}%` }"
+                      class="h-full rounded-full bg-red-400"
+                      :style="{ width: `${result.thirdPartyDomains[0].size > 0 ? (tp.size / result.thirdPartyDomains[0].size) * 100 : 0}%` }"
                     />
                   </div>
-                  <div class="flex justify-between text-[10px] text-gray-500 mt-1">
-                    <span v-for="p in httpArchivePercentiles" :key="p.label" class="text-center">
-                      <span class="block font-medium">{{ p.label }}</span>
-                      <span>{{ formatBytes(p.kb * 1024) }}</span>
-                    </span>
-                  </div>
                 </div>
               </div>
-
-              <!-- Summary Stats -->
-              <div
-                v-motion
-                :initial="{ opacity: 0, y: 20 }"
-                :animate="{ opacity: 1, y: 0 }"
-                :transition="{ duration: 0.3, delay: 0.15 }"
-                class="grid grid-cols-2 sm:grid-cols-4 gap-3"
-              >
-                <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
-                  <p class="text-lg font-bold text-gray-900 dark:text-white">
-                    {{ result.totalRequests }}
-                  </p>
-                  <p class="text-xs text-gray-500">
-                    Requests
-                  </p>
-                </div>
-                <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
-                  <p class="text-lg font-bold text-gray-900 dark:text-white">
-                    {{ formatBytes(result.totalUncompressedSize) }}
-                  </p>
-                  <p class="text-xs text-gray-500">
-                    Uncompressed
-                  </p>
-                </div>
-                <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
-                  <p class="text-lg font-bold text-gray-900 dark:text-white">
-                    {{ result.compressionRatio.toFixed(1) }}x
-                  </p>
-                  <p class="text-xs text-gray-500">
-                    Compression Ratio
-                  </p>
-                </div>
-                <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
-                  <p class="text-lg font-bold" :class="result.performanceScore >= 90 ? 'text-green-500' : result.performanceScore >= 50 ? 'text-orange-500' : 'text-red-500'">
-                    {{ result.performanceScore }}
-                  </p>
-                  <p class="text-xs text-gray-500">
-                    Perf Score
-                  </p>
-                </div>
-              </div>
-
-              <!-- Resource Breakdown -->
-              <div
-                v-motion
-                :initial="{ opacity: 0, y: 20 }"
-                :animate="{ opacity: 1, y: 0 }"
-                :transition="{ duration: 0.3, delay: 0.2 }"
-              >
-                <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                  <UIcon name="i-heroicons-chart-pie" class="w-4 h-4 text-cyan-500" />
-                  Resource Breakdown
-                </h2>
-
-                <!-- Stacked bar -->
-                <div class="h-4 rounded-full overflow-hidden flex mb-4">
-                  <div
-                    v-for="res in visualResources"
-                    :key="res.type"
-                    :class="resourceColors[res.type] || 'bg-gray-400'"
-                    :style="{ width: `${(res.size / result.totalSize) * 100}%` }"
-                    class="h-full"
-                    :title="`${res.label}: ${formatBytes(res.size)}`"
-                  />
-                </div>
-
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                  <div
-                    v-for="res in visualResources"
-                    :key="res.type"
-                    class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700"
-                  >
-                    <div class="flex items-center gap-2 mb-1">
-                      <div class="w-2.5 h-2.5 rounded-full" :class="[resourceColors[res.type] || 'bg-gray-400']" />
-                      <span class="text-xs font-medium text-gray-900 dark:text-white">{{ res.label }}</span>
-                    </div>
-                    <p class="text-sm font-bold text-gray-900 dark:text-white">
-                      {{ formatBytes(res.size) }}
-                    </p>
-                    <p class="text-[10px] text-gray-500">
-                      {{ res.count }} {{ res.count === 1 ? 'request' : 'requests' }} · {{ result.totalSize > 0 ? ((res.size / result.totalSize) * 100).toFixed(0) : 0 }}%
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Largest Resources -->
-              <div
-                v-if="result.largestResources.length"
-                v-motion
-                :initial="{ opacity: 0, y: 20 }"
-                :animate="{ opacity: 1, y: 0 }"
-                :transition="{ duration: 0.3, delay: 0.25 }"
-              >
-                <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                  <UIcon name="i-heroicons-arrow-trending-up" class="w-4 h-4 text-cyan-500" />
-                  Largest Resources
-                </h2>
-                <div class="rounded-lg border border-gray-200 dark:border-gray-800 overflow-x-auto">
-                  <table class="w-full text-xs">
-                    <thead class="bg-gray-50 dark:bg-gray-800/50">
-                      <tr>
-                        <th class="text-left p-2 font-medium text-gray-600 dark:text-gray-400">
-                          URL
-                        </th>
-                        <th class="text-right p-2 font-medium text-gray-600 dark:text-gray-400 w-24">
-                          Size
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr
-                        v-for="(res, idx) in result.largestResources"
-                        :key="idx"
-                        class="border-t border-gray-100 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors"
-                      >
-                        <td class="p-2 font-mono truncate max-w-[400px]" :title="res.url">
-                          {{ truncateUrl(res.url) }}
-                        </td>
-                        <td class="p-2 text-right font-mono text-gray-600 dark:text-gray-400">
-                          {{ formatBytes(res.size) }}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <!-- Third-Party Weight -->
-              <div
-                v-if="result.thirdPartyDomains.length"
-                v-motion
-                :initial="{ opacity: 0, y: 20 }"
-                :animate="{ opacity: 1, y: 0 }"
-                :transition="{ duration: 0.3, delay: 0.3 }"
-              >
-                <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                  <UIcon name="i-heroicons-server-stack" class="w-4 h-4 text-cyan-500" />
-                  Third-Party Weight
-                  <span class="text-xs font-normal text-gray-500">{{ result.thirdPartyPercent.toFixed(0) }}% of total</span>
-                </h2>
-                <div class="space-y-2">
-                  <div
-                    v-for="tp in result.thirdPartyDomains"
-                    :key="tp.entity"
-                    class="flex items-center gap-3 p-2 rounded-lg bg-gray-50 dark:bg-gray-800/50"
-                  >
-                    <div class="flex-1 min-w-0">
-                      <p class="text-xs font-medium text-gray-900 dark:text-white truncate">
-                        {{ tp.entity }}
-                      </p>
-                      <div class="flex items-center gap-2 mt-1">
-                        <div class="flex-1 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-                          <div
-                            class="h-full rounded-full bg-red-400"
-                            :style="{ width: `${result.thirdPartyDomains[0].size > 0 ? (tp.size / result.thirdPartyDomains[0].size) * 100 : 0}%` }"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div class="text-right shrink-0">
-                      <p class="text-xs font-bold text-gray-900 dark:text-white">
-                        {{ formatBytes(tp.size) }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Unused Code -->
-              <div
-                v-if="result.unusedBytes > 0"
-                v-motion
-                :initial="{ opacity: 0, y: 20 }"
-                :animate="{ opacity: 1, y: 0 }"
-                :transition="{ duration: 0.3, delay: 0.35 }"
-                class="p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800"
-              >
-                <div class="flex items-start gap-3">
-                  <UIcon name="i-heroicons-exclamation-triangle" class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                  <div>
-                    <p class="text-sm font-medium text-amber-900 dark:text-amber-200">
-                      {{ formatBytes(result.unusedBytes) }} of unused code shipped ({{ result.unusedPercent.toFixed(0) }}% of transfer)
-                    </p>
-                    <p class="text-xs text-amber-700 dark:text-amber-400 mt-1">
-                      Unused JavaScript and CSS are downloaded, parsed, and compiled but never executed on initial page load. Use code splitting, tree shaking, and dynamic imports to reduce this overhead.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Compression Efficiency -->
-              <div
-                v-if="result.compressionRatio > 1"
-                v-motion
-                :initial="{ opacity: 0, y: 20 }"
-                :animate="{ opacity: 1, y: 0 }"
-                :transition="{ duration: 0.3, delay: 0.4 }"
-                class="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800"
-              >
-                <div class="flex items-start gap-3">
-                  <UIcon name="i-heroicons-archive-box-arrow-down" class="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-                  <div>
-                    <p class="text-sm font-medium text-blue-900 dark:text-blue-200">
-                      Compression saving {{ formatBytes(result.totalUncompressedSize - result.totalSize) }} ({{ result.compressionRatio.toFixed(1) }}x ratio)
-                    </p>
-                    <p class="text-xs text-blue-700 dark:text-blue-400 mt-1">
-                      {{ result.compressionRatio >= 3 ? 'Good compression ratio. Your server is using gzip or brotli effectively.' : 'Low compression ratio. Ensure your server enables brotli or gzip for text-based resources (HTML, CSS, JS, JSON).' }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Related Tools CTA -->
-              <div class="p-4 rounded-xl bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-950/30 dark:to-blue-950/30 border border-cyan-200 dark:border-cyan-800">
-                <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
-                  <div class="text-center sm:text-left">
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">
-                      Dive deeper into performance
-                    </p>
-                    <p class="text-xs text-gray-500">
-                      Analyze LCP, network requests, and full Lighthouse reports
-                    </p>
-                  </div>
-                  <div class="flex flex-wrap gap-2">
-                    <UButton to="/tools/pagespeed-insights-performance" variant="outline" size="sm">
-                      Full PSI Report
-                    </UButton>
-                    <UButton to="/tools/har-viewer" variant="outline" size="sm">
-                      HAR Viewer
-                    </UButton>
-                    <UButton to="/tools/json-size" variant="outline" size="sm">
-                      JSON Size
-                    </UButton>
-                  </div>
-                </div>
+              <div class="text-right shrink-0">
+                <p class="text-xs font-bold text-gray-900 dark:text-white">
+                  {{ formatBytes(tp.size) }}
+                </p>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Unused Code -->
+        <div
+          v-if="result.unusedBytes > 0"
+          v-motion
+          :initial="{ opacity: 0, y: 20 }"
+          :animate="{ opacity: 1, y: 0 }"
+          :transition="{ duration: 0.3, delay: 0.35 }"
+          class="p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800"
+        >
+          <div class="flex items-start gap-3">
+            <UIcon name="i-heroicons-exclamation-triangle" class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+            <div>
+              <p class="text-sm font-medium text-amber-900 dark:text-amber-200">
+                {{ formatBytes(result.unusedBytes) }} of unused code shipped ({{ result.unusedPercent.toFixed(0) }}% of transfer)
+              </p>
+              <p class="text-xs text-amber-700 dark:text-amber-400 mt-1">
+                Unused JavaScript and CSS are downloaded, parsed, and compiled but never executed on initial page load. Use code splitting, tree shaking, and dynamic imports to reduce this overhead.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Compression Efficiency -->
+        <div
+          v-if="result.compressionRatio > 1"
+          v-motion
+          :initial="{ opacity: 0, y: 20 }"
+          :animate="{ opacity: 1, y: 0 }"
+          :transition="{ duration: 0.3, delay: 0.4 }"
+          class="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800"
+        >
+          <div class="flex items-start gap-3">
+            <UIcon name="i-heroicons-archive-box-arrow-down" class="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+            <div>
+              <p class="text-sm font-medium text-blue-900 dark:text-blue-200">
+                Compression saving {{ formatBytes(result.totalUncompressedSize - result.totalSize) }} ({{ result.compressionRatio.toFixed(1) }}x ratio)
+              </p>
+              <p class="text-xs text-blue-700 dark:text-blue-400 mt-1">
+                {{ result.compressionRatio >= 3 ? 'Good compression ratio. Your server is using gzip or brotli effectively.' : 'Low compression ratio. Ensure your server enables brotli or gzip for text-based resources (HTML, CSS, JS, JSON).' }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Related Tools CTA -->
+        <div class="p-4 rounded-xl bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-950/30 dark:to-blue-950/30 border border-cyan-200 dark:border-cyan-800">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="text-center sm:text-left">
+              <p class="text-sm font-medium text-gray-900 dark:text-white">
+                Dive deeper into performance
+              </p>
+              <p class="text-xs text-gray-500">
+                Analyze LCP, network requests, and full Lighthouse reports
+              </p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <UButton to="/tools/pagespeed-insights-performance" variant="outline" size="sm">
+                Full PSI Report
+              </UButton>
+              <UButton to="/tools/har-viewer" variant="outline" size="sm">
+                HAR Viewer
+              </UButton>
+              <UButton to="/tools/json-size" variant="outline" size="sm">
+                JSON Size
+              </UButton>
+            </div>
+          </div>
+        </div>
       </div>
-    </section>
+    </ToolCard>
 
     <!-- Educational Content (no result) -->
     <section v-if="!result && !loading" class="px-3 sm:px-6 lg:px-8 pb-12">
@@ -896,15 +724,3 @@ const visualResources = computed(() => {
     </section>
   </div>
 </template>
-
-<style scoped>
-.slide-down-enter-active,
-.slide-down-leave-active {
-  transition: all 0.3s ease;
-}
-.slide-down-enter-from,
-.slide-down-leave-to {
-  opacity: 0;
-  transform: translate(-50%, -100%);
-}
-</style>
