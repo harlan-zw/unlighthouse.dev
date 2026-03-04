@@ -445,8 +445,8 @@ const keyBarColors = ['bg-teal-500', 'bg-cyan-500', 'bg-blue-500', 'bg-indigo-50
       </div>
     </ToolCard>
 
-    <!-- Educational Content (when no analysis) -->
-    <section v-if="!analysis" class="px-3 sm:px-6 lg:px-8 pb-12">
+    <!-- Educational Content -->
+    <section class="px-3 sm:px-6 lg:px-8 pb-12">
       <div class="max-w-6xl mx-auto">
         <div class="mb-10 grid lg:grid-cols-2 gap-6 items-start">
           <div>

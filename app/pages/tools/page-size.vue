@@ -571,8 +571,8 @@ const visualResources = computed(() => {
       </div>
     </ToolCard>
 
-    <!-- Educational Content (no result) -->
-    <section v-if="!result && !loading" class="px-3 sm:px-6 lg:px-8 pb-12">
+    <!-- Educational Content -->
+    <section class="px-3 sm:px-6 lg:px-8 pb-12">
       <div class="max-w-6xl mx-auto">
         <div class="mb-10 grid lg:grid-cols-2 gap-6 items-start">
           <div>
@@ -712,14 +712,6 @@ const visualResources = computed(() => {
             </UButton>
           </div>
         </div>
-      </div>
-    </section>
-
-    <!-- Feedback/FAQ after results -->
-    <section v-if="result" class="px-3 sm:px-6 lg:px-8 pb-12">
-      <div class="max-w-6xl mx-auto">
-        <ToolFeedback tool-id="page-size" :context="{ hasResult: true }" />
-        <ToolFaq :faqs="faqs" color="cyan" />
       </div>
     </section>
   </div>

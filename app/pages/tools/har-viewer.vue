@@ -639,7 +639,7 @@ function getTimingPhaseWidths(entry: ParsedHarEntry) {
     </ToolCard>
 
     <!-- Educational Content -->
-    <section v-if="!report" class="px-3 sm:px-6 lg:px-8 pb-12">
+    <section class="px-3 sm:px-6 lg:px-8 pb-12">
       <div class="max-w-6xl mx-auto">
         <!-- How to Read a HAR File -->
         <div class="mb-10 grid lg:grid-cols-2 gap-6 items-start">

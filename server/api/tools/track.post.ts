@@ -2,8 +2,18 @@ import type { ToolName } from '../../database/schema'
 import { trackToolUsage } from '../../utils/analytics'
 
 const validTools: ToolName[] = [
+  'pagespeed-insights',
+  'lcp',
+  'cls',
+  'inp',
+  'cwv-check',
+  'cwv-history',
+  'ttfb-checker',
+  'bulk-pagespeed',
+  'cwv-compare',
   'lighthouse-report-viewer',
   'lighthouse-score-calculator',
+  'page-size',
   'har-viewer',
   'json-size',
 ]
