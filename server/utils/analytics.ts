@@ -68,6 +68,7 @@ export function getTimeRangeFilter(range: string): { value: string, unit: string
     '7d': { value: '7', unit: 'DAY' },
     '30d': { value: '30', unit: 'DAY' },
     '90d': { value: '90', unit: 'DAY' },
+    '180d': { value: '180', unit: 'DAY' },
   }
   return intervals[range] || intervals['24h']
 }

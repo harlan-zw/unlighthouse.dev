@@ -18,6 +18,8 @@ const timeRanges = [
   { label: '24 Hours', value: '24h' },
   { label: '7 Days', value: '7d' },
   { label: '30 Days', value: '30d' },
+  { label: '90 Days', value: '90d' },
+  { label: '180 Days', value: '180d' },
 ]
 
 const { data: analytics, refresh, status } = useFetch('/api/admin/tool-analytics', {
