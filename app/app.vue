@@ -121,6 +121,9 @@ onKeyStroke('Divide', () => {
     </ClientOnly>
 
     <Footer />
+    <ClientOnly>
+      <ToolBackgroundIndicator />
+    </ClientOnly>
   </UApp>
 </template>
 

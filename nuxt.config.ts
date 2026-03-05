@@ -5,7 +5,7 @@ import { resolve } from 'pathe'
 import { gray, logger } from './logger'
 
 export default defineNuxtConfig({
-  extends: ['./layers/admin'],
+  extends: ['./layers/tools', './layers/admin'],
 
   modules: [
     '@nuxtjs/seo',

@@ -54,7 +54,7 @@ const mobileDocsGroups = computed(() => {
       </UNavigationMenu>
       <UNavigationMenu :ui="{ viewport: 'min-w-[680px]' }" :items="[toolsNav]" class="hidden lg:flex justify-center">
         <template #item-content>
-          <ToolsMenu />
+          <ToolMenu />
         </template>
       </UNavigationMenu>
     </template>

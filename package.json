@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@nuxtjs/mcp-toolkit": "^0.7.0",
-    "agents": "^0.7.2",
+    "agents": "^0.7.4",
     "drizzle-orm": "^0.45.1",
     "nuxt-auth-utils": "^0.5.29",
     "three": "^0.183.2",
@@ -40,7 +40,7 @@
     "@nuxt/devtools": "3.2.2",
     "@nuxt/fonts": "^0.14.0",
     "@nuxt/image": "^2.0.0",
-    "@nuxt/scripts": "^1.0.0-beta.7",
+    "@nuxt/scripts": "^1.0.0-beta.14",
     "@nuxt/ui": "^4.5.1",
     "@nuxtjs/seo": "^3.4.0",
     "@sentry/nuxt": "^10.42.0",
