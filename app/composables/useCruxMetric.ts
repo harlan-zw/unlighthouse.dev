@@ -1,8 +1,6 @@
 import type { CruxMetricResponse } from '~~/server/api/crux/metric.post'
 import type { MetricKey } from '~/utils/crux'
 
-export type FormFactor = 'PHONE' | 'DESKTOP'
-
 export function useCruxMetric(
   url: Ref<string>,
   metric: MetricKey,

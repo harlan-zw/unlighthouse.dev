@@ -151,26 +151,6 @@ export function calculateRating(score: number): Rating {
   return 'fail'
 }
 
-// Get rating color
-export function getRatingColor(rating: Rating): string {
-  switch (rating) {
-    case 'pass': return '#22c55e'
-    case 'average': return '#f97316'
-    case 'fail': return '#ef4444'
-  }
-}
-
-// Get score color (gradient between rating colors)
-export function getScoreColor(score: number): string {
-  if (score >= 0.9)
-    return '#22c55e' // green
-  if (score >= 0.5) {
-    // Interpolate between orange and green
-    return score >= 0.7 ? '#84cc16' : '#f97316' // lime or orange
-  }
-  return '#ef4444' // red
-}
-
 // Get metrics for device
 export function getMetricsForDevice(device: Device): MetricDefinition[] {
   const metrics = device === 'mobile' ? MOBILE_METRICS : DESKTOP_METRICS
