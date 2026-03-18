@@ -36,9 +36,9 @@ export default defineCachedEventHandler(async (e) => {
     }
     return acc
   }, {
-    others: [],
-    $25: [],
-    $50: [],
+    others: [] as typeof sponsors,
+    $25: [] as typeof sponsors,
+    $50: [] as typeof sponsors,
   })
 }, {
   // last for 1 day

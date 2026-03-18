@@ -15,7 +15,7 @@ export default defineCachedEventHandler(async (e) => {
     contributions: contributor.contributions,
   })).filter((contributor) => {
     // filter bots
-    return !contributor.login.includes('[bot]')
+    return !contributor.login?.includes('[bot]')
   })
 }, {
   swr: true,

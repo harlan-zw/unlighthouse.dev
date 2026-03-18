@@ -28,7 +28,7 @@ export default defineCachedEventHandler(async (event) => {
     ].join(';'),
   )
 
-  const result = await $fetch<Tweet>(url.toString(), { responseType: 'json' })
+  const result = await $fetch<{ text?: string }>(url.toString(), { responseType: 'json' })
 
   if (result.text)
     return result

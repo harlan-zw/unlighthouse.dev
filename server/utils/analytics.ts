@@ -21,8 +21,8 @@ export interface AnalyticsDataPoint {
   indexes?: string[]
 }
 
-export function getAnalyticsEngine(event: H3Event): AnalyticsEngineDataset | undefined {
-  return (event.context.cloudflare?.env as { TOOL_ANALYTICS?: AnalyticsEngineDataset } | undefined)?.TOOL_ANALYTICS
+export function getAnalyticsEngine(event: H3Event) {
+  return (event.context.cloudflare?.env as { TOOL_ANALYTICS?: { writeDataPoint: (dataPoint: AnalyticsDataPoint) => void } } | undefined)?.TOOL_ANALYTICS
 }
 
 export async function trackToolUsage(
@@ -70,7 +70,7 @@ export function getTimeRangeFilter(range: string): { value: string, unit: string
     '90d': { value: '90', unit: 'DAY' },
     '180d': { value: '180', unit: 'DAY' },
   }
-  return intervals[range] || intervals['24h']
+  return intervals[range] || intervals['24h']!
 }
 
 export async function trackToolLookup(
@@ -93,7 +93,7 @@ export async function trackToolLookup(
   const session = await getUserSession(event).catch(() => null)
 
   useDB(event).insert(toolLookups).values({
-    userId: session?.user?.id || null,
+    userId: (session?.user as { id?: string } | undefined)?.id || null,
     sessionId: getSessionId(event),
     tool,
     query: domain,

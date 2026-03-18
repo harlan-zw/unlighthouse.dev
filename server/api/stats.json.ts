@@ -1,11 +1,11 @@
-function customSortSemver(a, b) {
+function customSortSemver(a: string, b: string) {
   const aParts = String(a).split('.')
   const bParts = String(b).split('.')
   for (let i = 0; i < aParts.length; i++) {
     if (aParts[i] === bParts[i]) {
       continue
     }
-    return Number.parseInt(bParts[i]) - Number.parseInt(aParts[i])
+    return Number.parseInt(bParts[i]!) - Number.parseInt(aParts[i]!)
   }
   return 0
 }
@@ -20,14 +20,14 @@ export default defineCachedEventHandler(async (e) => {
     e.$fetch(`/api/github/contributors`),
   ])
   // get all major versions from releases, need to map into major version groups then get first child
-  const versionGroups = (releases?.releases || []).map(r => r.name).reduce((group, v) => {
-    const [major] = v.split('.').slice(0, 1)
+  const versionGroups = (releases?.releases || []).map(r => r.name).reduce((group: Record<string, string[]>, v) => {
+    const major = v.split('.')[0]!
     group[major] = group[major] || []
-    group[major].push(v)
+    group[major]!.push(v)
     return group
-  }, [])
+  }, {})
   // first of each group make an object, sort so we get the oldest version
-  const versions = Object.values(versionGroups).sort(customSortSemver).map(v => v[0]).map(v => v.startsWith('v') ? v : `v${v}`).sort((a, b) => b.localeCompare(a))
+  const versions = Object.values(versionGroups).sort((a, b) => customSortSemver(a[0]!, b[0]!)).map(v => v[0]!).map(v => v.startsWith('v') ? v : `v${v}`).sort((a, b) => b.localeCompare(a))
   return {
     fetchedAt: Date.now(),
     versions,

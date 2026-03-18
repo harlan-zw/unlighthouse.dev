@@ -27,8 +27,8 @@ export default defineEventHandler(async (event) => {
     },
     sessionConfig: {
       maxAge: config.session?.maxAge,
-      sameSite: config.session?.cookie?.sameSite,
-      secure: config.session?.cookie?.secure,
+      sameSite: config.session?.cookie && typeof config.session.cookie === 'object' ? config.session.cookie.sameSite : undefined,
+      secure: config.session?.cookie && typeof config.session.cookie === 'object' ? config.session.cookie.secure : undefined,
     },
     cookies: {
       hasAuthState: !!cookies['nuxt-auth-state'],

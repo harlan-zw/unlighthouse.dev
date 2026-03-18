@@ -28,7 +28,7 @@ export default defineCachedEventHandler(async (e) => {
   const lastCommit = data[0]
 
   // Get committer info, handling web-flow case (PRs)
-  let committerName = lastCommit.commit.author.name
+  let committerName = lastCommit.commit.author!.name
   let committerLogin = lastCommit.committer?.login
   let committerAvatar = lastCommit.committer?.avatar_url
   let commitUrl = lastCommit.html_url
@@ -47,9 +47,9 @@ export default defineCachedEventHandler(async (e) => {
         })
 
         // Use PR author instead of web-flow
-        committerLogin = prData.user.login
-        committerAvatar = prData.user.avatar_url
-        committerName = prData.user.name || committerLogin
+        committerLogin = prData.user?.login
+        committerAvatar = prData.user?.avatar_url
+        committerName = prData.user?.name || committerLogin
         commitUrl = prData.html_url
       }
     }
@@ -59,25 +59,25 @@ export default defineCachedEventHandler(async (e) => {
   }
 
   // date is in the format  "2024-10-21T14:19:05Z" - we need to convert it to Oct 22, 2024
-  const date = lastCommit.commit.author.date
-  const formattedDate = new Date(date).toLocaleDateString('en-US', {
+  const date = lastCommit.commit.author?.date
+  const formattedDate = new Date(date!).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
   })
   return {
     author: {
-      name: committerName.toLowerCase().startsWith('harlan') ? 'Harlan Wilton' : committerName,
+      name: committerName?.toLowerCase().startsWith('harlan') ? 'Harlan Wilton' : committerName,
       committer: committerLogin,
       avatar: committerAvatar,
     },
     dateHuman: formattedDate,
-    date: lastCommit.commit.author.date,
+    date: lastCommit.commit.author?.date,
     url: commitUrl,
     message: lastCommit.commit.message,
   }
 }, {
   name: 'github-last-commit',
   maxAge: 60 * 60 * 24, // 1 day
-  getKey: (e: H3Event) => getQuery(e)?.file,
+  getKey: (e: H3Event) => String(getQuery(e)?.file || ''),
 })

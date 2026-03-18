@@ -1,6 +1,6 @@
 import type { H3Event } from 'h3'
 
-const _fetchPSI = cachedFunction(async (url: string, strategy: 'mobile' | 'desktop', token: string): Promise<PSIResult> => {
+const _fetchPSI = cachedFunction(async (url: string, strategy: 'mobile' | 'desktop', token: string) => {
   const psiUrl = new URL('https://www.googleapis.com/pagespeedonline/v5/runPagespeed')
   psiUrl.searchParams.set('url', url)
   psiUrl.searchParams.set('category', 'PERFORMANCE')
@@ -18,7 +18,7 @@ const _fetchPSI = cachedFunction(async (url: string, strategy: 'mobile' | 'deskt
   staleMaxAge: 24 * 60 * 60,
 })
 
-export function fetchPSI(event: H3Event, url: string, strategy: 'mobile' | 'desktop' = 'mobile'): Promise<PSIResult> {
+export function fetchPSI(event: H3Event, url: string, strategy: 'mobile' | 'desktop' = 'mobile') {
   const token = useRuntimeConfig(event).googleApiToken
   if (!token)
     throw createError({ message: 'NUXT_GOOGLE_API_TOKEN not configured', statusCode: 500 })

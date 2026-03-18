@@ -52,7 +52,7 @@ export function stripHeaderAnchorLinks(payload: any) {
 export function modifyRelativeDocLinksWithFramework(
   payload: any,
 ): any[] {
-  const links = []
+  const links: any[] = []
   // find a tags and check the href, if it's relative and contains docs and does not have a framework (getPathFramework)
   // then we should add the framework getPathWithFramework
   walk(

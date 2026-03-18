@@ -11,8 +11,8 @@ export function initOctokitRequestHandler(e: H3Event) {
     auth: githubAccessToken,
   })
   return {
-    repo: repo.split('/')[1],
-    owner: repo.split('/')[0],
+    repo: repo.split('/')[1]!,
+    owner: repo.split('/')[0]!,
     octokit,
   }
 }
@@ -26,8 +26,8 @@ export const cachedFetchGitHubRaw = defineCachedFunction(async (e: H3Event, full
   if (!fullPath?.startsWith('harlan-zw/')) {
     throw new Error(`Invalid repo ${fullPath}`)
   }
-  const repo = fullPath.split('/')[1]
-  const owner = fullPath.split('/')[0]
+  const repo = fullPath.split('/')[1]!
+  const owner = fullPath.split('/')[0]!
   const path = fullPath.split('/').slice(2).join('/')
   const octokit = new Octokit({
     auth: githubAccessToken,
@@ -42,7 +42,7 @@ export const cachedFetchGitHubRaw = defineCachedFunction(async (e: H3Event, full
   })
 
   // Decode the Base64 content
-  return Buffer.from(data.content, 'base64').toString('utf-8')
+  return Buffer.from((data as { content: string }).content, 'base64').toString('utf-8')
 }, {
   maxAge: 60 * 60, // 1 hour
   name: 'ghRaw',

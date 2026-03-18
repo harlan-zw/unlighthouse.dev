@@ -25,7 +25,7 @@ const handler = defineOAuthGitHubEventHandler({
       .sort((a, b) => (b.primary ? 1 : 0) - (a.primary ? 1 : 0))
       .map(e => e.email)
 
-    const primaryEmail = verifiedEmails[0] || user.email
+    const primaryEmail = verifiedEmails[0] || user.email || ''
 
     // Upsert user in database
     const db = useDB(event)
@@ -39,7 +39,7 @@ const handler = defineOAuthGitHubEventHandler({
         githubAvatarUrl: user.avatar_url,
         isAdmin: ADMIN_EMAILS.includes(primaryEmail),
         updatedAt: new Date(),
-      }).where(eq(users.id, existingUser.id))
+      }).where(eq(users.id, existingUser.id!))
       dbUser = existingUser
     }
     else {
@@ -49,7 +49,7 @@ const handler = defineOAuthGitHubEventHandler({
         githubEmail: primaryEmail,
         githubAvatarUrl: user.avatar_url,
         isAdmin: ADMIN_EMAILS.includes(primaryEmail),
-      }).returning().get()
+      }).returning().get()!
     }
 
     await setUserSession(event, {

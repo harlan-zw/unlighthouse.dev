@@ -20,7 +20,7 @@ export default defineCachedEventHandler(async (e) => {
   if (!lastPage) {
     throw new Error('Could not find last page')
   }
-  return Number.parseInt(lastPage[1], 10)
+  return Number.parseInt(lastPage[1]!, 10)
 }, {
   // last for 1 week
   name: 'commit-count-v2',
