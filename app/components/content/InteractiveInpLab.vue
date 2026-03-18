@@ -80,7 +80,7 @@ function getRating(ms: number) {
 
 const currentExplanation = computed(() => {
   if (isProcessing.value) {
-    const currentBlock = mainThreadBlocks.value[mainThreadBlocks.value.length - 1]
+    const currentBlock = mainThreadBlocks.value.at(-1)
     if (currentBlock) {
       const labels: Record<string, string> = {
         'handler': 'Running your click handler...',

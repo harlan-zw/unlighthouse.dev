@@ -47,7 +47,7 @@ const currentExplanation = computed(() => {
   if (shifts.value.length === 0) {
     return 'Click a shift trigger to see how unexpected layout changes affect CLS score.'
   }
-  const lastShift = shifts.value[shifts.value.length - 1]
+  const lastShift = shifts.value.at(-1)
   return `${lastShift.icon} ${lastShift.type}: Moved ${(lastShift.distance * 100).toFixed(0)}% of viewport, affecting ${(lastShift.impact * 100).toFixed(0)}% of visible area.`
 })
 

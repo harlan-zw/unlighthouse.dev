@@ -85,7 +85,7 @@ export async function trackToolLookup(
 
   // Extract domain from URL
   let domain = url.trim()
-  if (domain.match(/^https?:\/\//)) {
+  if (/^https?:\/\//.test(domain)) {
     const parsed = new URL(domain).hostname
     domain = parsed
   }

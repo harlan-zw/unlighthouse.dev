@@ -143,7 +143,7 @@ const chartAreaPath = computed(() => {
   if (validPoints.length < 2)
     return ''
   const linePath = validPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
-  const lastX = validPoints[validPoints.length - 1]!.x
+  const lastX = validPoints.at(-1)!.x
   const firstX = validPoints[0]!.x
   return `${linePath} L ${lastX} 100 L ${firstX} 100 Z`
 })

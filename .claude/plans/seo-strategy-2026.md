@@ -93,7 +93,7 @@ Spain overtook India as #1. Latin America (Mexico, Argentina, Colombia) growing 
 10. **Create `/automation/github-actions`** — only missing page from March content calendar (Week 12). All other 7 pages already exist.
 11. **"lcp meaning"** — NEW keyword, 80 impressions, pos 8.2 on /learn-lighthouse/lcp. Add "lcp meaning" to keywords frontmatter.
 12. **"what is speed index in lighthouse"** — 58 impressions, pos 8.6. Ensure glossary/speed-index targets this phrase.
-13. **"puppeteer evaluateonnewdocument localstorage"** — 133 impressions, pos 4.8 (already ranking well!). Niche but high-intent. Could add a dedicated section to puppeteer page.
+13. **"puppeteer evaluateonnewdocument localstorage"** — 133 impressions, pos 4.8 (already ranking well!). Niche but high-intent. Must add a dedicated section to puppeteer page.
 14. **"lighthouse continuous integration"** — 119 impressions, pos 10.3 on /integrations/ci (improved from pos 18.9 prev period!). Keep monitoring, may need dedicated content push.
 15. **"dev lighthouse"** — 147 impressions, pos 9.7, 0 clicks. Ambiguous intent but worth monitoring.
 
@@ -855,7 +855,7 @@ When people compare tools, we want to be included:
 | Brazil | 16 | 2.9% | +8 |
 | France | 15 | 2.7% | -20 |
 
-**Observation:** India is #1 and growing. Consider:
+**Observation:** India is #1 and growing. Must:
 - More developer-focused content
 - Pricing consideration for cloud (PPP)
 - No localization needed (English works)

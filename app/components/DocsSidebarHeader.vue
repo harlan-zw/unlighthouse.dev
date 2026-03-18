@@ -36,7 +36,7 @@ const bottom = computed(() => {
                 {{ link.title }}
               </div>
             </div>
-            <UIcon v-if="link.tag" :name="`i-logos-${link.tag}`" dynamclic ass="w-4 h-4" />
+            <UIcon v-if="link.tag" :name="`i-logos-${link.tag}`" dynamic class="w-4 h-4" />
           </div>
           <div v-else :class="link.deprecated ? 'opacity-50' : ''">
             <UIcon v-if="link.icon" :name="link.icon" class="w-4 h-4 text-(--ui-primary)-400 dark:text-sky-200" />

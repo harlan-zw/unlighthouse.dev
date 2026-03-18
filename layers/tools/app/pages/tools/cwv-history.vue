@@ -133,7 +133,7 @@ function lookup() {
 const latestData = computed<HistoryItem | null>(() => {
   if (!result.value?.history?.length)
     return null
-  return result.value.history[result.value.history.length - 1]
+  return result.value.history.at(-1)
 })
 
 const passesCWV = computed(() => {
@@ -260,7 +260,7 @@ const chartAreaPath = computed(() => {
   if (validPoints.length < 2)
     return ''
   const linePath = validPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
-  const lastX = validPoints[validPoints.length - 1].x
+  const lastX = validPoints.at(-1).x
   const firstX = validPoints[0].x
   return `${linePath} L ${lastX} 100 L ${firstX} 100 Z`
 })

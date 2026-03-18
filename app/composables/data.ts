@@ -15,8 +15,8 @@ export async function useStats() {
 function getCollectionForPath(path: string) {
   if (path.startsWith('/glossary'))
     return 'glossary'
-  if (path.startsWith('/learn'))
-    return 'learn'
+  if (path.startsWith('/learn-lighthouse'))
+    return 'learnLighthouse'
   if (path.startsWith('/blog'))
     return 'blog'
   if (path.startsWith('/cloud'))

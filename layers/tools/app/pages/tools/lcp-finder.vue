@@ -177,7 +177,7 @@ function playAnimation() {
       }
       else {
         // Small pause before next phase
-        setTimeout(() => animatePhase(idx + 1), 200)
+        setTimeout(animatePhase, 200, idx + 1)
       }
     }
 

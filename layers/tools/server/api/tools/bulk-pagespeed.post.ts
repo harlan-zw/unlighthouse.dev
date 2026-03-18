@@ -158,7 +158,7 @@ export default defineEventHandler(async (event) => {
   // Start initial batch of concurrent requests
   const initialBatch = Math.min(CONCURRENCY, urls.length)
   await Promise.all(
-    Array.from({ length: initialBatch }, () => processNext()),
+    Array.from({ length: initialBatch }).fill(processNext()),
   )
 
   // Calculate summary

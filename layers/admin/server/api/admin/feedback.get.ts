@@ -44,7 +44,7 @@ export default defineEventHandler(async (event) => {
     else if (row.thumb === 'down')
       entry.down = row.count
   }
-  const thumbsByTool = [...thumbsMap.entries()].map(([path, counts]) => ({
+  const thumbsByTool = Array.from(thumbsMap.entries(), ([path, counts]) => ({
     path,
     up: counts.up,
     down: counts.down,
