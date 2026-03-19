@@ -14,28 +14,28 @@ const fieldSteps = [
 
 <template>
   <div class="my-6 not-prose">
-    <div class="rounded-xl border border-[var(--ui-border)] overflow-hidden bg-[var(--ui-bg-elevated)]">
+    <div class="rounded-xl border border-default overflow-hidden bg-elevated">
       <!-- Lab row -->
       <div class="p-4 sm:p-5">
         <div class="flex items-center gap-2 mb-3">
-          <span class="text-xs font-bold tracking-wider uppercase text-[var(--ui-primary)]">Lab Data</span>
-          <span class="text-xs text-[var(--ui-text-dimmed)]">Lighthouse</span>
+          <span class="text-xs font-bold tracking-wider uppercase text-primary">Lab Data</span>
+          <span class="text-xs text-dimmed">Lighthouse</span>
         </div>
         <div class="flex items-center gap-2 sm:gap-3">
           <template v-for="(step, i) in labSteps" :key="step.title">
             <div class="flex-1 rounded-lg border border-[var(--ui-primary)]/20 bg-[var(--ui-primary)]/5 p-3 sm:p-4 min-w-0">
               <div class="flex items-center gap-2 mb-1">
-                <UIcon :name="step.icon" class="text-[var(--ui-primary)] shrink-0 size-4" />
+                <UIcon :name="step.icon" class="text-primary shrink-0 size-4" />
                 <span class="font-semibold text-sm sm:text-base truncate">{{ step.title }}</span>
               </div>
-              <p class="text-xs text-[var(--ui-text-dimmed)] hidden sm:block">
+              <p class="text-xs text-dimmed hidden sm:block">
                 {{ step.desc }}
               </p>
               <UBadge v-if="step.badge" color="primary" variant="subtle" size="xs" class="mt-1.5">
                 {{ step.badge }}
               </UBadge>
             </div>
-            <UIcon v-if="i < labSteps.length - 1" name="i-heroicons-arrow-right" class="text-[var(--ui-primary)] shrink-0 size-4" />
+            <UIcon v-if="i < labSteps.length - 1" name="i-heroicons-arrow-right" class="text-primary shrink-0 size-4" />
           </template>
         </div>
       </div>
@@ -46,7 +46,7 @@ const fieldSteps = [
       <div class="p-4 sm:p-5">
         <div class="flex items-center gap-2 mb-3">
           <span class="text-xs font-bold tracking-wider uppercase text-emerald-500">Field Data</span>
-          <span class="text-xs text-[var(--ui-text-dimmed)]">CrUX / PSI</span>
+          <span class="text-xs text-dimmed">CrUX / PSI</span>
         </div>
         <div class="flex items-center gap-2 sm:gap-3">
           <template v-for="(step, i) in fieldSteps" :key="step.title">
@@ -55,7 +55,7 @@ const fieldSteps = [
                 <UIcon :name="step.icon" class="text-emerald-500 shrink-0 size-4" />
                 <span class="font-semibold text-sm sm:text-base truncate">{{ step.title }}</span>
               </div>
-              <p class="text-xs text-[var(--ui-text-dimmed)] hidden sm:block">
+              <p class="text-xs text-dimmed hidden sm:block">
                 {{ step.desc }}
               </p>
               <UBadge v-if="step.badge" color="success" variant="subtle" size="xs" class="mt-1.5">

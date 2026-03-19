@@ -71,18 +71,18 @@ watchDebounced(
   (newUrls) => {
     const validUrls = newUrls.filter(u => u.trim())
     if (validUrls.length >= 2) {
-      router.replace({ query: { ...route.query, sites: validUrls.map(u => encodeURIComponent(u)).join(',') } })
+      navigateTo({ query: { ...route.query, sites: validUrls.map(u => encodeURIComponent(u)).join(',') } }, { replace: true })
     }
     else {
       const { sites: _, ...rest } = route.query
-      router.replace({ query: rest })
+      navigateTo({ query: rest }, { replace: true })
     }
   },
   { debounce: 500, deep: true },
 )
 
 watch(formFactor, (newFactor) => {
-  router.replace({ query: { ...route.query, device: newFactor === 'DESKTOP' ? 'desktop' : undefined } })
+  navigateTo({ query: { ...route.query, device: newFactor === 'DESKTOP' ? 'desktop' : undefined } }, { replace: true })
 })
 
 function addUrl() {

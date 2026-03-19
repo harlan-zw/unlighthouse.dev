@@ -95,7 +95,7 @@ function locateMe() {
 <template>
   <div class="my-6">
     <ClientOnly>
-      <div class="rounded-xl border border-[var(--ui-border)] overflow-hidden bg-[var(--ui-bg-elevated)]">
+      <div class="rounded-xl border border-default overflow-hidden bg-elevated">
         <!-- Map -->
         <div class="h-[360px] relative">
           <VisSingleContainer :data="mapData" :height="360">
@@ -118,7 +118,7 @@ function locateMe() {
         </div>
 
         <!-- Controls -->
-        <div class="p-4 border-t border-[var(--ui-border)]">
+        <div class="p-4 border-t border-default">
           <div v-if="!userLocation" class="flex items-center gap-3 flex-wrap">
             <UButton
               icon="i-heroicons-map-pin"
@@ -129,15 +129,15 @@ function locateMe() {
             >
               Find my nearest PSI server
             </UButton>
-            <span v-if="locationError" class="text-sm text-[var(--ui-text-dimmed)]">{{ locationError }}</span>
-            <span v-else class="text-sm text-[var(--ui-text-dimmed)]">See which data center PSI routes your test to</span>
+            <span v-if="locationError" class="text-sm text-dimmed">{{ locationError }}</span>
+            <span v-else class="text-sm text-dimmed">See which data center PSI routes your test to</span>
           </div>
 
           <!-- Distance results -->
           <div v-else class="space-y-3">
             <div class="flex items-center gap-2 text-sm font-medium">
               <UIcon name="i-heroicons-map-pin" class="text-cyan-400" />
-              <span>PSI will route your test to <strong class="text-[var(--ui-primary)]">{{ closestServer?.label }}</strong> ({{ closestServer?.region }})</span>
+              <span>PSI will route your test to <strong class="text-primary">{{ closestServer?.label }}</strong> ({{ closestServer?.region }})</span>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <div
@@ -145,17 +145,17 @@ function locateMe() {
                 :key="d.id"
                 class="rounded-lg p-3 text-sm border"
                 :class="d.id === closestServer?.id
-                  ? 'border-[var(--ui-primary)] bg-[var(--ui-primary)]/5'
-                  : 'border-[var(--ui-border)]'"
+                  ? 'border-primary bg-[var(--ui-primary)]/5'
+                  : 'border-default'"
               >
                 <div class="font-semibold flex items-center gap-1.5">
                   <span
                     class="w-2 h-2 rounded-full shrink-0"
-                    :class="d.id === closestServer?.id ? 'bg-[var(--ui-primary)]' : 'bg-[var(--ui-text-dimmed)]'"
+                    :class="d.id === closestServer?.id ? 'bg-primary' : 'bg-[var(--ui-text-dimmed)]'"
                   />
                   {{ d.label }}
                 </div>
-                <div class="text-[var(--ui-text-dimmed)] mt-1">
+                <div class="text-dimmed mt-1">
                   {{ d.km.toLocaleString() }} km &middot; ~{{ d.ping }}ms
                 </div>
               </div>

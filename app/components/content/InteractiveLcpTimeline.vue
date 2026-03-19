@@ -169,14 +169,14 @@ function getRating(ms: number) {
           </UBadge>
         </div>
       </div>
-      <p class="text-sm text-[var(--ui-text-muted)] mb-3">
+      <p class="text-sm text-muted mb-3">
         Watch how browser measures time to largest content. LCP includes server response, resource discovery, download, and render.
       </p>
 
-      <div class="rounded-xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] overflow-hidden">
+      <div class="rounded-xl border border-default bg-elevated overflow-hidden">
         <div class="grid lg:grid-cols-5 gap-0">
           <!-- Browser simulation -->
-          <div class="lg:col-span-3 p-4 border-b lg:border-b-0 lg:border-r border-[var(--ui-border)]">
+          <div class="lg:col-span-3 p-4 border-b lg:border-b-0 lg:border-r border-default">
             <DemoBrowser
               url="shop.example.com/product"
               :status="pageState === 'idle' ? 'idle' : pageState === 'complete' ? 'complete' : 'loading'"
@@ -188,10 +188,10 @@ function getRating(ms: number) {
                   :class="pageState === 'idle' ? 'opacity-100' : 'opacity-0 pointer-events-none'"
                 >
                   <div class="space-y-3">
-                    <div class="h-5 bg-[var(--ui-bg-accented)] rounded w-1/3" />
-                    <div class="h-3 bg-[var(--ui-bg-accented)] rounded w-2/3" />
-                    <div class="h-20 bg-[var(--ui-bg-accented)] rounded w-full flex items-center justify-center">
-                      <span class="text-xs text-[var(--ui-text-muted)]">Hero Image</span>
+                    <div class="h-5 bg-accented rounded w-1/3" />
+                    <div class="h-3 bg-accented rounded w-2/3" />
+                    <div class="h-20 bg-accented rounded w-full flex items-center justify-center">
+                      <span class="text-xs text-muted">Hero Image</span>
                     </div>
                   </div>
                 </div>
@@ -202,7 +202,7 @@ function getRating(ms: number) {
                   :class="pageState === 'connecting' ? 'opacity-100' : 'opacity-0 pointer-events-none'"
                 >
                   <div class="flex flex-col items-center gap-2">
-                    <div class="size-8 border-2 border-[var(--ui-border)] border-t-blue-500 rounded-full animate-spin" />
+                    <div class="size-8 border-2 border-default border-t-blue-500 rounded-full animate-spin" />
                     <span class="text-xs text-blue-500 font-medium">Waiting for server...</span>
                   </div>
                 </div>
@@ -229,7 +229,7 @@ function getRating(ms: number) {
                   <div class="space-y-3">
                     <div class="h-5 bg-[var(--ui-text-highlighted)] rounded w-1/3" />
                     <div class="h-3 bg-[var(--ui-text-muted)]/50 rounded w-2/3" />
-                    <div class="h-20 bg-[var(--ui-bg-accented)] rounded overflow-hidden relative">
+                    <div class="h-20 bg-accented rounded overflow-hidden relative">
                       <div
                         class="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-500/30 to-cyan-500/50 transition-all duration-100"
                         :style="{ width: `${lcpProgress}%` }"
@@ -273,7 +273,7 @@ function getRating(ms: number) {
                         <div class="text-lg font-bold font-mono">
                           {{ (total / 1000).toFixed(2) }}s
                         </div>
-                        <div class="text-xs text-[var(--ui-text-muted)]">
+                        <div class="text-xs text-muted">
                           LCP ✓
                         </div>
                       </div>
@@ -284,15 +284,15 @@ function getRating(ms: number) {
             </DemoBrowser>
 
             <!-- Step explanation -->
-            <div class="mt-3 p-3 bg-[var(--ui-bg)] rounded-lg border border-[var(--ui-border)] min-h-[52px]">
+            <div class="mt-3 p-3 bg-default rounded-lg border border-default min-h-[52px]">
               <div class="flex items-start gap-2">
                 <span
                   class="size-5 rounded-full flex items-center justify-center text-xs shrink-0 mt-0.5"
-                  :class="pageState === 'complete' ? rating.bg : 'bg-[var(--ui-bg-accented)]'"
+                  :class="pageState === 'complete' ? rating.bg : 'bg-accented'"
                 >
                   {{ pageState === 'idle' ? '💡' : pageState === 'complete' ? '✓' : currentPhase + 1 }}
                 </span>
-                <p class="text-sm text-[var(--ui-text-muted)]">
+                <p class="text-sm text-muted">
                   {{ currentStepExplanation }}
                 </p>
               </div>
@@ -303,10 +303,10 @@ function getRating(ms: number) {
           <div class="lg:col-span-2 p-4 flex flex-col">
             <!-- Timeline -->
             <div class="mb-4">
-              <div class="text-xs text-[var(--ui-text-muted)] mb-2">
+              <div class="text-xs text-muted mb-2">
                 Timeline breakdown:
               </div>
-              <div class="h-6 rounded-md overflow-hidden flex bg-[var(--ui-bg)]">
+              <div class="h-6 rounded-md overflow-hidden flex bg-default">
                 <div
                   v-for="(phase, i) in phases"
                   :key="phase.id"
@@ -317,12 +317,12 @@ function getRating(ms: number) {
                     opacity: currentPhase === i ? 1 : currentPhase > i ? 0.7 : 0.3,
                   }"
                 >
-                  <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-[var(--ui-bg-inverted)] text-[var(--ui-bg)] text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                  <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-inverted text-[var(--ui-bg)] text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
                     {{ phase.label }}: {{ timings[phase.id as keyof typeof timings] }}ms
                   </div>
                 </div>
               </div>
-              <div class="flex justify-between mt-1.5 text-xs text-[var(--ui-text-muted)]">
+              <div class="flex justify-between mt-1.5 text-xs text-muted">
                 <div v-for="phase in phases" :key="phase.id" class="flex items-center gap-1">
                   <div class="size-2 rounded-sm" :style="{ backgroundColor: phase.color }" />
                   <span>{{ phase.label }}</span>
@@ -332,14 +332,14 @@ function getRating(ms: number) {
 
             <!-- Presets -->
             <div class="mb-4">
-              <div class="text-xs text-[var(--ui-text-muted)] mb-2">
+              <div class="text-xs text-muted mb-2">
                 Try different scenarios:
               </div>
               <div class="grid grid-cols-2 gap-2">
                 <button
                   v-for="preset in presets"
                   :key="preset.label"
-                  class="p-2 rounded-lg border border-[var(--ui-border)] hover:border-[var(--ui-primary)] hover:bg-[var(--ui-bg)] transition-colors text-left"
+                  class="p-2 rounded-lg border border-default hover:border-primary hover:bg-default transition-colors text-left"
                   @click="applyPreset(preset)"
                 >
                   <div class="flex items-center justify-between">
@@ -351,7 +351,7 @@ function getRating(ms: number) {
                       {{ ((preset.ttfb + preset.loadDelay + preset.loadDuration + preset.renderDelay) / 1000).toFixed(1) }}s
                     </span>
                   </div>
-                  <div class="text-xs text-[var(--ui-text-muted)]">
+                  <div class="text-xs text-muted">
                     {{ preset.tip }}
                   </div>
                 </button>
@@ -383,11 +383,11 @@ function getRating(ms: number) {
         </div>
 
         <!-- Footer -->
-        <div class="px-4 py-3 bg-[var(--ui-bg)] border-t border-[var(--ui-border)] flex items-center justify-between text-xs">
-          <span class="text-[var(--ui-text-muted)]">
-            <strong class="text-[var(--ui-text)]">Tip:</strong> Optimize TTFB with CDN, preload LCP images, use modern formats.
+        <div class="px-4 py-3 bg-default border-t border-default flex items-center justify-between text-xs">
+          <span class="text-muted">
+            <strong class="text-default">Tip:</strong> Optimize TTFB with CDN, preload LCP images, use modern formats.
           </span>
-          <div class="flex items-center gap-3 text-[var(--ui-text-muted)]">
+          <div class="flex items-center gap-3 text-muted">
             <span class="flex items-center gap-1"><span class="size-2 rounded-full bg-success" /> ≤2.5s</span>
             <span class="flex items-center gap-1"><span class="size-2 rounded-full bg-warning" /> 2.5-4s</span>
             <span class="flex items-center gap-1"><span class="size-2 rounded-full bg-error" /> >4s</span>
@@ -397,8 +397,8 @@ function getRating(ms: number) {
     </div>
 
     <template #fallback>
-      <div class="rounded-xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] h-96 flex items-center justify-center">
-        <div class="flex items-center gap-2 text-[var(--ui-text-muted)]">
+      <div class="rounded-xl border border-default bg-elevated h-96 flex items-center justify-center">
+        <div class="flex items-center gap-2 text-muted">
           <div class="size-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
           <span>Loading demo...</span>
         </div>

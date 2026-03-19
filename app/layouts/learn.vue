@@ -213,7 +213,7 @@ const breadcrumbs = useBreadcrumbItems({
                 <!-- Header -->
                 <div class="flex items-center gap-2 mb-4 px-1">
                   <UIcon name="i-heroicons-academic-cap" class="size-4 text-amber-500" />
-                  <span class="text-sm font-semibold text-[var(--ui-text-highlighted)]">Learn Google Lighthouse</span>
+                  <span class="text-sm font-semibold text-highlighted">Learn Google Lighthouse</span>
                 </div>
 
                 <!-- Section Switcher -->
@@ -240,7 +240,7 @@ const breadcrumbs = useBreadcrumbItems({
                       :class="[
                         activeSection === section.key
                           ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400'
-                          : 'bg-[var(--ui-bg-elevated)] text-[var(--ui-text-dimmed)] group-hover:text-[var(--ui-text-muted)]',
+                          : 'bg-elevated text-dimmed group-hover:text-muted',
                       ]"
                     >
                       <UIcon :name="section.icon" class="size-4" />
@@ -252,12 +252,12 @@ const breadcrumbs = useBreadcrumbItems({
                         :class="[
                           activeSection === section.key
                             ? 'text-amber-600 dark:text-amber-400'
-                            : 'text-[var(--ui-text-muted)] group-hover:text-[var(--ui-text-highlighted)]',
+                            : 'text-muted group-hover:text-highlighted',
                         ]"
                       >
                         {{ section.label }}
                       </div>
-                      <div class="text-[11px] text-[var(--ui-text-dimmed)] truncate">
+                      <div class="text-[11px] text-dimmed truncate">
                         {{ section.description }}
                       </div>
                     </div>
@@ -278,13 +278,13 @@ const breadcrumbs = useBreadcrumbItems({
                       :class="[
                         isActive(item.to || item.path)
                           ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 font-medium'
-                          : 'text-[var(--ui-text-muted)] hover:text-[var(--ui-text-highlighted)] hover:bg-[var(--ui-bg-elevated)]/50',
+                          : 'text-muted hover:text-highlighted hover:bg-[var(--ui-bg-elevated)]/50',
                       ]"
                     >
                       <UIcon
                         :name="item.icon!"
                         class="size-3.5 flex-shrink-0 transition-colors"
-                        :class="isActive(item.to || item.path) ? 'text-amber-500' : 'text-[var(--ui-text-dimmed)] group-hover:text-amber-500/70'"
+                        :class="isActive(item.to || item.path) ? 'text-amber-500' : 'text-dimmed group-hover:text-amber-500/70'"
                       />
                       <span class="text-[13px]">{{ item.title }}</span>
                     </NuxtLink>
@@ -300,14 +300,14 @@ const breadcrumbs = useBreadcrumbItems({
                           isActive(item.to)
                             ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 font-medium'
                             : isInSection(item.path)
-                              ? 'text-[var(--ui-text-highlighted)] font-medium'
-                              : 'text-[var(--ui-text-muted)] hover:text-[var(--ui-text-highlighted)] hover:bg-[var(--ui-bg-elevated)]/50',
+                              ? 'text-highlighted font-medium'
+                              : 'text-muted hover:text-highlighted hover:bg-[var(--ui-bg-elevated)]/50',
                         ]"
                       >
                         <UIcon
                           :name="item.icon!"
                           class="size-3.5 flex-shrink-0 transition-colors"
-                          :class="isInSection(item.path) ? 'text-amber-500' : 'text-[var(--ui-text-dimmed)] group-hover:text-amber-500/70'"
+                          :class="isInSection(item.path) ? 'text-amber-500' : 'text-dimmed group-hover:text-amber-500/70'"
                         />
                         <span class="text-[13px]">{{ item.title }}</span>
                       </NuxtLink>
@@ -315,7 +315,7 @@ const breadcrumbs = useBreadcrumbItems({
                       <!-- Children (collapsible based on active section) -->
                       <div
                         v-if="isInSection(item.path)"
-                        class="ml-4 pl-3 mt-1 mb-2 border-l border-[var(--ui-border)] space-y-0.5"
+                        class="ml-4 pl-3 mt-1 mb-2 border-l border-default space-y-0.5"
                       >
                         <NuxtLink
                           v-for="child in item.children"
@@ -325,7 +325,7 @@ const breadcrumbs = useBreadcrumbItems({
                           :class="[
                             isActive(child.path)
                               ? 'text-amber-600 dark:text-amber-400 font-medium bg-amber-500/5'
-                              : 'text-[var(--ui-text-muted)] hover:text-[var(--ui-text-highlighted)]',
+                              : 'text-muted hover:text-highlighted',
                           ]"
                         >
                           {{ child.title }}

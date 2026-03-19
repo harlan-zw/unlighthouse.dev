@@ -141,8 +141,8 @@ const tools = [
       <h2 class="text-xl font-semibold mb-6">
         Core Web Vitals
       </h2>
-      <p class="text-[var(--ui-text-muted)] mb-8">
-        Core Web Vitals are <a href="https://developers.google.com/search/docs/appearance/core-web-vitals" target="_blank" class="text-[var(--ui-text)] underline underline-offset-2">Google's ranking factor</a> for measuring user experience. Only <a href="https://almanac.httparchive.org/en/2024/performance" target="_blank" class="text-[var(--ui-text)] underline underline-offset-2">48% of mobile sites</a> currently pass all three metrics.
+      <p class="text-muted mb-8">
+        Core Web Vitals are <a href="https://developers.google.com/search/docs/appearance/core-web-vitals" target="_blank" class="text-default underline underline-offset-2">Google's ranking factor</a> for measuring user experience. Only <a href="https://almanac.httparchive.org/en/2024/performance" target="_blank" class="text-default underline underline-offset-2">48% of mobile sites</a> currently pass all three metrics.
       </p>
 
       <div class="grid md:grid-cols-3 gap-6">
@@ -150,7 +150,7 @@ const tools = [
           v-for="metric in metrics"
           :key="metric.title"
           :to="metric.to"
-          class="group relative overflow-hidden rounded-xl border border-[var(--ui-border)] bg-[var(--ui-bg)] p-6 hover:border-[var(--ui-border-accented)] transition-all hover:shadow-lg"
+          class="group relative overflow-hidden rounded-xl border border-default bg-default p-6 hover:border-accented transition-all hover:shadow-lg"
         >
           <div class="flex items-start justify-between mb-4">
             <div class="p-2 rounded-lg bg-current/10" :class="[metric.color]">
@@ -160,15 +160,15 @@ const tools = [
               <div class="text-2xl font-bold" :class="metric.color">
                 {{ metric.stat }}
               </div>
-              <div class="text-xs text-[var(--ui-text-dimmed)]">
+              <div class="text-xs text-dimmed">
                 {{ metric.statLabel }}
               </div>
             </div>
           </div>
-          <h3 class="font-semibold mb-2 group-hover:text-[var(--ui-primary)] transition-colors">
+          <h3 class="font-semibold mb-2 group-hover:text-primary transition-colors">
             {{ metric.title }}
           </h3>
-          <p class="text-sm text-[var(--ui-text-muted)]">
+          <p class="text-sm text-muted">
             {{ metric.description }}
           </p>
           <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-current to-transparent opacity-0 group-hover:opacity-20 transition-opacity" :class="metric.color" />
@@ -186,16 +186,16 @@ const tools = [
           v-for="guide in guides"
           :key="guide.title"
           :to="guide.to"
-          class="group flex items-start gap-4 p-6 rounded-xl border border-[var(--ui-border)] bg-[var(--ui-bg)] hover:border-[var(--ui-border-accented)] transition-all"
+          class="group flex items-start gap-4 p-6 rounded-xl border border-default bg-default hover:border-accented transition-all"
         >
           <div class="p-2 rounded-lg bg-amber-500/10">
             <UIcon :name="guide.icon" class="size-5 text-amber-500" />
           </div>
           <div>
-            <h3 class="font-semibold mb-1 group-hover:text-[var(--ui-primary)] transition-colors">
+            <h3 class="font-semibold mb-1 group-hover:text-primary transition-colors">
               {{ guide.title }}
             </h3>
-            <p class="text-sm text-[var(--ui-text-muted)]">
+            <p class="text-sm text-muted">
               {{ guide.description }}
             </p>
           </div>
@@ -213,16 +213,16 @@ const tools = [
           v-for="cat in categories"
           :key="cat.title"
           :to="cat.to"
-          class="group flex items-start gap-4 p-6 rounded-xl border border-[var(--ui-border)] bg-[var(--ui-bg)] hover:border-[var(--ui-border-accented)] transition-all"
+          class="group flex items-start gap-4 p-6 rounded-xl border border-default bg-default hover:border-accented transition-all"
         >
           <div class="p-2 rounded-lg bg-current/10" :class="[cat.color]">
             <UIcon :name="cat.icon" class="size-5" :class="cat.color" />
           </div>
           <div>
-            <h3 class="font-semibold mb-1 group-hover:text-[var(--ui-primary)] transition-colors">
+            <h3 class="font-semibold mb-1 group-hover:text-primary transition-colors">
               {{ cat.title }}
             </h3>
-            <p class="text-sm text-[var(--ui-text-muted)]">
+            <p class="text-sm text-muted">
               {{ cat.description }}
             </p>
           </div>
@@ -240,16 +240,16 @@ const tools = [
           v-for="tool in tools"
           :key="tool.title"
           :to="tool.to"
-          class="group flex items-start gap-4 p-6 rounded-xl border border-[var(--ui-border)] bg-[var(--ui-bg)] hover:border-[var(--ui-border-accented)] transition-all"
+          class="group flex items-start gap-4 p-6 rounded-xl border border-default bg-default hover:border-accented transition-all"
         >
           <div class="p-2 rounded-lg bg-emerald-500/10">
             <UIcon :name="tool.icon" class="size-5 text-emerald-500" />
           </div>
           <div>
-            <h3 class="font-semibold mb-1 group-hover:text-[var(--ui-primary)] transition-colors">
+            <h3 class="font-semibold mb-1 group-hover:text-primary transition-colors">
               {{ tool.title }}
             </h3>
-            <p class="text-sm text-[var(--ui-text-muted)]">
+            <p class="text-sm text-muted">
               {{ tool.description }}
             </p>
           </div>
@@ -263,7 +263,7 @@ const tools = [
           <h3 class="text-lg font-semibold mb-2">
             Test Your Entire Site
           </h3>
-          <p class="text-[var(--ui-text-muted)]">
+          <p class="text-muted">
             Most tools only test one page at a time. Unlighthouse scans your entire site and shows scores for every page.
           </p>
         </div>

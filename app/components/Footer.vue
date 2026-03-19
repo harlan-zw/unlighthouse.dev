@@ -159,7 +159,7 @@ const toolsLinks = [
     <div class="border-t border-neutral-200 dark:border-neutral-800">
       <UContainer>
         <div class="py-10">
-          Copyright © 2023-{{ new Date().getFullYear() }} Harlan Wilton - <a href="https://github.com/harlan-zw/unlighthouse/blob/main/LICENSE">MIT License</a>
+          Copyright © 2023-{{ new Date().getFullYear() }} Harlan Wilton - <a href="https://github.com/harlan-zw/unlighthouse/blob/main/license">MIT License</a>
         </div>
       </UContainer>
     </div>

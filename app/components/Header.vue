@@ -91,7 +91,7 @@ const mobileDocsGroups = computed(() => {
           <template v-if="group.nav.some(s => s.children?.length)">
             <template v-for="section in group.nav" :key="section.path">
               <div class="space-y-1">
-                <p class="text-[11px] font-semibold text-[var(--ui-text-muted)] uppercase tracking-wider px-2">
+                <p class="text-[11px] font-semibold text-muted uppercase tracking-wider px-2">
                   {{ `${group.label} - ${section.title}` }}
                 </p>
                 <nav class="space-y-0.5">
@@ -99,7 +99,7 @@ const mobileDocsGroups = computed(() => {
                     v-for="child in (section.children || [section])"
                     :key="child.path"
                     :to="child.path"
-                    class="flex items-center gap-2.5 px-2 py-1.5 rounded-md text-sm text-[var(--ui-text)] hover:bg-[var(--ui-bg-elevated)] transition-colors"
+                    class="flex items-center gap-2.5 px-2 py-1.5 rounded-md text-sm text-default hover:bg-elevated transition-colors"
                   >
                     {{ child.title }}
                   </NuxtLink>
@@ -111,7 +111,7 @@ const mobileDocsGroups = computed(() => {
           <!-- Flat: sections are leaf items (e.g. Integrations, API) -->
           <template v-else>
             <div class="space-y-1">
-              <p class="text-[11px] font-semibold text-[var(--ui-text-muted)] uppercase tracking-wider px-2">
+              <p class="text-[11px] font-semibold text-muted uppercase tracking-wider px-2">
                 {{ group.label }}
               </p>
               <nav class="space-y-0.5">
@@ -119,7 +119,7 @@ const mobileDocsGroups = computed(() => {
                   v-for="item in group.nav"
                   :key="item.path"
                   :to="item.path"
-                  class="flex items-center gap-2.5 px-2 py-1.5 rounded-md text-sm text-[var(--ui-text)] hover:bg-[var(--ui-bg-elevated)] transition-colors"
+                  class="flex items-center gap-2.5 px-2 py-1.5 rounded-md text-sm text-default hover:bg-elevated transition-colors"
                 >
                   {{ item.title }}
                 </NuxtLink>
@@ -131,7 +131,7 @@ const mobileDocsGroups = computed(() => {
 
         <!-- Mobile: Learn section -->
         <div class="space-y-1">
-          <p class="text-[11px] font-semibold text-[var(--ui-text-muted)] uppercase tracking-wider px-2">
+          <p class="text-[11px] font-semibold text-muted uppercase tracking-wider px-2">
             Learn
           </p>
           <nav class="space-y-0.5">
@@ -139,7 +139,7 @@ const mobileDocsGroups = computed(() => {
               v-for="item in learnNav?.children"
               :key="item.to"
               :to="item.to"
-              class="flex items-center gap-2.5 px-2 py-1.5 rounded-md text-sm text-[var(--ui-text)] hover:bg-[var(--ui-bg-elevated)] transition-colors"
+              class="flex items-center gap-2.5 px-2 py-1.5 rounded-md text-sm text-default hover:bg-elevated transition-colors"
             >
               <UIcon v-if="item.icon" :name="item.icon" class="w-4 h-4 opacity-60" />
               {{ item.label }}
@@ -151,7 +151,7 @@ const mobileDocsGroups = computed(() => {
 
         <!-- Mobile: Tools section -->
         <div class="space-y-1">
-          <p class="text-[11px] font-semibold text-[var(--ui-text-muted)] uppercase tracking-wider px-2">
+          <p class="text-[11px] font-semibold text-muted uppercase tracking-wider px-2">
             Tools
           </p>
           <nav class="space-y-0.5">
@@ -159,7 +159,7 @@ const mobileDocsGroups = computed(() => {
               v-for="item in toolsNav?.children"
               :key="item.to"
               :to="item.to"
-              class="flex items-center gap-2.5 px-2 py-1.5 rounded-md text-sm text-[var(--ui-text)] hover:bg-[var(--ui-bg-elevated)] transition-colors"
+              class="flex items-center gap-2.5 px-2 py-1.5 rounded-md text-sm text-default hover:bg-elevated transition-colors"
             >
               <UIcon v-if="item.icon" :name="item.icon" class="w-4 h-4 opacity-60" />
               {{ item.label }}

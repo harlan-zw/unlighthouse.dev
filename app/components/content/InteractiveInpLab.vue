@@ -199,32 +199,32 @@ const blockColors: Record<string, string> = {
           </UBadge>
         </div>
       </div>
-      <p class="text-sm text-[var(--ui-text-muted)] mb-3">
+      <p class="text-sm text-muted mb-3">
         INP measures time from click to visual feedback. Animation slowed 2× so you can see what's blocking.
       </p>
 
-      <div class="rounded-xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] overflow-hidden">
+      <div class="rounded-xl border border-default bg-elevated overflow-hidden">
         <div class="grid lg:grid-cols-5 gap-0">
           <!-- Browser simulation -->
-          <div class="lg:col-span-3 p-4 border-b lg:border-b-0 lg:border-r border-[var(--ui-border)]">
+          <div class="lg:col-span-3 p-4 border-b lg:border-b-0 lg:border-r border-default">
             <DemoBrowser url="shop.example.com/headphones">
               <div class="p-4">
                 <!-- Product card -->
                 <div class="flex gap-4 mb-4">
-                  <div class="size-20 bg-[var(--ui-bg-accented)] rounded-lg flex items-center justify-center text-3xl shrink-0">
+                  <div class="size-20 bg-accented rounded-lg flex items-center justify-center text-3xl shrink-0">
                     🎧
                   </div>
                   <div class="flex-1 min-w-0">
                     <div class="font-medium mb-1">
                       Wireless Headphones
                     </div>
-                    <div class="text-sm text-[var(--ui-text-muted)] mb-3">
+                    <div class="text-sm text-muted mb-3">
                       $99.00
                     </div>
 
                     <!-- Add to Cart button - stays frozen during processing to demonstrate INP delay -->
                     <button
-                      class="px-4 py-2 rounded-lg font-medium text-sm transition-all relative overflow-hidden bg-[var(--ui-primary)] text-white"
+                      class="px-4 py-2 rounded-lg font-medium text-sm transition-all relative overflow-hidden bg-primary text-white"
                       :class="[
                         isProcessing
                           ? 'scale-95 opacity-80 cursor-wait'
@@ -258,9 +258,9 @@ const blockColors: Record<string, string> = {
                 </div>
 
                 <!-- Cart status -->
-                <div class="flex items-center justify-between text-sm text-[var(--ui-text-muted)] mb-4">
+                <div class="flex items-center justify-between text-sm text-muted mb-4">
                   <span>Cart: {{ cartCount }} item{{ cartCount !== 1 ? 's' : '' }}</span>
-                  <button v-if="cartCount > 0" class="text-xs hover:text-[var(--ui-text)]" @click="reset">
+                  <button v-if="cartCount > 0" class="text-xs hover:text-default" @click="reset">
                     Clear
                   </button>
                 </div>
@@ -268,14 +268,14 @@ const blockColors: Record<string, string> = {
                 <!-- Main Thread Visualization -->
                 <div class="space-y-2">
                   <div class="flex items-center justify-between text-xs">
-                    <span class="text-[var(--ui-text-muted)]">Main Thread</span>
+                    <span class="text-muted">Main Thread</span>
                     <span v-if="isProcessing" class="text-warning flex items-center gap-1">
                       <span class="size-1.5 rounded-full bg-warning animate-pulse" /> Blocked
                     </span>
-                    <span v-else class="text-[var(--ui-text-muted)]">Idle</span>
+                    <span v-else class="text-muted">Idle</span>
                   </div>
 
-                  <div class="h-10 bg-[var(--ui-bg-accented)] rounded-lg overflow-hidden flex relative">
+                  <div class="h-10 bg-accented rounded-lg overflow-hidden flex relative">
                     <div
                       v-for="block in mainThreadBlocks"
                       :key="block.id"
@@ -290,7 +290,7 @@ const blockColors: Record<string, string> = {
 
                     <div
                       v-if="mainThreadBlocks.length === 0"
-                      class="absolute inset-0 flex items-center justify-center text-xs text-[var(--ui-text-muted)]"
+                      class="absolute inset-0 flex items-center justify-center text-xs text-muted"
                     >
                       Waiting for interaction...
                     </div>
@@ -300,23 +300,23 @@ const blockColors: Record<string, string> = {
                   <div class="flex flex-wrap gap-3 text-xs">
                     <div class="flex items-center gap-1">
                       <div class="size-2 rounded-sm bg-emerald-500" />
-                      <span class="text-[var(--ui-text-muted)]">Handler</span>
+                      <span class="text-muted">Handler</span>
                     </div>
                     <div class="flex items-center gap-1">
                       <div class="size-2 rounded-sm bg-blue-500" />
-                      <span class="text-[var(--ui-text-muted)]">Paint</span>
+                      <span class="text-muted">Paint</span>
                     </div>
                     <div class="flex items-center gap-1">
                       <div class="size-2 rounded-sm bg-red-500" />
-                      <span class="text-[var(--ui-text-muted)]">JS</span>
+                      <span class="text-muted">JS</span>
                     </div>
                     <div class="flex items-center gap-1">
                       <div class="size-2 rounded-sm bg-amber-500" />
-                      <span class="text-[var(--ui-text-muted)]">Layout</span>
+                      <span class="text-muted">Layout</span>
                     </div>
                     <div class="flex items-center gap-1">
                       <div class="size-2 rounded-sm bg-purple-500" />
-                      <span class="text-[var(--ui-text-muted)]">3rd Party</span>
+                      <span class="text-muted">3rd Party</span>
                     </div>
                   </div>
                 </div>
@@ -324,7 +324,7 @@ const blockColors: Record<string, string> = {
             </DemoBrowser>
 
             <!-- Explanation -->
-            <div class="mt-3 p-3 bg-[var(--ui-bg)] rounded-lg border border-[var(--ui-border)]">
+            <div class="mt-3 p-3 bg-default rounded-lg border border-default">
               <p class="text-sm">
                 {{ currentExplanation }}
               </p>
@@ -333,7 +333,7 @@ const blockColors: Record<string, string> = {
 
           <!-- Scenario selector -->
           <div class="lg:col-span-2 p-4 flex flex-col">
-            <div class="text-xs text-[var(--ui-text-muted)] mb-2">
+            <div class="text-xs text-muted mb-2">
               What's blocking the response?
             </div>
 
@@ -344,8 +344,8 @@ const blockColors: Record<string, string> = {
                 class="w-full flex items-start gap-3 p-2 rounded-lg border transition-all text-left"
                 :class="[
                   selectedScenario.id === scenario.id
-                    ? 'border-[var(--ui-primary)] bg-[var(--ui-primary)]/5'
-                    : 'border-[var(--ui-border)] hover:border-[var(--ui-primary)]/50',
+                    ? 'border-primary bg-[var(--ui-primary)]/5'
+                    : 'border-default hover:border-[var(--ui-primary)]/50',
                 ]"
                 @click="selectedScenario = scenario; reset()"
               >
@@ -360,7 +360,7 @@ const blockColors: Record<string, string> = {
                       {{ scenario.delay }}ms
                     </span>
                   </div>
-                  <div class="text-xs text-[var(--ui-text-muted)]">
+                  <div class="text-xs text-muted">
                     {{ scenario.description }}
                   </div>
                 </div>
@@ -370,11 +370,11 @@ const blockColors: Record<string, string> = {
             <div class="flex-1" />
 
             <!-- What happens breakdown -->
-            <div class="p-3 bg-[var(--ui-bg)] rounded-lg text-xs mb-4">
-              <div class="text-[var(--ui-text-muted)] mb-1">
+            <div class="p-3 bg-default rounded-lg text-xs mb-4">
+              <div class="text-muted mb-1">
                 Sequence:
               </div>
-              <div class="text-[var(--ui-text)]">
+              <div class="text-default">
                 {{ selectedScenario.whatHappens }}
               </div>
             </div>
@@ -386,11 +386,11 @@ const blockColors: Record<string, string> = {
         </div>
 
         <!-- Footer -->
-        <div class="px-4 py-3 bg-[var(--ui-bg)] border-t border-[var(--ui-border)] flex items-center justify-between text-xs">
-          <span class="text-[var(--ui-text-muted)]">
-            <strong class="text-[var(--ui-text)]">Fix:</strong> Break up long tasks, defer analytics, avoid layout thrashing.
+        <div class="px-4 py-3 bg-default border-t border-default flex items-center justify-between text-xs">
+          <span class="text-muted">
+            <strong class="text-default">Fix:</strong> Break up long tasks, defer analytics, avoid layout thrashing.
           </span>
-          <div class="flex items-center gap-3 text-[var(--ui-text-muted)]">
+          <div class="flex items-center gap-3 text-muted">
             <span class="flex items-center gap-1"><span class="size-2 rounded-full bg-success" /> ≤200ms</span>
             <span class="flex items-center gap-1"><span class="size-2 rounded-full bg-warning" /> 200-500ms</span>
             <span class="flex items-center gap-1"><span class="size-2 rounded-full bg-error" /> >500ms</span>
@@ -400,8 +400,8 @@ const blockColors: Record<string, string> = {
     </div>
 
     <template #fallback>
-      <div class="rounded-xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] h-96 flex items-center justify-center">
-        <div class="flex items-center gap-2 text-[var(--ui-text-muted)]">
+      <div class="rounded-xl border border-default bg-elevated h-96 flex items-center justify-center">
+        <div class="flex items-center gap-2 text-muted">
           <div class="size-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
           <span>Loading demo...</span>
         </div>

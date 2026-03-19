@@ -66,7 +66,7 @@ const colorClasses = {
       :key="category.label"
       class="category-column relative"
       :class="[
-        catIdx < toolCategories.length - 1 ? 'border-r border-[var(--ui-border)]' : '',
+        catIdx < toolCategories.length - 1 ? 'border-r border-default' : '',
       ]"
       :style="{ '--stagger': catIdx }"
     >
@@ -77,11 +77,11 @@ const colorClasses = {
             class="w-1.5 h-1.5 rounded-full"
             :class="colorClasses[category.color].dot"
           />
-          <span class="text-[11px] font-semibold uppercase tracking-wider text-[var(--ui-text-muted)]">
+          <span class="text-[11px] font-semibold uppercase tracking-wider text-muted">
             {{ category.label }}
           </span>
         </div>
-        <p class="text-[10px] text-[var(--ui-text-dimmed)] pl-3.5">
+        <p class="text-[10px] text-dimmed pl-3.5">
           {{ category.description }}
         </p>
       </div>
@@ -109,24 +109,24 @@ const colorClasses = {
           </div>
 
           <!-- Label -->
-          <span class="text-sm font-medium text-[var(--ui-text)] group-hover:text-[var(--ui-text-highlighted)] transition-colors whitespace-nowrap">
+          <span class="text-sm font-medium text-default group-hover:text-highlighted transition-colors whitespace-nowrap">
             {{ tool.label }}
           </span>
 
           <!-- Arrow on hover -->
           <UIcon
             name="i-heroicons-chevron-right-20-solid"
-            class="w-3.5 h-3.5 text-[var(--ui-text-dimmed)] opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200"
+            class="w-3.5 h-3.5 text-dimmed opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200"
           />
         </NuxtLink>
       </div>
     </div>
 
     <!-- Footer: View all link -->
-    <div class="col-span-3 border-t border-[var(--ui-border)] bg-[var(--ui-bg-elevated)]/50">
+    <div class="col-span-3 border-t border-default bg-[var(--ui-bg-elevated)]/50">
       <NuxtLink
         to="/tools"
-        class="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-[var(--ui-text-muted)] hover:text-[var(--ui-text)] transition-colors group"
+        class="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-muted hover:text-default transition-colors group"
       >
         <UIcon name="i-heroicons-squares-2x2" class="w-4 h-4" />
         <span>View all tools</span>

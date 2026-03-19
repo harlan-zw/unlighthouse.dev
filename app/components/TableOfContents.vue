@@ -35,7 +35,7 @@ const router = useRouter()
 
 function scrollToHeading(id: string) {
   const encodedId = encodeURIComponent(id)
-  router.push(`#${encodedId}`)
+  navigateTo(`#${encodedId}`)
   emit('move', id)
 }
 </script>

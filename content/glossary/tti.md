@@ -26,7 +26,7 @@ Time to Interactive measured when a page became fully interactive - displaying u
 
 [Google removed TTI](https://developer.chrome.com/blog/lighthouse-10-0) because:
 
-- **Overly sensitive to outliers** - A single late network request could dramatically inflate TTI
+- **Overly sensitive to outliers** - A single late network request could inflate TTI
 - **Better alternatives exist** - [TBT](/glossary/tbt) measures blocking more robustly
 - **Poor correlation with real experience** - Terrible TTI could still feel responsive
 

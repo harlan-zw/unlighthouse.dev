@@ -112,7 +112,7 @@ async function onSubmit(event: FormSubmitEvent<CommentFeedbackSchemaOutput>) {
       </div>
     </div>
 
-    <div v-if="commentSubmissionStatus !== 'submitted'" class="mt-4 pt-4 border-t border-[var(--ui-border)]">
+    <div v-if="commentSubmissionStatus !== 'submitted'" class="mt-4 pt-4 border-t border-default">
       <UForm :schema="CommentFeedbackSchema" :state="state" class="space-y-3" :validate-on="['change']" @submit="onSubmit">
         <UFormField label="Anything that could be done better? :)" name="comment">
           <UTextarea v-model="state.comment" placeholder="Tell us how we can improve this tool..." class="w-full" :rows="2" />

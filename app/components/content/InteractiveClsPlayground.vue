@@ -107,14 +107,14 @@ function toggleProtectedMode() {
           </UBadge>
         </div>
       </div>
-      <p class="text-sm text-[var(--ui-text-muted)] mb-3">
+      <p class="text-sm text-muted mb-3">
         Experience how layout shifts frustrate users. Each shift adds to cumulative score based on area affected × distance moved.
       </p>
 
-      <div class="rounded-xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] overflow-hidden">
+      <div class="rounded-xl border border-default bg-elevated overflow-hidden">
         <div class="grid lg:grid-cols-5 gap-0">
           <!-- Browser simulation -->
-          <div class="lg:col-span-3 p-4 border-b lg:border-b-0 lg:border-r border-[var(--ui-border)]">
+          <div class="lg:col-span-3 p-4 border-b lg:border-b-0 lg:border-r border-default">
             <DemoBrowser url="news.example.com/article">
               <!-- contain: layout prevents demo shifts from affecting page CLS -->
               <div class="p-4 min-h-[220px] relative" style="contain: layout;">
@@ -127,14 +127,14 @@ function toggleProtectedMode() {
                   <div
                     v-if="activeShifts.dynamic"
                     class="mb-3 p-2 rounded border border-dashed flex items-center justify-center text-xs"
-                    :class="protectedMode ? 'border-[var(--ui-border)] bg-[var(--ui-bg-accented)]' : 'border-amber-500/50 bg-amber-500/10 text-amber-600 dark:text-amber-400'"
+                    :class="protectedMode ? 'border-default bg-accented' : 'border-amber-500/50 bg-amber-500/10 text-amber-600 dark:text-amber-400'"
                   >
                     {{ protectedMode ? '📝 Banner (reserved space)' : '📝 Cookie consent banner appeared!' }}
                   </div>
                 </Transition>
                 <div
                   v-if="protectedMode && !activeShifts.dynamic"
-                  class="mb-3 h-10 rounded border border-dashed border-[var(--ui-border)] flex items-center justify-center text-xs text-[var(--ui-text-muted)]"
+                  class="mb-3 h-10 rounded border border-dashed border-default flex items-center justify-center text-xs text-muted"
                 >
                   Reserved for banner
                 </div>
@@ -152,14 +152,14 @@ function toggleProtectedMode() {
                   <div
                     v-if="activeShifts.ad"
                     class="mb-3 h-16 rounded border border-dashed flex items-center justify-center text-xs"
-                    :class="protectedMode ? 'border-[var(--ui-border)] bg-[var(--ui-bg-accented)]' : 'border-rose-500/50 bg-rose-500/10 text-rose-600 dark:text-rose-400'"
+                    :class="protectedMode ? 'border-default bg-accented' : 'border-rose-500/50 bg-rose-500/10 text-rose-600 dark:text-rose-400'"
                   >
                     {{ protectedMode ? '📢 Ad (reserved space)' : '📢 Advertisement loaded late!' }}
                   </div>
                 </Transition>
                 <div
                   v-if="protectedMode && !activeShifts.ad"
-                  class="mb-3 h-16 rounded border border-dashed border-[var(--ui-border)] flex items-center justify-center text-xs text-[var(--ui-text-muted)]"
+                  class="mb-3 h-16 rounded border border-dashed border-default flex items-center justify-center text-xs text-muted"
                 >
                   Reserved for ad
                 </div>
@@ -182,9 +182,9 @@ function toggleProtectedMode() {
                     protectedMode || activeShifts.image ? 'h-20' : 'h-6',
                     activeShifts.image
                       ? protectedMode
-                        ? 'border border-dashed border-[var(--ui-border)] bg-[var(--ui-bg-accented)]'
+                        ? 'border border-dashed border-default bg-accented'
                         : 'border border-dashed border-cyan-500/50 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400'
-                      : 'bg-[var(--ui-bg-accented)] text-[var(--ui-text-muted)]',
+                      : 'bg-accented text-muted',
                   ]"
                 >
                   <span v-if="activeShifts.image">
@@ -198,7 +198,7 @@ function toggleProtectedMode() {
                 <div
                   v-if="activeShifts.font"
                   class="absolute bottom-2 right-2 px-2 py-1 rounded text-xs"
-                  :class="protectedMode ? 'bg-[var(--ui-bg-accented)] text-[var(--ui-text-muted)]' : 'bg-purple-500/10 text-purple-600 dark:text-purple-400'"
+                  :class="protectedMode ? 'bg-accented text-muted' : 'bg-purple-500/10 text-purple-600 dark:text-purple-400'"
                 >
                   🔤 {{ protectedMode ? 'Font (fallback sized)' : 'Font swapped!' }}
                 </div>
@@ -206,7 +206,7 @@ function toggleProtectedMode() {
             </DemoBrowser>
 
             <!-- Explanation -->
-            <div class="mt-3 p-3 bg-[var(--ui-bg)] rounded-lg border border-[var(--ui-border)]">
+            <div class="mt-3 p-3 bg-default rounded-lg border border-default">
               <div class="flex items-start gap-2">
                 <span class="text-sm">{{ currentExplanation }}</span>
               </div>
@@ -215,7 +215,7 @@ function toggleProtectedMode() {
 
           <!-- Controls -->
           <div class="lg:col-span-2 p-4 flex flex-col">
-            <div class="text-xs text-[var(--ui-text-muted)] mb-2">
+            <div class="text-xs text-muted mb-2">
               Trigger layout shifts:
             </div>
 
@@ -226,8 +226,8 @@ function toggleProtectedMode() {
                 class="w-full flex items-center gap-3 p-2 rounded-lg border transition-all text-left"
                 :class="[
                   activeShifts[scenario.id]
-                    ? 'border-[var(--ui-border)] bg-[var(--ui-bg-accented)] opacity-60'
-                    : 'border-[var(--ui-border)] hover:border-[var(--ui-primary)] hover:bg-[var(--ui-bg)]',
+                    ? 'border-default bg-accented opacity-60'
+                    : 'border-default hover:border-primary hover:bg-default',
                 ]"
                 :disabled="activeShifts[scenario.id]"
                 @click="triggerShift(scenario)"
@@ -239,7 +239,7 @@ function toggleProtectedMode() {
                     <span v-if="!protectedMode" class="text-xs font-mono text-error">+{{ (scenario.impact * scenario.distance).toFixed(3) }}</span>
                     <span v-else class="text-xs text-success">Protected</span>
                   </div>
-                  <div class="text-xs text-[var(--ui-text-muted)] truncate">
+                  <div class="text-xs text-muted truncate">
                     {{ scenario.description }}
                   </div>
                 </div>
@@ -248,17 +248,17 @@ function toggleProtectedMode() {
 
             <!-- Shift log -->
             <div v-if="shifts.length > 0" class="mb-4">
-              <div class="text-xs text-[var(--ui-text-muted)] mb-2">
+              <div class="text-xs text-muted mb-2">
                 Shift log:
               </div>
               <div class="space-y-1 max-h-24 overflow-y-auto">
                 <div
                   v-for="shift in [...shifts].reverse()"
                   :key="shift.id"
-                  class="flex items-center justify-between text-xs p-2 rounded bg-[var(--ui-bg)]"
+                  class="flex items-center justify-between text-xs p-2 rounded bg-default"
                 >
                   <span>{{ shift.icon }} {{ shift.type }}</span>
-                  <span class="font-mono text-[var(--ui-text-muted)]">
+                  <span class="font-mono text-muted">
                     {{ shift.impact.toFixed(2) }} × {{ shift.distance.toFixed(2) }} = <span class="text-error">{{ shift.score.toFixed(4) }}</span>
                   </span>
                 </div>
@@ -268,8 +268,8 @@ function toggleProtectedMode() {
             <div class="flex-1" />
 
             <!-- Formula -->
-            <div class="p-2 bg-[var(--ui-bg)] rounded-lg text-xs mb-4">
-              <span class="text-[var(--ui-text-muted)]">Formula:</span>
+            <div class="p-2 bg-default rounded-lg text-xs mb-4">
+              <span class="text-muted">Formula:</span>
               <code class="ml-1">CLS = impact × distance</code>
             </div>
 
@@ -291,11 +291,11 @@ function toggleProtectedMode() {
         </div>
 
         <!-- Footer -->
-        <div class="px-4 py-3 bg-[var(--ui-bg)] border-t border-[var(--ui-border)] flex items-center justify-between text-xs">
-          <span class="text-[var(--ui-text-muted)]">
-            <strong class="text-[var(--ui-text)]">Fix:</strong> Set width/height on images, reserve space for ads and dynamic content.
+        <div class="px-4 py-3 bg-default border-t border-default flex items-center justify-between text-xs">
+          <span class="text-muted">
+            <strong class="text-default">Fix:</strong> Set width/height on images, reserve space for ads and dynamic content.
           </span>
-          <div class="flex items-center gap-3 text-[var(--ui-text-muted)]">
+          <div class="flex items-center gap-3 text-muted">
             <span class="flex items-center gap-1"><span class="size-2 rounded-full bg-success" /> ≤0.1</span>
             <span class="flex items-center gap-1"><span class="size-2 rounded-full bg-warning" /> 0.1-0.25</span>
             <span class="flex items-center gap-1"><span class="size-2 rounded-full bg-error" /> >0.25</span>
@@ -305,8 +305,8 @@ function toggleProtectedMode() {
     </div>
 
     <template #fallback>
-      <div class="rounded-xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] h-96 flex items-center justify-center">
-        <div class="flex items-center gap-2 text-[var(--ui-text-muted)]">
+      <div class="rounded-xl border border-default bg-elevated h-96 flex items-center justify-center">
+        <div class="flex items-center gap-2 text-muted">
           <div class="size-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
           <span>Loading demo...</span>
         </div>

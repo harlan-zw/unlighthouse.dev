@@ -64,7 +64,7 @@ const subSectionLinks = computed(() => {
               :to="item.to"
             >
               {{ item.label }}
-              <div :class="item.active ? 'absolute bottom-0 h-[1.5px] w-full bg-[var(--ui-primary)]' : 'absolute bottom-0 h-[1.5px] w-full group-hover:bg-gray-200 dark:group-hover:bg-gray-700'" />
+              <div :class="item.active ? 'absolute bottom-0 h-[1.5px] w-full bg-primary' : 'absolute bottom-0 h-[1.5px] w-full group-hover:bg-gray-200 dark:group-hover:bg-gray-700'" />
             </NuxtLink>
           </div>
         </div>

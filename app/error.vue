@@ -165,19 +165,19 @@ if (props.error.statusCode && !isPrerendering) {
           </h2>
 
           <!-- Recommended Links -->
-          <div class="bg-[var(--ui-bg)] border-[var(--ui-border)] rounded-lg shadow-sm border  overflow-hidden">
+          <div class="bg-default border-default rounded-lg shadow-sm border  overflow-hidden">
             <nav>
               <ul class="divide-y divide-gray-100 dark:divide-neutral-800">
                 <li
                   v-for="(link, index) in recommendedLinks"
                   :key="index"
-                  class="hover:bg-[var(--ui-bg-elevated)] transition-colors duration-150"
+                  class="hover:bg-elevated transition-colors duration-150"
                 >
                   <NuxtLink
                     :to="link.item.path"
-                    class="p-4 text-[var(--ui-text)] hover:text-[var(--ui-text-inverse)] block"
+                    class="p-4 text-default hover:text-[var(--ui-text-inverse)] block"
                   >
-                    <div class="text-sm text-[var(--ui-text-dimmed)] mb-1">
+                    <div class="text-sm text-dimmed mb-1">
                       {{ link.item.hierarchy.slice(-3).join(' > ') }}
                     </div>
                     <div class="font-medium" v-html="link.item.title" />

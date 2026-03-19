@@ -73,9 +73,9 @@ Speed Index complements FCP and LCP by measuring the experience between these po
 ## Measure Speed Index
 
 - Lighthouse in Chrome DevTools
-- [PageSpeed Insights](https://pagespeed.web.dev/) — Speed Index appears in the "Diagnostics" section of PageSpeed Insights results
+- [PageSpeed Insights](https://pagespeed.web.dev/) - Speed Index appears in the "Diagnostics" section of PageSpeed Insights results
 - WebPageTest (original source of the metric)
-- [Unlighthouse Bulk PageSpeed Test](/tools/bulk-pagespeed) — test Speed Index across your entire site
+- [Unlighthouse Bulk PageSpeed Test](/tools/bulk-pagespeed) - test Speed Index across your entire site
 
 ::note
 Speed Index is a lab metric, not a Core Web Vital. Focus on [LCP](/glossary/lcp), [CLS](/glossary/cls), and [INP](/glossary/inp) for search ranking impact. Use the [Lighthouse Score Calculator](/tools/lighthouse-score-calculator) to see how Speed Index (10% weight) affects your overall score.

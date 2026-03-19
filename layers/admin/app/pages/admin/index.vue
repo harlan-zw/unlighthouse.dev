@@ -104,14 +104,14 @@ const lookupColumns: TableColumn<ToolLookup>[] = [
         h('div', { class: `w-8 h-8 rounded-lg bg-${meta.color}-500/10 flex items-center justify-center` }, [
           h('span', { class: `${meta.icon} w-4 h-4 text-${meta.color}-500` }),
         ]),
-        h('span', { class: 'font-medium text-[var(--ui-text-highlighted)]' }, meta.name),
+        h('span', { class: 'font-medium text-highlighted' }, meta.name),
       ])
     },
   },
   {
     accessorKey: 'query',
     header: 'Domain',
-    cell: ({ row }) => h('code', { class: 'text-[13px] font-mono bg-[var(--ui-bg)] px-2 py-1 rounded-md text-[var(--ui-text-muted)]' }, row.original.query),
+    cell: ({ row }) => h('code', { class: 'text-[13px] font-mono bg-default px-2 py-1 rounded-md text-muted' }, row.original.query),
   },
   {
     accessorKey: 'strategy',
@@ -119,10 +119,10 @@ const lookupColumns: TableColumn<ToolLookup>[] = [
     cell: ({ row }) => {
       const strategy = row.original.strategy
       if (!strategy)
-        return h('span', { class: 'text-[var(--ui-text-dimmed)]' }, '—')
+        return h('span', { class: 'text-dimmed' }, '—')
       const icon = strategy === 'mobile' ? 'i-carbon-mobile' : 'i-carbon-laptop'
       const label = strategy === 'mobile' ? 'Mobile' : 'Desktop'
-      return h('div', { class: 'flex items-center gap-2 text-[var(--ui-text-muted)]' }, [
+      return h('div', { class: 'flex items-center gap-2 text-muted' }, [
         h('span', { class: `${icon} w-4 h-4` }),
         h('span', { class: 'text-sm' }, label),
       ])
@@ -135,10 +135,10 @@ const lookupColumns: TableColumn<ToolLookup>[] = [
       const sessionId = row.original.session_id
       const userId = row.original.user_id
       if (!sessionId && !userId)
-        return h('span', { class: 'text-[var(--ui-text-dimmed)]' }, '—')
+        return h('span', { class: 'text-dimmed' }, '—')
       return h('span', { class: 'inline-flex items-center gap-1.5 text-xs' }, [
         h('span', { class: `w-1.5 h-1.5 rounded-full ${userId ? 'bg-emerald-500' : 'bg-gray-400'}` }),
-        h('code', { class: 'font-mono text-[var(--ui-text-muted)]' }, sessionId || userId!.slice(0, 8)),
+        h('code', { class: 'font-mono text-muted' }, sessionId || userId!.slice(0, 8)),
       ])
     },
   },
@@ -149,9 +149,9 @@ const lookupColumns: TableColumn<ToolLookup>[] = [
       const raw = row.original.created_at
       const date = raw instanceof Date ? raw : new Date(typeof raw === 'number' ? raw * 1000 : raw)
       if (Number.isNaN(date.getTime()))
-        return h('span', { class: 'text-[var(--ui-text-dimmed)]' }, '—')
+        return h('span', { class: 'text-dimmed' }, '—')
       return h('time', {
-        class: 'text-sm font-mono text-[var(--ui-text-muted)] tabular-nums',
+        class: 'text-sm font-mono text-muted tabular-nums',
         datetime: date.toISOString(),
       }, formatRelativeTime(date))
     },
@@ -218,6 +218,10 @@ const filteredFeedback = computed(() => {
   return feedbackData.value.entries.filter(e => e.path === activeFeedbackPath.value)
 })
 
+const feedbackComments = computed(() =>
+  filteredFeedback.value.filter(e => e.comment),
+)
+
 const feedbackColumns: TableColumn<FeedbackEntry>[] = [
   {
     accessorKey: 'path',
@@ -229,7 +233,7 @@ const feedbackColumns: TableColumn<FeedbackEntry>[] = [
         h('div', { class: `w-8 h-8 rounded-lg bg-${meta.color}-500/10 flex items-center justify-center` }, [
           h('span', { class: `${meta.icon} w-4 h-4 text-${meta.color}-500` }),
         ]),
-        h('span', { class: 'font-medium text-[var(--ui-text-highlighted)] text-sm' }, meta.name),
+        h('span', { class: 'font-medium text-highlighted text-sm' }, meta.name),
       ])
     },
   },
@@ -239,7 +243,7 @@ const feedbackColumns: TableColumn<FeedbackEntry>[] = [
     cell: ({ row }) => {
       const thumb = row.original.thumb
       if (!thumb)
-        return h('span', { class: 'text-[var(--ui-text-dimmed)]' }, '—')
+        return h('span', { class: 'text-dimmed' }, '—')
       const icon = thumb === 'up' ? 'i-carbon-thumbs-up-filled' : 'i-carbon-thumbs-down-filled'
       const color = thumb === 'up' ? 'text-emerald-500' : 'text-red-500'
       return h('span', { class: `${icon} w-4 h-4 ${color}` })
@@ -251,8 +255,8 @@ const feedbackColumns: TableColumn<FeedbackEntry>[] = [
     cell: ({ row }) => {
       const comment = row.original.comment
       if (!comment)
-        return h('span', { class: 'text-[var(--ui-text-dimmed)]' }, '—')
-      return h('span', { class: 'text-sm text-[var(--ui-text-muted)] max-w-xs truncate block' }, comment)
+        return h('span', { class: 'text-dimmed' }, '—')
+      return h('span', { class: 'text-sm text-muted max-w-xs truncate block' }, comment)
     },
   },
   {
@@ -262,10 +266,10 @@ const feedbackColumns: TableColumn<FeedbackEntry>[] = [
       const sessionId = row.original.sessionId
       const userId = row.original.userId
       if (!sessionId && !userId)
-        return h('span', { class: 'text-[var(--ui-text-dimmed)]' }, '—')
+        return h('span', { class: 'text-dimmed' }, '—')
       return h('span', { class: 'inline-flex items-center gap-1.5 text-xs' }, [
         h('span', { class: `w-1.5 h-1.5 rounded-full ${userId ? 'bg-emerald-500' : 'bg-gray-400'}` }),
-        h('code', { class: 'font-mono text-[var(--ui-text-muted)]' }, sessionId || userId!.slice(0, 8)),
+        h('code', { class: 'font-mono text-muted' }, sessionId || userId!.slice(0, 8)),
       ])
     },
   },
@@ -276,9 +280,9 @@ const feedbackColumns: TableColumn<FeedbackEntry>[] = [
       const raw = row.original.createdAt
       const date = raw instanceof Date ? raw : new Date(typeof raw === 'number' ? raw * 1000 : raw)
       if (Number.isNaN(date.getTime()))
-        return h('span', { class: 'text-[var(--ui-text-dimmed)]' }, '—')
+        return h('span', { class: 'text-dimmed' }, '—')
       return h('time', {
-        class: 'text-sm font-mono text-[var(--ui-text-muted)] tabular-nums',
+        class: 'text-sm font-mono text-muted tabular-nums',
         datetime: date.toISOString(),
       }, formatRelativeTime(date))
     },
@@ -367,22 +371,22 @@ function toggleJourney(id: string) {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[var(--ui-bg)]">
+  <div class="min-h-screen bg-default">
     <!-- Header -->
-    <header class="sticky top-0 z-50 border-b border-[var(--ui-border)] bg-[var(--ui-bg-elevated)]/80 backdrop-blur-xl">
+    <header class="sticky top-0 z-50 border-b border-default bg-[var(--ui-bg-elevated)]/80 backdrop-blur-xl">
       <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         <div class="flex items-center gap-4">
           <NuxtLink
             to="/"
-            class="w-9 h-9 rounded-lg bg-[var(--ui-bg)] border border-[var(--ui-border)] flex items-center justify-center text-[var(--ui-text-muted)] hover:text-[var(--ui-text-highlighted)] hover:border-[var(--ui-border-hover)] transition-all"
+            class="w-9 h-9 rounded-lg bg-default border border-default flex items-center justify-center text-muted hover:text-highlighted hover:border-[var(--ui-border-hover)] transition-all"
           >
             <UIcon name="i-carbon-arrow-left" class="w-4 h-4" />
           </NuxtLink>
           <div>
-            <h1 class="text-base font-semibold text-[var(--ui-text-highlighted)]">
+            <h1 class="text-base font-semibold text-highlighted">
               Admin Dashboard
             </h1>
-            <p class="text-xs text-[var(--ui-text-dimmed)]">
+            <p class="text-xs text-dimmed">
               Analytics & Tool Usage
             </p>
           </div>
@@ -390,7 +394,7 @@ function toggleJourney(id: string) {
         <div v-if="loggedIn" class="flex items-center gap-4">
           <div class="flex items-center gap-2">
             <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span class="text-sm text-[var(--ui-text-muted)]">{{ user?.email }}</span>
+            <span class="text-sm text-muted">{{ user?.email }}</span>
           </div>
           <UButton variant="ghost" size="sm" color="neutral" @click="clear">
             Sign out
@@ -402,13 +406,13 @@ function toggleJourney(id: string) {
     <main class="max-w-6xl mx-auto px-6 py-8">
       <!-- Auth States -->
       <div v-if="!loggedIn" class="flex flex-col items-center justify-center py-24">
-        <div class="w-20 h-20 rounded-2xl bg-[var(--ui-bg-elevated)] border border-[var(--ui-border)] flex items-center justify-center mb-6">
-          <UIcon name="i-carbon-locked" class="w-8 h-8 text-[var(--ui-text-dimmed)]" />
+        <div class="w-20 h-20 rounded-2xl bg-elevated border border-default flex items-center justify-center mb-6">
+          <UIcon name="i-carbon-locked" class="w-8 h-8 text-dimmed" />
         </div>
-        <h2 class="text-xl font-semibold text-[var(--ui-text-highlighted)] mb-2">
+        <h2 class="text-xl font-semibold text-highlighted mb-2">
           Authentication Required
         </h2>
-        <p class="text-[var(--ui-text-muted)] mb-8 text-center max-w-sm">
+        <p class="text-muted mb-8 text-center max-w-sm">
           Sign in with your GitHub account to access the admin dashboard.
         </p>
         <UButton to="/auth/github" external size="lg" icon="i-carbon-logo-github">
@@ -420,11 +424,11 @@ function toggleJourney(id: string) {
         <div class="w-20 h-20 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-6">
           <UIcon name="i-carbon-warning" class="w-8 h-8 text-amber-500" />
         </div>
-        <h2 class="text-xl font-semibold text-[var(--ui-text-highlighted)] mb-2">
+        <h2 class="text-xl font-semibold text-highlighted mb-2">
           Access Denied
         </h2>
-        <p class="text-[var(--ui-text-muted)] mb-8 text-center max-w-sm">
-          <code class="text-sm bg-[var(--ui-bg)] px-2 py-0.5 rounded">{{ user?.email }}</code>
+        <p class="text-muted mb-8 text-center max-w-sm">
+          <code class="text-sm bg-default px-2 py-0.5 rounded">{{ user?.email }}</code>
           is not authorized to access this dashboard.
         </p>
         <UButton variant="soft" color="neutral" @click="clear">
@@ -438,10 +442,10 @@ function toggleJourney(id: string) {
         <section>
           <div class="flex items-center justify-between mb-6">
             <div>
-              <h2 class="text-lg font-semibold text-[var(--ui-text-highlighted)]">
+              <h2 class="text-lg font-semibold text-highlighted">
                 Analytics Overview
               </h2>
-              <p class="text-sm text-[var(--ui-text-dimmed)]">
+              <p class="text-sm text-dimmed">
                 Real-time tool usage metrics
               </p>
             </div>
@@ -469,7 +473,7 @@ function toggleJourney(id: string) {
             <div
               v-for="stat in statCards"
               :key="stat.label"
-              class="group relative p-5 rounded-xl bg-[var(--ui-bg-elevated)] border border-[var(--ui-border)] hover:border-[var(--ui-border-hover)] transition-all"
+              class="group relative p-5 rounded-xl bg-elevated border border-default hover:border-[var(--ui-border-hover)] transition-all"
             >
               <div class="flex items-start justify-between mb-3">
                 <div
@@ -478,12 +482,12 @@ function toggleJourney(id: string) {
                 >
                   <UIcon :name="stat.icon" class="w-5 h-5" :class="`text-${stat.color}-500`" />
                 </div>
-                <div v-if="status === 'pending'" class="w-12 h-4 rounded bg-[var(--ui-bg)] animate-pulse" />
+                <div v-if="status === 'pending'" class="w-12 h-4 rounded bg-default animate-pulse" />
               </div>
-              <p class="text-sm text-[var(--ui-text-muted)] mb-1">
+              <p class="text-sm text-muted mb-1">
                 {{ stat.label }}
               </p>
-              <p class="text-2xl font-bold font-mono tabular-nums text-[var(--ui-text-highlighted)]">
+              <p class="text-2xl font-bold font-mono tabular-nums text-highlighted">
                 <template v-if="status !== 'pending'">
                   {{ stat.isPercent ? `${stat.value.toFixed(1)}%` : stat.value.toLocaleString() }}
                 </template>
@@ -494,8 +498,8 @@ function toggleJourney(id: string) {
 
           <!-- Tool Usage with Progress Bars -->
           <div class="grid lg:grid-cols-2 gap-6">
-            <div class="p-6 rounded-xl bg-[var(--ui-bg-elevated)] border border-[var(--ui-border)]">
-              <h3 class="text-sm font-medium text-[var(--ui-text-muted)] uppercase tracking-wider mb-5">
+            <div class="p-6 rounded-xl bg-elevated border border-default">
+              <h3 class="text-sm font-medium text-muted uppercase tracking-wider mb-5">
                 Tool Usage
               </h3>
               <div v-if="analytics?.topTools?.length" class="space-y-4">
@@ -512,15 +516,15 @@ function toggleJourney(id: string) {
                           :class="`text-${getToolMeta(tool.tool).color}-500`"
                         />
                       </div>
-                      <span class="text-sm font-medium text-[var(--ui-text-highlighted)]">
+                      <span class="text-sm font-medium text-highlighted">
                         {{ getToolMeta(tool.tool).name }}
                       </span>
                     </div>
-                    <span class="text-sm font-mono tabular-nums text-[var(--ui-text-muted)]">
+                    <span class="text-sm font-mono tabular-nums text-muted">
                       {{ tool.count.toLocaleString() }}
                     </span>
                   </div>
-                  <div class="h-1.5 rounded-full bg-[var(--ui-bg)] overflow-hidden">
+                  <div class="h-1.5 rounded-full bg-default overflow-hidden">
                     <div
                       class="h-full rounded-full transition-all duration-500"
                       :class="`bg-${getToolMeta(tool.tool).color}-500`"
@@ -532,45 +536,45 @@ function toggleJourney(id: string) {
               <div v-else-if="status === 'pending'" class="space-y-4">
                 <div v-for="i in 3" :key="i" class="space-y-2">
                   <div class="flex justify-between">
-                    <div class="w-32 h-4 rounded bg-[var(--ui-bg)] animate-pulse" />
-                    <div class="w-8 h-4 rounded bg-[var(--ui-bg)] animate-pulse" />
+                    <div class="w-32 h-4 rounded bg-default animate-pulse" />
+                    <div class="w-8 h-4 rounded bg-default animate-pulse" />
                   </div>
-                  <div class="h-1.5 rounded-full bg-[var(--ui-bg)]" />
+                  <div class="h-1.5 rounded-full bg-default" />
                 </div>
               </div>
-              <p v-else class="text-sm text-[var(--ui-text-dimmed)] text-center py-8">
+              <p v-else class="text-sm text-dimmed text-center py-8">
                 No tool usage data yet
               </p>
             </div>
 
-            <div class="p-6 rounded-xl bg-[var(--ui-bg-elevated)] border border-[var(--ui-border)]">
-              <h3 class="text-sm font-medium text-[var(--ui-text-muted)] uppercase tracking-wider mb-5">
+            <div class="p-6 rounded-xl bg-elevated border border-default">
+              <h3 class="text-sm font-medium text-muted uppercase tracking-wider mb-5">
                 Action Breakdown
               </h3>
               <div v-if="analytics?.topActions?.length" class="space-y-3">
                 <div
                   v-for="action in analytics.topActions"
                   :key="action.action"
-                  class="flex items-center justify-between py-2 border-b border-[var(--ui-border)] last:border-0"
+                  class="flex items-center justify-between py-2 border-b border-default last:border-0"
                 >
                   <div class="flex items-center gap-2">
-                    <div class="w-2 h-2 rounded-full bg-[var(--ui-primary)]" />
-                    <span class="text-sm text-[var(--ui-text-highlighted)] capitalize">
+                    <div class="w-2 h-2 rounded-full bg-primary" />
+                    <span class="text-sm text-highlighted capitalize">
                       {{ action.action }}
                     </span>
                   </div>
-                  <span class="text-sm font-mono tabular-nums text-[var(--ui-text-muted)]">
+                  <span class="text-sm font-mono tabular-nums text-muted">
                     {{ action.count.toLocaleString() }}
                   </span>
                 </div>
               </div>
               <div v-else-if="status === 'pending'" class="space-y-3">
-                <div v-for="i in 3" :key="i" class="flex justify-between py-2 border-b border-[var(--ui-border)] last:border-0">
-                  <div class="w-24 h-4 rounded bg-[var(--ui-bg)] animate-pulse" />
-                  <div class="w-12 h-4 rounded bg-[var(--ui-bg)] animate-pulse" />
+                <div v-for="i in 3" :key="i" class="flex justify-between py-2 border-b border-default last:border-0">
+                  <div class="w-24 h-4 rounded bg-default animate-pulse" />
+                  <div class="w-12 h-4 rounded bg-default animate-pulse" />
                 </div>
               </div>
-              <p v-else class="text-sm text-[var(--ui-text-dimmed)] text-center py-8">
+              <p v-else class="text-sm text-dimmed text-center py-8">
                 No action data yet
               </p>
             </div>
@@ -580,18 +584,18 @@ function toggleJourney(id: string) {
         <!-- Section: Tool Insights -->
         <section>
           <div class="mb-6">
-            <h2 class="text-lg font-semibold text-[var(--ui-text-highlighted)]">
+            <h2 class="text-lg font-semibold text-highlighted">
               Tool Insights
             </h2>
-            <p class="text-sm text-[var(--ui-text-dimmed)]">
+            <p class="text-sm text-dimmed">
               Feedback sentiment and session engagement
             </p>
           </div>
 
           <div class="grid lg:grid-cols-2 gap-6">
             <!-- Feedback Sentiment Per Tool -->
-            <div class="p-6 rounded-xl bg-[var(--ui-bg-elevated)] border border-[var(--ui-border)]">
-              <h3 class="text-sm font-medium text-[var(--ui-text-muted)] uppercase tracking-wider mb-5">
+            <div class="p-6 rounded-xl bg-elevated border border-default">
+              <h3 class="text-sm font-medium text-muted uppercase tracking-wider mb-5">
                 Feedback Sentiment Per Tool
               </h3>
               <div v-if="feedbackRateByTool.length" class="space-y-5">
@@ -608,16 +612,16 @@ function toggleJourney(id: string) {
                           :class="`text-${tool.meta.color}-500`"
                         />
                       </div>
-                      <span class="text-sm font-medium text-[var(--ui-text-highlighted)]">{{ tool.meta.name }}</span>
+                      <span class="text-sm font-medium text-highlighted">{{ tool.meta.name }}</span>
                     </div>
-                    <div class="flex items-center gap-3 text-xs font-mono tabular-nums text-[var(--ui-text-muted)]">
+                    <div class="flex items-center gap-3 text-xs font-mono tabular-nums text-muted">
                       <span>{{ tool.lookups }} lookups</span>
                       <span>{{ tool.total }} feedback</span>
-                      <span class="text-[var(--ui-text-highlighted)]">{{ tool.rate }}%</span>
+                      <span class="text-highlighted">{{ tool.rate }}%</span>
                     </div>
                   </div>
                   <!-- Stacked bar -->
-                  <div class="h-2 rounded-full bg-[var(--ui-bg)] overflow-hidden flex">
+                  <div class="h-2 rounded-full bg-default overflow-hidden flex">
                     <div
                       v-if="tool.total > 0"
                       class="h-full bg-emerald-500 transition-all duration-500"
@@ -629,49 +633,49 @@ function toggleJourney(id: string) {
                       :style="{ width: `${(tool.down / tool.total) * 100}%` }"
                     />
                   </div>
-                  <div class="flex justify-between mt-1 text-xs text-[var(--ui-text-dimmed)]">
+                  <div class="flex justify-between mt-1 text-xs text-dimmed">
                     <span class="text-emerald-500">{{ tool.up }} up</span>
                     <span class="text-red-500">{{ tool.down }} down</span>
                   </div>
                 </div>
               </div>
-              <p v-else class="text-sm text-[var(--ui-text-dimmed)] text-center py-8">
+              <p v-else class="text-sm text-dimmed text-center py-8">
                 No feedback data yet
               </p>
             </div>
 
             <!-- Engagement -->
-            <div class="p-6 rounded-xl bg-[var(--ui-bg-elevated)] border border-[var(--ui-border)]">
-              <h3 class="text-sm font-medium text-[var(--ui-text-muted)] uppercase tracking-wider mb-5">
+            <div class="p-6 rounded-xl bg-elevated border border-default">
+              <h3 class="text-sm font-medium text-muted uppercase tracking-wider mb-5">
                 Session Engagement
               </h3>
               <div v-if="lookupData?.engagement && engagementTotal > 0">
                 <div class="grid grid-cols-2 gap-4 mb-6">
-                  <div class="p-4 rounded-lg bg-[var(--ui-bg)]">
-                    <p class="text-sm text-[var(--ui-text-muted)] mb-1">
+                  <div class="p-4 rounded-lg bg-default">
+                    <p class="text-sm text-muted mb-1">
                       Repeat Sessions
                     </p>
                     <p class="text-2xl font-bold font-mono tabular-nums text-emerald-500">
                       {{ lookupData.engagement.repeat }}
                     </p>
-                    <p class="text-xs text-[var(--ui-text-dimmed)] mt-1">
+                    <p class="text-xs text-dimmed mt-1">
                       {{ ((lookupData.engagement.repeat / engagementTotal) * 100).toFixed(1) }}% of sessions
                     </p>
                   </div>
-                  <div class="p-4 rounded-lg bg-[var(--ui-bg)]">
-                    <p class="text-sm text-[var(--ui-text-muted)] mb-1">
+                  <div class="p-4 rounded-lg bg-default">
+                    <p class="text-sm text-muted mb-1">
                       One-and-Done
                     </p>
-                    <p class="text-2xl font-bold font-mono tabular-nums text-[var(--ui-text-highlighted)]">
+                    <p class="text-2xl font-bold font-mono tabular-nums text-highlighted">
                       {{ lookupData.engagement.single }}
                     </p>
-                    <p class="text-xs text-[var(--ui-text-dimmed)] mt-1">
+                    <p class="text-xs text-dimmed mt-1">
                       {{ ((lookupData.engagement.single / engagementTotal) * 100).toFixed(1) }}% of sessions
                     </p>
                   </div>
                 </div>
                 <!-- Visual bar -->
-                <div class="h-3 rounded-full bg-[var(--ui-bg)] overflow-hidden flex">
+                <div class="h-3 rounded-full bg-default overflow-hidden flex">
                   <div
                     class="h-full bg-emerald-500 transition-all duration-500"
                     :style="{ width: `${(lookupData.engagement.repeat / engagementTotal) * 100}%` }"
@@ -681,12 +685,12 @@ function toggleJourney(id: string) {
                     :style="{ width: `${(lookupData.engagement.single / engagementTotal) * 100}%` }"
                   />
                 </div>
-                <div class="flex justify-between mt-2 text-xs text-[var(--ui-text-dimmed)]">
+                <div class="flex justify-between mt-2 text-xs text-dimmed">
                   <span class="text-emerald-500">Repeat (2+ lookups)</span>
                   <span>Single lookup</span>
                 </div>
               </div>
-              <p v-else class="text-sm text-[var(--ui-text-dimmed)] text-center py-8">
+              <p v-else class="text-sm text-dimmed text-center py-8">
                 No session data yet
               </p>
             </div>
@@ -696,15 +700,15 @@ function toggleJourney(id: string) {
         <!-- Section: Daily Trends -->
         <section>
           <div class="mb-6">
-            <h2 class="text-lg font-semibold text-[var(--ui-text-highlighted)]">
+            <h2 class="text-lg font-semibold text-highlighted">
               Daily Trends
             </h2>
-            <p class="text-sm text-[var(--ui-text-dimmed)]">
+            <p class="text-sm text-dimmed">
               Lookups per day over the last 30 days
             </p>
           </div>
 
-          <div class="p-6 rounded-xl bg-[var(--ui-bg-elevated)] border border-[var(--ui-border)]">
+          <div class="p-6 rounded-xl bg-elevated border border-default">
             <div v-if="insightsData?.dailyTrends?.length" class="flex items-end gap-1" style="height: 160px;">
               <div
                 v-for="day in insightsData.dailyTrends"
@@ -712,16 +716,16 @@ function toggleJourney(id: string) {
                 class="group relative flex-1 flex flex-col items-center justify-end h-full"
               >
                 <div
-                  class="w-full rounded-t bg-[var(--ui-primary)] transition-all duration-300 hover:opacity-80 min-h-[2px]"
+                  class="w-full rounded-t bg-primary transition-all duration-300 hover:opacity-80 min-h-[2px]"
                   :style="{ height: `${Math.max((day.count / maxDailyCount) * 100, 1)}%` }"
                 />
                 <!-- Tooltip -->
                 <div class="absolute bottom-full mb-2 hidden group-hover:block z-10">
-                  <div class="bg-[var(--ui-bg-elevated)] border border-[var(--ui-border)] rounded-lg px-3 py-2 shadow-xl text-center whitespace-nowrap">
-                    <p class="text-xs font-mono text-[var(--ui-text-highlighted)]">
+                  <div class="bg-elevated border border-default rounded-lg px-3 py-2 shadow-xl text-center whitespace-nowrap">
+                    <p class="text-xs font-mono text-highlighted">
                       {{ day.count }}
                     </p>
-                    <p class="text-xs text-[var(--ui-text-dimmed)]">
+                    <p class="text-xs text-dimmed">
                       {{ day.day }}
                     </p>
                   </div>
@@ -729,13 +733,13 @@ function toggleJourney(id: string) {
               </div>
             </div>
             <div v-else-if="insightsStatus === 'pending'" class="flex items-end gap-1" style="height: 160px;">
-              <div v-for="i in 30" :key="i" class="flex-1 bg-[var(--ui-bg)] rounded-t animate-pulse" :style="{ height: `${20 + Math.random() * 60}%` }" />
+              <div v-for="i in 30" :key="i" class="flex-1 bg-default rounded-t animate-pulse" :style="{ height: `${20 + Math.random() * 60}%` }" />
             </div>
-            <p v-else class="text-sm text-[var(--ui-text-dimmed)] text-center py-8">
+            <p v-else class="text-sm text-dimmed text-center py-8">
               No trend data yet
             </p>
             <!-- X-axis labels -->
-            <div v-if="insightsData?.dailyTrends?.length" class="flex justify-between mt-2 text-xs text-[var(--ui-text-dimmed)] font-mono">
+            <div v-if="insightsData?.dailyTrends?.length" class="flex justify-between mt-2 text-xs text-dimmed font-mono">
               <span>{{ insightsData.dailyTrends[0]?.day }}</span>
               <span>{{ insightsData.dailyTrends[insightsData.dailyTrends.length - 1]?.day }}</span>
             </div>
@@ -745,33 +749,33 @@ function toggleJourney(id: string) {
         <!-- Section: Top Domains -->
         <section>
           <div class="mb-6">
-            <h2 class="text-lg font-semibold text-[var(--ui-text-highlighted)]">
+            <h2 class="text-lg font-semibold text-highlighted">
               Top Domains
             </h2>
-            <p class="text-sm text-[var(--ui-text-dimmed)]">
+            <p class="text-sm text-dimmed">
               Most queried domains across all tools
             </p>
           </div>
 
-          <div class="p-6 rounded-xl bg-[var(--ui-bg-elevated)] border border-[var(--ui-border)]">
+          <div class="p-6 rounded-xl bg-elevated border border-default">
             <div v-if="topDomains.length" class="space-y-3">
               <div v-for="(domain, i) in topDomains" :key="domain.query" class="flex items-center gap-4">
-                <span class="w-6 text-right text-xs font-mono tabular-nums text-[var(--ui-text-dimmed)]">{{ i + 1 }}</span>
+                <span class="w-6 text-right text-xs font-mono tabular-nums text-dimmed">{{ i + 1 }}</span>
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center justify-between mb-1">
-                    <code class="text-sm font-mono text-[var(--ui-text-highlighted)] truncate">{{ domain.query }}</code>
-                    <span class="text-xs font-mono tabular-nums text-[var(--ui-text-muted)] ml-3 shrink-0">{{ domain.count }}</span>
+                    <code class="text-sm font-mono text-highlighted truncate">{{ domain.query }}</code>
+                    <span class="text-xs font-mono tabular-nums text-muted ml-3 shrink-0">{{ domain.count }}</span>
                   </div>
-                  <div class="h-1.5 rounded-full bg-[var(--ui-bg)] overflow-hidden">
+                  <div class="h-1.5 rounded-full bg-default overflow-hidden">
                     <div
-                      class="h-full rounded-full bg-[var(--ui-primary)] transition-all duration-500"
+                      class="h-full rounded-full bg-primary transition-all duration-500"
                       :style="{ width: `${(domain.count / maxDomainCount) * 100}%` }"
                     />
                   </div>
                 </div>
               </div>
             </div>
-            <p v-else class="text-sm text-[var(--ui-text-dimmed)] text-center py-8">
+            <p v-else class="text-sm text-dimmed text-center py-8">
               No domain data yet
             </p>
           </div>
@@ -780,28 +784,28 @@ function toggleJourney(id: string) {
         <!-- Section: Session Journeys -->
         <section>
           <div class="mb-6">
-            <h2 class="text-lg font-semibold text-[var(--ui-text-highlighted)]">
+            <h2 class="text-lg font-semibold text-highlighted">
               Session Journeys
             </h2>
-            <p class="text-sm text-[var(--ui-text-dimmed)]">
+            <p class="text-sm text-dimmed">
               Tool usage patterns per session
             </p>
           </div>
 
-          <div class="rounded-xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] overflow-hidden">
+          <div class="rounded-xl border border-default bg-elevated overflow-hidden">
             <div v-if="insightsData?.journeys?.length" class="divide-y divide-[var(--ui-border)]">
               <div v-for="journey in insightsData.journeys" :key="journey.sessionId">
                 <button
-                  class="w-full px-5 py-4 flex items-center gap-4 hover:bg-[var(--ui-bg)] transition-colors text-left"
+                  class="w-full px-5 py-4 flex items-center gap-4 hover:bg-default transition-colors text-left"
                   @click="toggleJourney(journey.sessionId)"
                 >
                   <UIcon
                     name="i-carbon-chevron-right"
-                    class="w-4 h-4 text-[var(--ui-text-dimmed)] transition-transform shrink-0"
+                    class="w-4 h-4 text-dimmed transition-transform shrink-0"
                     :class="{ 'rotate-90': expandedJourneys.has(journey.sessionId) }"
                   />
-                  <code class="text-xs font-mono text-[var(--ui-text-muted)]">{{ journey.sessionId.slice(0, 12) }}</code>
-                  <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-mono bg-[var(--ui-primary)]/10 text-[var(--ui-primary)]">
+                  <code class="text-xs font-mono text-muted">{{ journey.sessionId.slice(0, 12) }}</code>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-mono bg-[var(--ui-primary)]/10 text-primary">
                     {{ journey.toolCount }} tools
                   </span>
                   <div class="flex items-center gap-1.5 flex-1 min-w-0">
@@ -814,11 +818,11 @@ function toggleJourney(id: string) {
                     >
                       <UIcon :name="getToolMeta(lookup.tool).icon" class="w-3 h-3" :class="`text-${getToolMeta(lookup.tool).color}-500`" />
                     </div>
-                    <span v-if="journey.lookups.length > 8" class="text-xs text-[var(--ui-text-dimmed)]">+{{ journey.lookups.length - 8 }}</span>
+                    <span v-if="journey.lookups.length > 8" class="text-xs text-dimmed">+{{ journey.lookups.length - 8 }}</span>
                   </div>
                   <div v-if="journey.feedback.length" class="flex items-center gap-1 shrink-0">
-                    <UIcon name="i-carbon-chat" class="w-3.5 h-3.5 text-[var(--ui-text-dimmed)]" />
-                    <span class="text-xs text-[var(--ui-text-dimmed)]">{{ journey.feedback.length }}</span>
+                    <UIcon name="i-carbon-chat" class="w-3.5 h-3.5 text-dimmed" />
+                    <span class="text-xs text-dimmed">{{ journey.feedback.length }}</span>
                   </div>
                 </button>
                 <!-- Expanded detail -->
@@ -834,9 +838,9 @@ function toggleJourney(id: string) {
                     >
                       <UIcon :name="getToolMeta(lookup.tool).icon" class="w-3 h-3" :class="`text-${getToolMeta(lookup.tool).color}-500`" />
                     </div>
-                    <span class="text-[var(--ui-text-highlighted)]">{{ getToolMeta(lookup.tool).name }}</span>
-                    <code class="text-xs text-[var(--ui-text-muted)]">{{ lookup.query }}</code>
-                    <span class="text-xs text-[var(--ui-text-dimmed)] ml-auto">{{ formatRelativeTime(new Date(typeof lookup.createdAt === 'number' ? lookup.createdAt * 1000 : lookup.createdAt)) }}</span>
+                    <span class="text-highlighted">{{ getToolMeta(lookup.tool).name }}</span>
+                    <code class="text-xs text-muted">{{ lookup.query }}</code>
+                    <span class="text-xs text-dimmed ml-auto">{{ formatRelativeTime(new Date(typeof lookup.createdAt === 'number' ? lookup.createdAt * 1000 : lookup.createdAt)) }}</span>
                   </div>
                   <div
                     v-for="(fb, fi) in journey.feedback"
@@ -844,33 +848,33 @@ function toggleJourney(id: string) {
                     class="flex items-center gap-3 text-sm"
                   >
                     <div class="w-6 h-6 rounded flex items-center justify-center shrink-0 bg-gray-500/10">
-                      <UIcon :name="fb.thumb === 'up' ? 'i-carbon-thumbs-up-filled' : fb.thumb === 'down' ? 'i-carbon-thumbs-down-filled' : 'i-carbon-chat'" class="w-3 h-3" :class="fb.thumb === 'up' ? 'text-emerald-500' : fb.thumb === 'down' ? 'text-red-500' : 'text-[var(--ui-text-dimmed)]'" />
+                      <UIcon :name="fb.thumb === 'up' ? 'i-carbon-thumbs-up-filled' : fb.thumb === 'down' ? 'i-carbon-thumbs-down-filled' : 'i-carbon-chat'" class="w-3 h-3" :class="fb.thumb === 'up' ? 'text-emerald-500' : fb.thumb === 'down' ? 'text-red-500' : 'text-dimmed'" />
                     </div>
-                    <span class="text-[var(--ui-text-muted)]">Feedback on {{ getToolMeta(fb.path).name }}</span>
-                    <span class="text-xs text-[var(--ui-text-dimmed)] ml-auto">{{ formatRelativeTime(new Date(typeof fb.createdAt === 'number' ? fb.createdAt * 1000 : fb.createdAt)) }}</span>
+                    <span class="text-muted">Feedback on {{ getToolMeta(fb.path).name }}</span>
+                    <span class="text-xs text-dimmed ml-auto">{{ formatRelativeTime(new Date(typeof fb.createdAt === 'number' ? fb.createdAt * 1000 : fb.createdAt)) }}</span>
                   </div>
                 </div>
               </div>
             </div>
             <div v-else-if="insightsStatus === 'pending'" class="p-12">
               <div class="flex flex-col items-center">
-                <div class="w-12 h-12 rounded-xl bg-[var(--ui-bg)] flex items-center justify-center mb-4">
-                  <UIcon name="i-carbon-renew" class="w-5 h-5 text-[var(--ui-text-dimmed)] animate-spin" />
+                <div class="w-12 h-12 rounded-xl bg-default flex items-center justify-center mb-4">
+                  <UIcon name="i-carbon-renew" class="w-5 h-5 text-dimmed animate-spin" />
                 </div>
-                <p class="text-sm text-[var(--ui-text-muted)]">
+                <p class="text-sm text-muted">
                   Loading journeys...
                 </p>
               </div>
             </div>
             <div v-else class="p-12">
               <div class="flex flex-col items-center">
-                <div class="w-12 h-12 rounded-xl bg-[var(--ui-bg)] flex items-center justify-center mb-4">
-                  <UIcon name="i-carbon-flow" class="w-5 h-5 text-[var(--ui-text-dimmed)]" />
+                <div class="w-12 h-12 rounded-xl bg-default flex items-center justify-center mb-4">
+                  <UIcon name="i-carbon-flow" class="w-5 h-5 text-dimmed" />
                 </div>
-                <p class="text-sm font-medium text-[var(--ui-text-highlighted)] mb-1">
+                <p class="text-sm font-medium text-highlighted mb-1">
                   No session journeys
                 </p>
-                <p class="text-xs text-[var(--ui-text-dimmed)]">
+                <p class="text-xs text-dimmed">
                   Session data will appear here
                 </p>
               </div>
@@ -882,49 +886,49 @@ function toggleJourney(id: string) {
         <section>
           <div class="flex items-center justify-between mb-6">
             <div>
-              <h2 class="text-lg font-semibold text-[var(--ui-text-highlighted)]">
+              <h2 class="text-lg font-semibold text-highlighted">
                 User Feedback
               </h2>
-              <p class="text-sm text-[var(--ui-text-dimmed)]">
+              <p class="text-sm text-dimmed">
                 Thumbs &amp; comments from D1
               </p>
             </div>
-            <div class="text-sm font-mono text-[var(--ui-text-dimmed)]">
+            <div class="text-sm font-mono text-dimmed">
               {{ feedbackData?.total ?? 0 }} total
             </div>
           </div>
 
           <!-- Feedback Summary Cards -->
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div class="p-4 rounded-xl bg-[var(--ui-bg-elevated)] border border-[var(--ui-border)]">
-              <p class="text-sm text-[var(--ui-text-muted)] mb-1">
+            <div class="p-4 rounded-xl bg-elevated border border-default">
+              <p class="text-sm text-muted mb-1">
                 Total
               </p>
-              <p class="text-xl font-bold font-mono tabular-nums text-[var(--ui-text-highlighted)]">
+              <p class="text-xl font-bold font-mono tabular-nums text-highlighted">
                 {{ feedbackData?.total ?? 0 }}
               </p>
             </div>
-            <div class="p-4 rounded-xl bg-[var(--ui-bg-elevated)] border border-[var(--ui-border)]">
-              <p class="text-sm text-[var(--ui-text-muted)] mb-1">
+            <div class="p-4 rounded-xl bg-elevated border border-default">
+              <p class="text-sm text-muted mb-1">
                 Thumbs Up
               </p>
               <p class="text-xl font-bold font-mono tabular-nums text-emerald-500">
                 {{ feedbackData?.stats?.up ?? 0 }}
               </p>
             </div>
-            <div class="p-4 rounded-xl bg-[var(--ui-bg-elevated)] border border-[var(--ui-border)]">
-              <p class="text-sm text-[var(--ui-text-muted)] mb-1">
+            <div class="p-4 rounded-xl bg-elevated border border-default">
+              <p class="text-sm text-muted mb-1">
                 Thumbs Down
               </p>
               <p class="text-xl font-bold font-mono tabular-nums text-red-500">
                 {{ feedbackData?.stats?.down ?? 0 }}
               </p>
             </div>
-            <div class="p-4 rounded-xl bg-[var(--ui-bg-elevated)] border border-[var(--ui-border)]">
-              <p class="text-sm text-[var(--ui-text-muted)] mb-1">
+            <div class="p-4 rounded-xl bg-elevated border border-default">
+              <p class="text-sm text-muted mb-1">
                 Comments
               </p>
-              <p class="text-xl font-bold font-mono tabular-nums text-[var(--ui-text-highlighted)]">
+              <p class="text-xl font-bold font-mono tabular-nums text-highlighted">
                 {{ feedbackData?.commentCount ?? 0 }}
               </p>
             </div>
@@ -938,8 +942,8 @@ function toggleJourney(id: string) {
               class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all"
               :class="[
                 activeFeedbackPath === fp.value
-                  ? 'bg-[var(--ui-primary)] text-white shadow-lg shadow-[var(--ui-primary)]/25'
-                  : 'bg-[var(--ui-bg-elevated)] text-[var(--ui-text-muted)] hover:text-[var(--ui-text-highlighted)] border border-[var(--ui-border)] hover:border-[var(--ui-border-hover)]',
+                  ? 'bg-primary text-white shadow-lg shadow-[var(--ui-primary)]/25'
+                  : 'bg-elevated text-muted hover:text-highlighted border border-default hover:border-[var(--ui-border-hover)]',
               ]"
               @click="activeFeedbackPath = fp.value"
             >
@@ -947,15 +951,68 @@ function toggleJourney(id: string) {
               <span
                 v-if="feedbackData?.byPath"
                 class="ml-0.5 px-2 py-0.5 rounded-md text-xs font-mono"
-                :class="activeFeedbackPath === fp.value ? 'bg-white/20' : 'bg-[var(--ui-bg)]'"
+                :class="activeFeedbackPath === fp.value ? 'bg-white/20' : 'bg-default'"
               >
                 {{ fp.value === 'all' ? feedbackData.total : (feedbackData.byPath[fp.value] || 0) }}
               </span>
             </button>
           </div>
 
+          <!-- Comments -->
+          <div v-if="feedbackComments.length" class="space-y-3 mb-6">
+            <h3 class="text-sm font-medium text-muted uppercase tracking-wider">
+              Comments ({{ feedbackComments.length }})
+            </h3>
+            <div class="grid gap-3">
+              <div
+                v-for="entry in feedbackComments"
+                :key="entry.id"
+                class="p-4 rounded-xl bg-elevated border border-default"
+              >
+                <div class="flex items-start gap-3">
+                  <div
+                    class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
+                    :class="entry.thumb === 'up' ? 'bg-emerald-500/10' : entry.thumb === 'down' ? 'bg-red-500/10' : 'bg-gray-500/10'"
+                  >
+                    <UIcon
+                      :name="entry.thumb === 'up' ? 'i-carbon-thumbs-up-filled' : entry.thumb === 'down' ? 'i-carbon-thumbs-down-filled' : 'i-carbon-chat'"
+                      class="w-4 h-4"
+                      :class="entry.thumb === 'up' ? 'text-emerald-500' : entry.thumb === 'down' ? 'text-red-500' : 'text-dimmed'"
+                    />
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm text-highlighted leading-relaxed">
+                      {{ entry.comment }}
+                    </p>
+                    <div class="flex items-center gap-3 mt-2 text-xs text-dimmed">
+                      <div class="flex items-center gap-1.5">
+                        <div
+                          class="w-5 h-5 rounded flex items-center justify-center"
+                          :class="`bg-${getToolMeta(entry.path).color}-500/10`"
+                        >
+                          <UIcon :name="getToolMeta(entry.path).icon" class="w-2.5 h-2.5" :class="`text-${getToolMeta(entry.path).color}-500`" />
+                        </div>
+                        <span>{{ getToolMeta(entry.path).name }}</span>
+                      </div>
+                      <span v-if="entry.sessionId" class="inline-flex items-center gap-1">
+                        <span :class="`w-1.5 h-1.5 rounded-full ${entry.userId ? 'bg-emerald-500' : 'bg-gray-400'}`" />
+                        <code class="font-mono">{{ entry.sessionId }}</code>
+                      </span>
+                      <time
+                        class="font-mono tabular-nums ml-auto"
+                        :datetime="new Date(typeof entry.createdAt === 'number' ? entry.createdAt * 1000 : entry.createdAt).toISOString()"
+                      >
+                        {{ formatRelativeTime(new Date(typeof entry.createdAt === 'number' ? entry.createdAt * 1000 : entry.createdAt)) }}
+                      </time>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Table -->
-          <div class="rounded-xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] overflow-hidden mb-10">
+          <div class="rounded-xl border border-default bg-elevated overflow-hidden mb-10">
             <UTable
               v-if="feedbackStatus !== 'pending' && filteredFeedback.length"
               :data="filteredFeedback"
@@ -964,10 +1021,10 @@ function toggleJourney(id: string) {
 
             <div v-else-if="feedbackStatus === 'pending'" class="p-12">
               <div class="flex flex-col items-center">
-                <div class="w-12 h-12 rounded-xl bg-[var(--ui-bg)] flex items-center justify-center mb-4">
-                  <UIcon name="i-carbon-renew" class="w-5 h-5 text-[var(--ui-text-dimmed)] animate-spin" />
+                <div class="w-12 h-12 rounded-xl bg-default flex items-center justify-center mb-4">
+                  <UIcon name="i-carbon-renew" class="w-5 h-5 text-dimmed animate-spin" />
                 </div>
-                <p class="text-sm text-[var(--ui-text-muted)]">
+                <p class="text-sm text-muted">
                   Loading feedback...
                 </p>
               </div>
@@ -975,13 +1032,13 @@ function toggleJourney(id: string) {
 
             <div v-else class="p-12">
               <div class="flex flex-col items-center">
-                <div class="w-12 h-12 rounded-xl bg-[var(--ui-bg)] flex items-center justify-center mb-4">
-                  <UIcon name="i-carbon-chat" class="w-5 h-5 text-[var(--ui-text-dimmed)]" />
+                <div class="w-12 h-12 rounded-xl bg-default flex items-center justify-center mb-4">
+                  <UIcon name="i-carbon-chat" class="w-5 h-5 text-dimmed" />
                 </div>
-                <p class="text-sm font-medium text-[var(--ui-text-highlighted)] mb-1">
+                <p class="text-sm font-medium text-highlighted mb-1">
                   No feedback yet
                 </p>
-                <p class="text-xs text-[var(--ui-text-dimmed)]">
+                <p class="text-xs text-dimmed">
                   User feedback will appear here
                 </p>
               </div>
@@ -993,14 +1050,14 @@ function toggleJourney(id: string) {
         <section>
           <div class="flex items-center justify-between mb-6">
             <div>
-              <h2 class="text-lg font-semibold text-[var(--ui-text-highlighted)]">
+              <h2 class="text-lg font-semibold text-highlighted">
                 Recent Lookups
               </h2>
-              <p class="text-sm text-[var(--ui-text-dimmed)]">
+              <p class="text-sm text-dimmed">
                 Domain queries from D1 database
               </p>
             </div>
-            <div class="text-sm font-mono text-[var(--ui-text-dimmed)]">
+            <div class="text-sm font-mono text-dimmed">
               {{ lookupData?.total ?? 0 }} total
             </div>
           </div>
@@ -1013,8 +1070,8 @@ function toggleJourney(id: string) {
               class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all"
               :class="[
                 activeLookupTab === tool.value
-                  ? 'bg-[var(--ui-primary)] text-white shadow-lg shadow-[var(--ui-primary)]/25'
-                  : 'bg-[var(--ui-bg-elevated)] text-[var(--ui-text-muted)] hover:text-[var(--ui-text-highlighted)] border border-[var(--ui-border)] hover:border-[var(--ui-border-hover)]',
+                  ? 'bg-primary text-white shadow-lg shadow-[var(--ui-primary)]/25'
+                  : 'bg-elevated text-muted hover:text-highlighted border border-default hover:border-[var(--ui-border-hover)]',
               ]"
               @click="activeLookupTab = tool.value"
             >
@@ -1023,7 +1080,7 @@ function toggleJourney(id: string) {
               <span
                 v-if="lookupData?.stats"
                 class="ml-0.5 px-2 py-0.5 rounded-md text-xs font-mono"
-                :class="activeLookupTab === tool.value ? 'bg-white/20' : 'bg-[var(--ui-bg)]'"
+                :class="activeLookupTab === tool.value ? 'bg-white/20' : 'bg-default'"
               >
                 {{ tool.value === 'all' ? lookupData.total : (lookupData.stats[tool.value] || 0) }}
               </span>
@@ -1031,7 +1088,7 @@ function toggleJourney(id: string) {
           </div>
 
           <!-- Table -->
-          <div class="rounded-xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] overflow-hidden">
+          <div class="rounded-xl border border-default bg-elevated overflow-hidden">
             <UTable
               v-if="lookupStatus !== 'pending' && filteredLookups.length"
               :data="filteredLookups"
@@ -1040,10 +1097,10 @@ function toggleJourney(id: string) {
 
             <div v-else-if="lookupStatus === 'pending'" class="p-12">
               <div class="flex flex-col items-center">
-                <div class="w-12 h-12 rounded-xl bg-[var(--ui-bg)] flex items-center justify-center mb-4">
-                  <UIcon name="i-carbon-renew" class="w-5 h-5 text-[var(--ui-text-dimmed)] animate-spin" />
+                <div class="w-12 h-12 rounded-xl bg-default flex items-center justify-center mb-4">
+                  <UIcon name="i-carbon-renew" class="w-5 h-5 text-dimmed animate-spin" />
                 </div>
-                <p class="text-sm text-[var(--ui-text-muted)]">
+                <p class="text-sm text-muted">
                   Loading lookups...
                 </p>
               </div>
@@ -1051,13 +1108,13 @@ function toggleJourney(id: string) {
 
             <div v-else class="p-12">
               <div class="flex flex-col items-center">
-                <div class="w-12 h-12 rounded-xl bg-[var(--ui-bg)] flex items-center justify-center mb-4">
-                  <UIcon name="i-carbon-data-table" class="w-5 h-5 text-[var(--ui-text-dimmed)]" />
+                <div class="w-12 h-12 rounded-xl bg-default flex items-center justify-center mb-4">
+                  <UIcon name="i-carbon-data-table" class="w-5 h-5 text-dimmed" />
                 </div>
-                <p class="text-sm font-medium text-[var(--ui-text-highlighted)] mb-1">
+                <p class="text-sm font-medium text-highlighted mb-1">
                   No lookups found
                 </p>
-                <p class="text-xs text-[var(--ui-text-dimmed)]">
+                <p class="text-xs text-dimmed">
                   Tool lookup data will appear here
                 </p>
               </div>

@@ -13,7 +13,7 @@ const tabs = ['Elements', 'Console', 'Sources', 'Network', 'Performance', 'Light
 
 <template>
   <div class="my-6 not-prose">
-    <div class="rounded-xl border border-[var(--ui-border)] overflow-hidden bg-[#1e1e1e] shadow-xl">
+    <div class="rounded-xl border border-default overflow-hidden bg-[#1e1e1e] shadow-xl">
       <!-- Title bar -->
       <div class="flex items-center gap-2 px-4 h-10 bg-[#2d2d2d]">
         <span class="w-3 h-3 rounded-full bg-[#ff5f57]" />

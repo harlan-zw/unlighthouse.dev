@@ -86,15 +86,15 @@ watchEffect(() => {
       >
         <ClientOnly>
           <div v-if="lastCommit?.author" class="mt-3 text-sm">
-            <div class="text-[var(--ui-text-dimmed)]">
+            <div class="text-dimmed">
               Last updated <time class="font-semibold" :datetime="lastCommit.date">{{ lastCommit.dateHuman }}</time> by <UBadge color="neutral" variant="outline">
                 <NuxtLink :to="`https://github.com/${lastCommit.author.committer}`" external target="_blank" class="inline-flex items-center gap-1.5">
-                  <div class="hover:text-[var(--ui-text)] text-[var(--ui-text-muted)] transition">
+                  <div class="hover:text-default text-muted transition">
                     {{ lastCommit.author.name }}
                   </div>
                 </NuxtLink>
               </UBadge> in <UBadge variant="outline" color="neutral" class="my-1">
-                <NuxtLink :to="lastCommit.url" target="_blank" external class="hover:text-[var(--ui-text)] text-[var(--ui-text-muted)] transition max-w-[250px] whitespace-nowrap overflow-hidden text-ellipsis">
+                <NuxtLink :to="lastCommit.url" target="_blank" external class="hover:text-default text-muted transition max-w-[250px] whitespace-nowrap overflow-hidden text-ellipsis">
                   {{ lastCommit.message }}
                 </NuxtLink>
               </UBadge>.

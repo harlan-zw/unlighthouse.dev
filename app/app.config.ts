@@ -77,10 +77,10 @@ export default ({
       variants: {
         active: {
           true: {
-            link: 'text-[var(--ui-text-toned)] after:-left-[1px] font-semibold rounded-[10px] after:rounded-[10px] after:w-full after:h-full after:absolute after:bottom-0 after:block after:bg-elevated/50 after:shadow-xs',
+            link: 'text-toned after:-left-[1px] font-semibold rounded-[10px] after:rounded-[10px] after:w-full after:h-full after:absolute after:bottom-0 after:block after:bg-elevated/50 after:shadow-xs',
           },
           false: {
-            link: 'text-[var(--ui-text-toned)]',
+            link: 'text-toned',
             linkLeadingIcon: 'text-dimmed',
           },
         },
@@ -103,7 +103,7 @@ export default ({
       },
       a: {
         base: [
-          'relative border-none underline underline-offset-4 text-[var(--ui-text)] decoration-transition-all decoration-opacity-70 decoration-[0.1rem] decoration-[var(--ui-text-dimmed)]',
+          'relative border-none underline underline-offset-4 text-default decoration-transition-all decoration-opacity-70 decoration-[0.1rem] decoration-[var(--ui-text-dimmed)]',
           'transition-all',
           'hover:text-dimmed decoration-opacity-100 hover:underline-offset-1 hover:decoration-[0.1rem]',
         ],

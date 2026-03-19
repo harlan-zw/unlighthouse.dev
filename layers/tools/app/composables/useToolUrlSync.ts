@@ -35,11 +35,11 @@ export function useToolUrlSync(urlInput: Ref<string>, options: ToolUrlSyncOption
     urlInput,
     (newUrl) => {
       if (newUrl) {
-        router.replace({ query: { ...route.query, [paramName]: encodeURIComponent(newUrl) } })
+        navigateTo({ query: { ...route.query, [paramName]: encodeURIComponent(newUrl) } }, { replace: true })
       }
       else {
         const { [paramName]: _, ...rest } = route.query
-        router.replace({ query: rest })
+        navigateTo({ query: rest }, { replace: true })
       }
     },
     { debounce },
@@ -50,10 +50,10 @@ export function useToolUrlSync(urlInput: Ref<string>, options: ToolUrlSyncOption
     watch(value, (newVal) => {
       if (defaultValue && newVal === defaultValue) {
         const { [paramKey]: _, ...rest } = route.query
-        router.replace({ query: rest })
+        navigateTo({ query: rest }, { replace: true })
       }
       else {
-        router.replace({ query: { ...route.query, [paramKey]: newVal } })
+        navigateTo({ query: { ...route.query, [paramKey]: newVal } }, { replace: true })
       }
     })
   }

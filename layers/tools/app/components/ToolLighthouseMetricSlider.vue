@@ -155,7 +155,7 @@ const thresholds = computed(() => {
       </ClientOnly>
     </div>
 
-    <div class="flex justify-between mt-1 text-xs text-[var(--ui-text-muted)]">
+    <div class="flex justify-between mt-1 text-xs text-muted">
       <span>{{ formatMetricValue(sliderMin, metric.unit) }}</span>
       <span class="opacity-60">{{ metric.description }}</span>
       <span>{{ formatMetricValue(sliderMax, metric.unit) }}</span>

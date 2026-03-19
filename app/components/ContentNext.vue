@@ -19,7 +19,7 @@ defineProps<{
 <template>
   <div class="space-y-8">
     <div v-if="relatedPages?.length" class="space-y-4">
-      <h3 class="text-sm font-medium text-[var(--ui-text-muted)]">
+      <h3 class="text-sm font-medium text-muted">
         Related
       </h3>
       <div class="flex flex-wrap gap-2">
