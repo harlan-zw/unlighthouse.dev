@@ -1,7 +1,7 @@
 import type { H3Event } from 'h3'
 import type { ToolName } from '../database/schema'
 import { toolLookups } from '../database/schema'
-import { useDB } from './db'
+import { getDB } from './db'
 
 const SESSION_COOKIE = 'analytics-session'
 const SESSION_MAX_AGE = 60 * 60 * 24 * 365 // 1 year
@@ -73,6 +73,8 @@ export function getTimeRangeFilter(range: string): { value: string, unit: string
   return intervals[range] || intervals['24h']!
 }
 
+const PROTOCOL_RE = /^https?:\/\//
+
 export async function trackToolLookup(
   event: H3Event,
   tool: ToolName,
@@ -85,14 +87,15 @@ export async function trackToolLookup(
 
   // Extract domain from URL
   let domain = url.trim()
-  if (/^https?:\/\//.test(domain)) {
+  if (PROTOCOL_RE.test(domain)) {
     const parsed = new URL(domain).hostname
     domain = parsed
   }
 
   const session = await getUserSession(event).catch(() => null)
 
-  useDB(event).insert(toolLookups).values({
+  const db = getDB(event)
+  db.insert(toolLookups).values({
     userId: (session?.user as { id?: string } | undefined)?.id || null,
     sessionId: getSessionId(event),
     tool,

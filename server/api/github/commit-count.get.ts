@@ -1,5 +1,7 @@
 import { initOctokitRequestHandler } from '~~/server/utils/github'
 
+const LAST_PAGE_RE = /page=(\d+)&sha=main>; rel="last"/
+
 export default defineCachedEventHandler(async (e) => {
   const { octokit, repo, owner } = initOctokitRequestHandler(e)
   const { headers } = await octokit.request('GET /repos/{owner}/{repo}/commits', {
@@ -16,7 +18,7 @@ export default defineCachedEventHandler(async (e) => {
   const link = String(headers.link) || ''
   // looks like: <https://api.github.com/repositories/577581539/commits?sha=main&per_page=1&page=2>; rel="next", <https://api.github.com/repositories/577581539/commits?sha=main&per_page=1&page=783>; rel="last"
   // we need to extract the last page number
-  const lastPage = link.match(/page=(\d+)&sha=main>; rel="last"/)
+  const lastPage = link.match(LAST_PAGE_RE)
   if (!lastPage) {
     throw new Error('Could not find last page')
   }

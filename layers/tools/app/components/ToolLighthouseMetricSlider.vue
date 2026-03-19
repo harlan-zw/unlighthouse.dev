@@ -17,6 +17,7 @@ const ratingColor = computed(() => {
     case 'pass': return '#22c55e'
     case 'average': return '#f97316'
     case 'fail': return '#ef4444'
+    default: return '#94a3b8'
   }
 })
 const displayValue = computed(() => formatMetricValue(props.value, props.metric.unit))

@@ -50,6 +50,9 @@ const RESOURCE_TYPE_MAP: Record<string, string> = {
   'audio/mpeg': 'media',
 }
 
+const H2_RE = /^h2.*/
+const H3_RE = /^h3.*/
+
 const RESOURCE_LABELS: Record<string, string> = {
   document: 'Documents',
   stylesheet: 'Stylesheets',
@@ -137,21 +140,27 @@ function parseHar(input: string | object): ParsedHar {
 
     // Domain
     let domain = ''
-    try { domain = getDomain(e.request.url) }
+    try {
+      domain = getDomain(e.request.url)
+    }
     catch {}
 
     // Cache
     const fromCache = !!(e._fromCache || e._fromServiceWorker || (e.response?.status === 304))
     if (fromCache)
       cacheHits++
-    else cacheMisses++
+    else
+      cacheMisses++
 
     // Protocol
     const protocol = e._protocol || e.connection || (e.request.httpVersion?.includes('2') ? 'h2' : e.request.httpVersion?.includes('3') ? 'h3' : 'http/1.1')
 
     // Aggregate type
     const existing = typeMap.get(type)
-    if (existing) { existing.count++; existing.size += xferSize }
+    if (existing) {
+      existing.count++
+      existing.size += xferSize
+    }
     else {
       typeMap.set(type, { count: 1, size: xferSize })
     }
@@ -163,14 +172,17 @@ function parseHar(input: string | object): ParsedHar {
     // Aggregate domain
     if (domain) {
       const d = domainMap.get(domain)
-      if (d) { d.count++; d.size += xferSize }
+      if (d) {
+        d.count++
+        d.size += xferSize
+      }
       else {
         domainMap.set(domain, { count: 1, size: xferSize })
       }
     }
 
     // Aggregate protocol
-    const normalizedProtocol = protocol.replace(/^h2.*/, 'h2').replace(/^h3.*/, 'h3') || 'http/1.1'
+    const normalizedProtocol = protocol.replace(H2_RE, 'h2').replace(H3_RE, 'h3') || 'http/1.1'
     protocolMap.set(normalizedProtocol, (protocolMap.get(normalizedProtocol) || 0) + 1)
 
     // Aggregate timing phases

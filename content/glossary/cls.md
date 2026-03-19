@@ -33,7 +33,7 @@ Cumulative Layout Shift (CLS) measures visual stability - how much content unexp
 
 [Google recommends](https://web.dev/articles/cls) a score of 0.1 or less for at least 75% of page visits.
 
-## How CLS Is Calculated
+## How Lighthouse Calculates CLS
 
 CLS quantifies unexpected shifts by multiplying impact fraction (viewport affected) by distance fraction (how far elements moved). User-initiated shifts within 500ms of interaction don't count.
 

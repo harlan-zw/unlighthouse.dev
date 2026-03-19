@@ -72,6 +72,23 @@ interface Analysis {
 
 const error = ref('')
 
+watch(inputText, (text) => {
+  const trimmed = text.trim()
+  if (!trimmed) {
+    error.value = ''
+    return
+  }
+
+  try {
+    JSON.parse(trimmed)
+    error.value = ''
+    trackUse()
+  }
+  catch {
+    error.value = 'Invalid JSON — check for trailing commas, single quotes, or syntax errors.'
+  }
+}, { immediate: true })
+
 const analysis = computed<Analysis | null>(() => {
   const text = inputText.value.trim()
   if (!text)
@@ -82,14 +99,8 @@ const analysis = computed<Analysis | null>(() => {
     parsed = JSON.parse(text)
   }
   catch {
-    error.value = 'Invalid JSON — check for trailing commas, single quotes, or syntax errors.'
     return null
   }
-
-  error.value = ''
-
-  // Track first successful analysis
-  trackUse()
 
   const rawSize = new Blob([text]).size
   const minifiedText = JSON.stringify(parsed)
@@ -174,7 +185,9 @@ function copyMinified() {
     return
   navigator.clipboard.writeText(analysis.value.minifiedText)
   copied.value = true
-  setTimeout(() => { copied.value = false }, 2000)
+  setTimeout(() => {
+    copied.value = false
+  }, 2000)
 }
 
 function loadSample() {

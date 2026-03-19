@@ -42,7 +42,7 @@ catalog:
   date-fns: ^4.1.0
   drizzle-orm: ^0.45.1
   eslint: ^10.0.3
-  eslint-plugin-harlanzw: ^0.5.21
+  eslint-plugin-harlanzw: ^0.5.22
   lint-staged: ^16.4.0
   markdownlint-cli: ^0.48.0
   motion-v: ^2.0.1

@@ -63,5 +63,5 @@ TBT has the largest impact on Lighthouse Performance score. High TBT means click
 - WebPageTest
 
 ::warning
-TBT is a lab metric. Real-world interactivity is measured by [INP](/glossary/inp), which is a Core Web Vital and ranking factor.
+TBT is a lab metric. [INP](/glossary/inp) measures real-world interactivity, which is a Core Web Vital and ranking factor.
 ::

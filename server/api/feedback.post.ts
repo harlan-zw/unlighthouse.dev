@@ -2,7 +2,7 @@ import { getHeader } from 'h3'
 import { parseURL } from 'ufo'
 import { CommentFeedbackSchema } from '~~/types/schemas'
 import { feedback } from '../database/schema'
-import { useDB } from '../utils/db'
+import { getDB } from '../utils/db'
 
 export default defineEventHandler(async (event) => {
   const { comment, toolId, context } = await readValidatedBody(event, CommentFeedbackSchema.parse)
@@ -12,7 +12,8 @@ export default defineEventHandler(async (event) => {
   if (!import.meta.dev) {
     const session = await getUserSession(event).catch(() => null)
 
-    useDB(event).insert(feedback).values({
+    const db = getDB(event)
+    db.insert(feedback).values({
       path,
       comment,
       metadata: { ...context, toolId },

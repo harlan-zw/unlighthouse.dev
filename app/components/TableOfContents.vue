@@ -31,11 +31,9 @@ const config = {
   depth: 'ml-3',
 }
 
-const router = useRouter()
-
-function scrollToHeading(id: string) {
+async function scrollToHeading(id: string) {
   const encodedId = encodeURIComponent(id)
-  navigateTo(`#${encodedId}`)
+  await navigateTo(`#${encodedId}`)
   emit('move', id)
 }
 </script>

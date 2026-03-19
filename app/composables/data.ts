@@ -101,7 +101,7 @@ export function mapPath(data, node = 0) {
     }
   })
 }
-export function isHydratingRef() {
+export function useIsHydrating() {
   const nuxtApp = useNuxtApp()
   const isHydrating = ref(true)
   nuxtApp.hooks.hook('page:finish', () => {

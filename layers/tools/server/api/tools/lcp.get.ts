@@ -9,6 +9,8 @@ interface DiscoveryCheck {
   label: string
 }
 
+const TAG_RE = /^<(\w+)/
+
 export default defineCachedEventHandler(async (event) => {
   await checkFreeToolRateLimit(event)
   const query = getQuery(event)
@@ -62,7 +64,7 @@ export default defineCachedEventHandler(async (event) => {
     const snippet = elementNode.snippet || ''
     const nodeLabel = elementNode.nodeLabel || ''
 
-    const tagMatch = snippet.match(/^<(\w+)/)
+    const tagMatch = snippet.match(TAG_RE)
     const tagName = tagMatch?.[1] || 'unknown'
 
     const type = tagName === 'img'

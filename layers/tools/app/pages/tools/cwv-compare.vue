@@ -37,7 +37,8 @@ useToolSeo({
 const { trackUse } = useToolTracking('cwv-compare')
 
 const route = useRoute()
-const router = useRouter()
+
+const DOMAIN_RE = /^(?:https?:\/\/)?(?:www\.)?([^/]+)/i
 
 const urls = ref<string[]>(['', ''])
 const formFactor = ref<FormFactor>('PHONE')
@@ -68,21 +69,21 @@ onMounted(() => {
 
 watchDebounced(
   urls,
-  (newUrls) => {
+  async (newUrls) => {
     const validUrls = newUrls.filter(u => u.trim())
     if (validUrls.length >= 2) {
-      navigateTo({ query: { ...route.query, sites: validUrls.map(u => encodeURIComponent(u)).join(',') } }, { replace: true })
+      await navigateTo({ query: { ...route.query, sites: validUrls.map(u => encodeURIComponent(u)).join(',') } }, { replace: true })
     }
     else {
       const { sites: _, ...rest } = route.query
-      navigateTo({ query: rest }, { replace: true })
+      await navigateTo({ query: rest }, { replace: true })
     }
   },
   { debounce: 500, deep: true },
 )
 
-watch(formFactor, (newFactor) => {
-  navigateTo({ query: { ...route.query, device: newFactor === 'DESKTOP' ? 'desktop' : undefined } }, { replace: true })
+watch(formFactor, async (newFactor) => {
+  await navigateTo({ query: { ...route.query, device: newFactor === 'DESKTOP' ? 'desktop' : undefined } }, { replace: true })
 })
 
 function addUrl() {
@@ -230,8 +231,8 @@ function formatCollectionDate(date: string) {
 }
 
 function getDomain(url: string): string {
-  const match = url.match(/^(?:https?:\/\/)?(?:www\.)?([^/]+)/i)
-  return match ? match[1] : url
+  const match = url.match(DOMAIN_RE)
+  return (match && match[1]) ? match[1] : url
 }
 
 function getBarWidth(comp: SiteComparison, metric: MetricKey): number {

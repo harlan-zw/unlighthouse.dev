@@ -11,6 +11,8 @@ definePageMeta({
 
 const { data: stats } = await useStats()
 
+const DOT_SPLIT_RE = /(\.)/g
+
 // credits https://github.com/antfu/releases.antfu.me/blob/main/app/components/TheItem.vue
 const HighlightedVersion = defineComponent({
   props: {
@@ -22,7 +24,7 @@ const HighlightedVersion = defineComponent({
   setup(props) {
     return () => {
       const version = props.version
-      const parts = version.split(/(\.)/g)
+      const parts = version.split(DOT_SPLIT_RE)
 
       let highlightedIndex = -1
       for (let i = parts.length - 1; i >= 0; i--) {

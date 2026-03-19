@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { animate } from 'motion-v'
-import { isHydratingRef } from '~/composables/data'
+import { useIsHydrating } from '~/composables/data'
 
 const route = useRoute()
 const navOpen = ref(false)
@@ -10,7 +10,7 @@ watch(() => route.path, () => {
   navOpen.value = false
 })
 
-const isHydrating = isHydratingRef()
+const isHydrating = useIsHydrating()
 
 const contentRef = ref(null)
 

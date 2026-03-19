@@ -106,8 +106,8 @@ catalogs:
       specifier: ^10.0.3
       version: 10.0.3
     eslint-plugin-harlanzw:
-      specifier: ^0.5.21
-      version: 0.5.21
+      specifier: ^0.5.22
+      version: 0.5.22
     lint-staged:
       specifier: ^16.4.0
       version: 16.4.0
@@ -303,7 +303,7 @@ importers:
         version: 10.0.3(jiti@2.6.1)
       eslint-plugin-harlanzw:
         specifier: 'catalog:'
-        version: 0.5.21(eslint@10.0.3(jiti@2.6.1))
+        version: 0.5.22(eslint@10.0.3(jiti@2.6.1))
       lint-staged:
         specifier: 'catalog:'
         version: 16.4.0
@@ -5361,8 +5361,8 @@ packages:
     peerDependencies:
       eslint: '>=8'
 
-  eslint-plugin-harlanzw@0.5.21:
-    resolution: {integrity: sha512-LWKaL1inP8MC5hu9ncWpR7e3JmK7u7QfEtfaPfFBVdCiCNJqb1olhRr7uDrwlt4RWCtXeKfWneZBuQs734i9Tg==}
+  eslint-plugin-harlanzw@0.5.22:
+    resolution: {integrity: sha512-HEFOhaTdykBOJehFIqwyRqFMIpMng+V9kwkKIbfXPQa1vz8crjDsBIDt9hLoPdKtz6F5Um1KajMI+4pXsz+WjQ==}
     peerDependencies:
       eslint: '>=9.0.0'
 
@@ -14471,7 +14471,7 @@ snapshots:
       eslint: 10.0.3(jiti@2.6.1)
       eslint-compat-utils: 0.5.1(eslint@10.0.3(jiti@2.6.1))
 
-  eslint-plugin-harlanzw@0.5.21(eslint@10.0.3(jiti@2.6.1)):
+  eslint-plugin-harlanzw@0.5.22(eslint@10.0.3(jiti@2.6.1)):
     dependencies:
       '@eslint/plugin-kit': 0.6.1
       eslint: 10.0.3(jiti@2.6.1)

@@ -1,3 +1,5 @@
+const TAG_RE = /^<(\w+)/
+
 export default defineCachedEventHandler(async (event) => {
   await checkFreeToolRateLimit(event)
   const query = getQuery(event)
@@ -89,7 +91,7 @@ export default defineCachedEventHandler(async (event) => {
 
   const lcpElement = elementNode
     ? {
-        tagName: elementNode.snippet?.match(/^<(\w+)/)?.[1] || 'unknown',
+        tagName: elementNode.snippet?.match(TAG_RE)?.[1] || 'unknown',
         snippet: elementNode.nodeLabel || elementNode.snippet || '',
         selector: elementNode.selector || '',
         boundingRect: elementNode.boundingRect,

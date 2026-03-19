@@ -34,23 +34,6 @@ const mapPoints = computed(() => {
   return points
 })
 
-const mapLinks = computed(() => {
-  if (!userLocation.value)
-    return []
-  return PSI_SERVERS.map(s => ({
-    id: `user-${s.id}`,
-    source: 'user',
-    target: s.id,
-    width: s.id === closestServer.value?.id ? 2 : 0.5,
-    color: s.id === closestServer.value?.id ? '#8B5CF6' : 'rgba(139,92,246,0.2)',
-  }))
-})
-
-const mapData = computed(() => ({
-  points: mapPoints.value,
-  links: mapLinks.value,
-}))
-
 function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371
   const dLat = (lat2 - lat1) * Math.PI / 180
@@ -74,6 +57,23 @@ const distances = computed(() => {
 })
 
 const closestServer = computed(() => distances.value[0] ?? null)
+
+const mapLinks = computed(() => {
+  if (!userLocation.value)
+    return []
+  return PSI_SERVERS.map(s => ({
+    id: `user-${s.id}`,
+    source: 'user',
+    target: s.id,
+    width: s.id === closestServer.value?.id ? 2 : 0.5,
+    color: s.id === closestServer.value?.id ? '#8B5CF6' : 'rgba(139,92,246,0.2)',
+  }))
+})
+
+const mapData = computed(() => ({
+  points: mapPoints.value,
+  links: mapLinks.value,
+}))
 
 function locateMe() {
   locating.value = true

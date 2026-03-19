@@ -42,9 +42,11 @@ const themeHex = computed(() => {
   return '#FFFFFF'
 })
 
+const HEX_PAIR_RE = /.{1,2}/g
+
 const themeRgb = computed(() => {
   // we want to convert it so it's just `<red>, <green>, <blue>` (255, 255, 255)
-  return themeHex.value.replace('#', '').match(/.{1,2}/g)?.map(v => Number.parseInt(v, 16)).join(', ')
+  return themeHex.value.replace('#', '').match(HEX_PAIR_RE)?.map(v => Number.parseInt(v, 16)).join(', ')
 })
 </script>
 

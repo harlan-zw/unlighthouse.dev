@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
 import { users } from '../../database/schema'
-import { useDB } from '../../utils/db'
+import { getDB } from '../../utils/db'
 
 const ADMIN_EMAILS = ['harlan@harlanzw.com']
 
@@ -28,7 +28,7 @@ const handler = defineOAuthGitHubEventHandler({
     const primaryEmail = verifiedEmails[0] || user.email || ''
 
     // Upsert user in database
-    const db = useDB(event)
+    const db = getDB(event)
     const existingUser = await db.select().from(users).where(eq(users.githubId, user.id)).get()
 
     let dbUser

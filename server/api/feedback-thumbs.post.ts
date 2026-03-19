@@ -4,7 +4,7 @@ import { getHeader } from 'h3'
 import { parseURL } from 'ufo'
 import { ThumbsFeedbackSchema } from '~~/types/schemas'
 import { feedback } from '../database/schema'
-import { useDB } from '../utils/db'
+import { getDB } from '../utils/db'
 
 export default defineEventHandler<Promise<ThumbsFeedbackResponse>>(async (event) => {
   const { thumbs, toolId, context } = await readValidatedBody(event, ThumbsFeedbackSchema.parse)
@@ -13,7 +13,7 @@ export default defineEventHandler<Promise<ThumbsFeedbackResponse>>(async (event)
 
   if (!import.meta.dev) {
     const session = await getUserSession(event).catch(() => null)
-    const db = useDB(event)
+    const db = getDB(event)
 
     db.insert(feedback).values({
       path,

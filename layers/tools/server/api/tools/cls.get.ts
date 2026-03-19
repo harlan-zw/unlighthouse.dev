@@ -31,6 +31,8 @@ interface LayoutShiftCluster {
   }>
 }
 
+const SRC_RE = /src="([^"]+)"/
+
 export default defineCachedEventHandler(async (event) => {
   await checkFreeToolRateLimit(event)
   const query = getQuery(event)
@@ -179,7 +181,7 @@ export default defineCachedEventHandler(async (event) => {
   const unsizedImagesList = (unsizedImages?.details?.items || []).slice(0, 5).map((item: Record<string, unknown>) => {
     const node = item.node as Record<string, unknown> | undefined
     return {
-      url: (item.url as string) || (node?.snippet as string)?.match(/src="([^"]+)"/)?.[1] || '',
+      url: (item.url as string) || (node?.snippet as string)?.match(SRC_RE)?.[1] || '',
       snippet: (node?.snippet as string) || '',
       selector: (node?.selector as string) || '',
     }

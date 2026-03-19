@@ -57,6 +57,7 @@ const ratingLabel = computed(() => {
     case 'pass': return 'Good'
     case 'average': return 'Needs Work'
     case 'fail': return 'Poor'
+    default: return 'Unknown'
   }
 })
 </script>

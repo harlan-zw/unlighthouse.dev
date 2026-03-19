@@ -1,11 +1,11 @@
 import { desc, sql } from 'drizzle-orm'
 import { feedback } from '../../../../../server/database/schema'
-import { useDB } from '../../../../../server/utils/db'
+import { getDB } from '../../../../../server/utils/db'
 import { requireAdminAuth } from '../../utils/admin'
 
 export default defineEventHandler(async (event) => {
   await requireAdminAuth(event)
-  const db = useDB(event)
+  const db = getDB(event)
 
   const [entries, thumbStats, pathStats, thumbsByToolRaw] = await Promise.all([
     db.select().from(feedback).orderBy(desc(feedback.createdAt)).limit(100),

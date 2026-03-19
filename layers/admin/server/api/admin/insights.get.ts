@@ -1,11 +1,11 @@
 import { desc, sql } from 'drizzle-orm'
 import { feedback, toolLookups } from '../../../../../server/database/schema'
-import { useDB } from '../../../../../server/utils/db'
+import { getDB } from '../../../../../server/utils/db'
 import { requireAdminAuth } from '../../utils/admin'
 
 export default defineEventHandler(async (event) => {
   await requireAdminAuth(event)
-  const db = useDB(event)
+  const db = getDB(event)
 
   const [recentLookups, recentFeedback, dailyTrendsRaw] = await Promise.all([
     db.select({

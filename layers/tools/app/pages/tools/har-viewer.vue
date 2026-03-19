@@ -157,7 +157,10 @@ function toggleSort(key: typeof sortKey.value) {
   if (sortKey.value === key) {
     sortAsc.value = !sortAsc.value
   }
-  else { sortKey.value = key; sortAsc.value = key === 'url' }
+  else {
+    sortKey.value = key
+    sortAsc.value = key === 'url'
+  }
 }
 
 function getSortIcon(key: string) {

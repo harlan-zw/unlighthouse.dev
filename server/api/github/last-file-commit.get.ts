@@ -3,6 +3,8 @@ import { getQuery } from 'h3'
 import { logger } from '~~/logger'
 import { initOctokitRequestHandler } from '~~/server/utils/github'
 
+const PR_NUMBER_RE = /#(\d+)/
+
 export default defineCachedEventHandler(async (e) => {
   setHeader(e, 'Content-Type', 'application/json')
   const { octokit, repo, owner } = initOctokitRequestHandler(e)
@@ -37,7 +39,7 @@ export default defineCachedEventHandler(async (e) => {
   if (committerLogin === 'web-flow') {
     try {
       // Extract PR number from squashed commit message (#166)
-      const prMatch = lastCommit.commit.message.match(/#(\d+)/)
+      const prMatch = lastCommit.commit.message.match(PR_NUMBER_RE)
       if (prMatch && prMatch[1]) {
         const prNumber = prMatch[1]
         const { data: prData } = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}', {

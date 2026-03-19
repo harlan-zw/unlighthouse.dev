@@ -136,8 +136,11 @@ function toggleSort(column: typeof sortColumn.value) {
   }
 }
 
+const PROTOCOL_RE = /^https?:\/\//
+const TRAILING_SLASH_RE = /\/$/
+
 function formatUrl(url: string) {
-  return url.replace(/^https?:\/\//, '').replace(/\/$/, '')
+  return url.replace(PROTOCOL_RE, '').replace(TRAILING_SLASH_RE, '')
 }
 
 function pasteFromClipboard() {

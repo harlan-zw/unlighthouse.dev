@@ -86,6 +86,11 @@ const lookupTools = [
 
 const activeLookupTab = ref('all')
 
+const randomHeights = ref<number[]>([])
+onMounted(() => {
+  randomHeights.value = Array.from({ length: 30 }).fill(20 + Math.random() * 60)
+})
+
 const filteredLookups = computed(() => {
   if (!lookupData.value?.lookups)
     return []
@@ -733,7 +738,7 @@ function toggleJourney(id: string) {
               </div>
             </div>
             <div v-else-if="insightsStatus === 'pending'" class="flex items-end gap-1" style="height: 160px;">
-              <div v-for="i in 30" :key="i" class="flex-1 bg-default rounded-t animate-pulse" :style="{ height: `${20 + Math.random() * 60}%` }" />
+              <div v-for="i in 30" :key="i" class="flex-1 bg-default rounded-t animate-pulse" :style="{ height: `${randomHeights[i - 1] || 40}%` }" />
             </div>
             <p v-else class="text-sm text-dimmed text-center py-8">
               No trend data yet

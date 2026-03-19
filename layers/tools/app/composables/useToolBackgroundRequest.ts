@@ -55,7 +55,9 @@ export function useToolBackgroundRequest<T = any>(toolId: string, opts: {
             color: 'success',
             actions: [{
               label: 'View Results',
-              onClick: () => navigateTo(opts.path),
+              onClick: () => {
+                return navigateTo(opts.path)
+              },
             }],
           })
         }
