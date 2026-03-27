@@ -6,18 +6,18 @@ trustPolicyExclude:
   - semver
 
 overrides:
-  h3: ^1.15.8
-  vite: ^8.0.0
+  h3: ^1.15.10
+  vite: ^8.0.3
 catalog:
   '@antfu/eslint-config': ^7.7.3
-  '@iconify-json/carbon': ^1.2.19
+  '@iconify-json/carbon': ^1.2.20
   '@iconify-json/heroicons': ^1.2.3
   '@iconify-json/logos': ^1.2.10
   '@iconify-json/material-symbols': ^1.2.63
   '@iconify-json/noto': ^1.2.7
   '@iconify-json/ph': ^1.2.2
   '@iconify-json/radix-icons': ^1.2.6
-  '@iconify-json/simple-icons': ^1.2.74
+  '@iconify-json/simple-icons': ^1.2.75
   '@iconify-json/uil': ^1.2.3
   '@iconify-json/unjs': ^1.2.3
   '@iconify-json/vscode-icons': ^1.2.45
@@ -26,34 +26,34 @@ catalog:
   '@nuxt/devtools': 3.2.4
   '@nuxt/fonts': ^0.14.0
   '@nuxt/image': ^2.0.0
-  '@nuxt/scripts': ^1.0.0-beta.25
-  '@nuxt/ui': ^4.5.1
-  '@nuxtjs/mcp-toolkit': ^0.10.0
-  '@nuxtjs/seo': ^3.4.0
-  '@sentry/nuxt': ^10.44.0
+  '@nuxt/scripts': ^1.0.0-beta.32
+  '@nuxt/ui': ^4.6.0
+  '@nuxtjs/mcp-toolkit': 0.11.0
+  '@nuxtjs/seo': ^5.0.2
+  '@sentry/nuxt': ^10.46.0
   '@unovis/vue': ^1.6.4
   '@vueuse/core': ^14.2.1
   '@vueuse/nuxt': ^14.2.1
-  agents: ^0.7.7
+  agents: ^0.8.6
   better-sqlite3: ^12.8.0
   case-police: ^2.2.0
   clsx: ^2.1.1
   consola: ^3.4.2
   date-fns: ^4.1.0
   drizzle-orm: ^0.45.1
-  eslint: ^10.0.3
-  eslint-plugin-harlanzw: ^0.5.22
+  eslint: ^10.1.0
+  eslint-plugin-harlanzw: ^0.12.0
   lint-staged: ^16.4.0
   markdownlint-cli: ^0.48.0
-  motion-v: ^2.0.1
+  motion-v: ^2.2.0
   nitro-cloudflare-dev: ^0.2.2
   nuxt: ^4.4.2
-  nuxt-ai-ready: ^0.12.1
+  nuxt-ai-ready: ^1.0.4
   nuxt-auth-utils: ^0.5.29
   nuxt-build-cache: ^0.1.1
   nuxt-lodash: ^2.5.3
-  nuxt-og-image: ^6.0.3
-  nuxt-skew-protection: ^0.7.6
+  nuxt-og-image: ^6.2.6
+  nuxt-skew-protection: ^1.0.4
   octokit: ^5.0.5
   ofetch: ^1.5.1
   shiki: ^4.0.2
@@ -65,7 +65,7 @@ catalog:
   tailwindcss-animate: ^1.0.7
   three: ^0.183.2
   troisjs: ^0.3.4
-  wrangler: ^4.75.0
+  wrangler: ^4.77.0
   zod: ^4.3.6
 
 ignoredBuiltDependencies:
@@ -80,3 +80,5 @@ onlyBuiltDependencies:
   - simple-git-hooks
   - vue-demi
   - workerd
+
+trustPolicyIgnoreAfter: 262800

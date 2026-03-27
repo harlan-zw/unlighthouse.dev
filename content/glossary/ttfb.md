@@ -64,5 +64,5 @@ TTFB is the starting point for all other metrics. High TTFB delays [FCP](/glossa
 - WebPageTest waterfall
 
 ::note
-TTFB is not a Core Web Vital, but directly impacts [LCP](/glossary/lcp) which is. Slow TTFB makes good LCP nearly impossible.
+TTFB directly impacts [LCP](/glossary/lcp), a Core Web Vital. Slow TTFB makes good LCP nearly impossible.
 ::
