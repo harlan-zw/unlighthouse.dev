@@ -1,6 +1,9 @@
 import { existsSync } from 'node:fs'
 import { defineCollection, defineContentConfig } from '@nuxt/content'
-import { asSeoCollection } from '@nuxtjs/seo/content'
+import { defineRobotsSchema } from '@nuxtjs/robots/content'
+import { defineSitemapSchema } from '@nuxtjs/sitemap/content'
+import { defineOgImageSchema } from 'nuxt-og-image/content'
+import { defineSchemaOrgSchema } from 'nuxt-schema-org/content'
 import { relative, resolve } from 'pathe'
 import { z } from 'zod'
 import { logger } from './logger'
@@ -14,6 +17,10 @@ const schema = z.object({
   ogImageComponent: z.string().optional(),
   new: z.boolean().optional(),
   deprecated: z.boolean().optional(),
+  ogImage: defineOgImageSchema(),
+  schemaOrg: defineSchemaOrgSchema(),
+  robots: defineRobotsSchema(),
+  sitemap: defineSitemapSchema(),
 })
 
 function resolvableUnlighthouseCollection() {
@@ -37,7 +44,7 @@ function resolvableUnlighthouseCollection() {
     }
   }
   logger.info(`🔗 Docs source using GitHub`)
-  return defineCollection(asSeoCollection({
+  return defineCollection({
     schema,
     type: 'page',
     source: {
@@ -45,11 +52,11 @@ function resolvableUnlighthouseCollection() {
       include: 'docs/**/*.md',
       prefix: `/`,
     },
-  }))
+  })
 }
 
 // Local content collections
-const glossary = defineCollection(asSeoCollection({
+const glossary = defineCollection({
   schema,
   type: 'page',
   source: {
@@ -57,9 +64,9 @@ const glossary = defineCollection(asSeoCollection({
     cwd: 'content/glossary',
     prefix: '/glossary',
   },
-}))
+})
 
-const learnLighthouse = defineCollection(asSeoCollection({
+const learnLighthouse = defineCollection({
   schema,
   type: 'page',
   source: {
@@ -67,7 +74,7 @@ const learnLighthouse = defineCollection(asSeoCollection({
     cwd: 'content/learn-lighthouse',
     prefix: '/learn-lighthouse',
   },
-}))
+})
 
 export const content = defineContentConfig({
   collections: {
