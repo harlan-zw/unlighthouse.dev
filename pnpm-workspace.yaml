@@ -48,7 +48,7 @@ catalog:
   motion-v: ^2.2.0
   nitro-cloudflare-dev: ^0.2.2
   nuxt: ^4.4.2
-  nuxt-ai-ready: ^1.1.0
+  nuxt-ai-ready: ^1.1.2
   nuxt-auth-utils: ^0.5.29
   nuxt-build-cache: ^0.1.1
   nuxt-lodash: ^2.5.3

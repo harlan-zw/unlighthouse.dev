@@ -124,8 +124,8 @@ catalogs:
       specifier: ^4.4.2
       version: 4.4.2
     nuxt-ai-ready:
-      specifier: ^1.1.0
-      version: 1.1.0
+      specifier: ^1.1.2
+      version: 1.1.2
     nuxt-auth-utils:
       specifier: ^0.5.29
       version: 0.5.29
@@ -321,7 +321,7 @@ importers:
         version: 4.4.2(@babel/core@7.29.0)(@babel/plugin-proposal-decorators@7.29.0(@babel/core@7.29.0))(@babel/plugin-syntax-jsx@7.28.6(@babel/core@7.29.0))(@parcel/watcher@2.5.6)(@types/node@25.3.3)(@vue/compiler-sfc@3.5.31)(better-sqlite3@12.8.0)(cac@6.7.14)(db0@0.3.4(better-sqlite3@12.8.0)(drizzle-orm@0.45.1(@cloudflare/workers-types@4.20260305.0)(@opentelemetry/api@1.9.0)(@types/pg@8.15.6)(better-sqlite3@12.8.0)))(drizzle-orm@0.45.1(@cloudflare/workers-types@4.20260305.0)(@opentelemetry/api@1.9.0)(@types/pg@8.15.6)(better-sqlite3@12.8.0))(esbuild@0.27.3)(eslint@10.1.0(jiti@2.6.1))(ioredis@5.9.3)(magicast@0.5.2)(optionator@0.9.4)(rolldown@1.0.0-rc.12)(rollup-plugin-visualizer@6.0.5(rolldown@1.0.0-rc.12)(rollup@4.59.0))(rollup@4.59.0)(terser@5.46.0)(typescript@5.9.3)(vite@8.0.3(@types/node@25.3.3)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))(yaml@2.8.2)
       nuxt-ai-ready:
         specifier: 'catalog:'
-        version: 1.1.0(7bb76ffee141c8e82ceb12322434432e)
+        version: 1.1.2(7bb76ffee141c8e82ceb12322434432e)
       nuxt-build-cache:
         specifier: 'catalog:'
         version: 0.1.1(magicast@0.5.2)
@@ -7042,8 +7042,8 @@ packages:
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
 
-  nuxt-ai-ready@1.1.0:
-    resolution: {integrity: sha512-ryaZziZ/XO8iFCRDAdK6Yy2M14l+U9RQP8tjnjt7BIProSClmY3CZGcnXYbLd/UR0SGaf2K+irDBJFNY8CTRNQ==}
+  nuxt-ai-ready@1.1.2:
+    resolution: {integrity: sha512-5BnZVeaGybNkr0+QDqlrBTNpSXn0izUfeNlziaV9jMxoGE7HbUg931o/m80L1IlT6BWOwTtZMe6WL27GyBIWlA==}
     hasBin: true
     peerDependencies:
       '@libsql/client': ^0.14.0
@@ -16952,7 +16952,7 @@ snapshots:
     dependencies:
       boolbase: 1.0.0
 
-  nuxt-ai-ready@1.1.0(7bb76ffee141c8e82ceb12322434432e):
+  nuxt-ai-ready@1.1.2(7bb76ffee141c8e82ceb12322434432e):
     dependencies:
       '@mdream/js': 1.0.3
       '@nuxt/kit': 4.4.2(magicast@0.5.2)
