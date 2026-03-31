@@ -1,5 +1,5 @@
 ---
-title: "What is Time to First Byte (TTFB)?"
+title: "What is time to first byte (TTFB)?"
 description: "TTFB measures server response time. Learn what it is, thresholds, and how to optimize it."
 keywords:
   - what is time to first byte
@@ -20,15 +20,14 @@ Time to First Byte (TTFB) measures how long until the browser receives the first
 
 ## Thresholds
 
-| Score | Rating |
-|-------|--------|
-| ≤ 800ms | Good |
-| 800ms - 1800ms | Needs Improvement |
-| > 1800ms | Poor |
+| Metric | Good | Needs Improvement | Poor |
+|--------|------|-------------------|------|
+| **Core Web Vitals** | ≤ 800ms | 800ms - 1800ms | > 1800ms |
+| **Lighthouse Audit** | < 600ms | 600ms - 1200ms | > 1200ms |
 
-[Google recommends](https://web.dev/articles/ttfb) 800 milliseconds or less.
+Aim for a field score of 800 milliseconds or less at the 75th percentile to pass the [Google threshold](https://web.dev/articles/ttfb). However, the Lighthouse audit requires a server response time under **600ms** to pass the lab check.
 
-## What TTFB Includes
+## What TTFB includes
 
 - Redirect time
 - DNS lookup
@@ -38,11 +37,11 @@ Time to First Byte (TTFB) measures how long until the browser receives the first
 
 Sites with poor [LCP](/glossary/lcp) have an [average TTFB of 2,270ms](https://almanac.httparchive.org/en/2024/performance) - nearly consuming the entire 2.5s LCP budget.
 
-## Why It Matters
+## Why it matters
 
 TTFB is the starting point for all other metrics. High TTFB delays [FCP](/glossary/fcp), [LCP](/glossary/lcp), and everything else. For SPAs, fast TTFB is especially critical since client-side rendering adds more time.
 
-## Common Issues
+## Common issues
 
 - Slow server processing / database queries
 - No caching (regenerating cacheable responses)

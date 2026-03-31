@@ -1,5 +1,5 @@
 ---
-title: "What is Cumulative Layout Shift (CLS)?"
+title: "What is cumulative layout shift (CLS)?"
 description: "CLS measures visual stability. Learn what it is, thresholds, and how to prevent layout shifts."
 keywords:
   - what is cumulative layout shift
@@ -31,17 +31,17 @@ Cumulative Layout Shift (CLS) measures visual stability - how much content unexp
 | 0.1 - 0.25 | Needs Improvement |
 | > 0.25 | Poor |
 
-[Google recommends](https://web.dev/articles/cls) a score of 0.1 or less for at least 75% of page visits.
+Aim for a score of 0.1 or less at the 75th percentile of page loads to pass the [Google threshold](https://web.dev/articles/cls).
 
-## How Lighthouse Calculates CLS
+## How Lighthouse calculates CLS
 
 CLS quantifies unexpected shifts by multiplying impact fraction (viewport affected) by distance fraction (how far elements moved). User-initiated shifts within 500ms of interaction don't count.
 
-## Why It Matters
+## Why it matters
 
 Layout shifts cause accidental clicks and lost reading position. [79% of mobile sites pass CLS](https://almanac.httparchive.org/en/2024/performance) - it's the best-performing Core Web Vital. [Redbus reduced CLS to 0 and saw 80-100% higher conversions](https://web.dev/case-studies/vitals-business-impact).
 
-## Common Issues
+## Common issues
 
 - Images without width/height dimensions
 - Ads and embeds without reserved space
@@ -56,4 +56,4 @@ Layout shifts cause accidental clicks and lost reading position. [79% of mobile 
 - [PageSpeed Insights](https://pagespeed.web.dev/) (field data)
 - Web Vitals Chrome extension
 
-→ [Complete CLS Guide](/learn-lighthouse/cls)
+→ [Complete CLS guide](/learn-lighthouse/cls)

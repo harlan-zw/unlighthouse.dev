@@ -1,5 +1,5 @@
 ---
-title: "What Is Speed Index in PageSpeed Insights & Lighthouse?"
+title: "What is speed index?"
 description: "Speed Index measures how fast visible content fills the viewport. Good score: ≤3.4s mobile, ≤1.3s desktop. 10% of Lighthouse performance score. Thresholds, tools, and fixes."
 keywords:
   - what is speed index
@@ -49,11 +49,11 @@ Speed Index measures how quickly visible content populates the viewport during l
 | 1.3s - 2.3s | Needs Improvement |
 | > 2.3s | Poor |
 
-## How It Works
+## How it works
 
 Lighthouse captures video frames during load and calculates how quickly the viewport fills with content. A page showing 80% content instantly scores better than one loading evenly over time.
 
-## Speed Index vs Other Metrics
+## Speed Index vs other metrics
 
 | Metric | Measures |
 |--------|----------|
@@ -63,18 +63,18 @@ Lighthouse captures video frames during load and calculates how quickly the view
 
 Speed Index complements FCP and LCP by measuring the experience between these points.
 
-## Common Issues
+## Common issues
 
 - Render-blocking CSS/JavaScript
 - Large above-the-fold images
 - Web font loading delays
 - Client-side rendering
 
-## Measure Speed Index
+## Measure speed index
 
 - Lighthouse in Chrome DevTools
-- [PageSpeed Insights](https://pagespeed.web.dev/) - Speed Index appears in the "Diagnostics" section of PageSpeed Insights results
-- WebPageTest (original source of the metric)
+- [PageSpeed Insights](https://pagespeed.web.dev/) - Speed Index appears in the "Diagnostics" section
+- WebPageTest (the original source of the metric)
 - [Unlighthouse Bulk PageSpeed Test](/tools/bulk-pagespeed) - test Speed Index across your entire site
 
 ::note

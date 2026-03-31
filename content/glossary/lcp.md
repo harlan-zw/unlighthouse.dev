@@ -1,5 +1,5 @@
 ---
-title: "What is Largest Contentful Paint (LCP)?"
+title: "What is largest contentful paint (LCP)?"
 description: "LCP measures loading performance. Learn what it is, thresholds, and how to improve your score."
 keywords:
   - what is largest contentful paint
@@ -31,17 +31,17 @@ Largest Contentful Paint (LCP) measures how long it takes for the largest visibl
 | 2.5s - 4.0s | Needs Improvement |
 | > 4.0s | Poor |
 
-[Google recommends](https://web.dev/articles/lcp) achieving 2.5 seconds or less for at least 75% of page visits.
+Aim for a score of 2.5 seconds or less at the 75th percentile of page loads to pass the [Google threshold](https://web.dev/articles/lcp).
 
-## What Triggers LCP
+## What triggers LCP
 
 LCP tracks when the largest image, video poster, or text block renders. [73% of mobile pages have an image as their LCP element](https://almanac.httparchive.org/en/2024/performance).
 
-## Why It Matters
+## Why it matters
 
-LCP is the [hardest Core Web Vital to pass](https://www.debugbear.com/blog/hardest-core-web-vitals-metric) - only 59% of mobile pages achieve good scores. [Vodafone improved LCP by 31% and saw 8% more sales](https://web.dev/case-studies/vitals-business-impact).
+LCP is the [hardest Core Web Vital to pass](https://almanac.httparchive.org/en/2024/performance) - only 59% of mobile pages achieve good scores. [Vodafone improved LCP by 31% and saw 8% more sales](https://web.dev/case-studies/vitals-business-impact).
 
-## Common Issues
+## Common issues
 
 - Slow server response ([TTFB](/glossary/ttfb))
 - Render-blocking CSS/JavaScript
@@ -56,4 +56,4 @@ LCP is the [hardest Core Web Vital to pass](https://www.debugbear.com/blog/harde
 - [PageSpeed Insights](https://pagespeed.web.dev/) (field data)
 - Search Console Core Web Vitals report
 
-→ [Complete LCP Guide](/learn-lighthouse/lcp)
+→ [Complete LCP guide](/learn-lighthouse/lcp)

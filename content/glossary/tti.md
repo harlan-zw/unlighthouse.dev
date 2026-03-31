@@ -1,5 +1,5 @@
 ---
-title: "What is Time to Interactive (TTI)?"
+title: "What is time to interactive (TTI)?"
 description: "TTI measured page interactivity but was deprecated in Lighthouse 10. Learn what replaced it."
 keywords:
   - what is time to interactive
@@ -22,7 +22,7 @@ Time to Interactive (TTI) was **removed from Lighthouse 10** in February 2023. U
 
 Time to Interactive measured when a page became fully interactive - displaying useful content, event handlers registered, and responding within 50ms. It identified a 5-second "quiet window" with no Long Tasks.
 
-## Why TTI Was Deprecated
+## Why TTI was deprecated
 
 [Google removed TTI](https://developer.chrome.com/blog/lighthouse-10-0) because:
 
@@ -30,17 +30,17 @@ Time to Interactive measured when a page became fully interactive - displaying u
 - **Better alternatives exist** - [TBT](/glossary/tbt) measures blocking more robustly
 - **Poor correlation with real experience** - Terrible TTI could still feel responsive
 
-## What Replaced TTI
+## What replaced TTI
 
-### Lab Testing
+### Lab testing
 
 [Total Blocking Time (TBT)](/glossary/tbt) - Measures cumulative main thread blocking. Now has 30% Lighthouse weight.
 
-### Field Measurement
+### Field measurement
 
 [Interaction to Next Paint (INP)](/glossary/inp) - Measures actual interaction responsiveness. Core Web Vital since March 2024.
 
-## Historical Thresholds
+## Historical thresholds
 
 | Score | Rating |
 |-------|--------|

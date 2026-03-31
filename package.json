@@ -14,6 +14,7 @@
     "lint:fix": "eslint . --fix",
     "lint:docs": "markdownlint ./content && case-police 'content/**/*.md' *.md",
     "lint:docs:fix": "markdownlint ./content --fix && case-police 'content/**/*.md' *.md --fix",
+    "lint:links": "node check_external_links.mjs",
     "typecheck": "nuxt typecheck",
     "twoslash:verify": "nuxt-content-twoslash verify --content-dir content"
   },

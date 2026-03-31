@@ -1,5 +1,5 @@
 ---
-title: "What is First Contentful Paint (FCP)?"
+title: "What is first contentful paint (FCP)?"
 description: "FCP measures when the first content renders. Learn what it is, thresholds, and how to improve it."
 keywords:
   - what is first contentful paint
@@ -24,7 +24,7 @@ First Contentful Paint (FCP) measures when the browser renders the first piece o
 | 1.8s - 3.0s | Needs Improvement |
 | > 3.0s | Poor |
 
-[Google recommends](https://web.dev/articles/fcp) 1.8 seconds or less for at least 75% of page visits.
+Aim for a score of 1.8 seconds or less at the 75th percentile of page loads to pass the [Google threshold](https://web.dev/articles/fcp).
 
 ## FCP vs LCP
 
@@ -35,11 +35,11 @@ First Contentful Paint (FCP) measures when the browser renders the first piece o
 
 A page can have fast FCP (spinner appears) but slow LCP (actual content takes longer). Both matter for UX.
 
-## Why It Matters
+## Why it matters
 
 FCP marks when users perceive the page is loading. Before FCP, they see only a blank screen. Fast FCP reassures users something is happening, reducing early abandonment.
 
-## Common Issues
+## Common issues
 
 - Slow server response ([TTFB](/glossary/ttfb))
 - Render-blocking CSS/JavaScript

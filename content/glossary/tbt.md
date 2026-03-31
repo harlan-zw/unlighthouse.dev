@@ -1,5 +1,5 @@
 ---
-title: "What is Total Blocking Time (TBT)?"
+title: "What is total blocking time (TBT)?"
 description: "TBT measures main thread blocking during load. Learn what it is, thresholds, and how to reduce blocking time."
 keywords:
   - what is total blocking time
@@ -26,7 +26,7 @@ Total Blocking Time (TBT) measures main thread blocking between [FCP](/glossary/
 | 200ms - 600ms | Needs Improvement |
 | > 600ms | Poor |
 
-## How TBT Works
+## How TBT works
 
 TBT counts the "blocking" portion of Long Tasks (JavaScript tasks >50ms). Only time beyond 50ms counts:
 
@@ -43,13 +43,13 @@ While the main thread is blocked, the browser can't respond to user input.
 | TBT | During load | Lab metric |
 | [INP](/glossary/inp) | Throughout session | Field metric |
 
-TBT is a lab proxy for interactivity. Low TBT often correlates with good INP, but not always.
+TBT is a lab proxy for interactivity. Low TBT typically correlates with good INP, but they can diverge if interactions happen late.
 
-## Why It Matters
+## Why it matters
 
 TBT has the largest impact on Lighthouse Performance score. High TBT means clicks and taps are delayed during page load.
 
-## Common Issues
+## Common issues
 
 - Large JavaScript bundles
 - Unoptimized third-party scripts
