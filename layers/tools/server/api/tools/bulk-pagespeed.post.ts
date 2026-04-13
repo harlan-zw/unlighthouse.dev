@@ -47,6 +47,9 @@ async function processSingleUrl(
   strategy: 'mobile' | 'desktop',
 ): Promise<BulkPSIResult> {
   const result = await fetchPSI(event, url, strategy)
+  if (!result) {
+    throw createError({ statusCode: 500, message: `Failed to fetch results for ${url}` })
+  }
   const audits = result.lighthouseResult.audits
   const performanceScore = result.lighthouseResult.categories.performance?.score
 

@@ -13,7 +13,7 @@ const schema = z.object({
   publishedAt: z.string().optional(),
   updatedAt: z.string().optional(),
   keywords: z.array(z.string()).optional(),
-  readTime: z.string(),
+  readTime: z.string().optional(),
   ogImageComponent: z.string().optional(),
   new: z.boolean().optional(),
   deprecated: z.boolean().optional(),
@@ -21,6 +21,10 @@ const schema = z.object({
   schemaOrg: defineSchemaOrgSchema(),
   robots: defineRobotsSchema(),
   sitemap: defineSitemapSchema(),
+  relatedPages: z.array(z.object({
+    path: z.string(),
+    title: z.string(),
+  })).optional(),
 })
 
 function resolvableUnlighthouseCollection() {

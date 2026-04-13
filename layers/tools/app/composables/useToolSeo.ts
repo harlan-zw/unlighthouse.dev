@@ -8,6 +8,8 @@ interface ToolSeoOptions {
   description: string
   icon?: string
   faqs?: FAQ[]
+  /** Internal metadata for LLM indexing. Not emitted as meta tag (Google ignores the keywords meta). */
+  keywords?: string[]
 }
 
 export function useToolSeo(opts: ToolSeoOptions) {

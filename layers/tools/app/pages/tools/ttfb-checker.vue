@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { ComponentPublicInstance } from 'vue'
 import type { TTFBCheckResponse } from '../../../server/api/tools/ttfb-check.post'
 import { metricDefinitions } from '../../utils/crux'
 
@@ -58,7 +59,7 @@ const { loading, error, result, run: runBg } = useToolBackgroundRequest<TTFBChec
   title: 'TTFB Checker',
   path: '/tools/ttfb-checker',
 })
-const loadingContainerRef = ref<HTMLElement | null>(null)
+const loadingContainerRef = ref<HTMLElement | ComponentPublicInstance | null>(null)
 
 const { showFloatingLoader } = useToolFloatingLoader(loading, loadingContainerRef)
 const { device } = useFormFactorBridge(formFactor)

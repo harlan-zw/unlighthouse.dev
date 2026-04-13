@@ -26,10 +26,10 @@ const total = computed(() =>
 
 const rating = computed(() => {
   if (total.value <= 2500)
-    return { label: 'Good', color: 'success', bg: 'bg-success/10' }
+    return { label: 'Good', color: 'success' as const, bg: 'bg-success/10' }
   if (total.value <= 4000)
-    return { label: 'Needs Improvement', color: 'warning', bg: 'bg-warning/10' }
-  return { label: 'Poor', color: 'error', bg: 'bg-error/10' }
+    return { label: 'Needs Improvement', color: 'warning' as const, bg: 'bg-warning/10' }
+  return { label: 'Poor', color: 'error' as const, bg: 'bg-error/10' }
 })
 
 const phaseEndTimes = computed(() => {
@@ -71,7 +71,7 @@ const lcpProgress = computed(() => {
     return 0
   if (currentPhase.value > 2)
     return 100
-  const phaseStart = phaseEndTimes.value[1]
+  const phaseStart = phaseEndTimes.value[1] || 0
   const phaseDuration = timings.value.loadDuration
   const phaseElapsed = elapsedTime.value - phaseStart
   return Math.min(100, Math.max(0, (phaseElapsed / phaseDuration) * 100))
@@ -87,7 +87,8 @@ function animate(timestamp: number) {
   // Determine current phase
   let phase = -1
   for (let i = 0; i < phaseEndTimes.value.length; i++) {
-    if (elapsed < phaseEndTimes.value[i]) {
+    const endTime = phaseEndTimes.value[i]
+    if (endTime !== undefined && elapsed < endTime) {
       phase = i
       break
     }

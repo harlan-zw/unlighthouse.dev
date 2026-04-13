@@ -38,8 +38,20 @@ const faqs = [
 ]
 
 useToolSeo({
-  title: 'JSON Size Analyzer - Calculate JSON Object Size Online Free',
-  description: 'Free JSON size calculator and analyzer. Measure raw, minified, gzip, and brotli sizes. Analyze key contributions, depth, and duplicate key overhead. Entirely client-side.',
+  title: 'JSON Size Calculator - Measure & Analyze JSON Size Online Free',
+  description: 'Free JSON size calculator. Measure raw, minified, gzip, and brotli sizes. Analyze key contributions, depth, and duplicate key overhead. Paste JSON, get instant size breakdown. 100% client-side.',
+  keywords: [
+    'json size calculator',
+    'json size',
+    'calculate json size',
+    'json size online',
+    'json size analyzer',
+    'json size tool',
+    'json byte calculator',
+    'json minifier size',
+    'json gzip size',
+    'json brotli size',
+  ],
   faqs,
 })
 

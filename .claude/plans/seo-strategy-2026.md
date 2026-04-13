@@ -3,8 +3,182 @@
 **Data-Driven Content Strategy to Capture DebugBear Traffic**
 
 Generated: January 24, 2026
-Last reviewed: March 4, 2026
+Last reviewed: April 13, 2026 (Q1 closeout)
 Based on: 28-day GSC data with period-over-period comparison
+
+---
+
+## Q1 2026 Closeout (April 13)
+
+### Q1 Final Scorecard
+
+| Window | Clicks | Impressions | CTR | Avg Pos | Keywords |
+|--------|--------|-------------|-----|---------|----------|
+| Jan (baseline) | 557 | 4,867 | 2.14% | 29.2 | ~250 |
+| Feb | 1,320 | 77,062 | 1.7% | 8.4 | 897 |
+| Mar (Mar 4 snapshot) | 1,389 | 78,779 | 1.8% | 8.0 | 930 |
+| **28d ending Apr 11** | **1,134** | **109,973** | **1.03%** | **7.5** | **1,761** |
+| Q1 target (Mar) | 2,000 | — | — | — | — |
+
+**Hit rate vs targets:**
+- ❌ March 2,000 clicks target missed (peaked ~1,389)
+- ✅ Position 7.5 (vs Mar target ~8)
+- ✅ Keywords 1,761 (nearly doubled)
+- ✅ Impressions 109K (up 22x from Jan)
+
+### What Actually Happened in Q1
+
+**Wins (vs Jan baseline):**
+- Impressions +2,160% (4,867 → 109,973)
+- Avg position improved +21.7 places (29.2 → 7.5)
+- Keyword footprint grew 7x (250 → 1,761)
+- Tools shipped: 11 live (bulk-pagespeed, cls-debugger, inp-analyzer, cwv-compare/checker/history, lcp-finder, lighthouse-report-viewer, lighthouse-score-calculator, pagespeed-insights-performance, ttfb-checker) + 3 newer (page-size, har-viewer, json-size)
+- learn-lighthouse content hub: 80+ pages across LCP/CLS/INP/SEO/A11y/Best Practices/Playwright/Lighthouse CI
+- `lighthouse cli` pos 11 → 5.8, `lighthouse ci` pos 14 → 8.0
+
+**Regressions / concerns:**
+1. **Homepage bleed:** `/` clicks went 981 (Feb) → 1,036 (Mar) → **731** (28d ending Apr 11). Brand keyword `unlighthouse` clicks 740 → 611 (-129). Possible causes: SGE/AI Overviews cannibalizing brand clicks, or dev audience dipping. Needs investigation — the homepage is still our #1 revenue page.
+2. **Zero-click crisis UNRESOLVED:** Despite Feb 27 + Mar 4 title/meta fixes, CLI flag clusters are STILL 0% CTR:
+   - `--maxroutes unlighthouse` variants: 932 impressions, 0 clicks
+   - `unlighthouse cli desktop option` variants: 1,500+ impressions, 0 clicks
+   - `optimizecss next.config.js` variants: 644 impressions, 0 clicks
+   - `--ci unlighthouse` variants: 560 impressions, 0 clicks
+   - Hypothesis: these are navigational queries where users want code snippets in the SERP snippet, not a click. Or Google is rewriting our titles back. Verify by searching these manually and checking what snippet displays.
+3. **`lhci` keyword:** 173 impressions pos 7, 0 clicks — we rank but the page doesn't match intent (users want Google's `@lhci/cli`, not Unlighthouse's CI integration). 127 impressions on `@lhci/cli` specifically.
+4. **CTR dropped to 1.03%** — impressions growing faster than clicks. High-impression/low-intent long-tail expanding.
+5. **`lighthouse speed index` regressed** pos 9.3 → 11.7, 380 impressions 0 clicks (title rewrite Mar 4 didn't stick).
+6. **Spain traffic -21 clicks** — reverses Feb's surge; may signal Spanish queries now routed to localized results.
+
+### Top Pages (28d ending Apr 11)
+
+| URL | Clicks | Impressions | CTR | Pos | vs Prev 28d |
+|-----|--------|-------------|-----|-----|-------------|
+| `/` | 731 | 3,888 | 18.8% | 11.4 | **-176** |
+| `/learn-lighthouse/playwright` | 33 | 2,011 | 1.6% | 5.3 | +5 |
+| `/tools/lighthouse-report-viewer` | 33 | 3,487 | 0.9% | 8.0 | -14 |
+| `/integrations/cli` | 32 | 3,797 | 0.8% | 4.8 | -9 |
+| `/tools/cls-debugger` | 28 | 1,007 | 2.8% | 7.5 | -15 |
+| `/learn-lighthouse/seo` | 19 | 10,083 | 0.2% | 7.7 | +7 |
+| `/tools/inp-analyzer` | 16 | 411 | 3.9% | 6.9 | NEW +16 |
+| `/learn-lighthouse/lighthouse-ci` | 12 | 3,292 | 0.4% | 6.0 | NEW +12 |
+| `/learn-lighthouse/lcp` | 12 | 12,443 | 0.1% | 7.1 | +1 |
+| `/learn-lighthouse/lcp/lcp-lazy-loaded` | 9 | 5,257 | 0.2% | 6.5 | +8 |
+| `/tools/cwv-checker` | 6 | 574 | 1.0% | 14.4 | NEW +6 |
+
+**Patterns:**
+- Hub pages (seo, lcp, lighthouse-ci) grew impressions hard but CTR is 0.1-0.4% — titles need another pass
+- Tools page CTRs varying wildly: inp-analyzer 3.9%, cls-debugger 2.8%, report-viewer 0.9% — viewer is underperforming
+- Long-tail fix pages (`lcp-lazy-loaded`) now in the top 10
+
+### Striking Distance (pos 4-20, top potential)
+
+| Keyword | Impressions | Pos | Potential | Target Page |
+|---------|-------------|-----|-----------|-------------|
+| lighthouse cli | 787 | 5.8 | 118 | `/integrations/cli` |
+| lighthouse ci | 616 | 8.0 | 92 | cannibalized between `/integrations/ci` + `/learn-lighthouse/lighthouse-ci` |
+| `--maxroutes` unlighthouse (2 variants) | 932 | 5.5 | 140 | `/learn-lighthouse/bulk` |
+| pagespeed insights vs lighthouse | 441 | 9.7 | 66 | `/learn-lighthouse/pagespeed-insights-vs-lighthouse` |
+| unlighthouse cli --desktop flag | 406 | 5.5 | 61 | `/guide/guides/device` |
+| index speed | 389 | 17.7 | 58 | glossary |
+| lighthouse speed index | 380 | 11.7 | 57 | `/glossary/speed-index` (regressed) |
+| largest contentful paint optimization best practices 2026 | 341 | 8.4 | 51 | `/learn-lighthouse/lcp/fix` |
+| lighthouse seo | 334 | 13.2 | 50 | `/learn-lighthouse/seo` |
+| puppeteer launch option userdatadir | 284 | 8.6 | 43 | `/guide/guides/puppeteer` |
+| lighthouse continuous integration | 174 | 15.8 | 26 | cannibalization again |
+| lhci | 173 | 7.0 | 26 | no fit — need disambiguation page |
+| json size calculator | 120 | 5.9 | 18 | `/tools/json-size` (new, 0 CTR) |
+| cls good threshold 0.1 web.dev | 180 | 7.7 | 27 | `/learn-lighthouse/cls` |
+| bulk cwv tool | 164 | 6.6 | 25 | `/tools/bulk-pagespeed` or cwv-compare |
+
+### New/Emerging Keyword Signals
+
+| Keyword | Impressions | Pos | Notes |
+|---------|-------------|-----|-------|
+| lcp-lazy-loaded queries | 5,257 (page-level) | 6.5 | Fix page working — expand it |
+| `@lhci/cli` | 127 | 6.4 | Disambiguation gap |
+| `largest contentful paint image was lazily loaded` | 100 | 4.3 | Already ranking top-5, needs title match |
+| `monitor lighthouse scores` | 90 | 11.0 | Cloud-product lead-gen term — hold until cloud ships |
+| `lcp metric` | 66 | 10.8 | Glossary gap |
+| `check core web vitals` | 176 | 17.3 | Tool-intent, route to cwv-checker |
+| `playwright lighthouse` (3 variants) | 353 | 5.7 | New cluster — expand playwright hub |
+
+### Rising Keywords
+- `lighthouse ci` +3 clicks, pos 9.7 → 8.0
+- `lighthouse playwright` +8 clicks, pos 5.8
+- `lighthouse seo` pos 23.2 → 13.2
+- `cumulative layout shift` pos 64.7 → 22.5
+
+### Declining Keywords
+- `npx unlighthouse` 15 → 9 clicks (brand decay matching homepage)
+- `lighthouse scoring calculator` 3 → 0 clicks
+- `lighthouse speed index` 1 → 0 clicks
+- `lighthouse report viewer` 2 → 1 click (title working but competing result improved)
+
+### Technical SEO Sweep
+- Sitemap: `https://unlighthouse.dev/sitemap.xml` — 141 URLs, **0 errors / 0 warnings**, last crawled Apr 7
+- GSC sync: 544 days, complete, no errors
+- No orphan pages flagged; sitemap covers `/tools/*`, `/learn-lighthouse/*`, `/glossary/*`, `/integrations/*`, `/guide/*`
+- Not tested this review: real CWV measurements on unlighthouse.dev itself — punt to standalone audit
+
+### Geographic (28d)
+| Country | Clicks | Change |
+|---------|--------|--------|
+| USA | 114 | +7 |
+| India | 88 | +6 (back to #2) |
+| Spain | 42 | **-21** |
+| UK | 34 | -10 |
+| France | 29 | -9 |
+| Germany | 24 | -16 |
+
+Spain surge reversed. Developed-market traffic broadly down. Needs investigation.
+
+---
+
+## Q2 2026 Plan
+
+### Priority 1: Fix the Zero-Click Crisis (recurring, blocking)
+
+The Feb 27 / Mar 4 title fixes did not solve it. Next steps:
+1. **Manual SERP audit** on 5 representative queries (`--maxroutes unlighthouse`, `unlighthouse --desktop`, `lhci`, `optimizecss next.config.js`, `--ci unlighthouse`). Screenshot what Google actually shows; check if title was rewritten by Google, if snippet is a featured answer, or if there's an AI Overview eating clicks.
+2. If Google rewrote titles → match keyword density to H1 + first paragraph, not just title.
+3. If AI Overview → add 40-50 word atomic answers at top of affected pages; add `FAQPage` schema.
+4. If snippet answers inline → restructure to require clicking for code (unlikely win).
+
+### Priority 2: Homepage Traffic Recovery
+1. Investigate `/` click decline (731 from 1,036). Pull 90d timeseries on brand keyword.
+2. Check if SGE/AI Overview now triggers for `unlighthouse`.
+3. If SGE: add atomic answer block above fold for "What is Unlighthouse?".
+
+### Priority 3: Keyword Cannibalization Cleanup
+- `lighthouse ci` splits between `/integrations/ci` (8.5) and `/learn-lighthouse/lighthouse-ci` (7.3). Decide which is canonical, canonical-link the other or merge content.
+- `lighthouse continuous integration` same pattern at pos 15.8.
+- `lhci` ranks but wrong intent → create `/learn-lighthouse/lhci-vs-unlighthouse-ci` disambiguation page.
+
+### Priority 4: High-Leverage Content Expansions
+1. `/learn-lighthouse/pagespeed-insights-vs-lighthouse` — 441 impr at pos 9.7. Push to pos 5. Add FAQ for "Why is my Lighthouse score different from PageSpeed Insights?" (PAA target).
+2. `/learn-lighthouse/lcp/fix` or new `/learn-lighthouse/lcp/2026-best-practices` — target "largest contentful paint optimization best practices 2026" (341 impressions).
+3. `/tools/json-size` — 120 impressions pos 5.9, 0 clicks. Title + meta rewrite to match "json size calculator" exact query.
+4. Expand `/learn-lighthouse/playwright` — cluster jumped to 353 combined impressions.
+
+### Priority 5: Deferred from Q1
+- `/cloud` + `/cloud/pricing` — only if product ready
+- `/compare/debugbear` — only if cloud exists
+- Framework pages (Next.js, Nuxt) — revisit after priorities 1-4
+
+### Priority 6: Strategic Bets (from prior Q2 section, unchanged)
+- Spanish i18n for `/tools/cls-debugger` + glossary (CLS, LCP, INP, CWV) targeting `auditoria lighthouse` + `core web vitals que es`
+- "State of Web Performance" report using Unlighthouse CLI data on top 10k Shopify/Next.js sites (link-magnet)
+- LoAF as secondary keyword inside INP guides
+
+### Success Criteria (end of June 2026)
+| Metric | Target |
+|--------|--------|
+| Monthly clicks (28d) | 2,500 |
+| Homepage clicks | 900+ (recover + grow) |
+| Zero-click CLI clusters CTR | >3% |
+| `lighthouse cli` pos | ≤ 4 |
+| `lighthouse ci` pos | ≤ 6 |
+| New tool pages converted to traffic | page-size, har-viewer, json-size each >20 clicks/mo |
 
 ---
 

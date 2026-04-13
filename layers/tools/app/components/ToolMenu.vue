@@ -1,5 +1,39 @@
 <script setup lang="ts">
-const toolCategories = [
+interface Tool {
+  label: string
+  icon: string
+  to: string
+}
+
+interface ToolCategory {
+  label: string
+  description: string
+  color: keyof typeof colorClasses
+  tools: Tool[]
+}
+
+const colorClasses = {
+  emerald: {
+    dot: 'bg-emerald-500',
+    iconBg: 'bg-emerald-500/10 dark:bg-emerald-500/15',
+    icon: 'text-emerald-600 dark:text-emerald-400',
+    hover: 'hover:bg-emerald-500/5 dark:hover:bg-emerald-500/10',
+  },
+  violet: {
+    dot: 'bg-violet-500',
+    iconBg: 'bg-violet-500/10 dark:bg-violet-500/15',
+    icon: 'text-violet-600 dark:text-violet-400',
+    hover: 'hover:bg-violet-500/5 dark:hover:bg-violet-500/10',
+  },
+  amber: {
+    dot: 'bg-amber-500',
+    iconBg: 'bg-amber-500/10 dark:bg-amber-500/15',
+    icon: 'text-amber-600 dark:text-amber-400',
+    hover: 'hover:bg-amber-500/5 dark:hover:bg-amber-500/10',
+  },
+}
+
+const toolCategories: ToolCategory[] = [
   {
     label: 'Core Web Vitals',
     description: 'Debug individual metrics',
@@ -36,27 +70,6 @@ const toolCategories = [
     ],
   },
 ]
-
-const colorClasses = {
-  emerald: {
-    dot: 'bg-emerald-500',
-    iconBg: 'bg-emerald-500/10 dark:bg-emerald-500/15',
-    icon: 'text-emerald-600 dark:text-emerald-400',
-    hover: 'hover:bg-emerald-500/5 dark:hover:bg-emerald-500/10',
-  },
-  violet: {
-    dot: 'bg-violet-500',
-    iconBg: 'bg-violet-500/10 dark:bg-violet-500/15',
-    icon: 'text-violet-600 dark:text-violet-400',
-    hover: 'hover:bg-violet-500/5 dark:hover:bg-violet-500/10',
-  },
-  amber: {
-    dot: 'bg-amber-500',
-    iconBg: 'bg-amber-500/10 dark:bg-amber-500/15',
-    icon: 'text-amber-600 dark:text-amber-400',
-    hover: 'hover:bg-amber-500/5 dark:hover:bg-amber-500/10',
-  },
-}
 </script>
 
 <template>

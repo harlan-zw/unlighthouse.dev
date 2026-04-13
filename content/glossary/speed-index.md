@@ -1,21 +1,26 @@
 ---
-title: "What is speed index?"
-description: "Speed Index measures how fast visible content fills the viewport. Good score: ≤3.4s mobile, ≤1.3s desktop. 10% of Lighthouse performance score. Thresholds, tools, and fixes."
+title: "Lighthouse Speed Index: What It Means, Good Scores & How to Fix"
+description: "Speed Index (SI) measures how fast visible content fills the viewport. Good: ≤3.4s mobile, ≤1.3s desktop. 10% of Lighthouse performance score. Thresholds, tools, fixes."
 keywords:
+  - lighthouse speed index
+  - speed index
+  - speed index lighthouse
+  - pagespeed insights speed index
+  - pagespeed speed index
+  - page speed index
+  - index speed
   - what is speed index
   - what is speed index in lighthouse
   - what is speed index in pagespeed insights
   - speed index meaning
   - speed index definition
-  - speed index lighthouse
-  - speed index pagespeed insights
   - speed index good score
   - speed index threshold
   - speed index vs lcp
   - speed index test
   - speed index score
   - improve speed index
-  - lighthouse speed index
+  - speed index web performance metric
 navigation:
   title: "Speed Index"
 relatedPages:

@@ -14,22 +14,10 @@ export async function useStats() {
 
 function getCollectionForPath(path: string) {
   if (path.startsWith('/glossary'))
-    return 'glossary'
+    return 'glossary' as const
   if (path.startsWith('/learn-lighthouse'))
-    return 'learnLighthouse'
-  if (path.startsWith('/blog'))
-    return 'blog'
-  if (path.startsWith('/cloud'))
-    return 'cloud'
-  if (path.startsWith('/tools'))
-    return 'tools'
-  if (path.startsWith('/compare'))
-    return 'compare'
-  if (path.startsWith('/automation'))
-    return 'automation'
-  if (path.startsWith('/frameworks'))
-    return 'frameworks'
-  return 'root'
+    return 'learnLighthouse' as const
+  return 'root' as const
 }
 
 export async function useCurrentDocPage() {
@@ -40,11 +28,14 @@ export async function useCurrentDocPage() {
   }
 
   const collection = getCollectionForPath(route.path)
+  const pagePromise = queryCollection(collection).path(route.path).first()
+  const surroundPromise = queryCollectionItemSurroundings(collection, route.path, {
+    fields: ['title', 'description', 'path'],
+  })
+
   const p = Promise.all([
-    queryCollection(collection).path(route.path).first(),
-    queryCollectionItemSurroundings(collection, route.path, {
-      fields: ['title', 'description', 'path'],
-    }),
+    pagePromise as any,
+    surroundPromise as any,
   ])
     .then(async ([pageData, surroundData]) => {
       if (!pageData?.body?.value) {
@@ -54,7 +45,7 @@ export async function useCurrentDocPage() {
       modifyRelativeDocLinksWithFramework(pageData.body.value)
 
       const page = ref(pageData)
-      const surround = ref((surroundData || []).filter(Boolean).map(m => ({
+      const surround = ref((surroundData || []).filter(Boolean).map((m: any) => ({
         ...m,
         _path: m.path,
       })))
@@ -89,8 +80,8 @@ export function movingAverage(data: number[], windowSize: number) {
   return result
 }
 
-export function mapPath(data, node = 0) {
-  return data.map((item) => {
+export function mapPath(data: any, node = 0) {
+  return data.map((item: any) => {
     if (item.children?.length && !item.page) {
       item.title = titleCase(item.title)
       item.children = mapPath(item.children, node + 1)

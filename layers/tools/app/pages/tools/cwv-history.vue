@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { ComponentPublicInstance } from 'vue'
 import type { CWVHistoryResponse } from '../../../server/api/tools/cwv-history.post'
 import type { CruxRating, MetricKey } from '../../utils/crux'
 import {
@@ -85,6 +86,7 @@ interface HistoryItem {
   ttfbGood?: number
   ttfbNeedsImprovement?: number
   ttfbPoor?: number
+  [key: string]: string | number | undefined
 }
 
 const urlInput = ref('')
@@ -95,7 +97,7 @@ const { loading, error, result, run: runBg } = useToolBackgroundRequest<CWVHisto
   title: 'CWV History',
   path: '/tools/cwv-history',
 })
-const loadingContainerRef = ref<HTMLElement | null>(null)
+const loadingContainerRef = ref<HTMLElement | ComponentPublicInstance | null>(null)
 
 const { showFloatingLoader } = useToolFloatingLoader(loading, loadingContainerRef)
 const selectedMetric = ref<MetricKey>('lcp')
@@ -133,16 +135,16 @@ function lookup() {
 const latestData = computed<HistoryItem | null>(() => {
   if (!result.value?.history?.length)
     return null
-  return result.value.history.at(-1)
+  return (result.value.history.at(-1) as any) || null
 })
 
 const passesCWV = computed(() => {
   if (!latestData.value)
     return false
   return getPassesAllCWV({
-    lcp: latestData.value.lcp75,
-    cls: latestData.value.cls75,
-    inp: latestData.value.inp75,
+    lcp: (latestData.value as any).lcp75,
+    cls: (latestData.value as any).cls75,
+    inp: (latestData.value as any).inp75,
   })
 })
 
@@ -164,7 +166,7 @@ const currentMetrics = computed(() => {
       good: def.good,
       poor: def.poor,
       learnMoreUrl: def.learnMoreUrl,
-      toolUrl: def.toolUrl,
+      toolUrl: (def as any).toolUrl,
     }
   })
 })
@@ -260,8 +262,8 @@ const chartAreaPath = computed(() => {
   if (validPoints.length < 2)
     return ''
   const linePath = validPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
-  const lastX = validPoints.at(-1).x
-  const firstX = validPoints[0].x
+  const lastX = validPoints.at(-1)!.x
+  const firstX = validPoints[0]!.x
   return `${linePath} L ${lastX} 100 L ${firstX} 100 Z`
 })
 
@@ -351,7 +353,7 @@ function formatChartDate(date: string) {
         </form>
       </div>
 
-      <ToolLoadingPill v-if="loading" ref="loadingContainerRef" :progress="loadingProgress" :message="loadingMessage" color="indigo" hint="Fetching 25 weeks of real user data." />
+      <ToolLoadingPill v-if="loading" ref="loadingContainerRef" :progress="loadingProgress" :message="loadingMessage || ''" color="indigo" hint="Fetching 25 weeks of real user data." />
 
       <!-- Error -->
       <ToolError :error="error" />
@@ -599,9 +601,9 @@ function formatChartDate(date: string) {
 
               <!-- X-axis labels -->
               <div class="flex justify-between mt-2 text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 font-mono">
-                <span v-if="result.history!.length">{{ formatChartDate(result.history![0].date) }}</span>
-                <span v-if="result.history!.length > 10">{{ formatChartDate(result.history![Math.floor(result.history!.length / 2)].date) }}</span>
-                <span v-if="result.history!.length">{{ formatChartDate(result.history![result.history!.length - 1].date) }}</span>
+                <span v-if="result.history?.length">{{ formatChartDate(result.history[0]?.date || '') }}</span>
+                <span v-if="result.history?.length && result.history.length > 10">{{ formatChartDate(result.history[Math.floor(result.history.length / 2)]?.date || '') }}</span>
+                <span v-if="result.history?.length">{{ formatChartDate(result.history[result.history.length - 1]?.date || '') }}</span>
               </div>
             </div>
 

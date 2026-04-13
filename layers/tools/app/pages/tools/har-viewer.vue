@@ -290,10 +290,10 @@ function getTimingPhaseWidths(entry: ParsedHarEntry) {
       <!-- Results -->
       <div v-if="report" class="p-4 sm:p-6 space-y-6">
         <!-- Page Info -->
-        <div v-if="report.pages.length" class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+        <div v-if="report?.pages?.length" class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
           <div class="flex items-center gap-2 min-w-0">
             <UIcon name="i-heroicons-globe-alt" class="w-4 h-4 text-gray-400 shrink-0" />
-            <span class="text-sm text-gray-700 dark:text-gray-300 truncate">{{ report.pages[0].title }}</span>
+            <span class="text-sm text-gray-700 dark:text-gray-300 truncate">{{ report.pages[0]?.title }}</span>
           </div>
         </div>
 
@@ -301,7 +301,7 @@ function getTimingPhaseWidths(entry: ParsedHarEntry) {
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
             <p class="text-lg font-bold text-gray-900 dark:text-white">
-              {{ report.totalRequests }}
+              {{ report?.totalRequests }}
             </p>
             <p class="text-xs text-gray-500">
               Requests
@@ -309,7 +309,7 @@ function getTimingPhaseWidths(entry: ParsedHarEntry) {
           </div>
           <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
             <p class="text-lg font-bold text-gray-900 dark:text-white">
-              {{ formatBytes(report.totalTransferSize) }}
+              {{ formatBytes(report?.totalTransferSize || 0) }}
             </p>
             <p class="text-xs text-gray-500">
               Transfer Size
@@ -317,7 +317,7 @@ function getTimingPhaseWidths(entry: ParsedHarEntry) {
           </div>
           <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
             <p class="text-lg font-bold text-gray-900 dark:text-white">
-              {{ formatMs(report.totalTime) }}
+              {{ formatMs(report?.totalTime || 0) }}
             </p>
             <p class="text-xs text-gray-500">
               Total Time
@@ -325,7 +325,7 @@ function getTimingPhaseWidths(entry: ParsedHarEntry) {
           </div>
           <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
             <p class="text-lg font-bold text-gray-900 dark:text-white">
-              {{ report.domainBreakdown.length }}
+              {{ report?.domainBreakdown?.length }}
             </p>
             <p class="text-xs text-gray-500">
               Domains
@@ -575,7 +575,7 @@ function getTimingPhaseWidths(entry: ParsedHarEntry) {
                   <div class="flex-1 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
                     <div
                       class="h-full rounded-full bg-teal-500"
-                      :style="{ width: `${(domain.size / report.domainBreakdown[0].size) * 100}%` }"
+                      :style="{ width: `${report.domainBreakdown[0] ? (domain.size / report.domainBreakdown[0].size) * 100 : 0}%` }"
                     />
                   </div>
                 </div>

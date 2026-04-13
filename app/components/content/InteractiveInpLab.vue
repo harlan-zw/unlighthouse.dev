@@ -11,8 +11,24 @@ const showFeedback = ref(false)
 const mainThreadBlocks = ref<{ id: number, type: string, width: number, label: string }[]>([])
 const blockId = ref(0)
 
+interface ScenarioBlock {
+  type: string
+  duration: number
+  label: string
+}
+
+interface Scenario {
+  id: string
+  label: string
+  icon: string
+  delay: number
+  description: string
+  whatHappens: string
+  blocks: ScenarioBlock[]
+}
+
 // Current scenario
-const scenarios = [
+const scenarios: Scenario[] = [
   {
     id: 'optimized',
     label: 'Optimized',
@@ -68,7 +84,7 @@ const scenarios = [
   },
 ]
 
-const selectedScenario = ref(scenarios[0])
+const selectedScenario = ref<Scenario>(scenarios[0]!)
 
 function getRating(ms: number) {
   if (ms <= 200)
@@ -109,11 +125,14 @@ async function addToCart() {
   if (isProcessing.value)
     return
 
+  const scenario = selectedScenario.value
+  if (!scenario)
+    return
+
   isProcessing.value = true
   showFeedback.value = false
   mainThreadBlocks.value = []
 
-  const scenario = selectedScenario.value
   const totalDuration = scenario.blocks.reduce((sum, b) => sum + b.duration, 0)
 
   // Visualize each block on the main thread
@@ -194,7 +213,7 @@ const blockColors: Record<string, string> = {
         </h3>
         <div v-if="lastInp !== null" class="flex items-center gap-2">
           <span class="font-mono text-xl font-bold tabular-nums">{{ lastInp }}ms</span>
-          <UBadge :color="getRating(lastInp).color" variant="subtle" size="sm">
+          <UBadge :color="(getRating(lastInp).color as any)" variant="subtle" size="sm">
             {{ getRating(lastInp).label }}
           </UBadge>
         </div>

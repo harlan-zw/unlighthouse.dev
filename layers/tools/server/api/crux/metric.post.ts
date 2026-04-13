@@ -23,6 +23,8 @@ const thresholds: Record<MetricKey, { good: number, poor: number }> = {
   inp: { good: 200, poor: 500 },
   fcp: { good: 1800, poor: 3000 },
   ttfb: { good: 800, poor: 1800 },
+  si: { good: 3400, poor: 5800 },
+  tbt: { good: 200, poor: 600 },
 }
 
 function getRating(metric: MetricKey, value: number): 'good' | 'needs-improvement' | 'poor' {

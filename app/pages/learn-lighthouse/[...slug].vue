@@ -12,14 +12,15 @@ const route = useRoute()
 const [{ data: page }, { data: surround }] = await Promise.all([
   useAsyncData(`learn-${route.path}`, () => queryCollection('learnLighthouse').path(route.path).first()),
   useAsyncData(`learn-${route.path}-surround`, () => queryCollectionItemSurroundings('learnLighthouse', route.path, {
-    fields: ['title', 'description', 'navigation'],
+    fields: ['title', 'description', 'path'],
+  }), {
     transform(items) {
       return items.map(m => ({
         ...m,
         _path: m.path,
       }))
     },
-  })),
+  }),
 ])
 
 if (!page.value)
@@ -45,7 +46,7 @@ useHead({
 
 const headline = computed(() => titleCase(getLastPathSegment(getPathSegments(route.path, route.path.split('/').length - 2))))
 
-defineOgImage('Docs', {
+defineOgImage('Docs' as any, {
   title: page.value?.title,
   description: page.value?.description,
   headline: headline.value,
@@ -124,7 +125,7 @@ const humanUpdatedDate = computed(() => page.value?.updatedAt
 
     <div class="hidden xl:block max-w-75 w-full">
       <div class="pt-11 pl-10 gap-5 flex flex-col">
-        <div v-if="page?.body?.toc?.links?.length > 1">
+        <div v-if="page?.body?.toc?.links?.length && page.body.toc.links.length > 1">
           <div class="mb-5 flex items-center gap-2 text-[var(--ui-text-accented)]">
             <UIcon name="i-tabler-align-left-2" class="size-4" />
             <div class="text-xs font-medium">

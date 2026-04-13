@@ -35,7 +35,7 @@ const learnCategories = [
   },
 ]
 
-const colorClasses = {
+const colorClasses: Record<string, { dot: string, iconBg: string, icon: string, hover: string }> = {
   emerald: {
     dot: 'bg-emerald-500',
     iconBg: 'bg-emerald-500/10 dark:bg-emerald-500/15',
@@ -73,7 +73,7 @@ const colorClasses = {
         <div class="flex items-center gap-2 mb-0.5">
           <span
             class="w-1.5 h-1.5 rounded-full"
-            :class="colorClasses[category.color].dot"
+            :class="colorClasses[category.color]?.dot"
           />
           <span class="text-[11px] font-semibold uppercase tracking-wider text-muted">
             {{ category.label }}
@@ -91,18 +91,18 @@ const colorClasses = {
           :key="item.to"
           :to="item.to"
           class="learn-item group flex items-center gap-2.5 px-2 py-2 rounded-lg transition-all duration-200"
-          :class="colorClasses[category.color].hover"
+          :class="colorClasses[category.color]?.hover"
           :style="{ '--item-delay': itemIdx }"
         >
           <!-- Icon -->
           <div
             class="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-transform duration-200 group-hover:scale-110"
-            :class="colorClasses[category.color].iconBg"
+            :class="colorClasses[category.color]?.iconBg"
           >
             <UIcon
               :name="item.icon"
               class="w-4 h-4 transition-colors"
-              :class="colorClasses[category.color].icon"
+              :class="colorClasses[category.color]?.icon"
             />
           </div>
 

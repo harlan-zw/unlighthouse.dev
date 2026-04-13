@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { ComponentPublicInstance } from 'vue'
+
 definePageMeta({
   breadcrumb: {
     icon: 'i-heroicons-photo',
@@ -64,7 +66,7 @@ const { loading, error, result, run: runBg } = useToolBackgroundRequest<LcpResul
   path: '/tools/lcp-finder',
 })
 const screenshotRef = ref<HTMLElement | null>(null)
-const loadingContainerRef = ref<HTMLElement | null>(null)
+const loadingContainerRef = ref<HTMLElement | ComponentPublicInstance | null>(null)
 
 const { showFloatingLoader } = useToolFloatingLoader(loading, loadingContainerRef)
 
@@ -1017,7 +1019,7 @@ const insights = computed<LcpInsight[]>(() => {
                     >
                       <!-- Phase label inside bar -->
                       <span
-                        v-if="phase.percentage >= 15 && (!isAnimating || animationProgress[idx] > 0.5)"
+                        v-if="phase.percentage >= 15 && (!isAnimating || (animationProgress[idx] !== undefined && animationProgress[idx] > 0.5))"
                         class="text-[10px] sm:text-xs font-semibold text-white drop-shadow whitespace-nowrap"
                       >
                         {{ phase.shortLabel }}

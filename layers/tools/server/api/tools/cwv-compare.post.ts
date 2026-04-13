@@ -36,6 +36,7 @@ export interface CWVCompareResponse {
     fcp: string | null
     ttfb: string | null
     overall: string | null
+    [key: string]: string | null
   }
   collectionPeriod: { start: string, end: string } | null
 }

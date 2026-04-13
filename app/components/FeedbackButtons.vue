@@ -65,7 +65,7 @@ async function onSubmit(event: FormSubmitEvent<CommentFeedbackSchemaOutput>) {
       <template v-if="thumbSubmissionStatus === 'loading'">
         <UIcon name="i-carbon-in-progress" class="w-6 h-6 animate-spin" />
       </template>
-      <template v-else-if="thumbSubmissionStatus === 'submitted'">
+      <template v-else-if="thumbSubmissionStatus === 'submitted' && thumbsResponse">
         <div v-if="thumbsResponse.thumbs === 'up'" class="flex items-center gap-3">
           <UIcon name="i-carbon-thumbs-up" class="w-6 h-6" />
           <span v-if="thumbsResponse.stats.up > 0">{{ thumbsResponse.stats.up }} {{ thumbsResponse.stats.up > 1 ? 'people agree' : 'person agrees' }}</span>

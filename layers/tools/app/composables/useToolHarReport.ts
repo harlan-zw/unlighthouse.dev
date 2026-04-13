@@ -66,7 +66,7 @@ const RESOURCE_LABELS: Record<string, string> = {
 function getResourceType(mimeType: string, _resourceType?: string): string {
   if (_resourceType)
     return _resourceType.toLowerCase()
-  const normalized = mimeType.split(';')[0].trim().toLowerCase()
+  const normalized = (mimeType.split(';')[0] || '').trim().toLowerCase()
   return RESOURCE_TYPE_MAP[normalized] || 'other'
 }
 

@@ -173,7 +173,7 @@ const trendChartData = computed(() => {
   // Get max value across all sites
   let maxValue = def.poor * 1.2
   sitesWithHistory.forEach((site) => {
-    site.history?.forEach((h) => {
+    site.history?.forEach((h: any) => {
       const val = h[p75Key]
       if (val && val > maxValue)
         maxValue = val * 1.1
@@ -183,7 +183,7 @@ const trendChartData = computed(() => {
   // Build series for each site
   const series = sitesWithHistory.map((site, idx) => {
     const values = sortedDates.map((date) => {
-      const entry = site.history?.find(h => h.date === date)
+      const entry = site.history?.find(h => h.date === date) as any
       return entry?.[p75Key] || null
     })
 
@@ -347,7 +347,7 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
                     <div class="flex items-center gap-2">
                       <div
                         class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm shrink-0"
-                        :class="siteColors[index % siteColors.length].bg"
+                        :class="siteColors[index % siteColors.length]?.bg"
                         :style="{ color: 'white' }"
                       >
                         {{ index + 1 }}
@@ -517,7 +517,7 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
                           <!-- Site indicator -->
                           <div
                             class="w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold shrink-0"
-                            :class="siteColors[idx % siteColors.length].bg"
+                            :class="siteColors[idx % siteColors.length]?.bg"
                             style="color: white;"
                           >
                             {{ idx + 1 }}
@@ -630,7 +630,7 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
                       >
                         <div
                           class="w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold shrink-0"
-                          :class="siteColors[idx % siteColors.length].bg"
+                          :class="siteColors[idx % siteColors.length]?.bg"
                           style="color: white;"
                         >
                           {{ idx + 1 }}
@@ -710,7 +710,7 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
                           v-if="series.path"
                           :d="series.path"
                           fill="none"
-                          :stroke="series.color.stroke"
+                          :stroke="series.color?.stroke"
                           stroke-width="0.8"
                           stroke-linecap="round"
                           stroke-linejoin="round"
@@ -720,7 +720,7 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
                             :cx="point.x"
                             :cy="point.y!"
                             r="0.8"
-                            :fill="series.color.stroke"
+                            :fill="series.color?.stroke"
                           />
                         </g>
                       </template>
@@ -728,9 +728,9 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
 
                     <!-- X-axis labels -->
                     <div class="flex justify-between mt-2 text-[10px] text-gray-500 dark:text-gray-400 font-mono">
-                      <span>{{ formatChartDate(trendChartData.dates[0]) }}</span>
-                      <span v-if="trendChartData.dates.length > 10">{{ formatChartDate(trendChartData.dates[Math.floor(trendChartData.dates.length / 2)]) }}</span>
-                      <span>{{ formatChartDate(trendChartData.dates[trendChartData.dates.length - 1]) }}</span>
+                      <span>{{ formatChartDate(trendChartData.dates[0] || '') }}</span>
+                      <span v-if="trendChartData.dates.length > 10">{{ formatChartDate(trendChartData.dates[Math.floor(trendChartData.dates.length / 2)] || '') }}</span>
+                      <span>{{ formatChartDate(trendChartData.dates[trendChartData.dates.length - 1] || '') }}</span>
                     </div>
                   </div>
 
@@ -741,7 +741,7 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
                       :key="series.url"
                       class="flex items-center gap-2"
                     >
-                      <div class="w-4 h-1 rounded" :style="{ backgroundColor: series.color.stroke }" />
+                      <div class="w-4 h-1 rounded" :style="{ backgroundColor: series.color?.stroke }" />
                       <span class="text-xs text-gray-600 dark:text-gray-400">{{ getDomain(series.url) }}</span>
                     </div>
                   </div>
@@ -768,7 +768,7 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
                   <div class="flex items-center gap-2 mb-3">
                     <div
                       class="w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold"
-                      :class="siteColors[idx % siteColors.length].bg"
+                      :class="siteColors[idx % siteColors.length]?.bg"
                       style="color: white;"
                     >
                       {{ idx + 1 }}

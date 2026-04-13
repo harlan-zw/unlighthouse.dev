@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { ComponentPublicInstance } from 'vue'
+
 definePageMeta({
   breadcrumb: {
     icon: 'i-heroicons-scale',
@@ -63,7 +65,7 @@ const { loading, error, result, run: runBg } = useToolBackgroundRequest<PageSize
   title: 'Page Size',
   path: '/tools/page-size',
 })
-const loadingContainerRef = ref<HTMLElement | null>(null)
+const loadingContainerRef = ref<HTMLElement | ComponentPublicInstance | null>(null)
 
 interface PageSizeResult {
   url: string
@@ -157,16 +159,16 @@ function getPercentilePosition(bytes: number): { percentile: string, position: n
 
   let position = 95
   for (let i = 1; i < breakpoints.length; i++) {
-    if (kb <= breakpoints[i].kb) {
-      const prev = breakpoints[i - 1]
-      const curr = breakpoints[i]
+    const prev = breakpoints[i - 1]
+    const curr = breakpoints[i]
+    if (prev && curr && kb <= curr.kb) {
       const ratio = (kb - prev.kb) / (curr.kb - prev.kb)
       position = prev.pct + ratio * (curr.pct - prev.pct)
       break
     }
   }
 
-  let percentile: string
+  let percentile = ''
   if (position <= 10)
     percentile = 'top 10%'
   else if (position <= 25)
@@ -477,7 +479,7 @@ const visualResources = computed(() => {
                   <div class="flex-1 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
                     <div
                       class="h-full rounded-full bg-red-400"
-                      :style="{ width: `${result.thirdPartyDomains[0].size > 0 ? (tp.size / result.thirdPartyDomains[0].size) * 100 : 0}%` }"
+                      :style="{ width: `${(result.thirdPartyDomains[0]?.size || 0) > 0 ? (tp.size / result.thirdPartyDomains[0]!.size) * 100 : 0}%` }"
                     />
                   </div>
                 </div>

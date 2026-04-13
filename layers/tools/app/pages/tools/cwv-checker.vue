@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { ComponentPublicInstance } from 'vue'
+
 definePageMeta({
   breadcrumb: {
     icon: 'i-heroicons-check-badge',
@@ -89,7 +91,7 @@ const { loading, error, result, run: runBg } = useToolBackgroundRequest<CWVResul
   title: 'CWV Checker',
   path: '/tools/cwv-checker',
 })
-const loadingContainerRef = ref<HTMLElement | null>(null)
+const loadingContainerRef = ref<HTMLElement | ComponentPublicInstance | null>(null)
 
 const { showFloatingLoader } = useToolFloatingLoader(loading, loadingContainerRef)
 const { current: loadingMessage, progress: loadingProgress, start: startLoadingMessages, stop: stopLoadingMessages } = useLoadingMessages([

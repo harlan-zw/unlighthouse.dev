@@ -2,7 +2,7 @@
 import type { ToolColor } from '../utils/tool-colors'
 
 defineProps<{
-  message: string
+  message?: string
   color: ToolColor
   hint?: string
   progress?: number

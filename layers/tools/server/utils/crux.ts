@@ -2,7 +2,7 @@ import type { H3Event } from 'h3'
 
 export type FormFactor = 'PHONE' | 'DESKTOP' | 'TABLET' | 'ALL_FORM_FACTORS'
 
-interface CrUXHistoryResult {
+export interface CrUXHistoryResult {
   key: {
     formFactor: 'PHONE' | 'DESKTOP' | 'TABLET'
     origin?: string
@@ -60,6 +60,7 @@ export interface NormalizedCrUXHistoryResult {
   inpGood?: number
   inpNeedsImprovement?: number
   inpPoor?: number
+  [key: string]: any
 }
 
 export function normaliseCruxHistory(data: CrUXHistoryResult): NormalizedCrUXHistoryResult[] {
@@ -148,8 +149,8 @@ export function normaliseCruxHistory(data: CrUXHistoryResult): NormalizedCrUXHis
     const actualIdx = start + idx
     return {
       date,
-      collectionStart: collectionPeriods[actualIdx].start,
-      collectionEnd: collectionPeriods[actualIdx].end,
+      collectionStart: collectionPeriods[actualIdx]?.start || '',
+      collectionEnd: collectionPeriods[actualIdx]?.end || '',
       cls75: cls.find(v => v.date === date)?.value,
       lcp75: lcp.find(v => v.date === date)?.value,
       inp75: inp.find(v => v.date === date)?.value,
@@ -208,7 +209,7 @@ export async function fetchCrUXHistory(event: H3Event, url: string, mode: 'origi
 }
 
 // Current CrUX data types
-interface CrUXCurrentResult {
+export interface CrUXCurrentResult {
   key: {
     formFactor: 'PHONE' | 'DESKTOP' | 'TABLET'
     origin?: string
@@ -228,7 +229,7 @@ interface CrUXCurrentResult {
   }
 }
 
-interface CrUXMetric {
+export interface CrUXMetric {
   histogram: Array<{
     start: number | string
     end?: number | string
@@ -247,6 +248,9 @@ export interface NormalizedCrUXCurrentResult {
   inp?: { p75: number, good: number, needsImprovement: number, poor: number }
   fcp?: { p75: number, good: number, needsImprovement: number, poor: number }
   ttfb?: { p75: number, good: number, needsImprovement: number, poor: number }
+  tbt?: { p75: number, good: number, needsImprovement: number, poor: number }
+  si?: { p75: number, good: number, needsImprovement: number, poor: number }
+  [key: string]: any
 }
 
 function normalizeMetric(metric: CrUXMetric | undefined): { p75: number, good: number, needsImprovement: number, poor: number } | undefined {
@@ -299,7 +303,6 @@ export async function fetchCrUXCurrent(event: H3Event, url: string, mode: 'origi
     body: payload,
   }).catch((e) => {
     const status = e?.status || e?.statusCode
-    // 404 = no data, 400 = invalid URL/bad request — both mean no data for this query
     if (status === 404 || status === 400)
       return null
     const apiMessage = e?.data?.error?.message || e?.message || 'CrUX API error'

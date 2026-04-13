@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { ComponentPublicInstance } from 'vue'
+
 definePageMeta({
   breadcrumb: {
     icon: 'i-heroicons-arrows-pointing-out',
@@ -62,7 +64,7 @@ const { loading, error, result, run: runBg } = useToolBackgroundRequest<ClsResul
   path: '/tools/cls-debugger',
 })
 const screenshotRef = ref<HTMLElement | null>(null)
-const loadingContainerRef = ref<HTMLElement | null>(null)
+const loadingContainerRef = ref<HTMLElement | ComponentPublicInstance | null>(null)
 const selectedElement = ref<number | null>(null)
 
 const { showFloatingLoader } = useToolFloatingLoader(loading, loadingContainerRef)

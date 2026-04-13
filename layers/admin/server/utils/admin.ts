@@ -9,7 +9,7 @@ export function isAdminEmail(email: string) {
 export async function requireAdminAuth(event: H3Event) {
   const session = await getUserSession(event)
 
-  if (!session?.user?.email || !isAdminEmail(session.user.email)) {
+  if (!(session?.user as any)?.email || !isAdminEmail((session.user as any).email)) {
     throw createError({ statusCode: 403, message: 'Forbidden' })
   }
 

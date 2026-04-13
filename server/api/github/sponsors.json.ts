@@ -4,7 +4,11 @@ import { appStorage } from '~~/server/storage'
 export default defineCachedEventHandler(async (e) => {
   const token = await appStorage().get<string>('github:token').catch(() => null) || useRuntimeConfig(e).githubAuthToken
   if (!token) {
-    return []
+    return {
+      others: [],
+      $25: [],
+      $50: [],
+    }
   }
   const _sponsors = await fetchGitHubSponsors(token, 'harlan-zw', 'user', {
     force: true, // use nitro cache

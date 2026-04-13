@@ -10,7 +10,10 @@ const ADMIN_EMAILS = ['harlan@harlanzw.com']
 
 const { loggedIn, user, clear } = useUserSession()
 
-const isAdmin = computed(() => user.value?.email && ADMIN_EMAILS.includes(user.value.email))
+const isAdmin = computed(() => {
+  const email = user.value?.email
+  return !!(email && ADMIN_EMAILS.includes(email))
+})
 
 const timeRange = ref('7d')
 const timeRanges = [
@@ -88,7 +91,7 @@ const activeLookupTab = ref('all')
 
 const randomHeights = ref<number[]>([])
 onMounted(() => {
-  randomHeights.value = Array.from({ length: 30 }).fill(20 + Math.random() * 60)
+  randomHeights.value = Array.from({ length: 30 }, () => 20 + Math.random() * 60)
 })
 
 const filteredLookups = computed(() => {
@@ -399,7 +402,7 @@ function toggleJourney(id: string) {
         <div v-if="loggedIn" class="flex items-center gap-4">
           <div class="flex items-center gap-2">
             <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span class="text-sm text-muted">{{ user?.email }}</span>
+            <span class="text-sm text-muted">{{ (user as any)?.email }}</span>
           </div>
           <UButton variant="ghost" size="sm" color="neutral" @click="clear">
             Sign out
@@ -433,7 +436,7 @@ function toggleJourney(id: string) {
           Access Denied
         </h2>
         <p class="text-muted mb-8 text-center max-w-sm">
-          <code class="text-sm bg-default px-2 py-0.5 rounded">{{ user?.email }}</code>
+          <code class="text-sm bg-default px-2 py-0.5 rounded">{{ (user as any)?.email }}</code>
           is not authorized to access this dashboard.
         </p>
         <UButton variant="soft" color="neutral" @click="clear">
@@ -468,7 +471,7 @@ function toggleJourney(id: string) {
                 color="neutral"
                 icon="i-carbon-renew"
                 :loading="status === 'pending'"
-                @click="refresh"
+                @click="() => refresh()"
               />
             </div>
           </div>

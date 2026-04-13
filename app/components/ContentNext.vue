@@ -35,6 +35,6 @@ defineProps<{
         </UButton>
       </div>
     </div>
-    <UContentSurround v-if="surround?.filter(Boolean).length" :surround="surround" />
+    <UContentSurround v-if="surround?.filter(Boolean).length" :surround="(surround?.filter(Boolean) as any)" />
   </div>
 </template>

@@ -59,7 +59,7 @@ const otherTerms = computed(() =>
           class="group p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-violet-400 dark:hover:border-violet-500 transition-colors"
         >
           <h3 class="font-semibold text-lg mb-2 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
-            {{ term.navigation?.title || term.title }}
+            {{ (term.navigation && typeof term.navigation === 'object' && 'title' in term.navigation) ? term.navigation.title : term.title }}
           </h3>
           <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
             {{ term.description }}
@@ -84,7 +84,7 @@ const otherTerms = computed(() =>
           class="group p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-violet-400 dark:hover:border-violet-500 transition-colors"
         >
           <h3 class="font-semibold text-lg mb-2 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
-            {{ term.navigation?.title || term.title }}
+            {{ (term.navigation && typeof term.navigation === 'object' && 'title' in term.navigation) ? term.navigation.title : term.title }}
           </h3>
           <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
             {{ term.description }}
@@ -106,7 +106,7 @@ const otherTerms = computed(() =>
           class="group p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-gray-400 dark:hover:border-gray-600 transition-colors opacity-70"
         >
           <h3 class="font-semibold text-lg mb-2 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">
-            {{ term.navigation?.title || term.title }}
+            {{ (term.navigation && typeof term.navigation === 'object' && 'title' in term.navigation) ? term.navigation.title : term.title }}
           </h3>
           <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
             {{ term.description }}

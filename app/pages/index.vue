@@ -29,7 +29,7 @@ const { data: sponsors } = await useFetch('/api/github/sponsors.json', {
           <span class="text-violet-600 dark:text-violet-400"> entire site</span>
         </h1>
         <p class="text-lg lg:text-xl text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto mb-8">
-          Crawl every page, run Google Lighthouse audits, get one unified performance report.
+          Unlighthouse is a free, open-source CLI that runs Google Lighthouse on every page of your site in parallel. Auto-discovers URLs, crawls in parallel, and delivers one unified performance report.
         </p>
 
         <!-- Terminal + CTAs inline -->
@@ -176,7 +176,7 @@ const { data: sponsors } = await useFetch('/api/github/sponsors.json', {
         <div class="flex flex-col lg:flex-row items-center justify-between gap-10 mb-10">
           <div class="text-center lg:text-left">
             <div class="text-4xl lg:text-5xl font-bold mb-2">
-              {{ humanNumber(stats.downloads.averageDownloads30) }}
+              {{ humanNumber(stats?.downloads?.averageDownloads30 || 0) }}
             </div>
             <p class="text-neutral-500">
               downloads per day
@@ -186,7 +186,7 @@ const { data: sponsors } = await useFetch('/api/github/sponsors.json', {
             <div class="text-center">
               <div class="text-3xl lg:text-4xl font-light flex items-center gap-2">
                 <UIcon name="i-carbon-chart-line-smooth" class="w-8 h-8 text-violet-500" />
-                {{ humanNumber(stats.downloads.totalDownloads30) }}
+                {{ humanNumber(stats?.downloads?.totalDownloads30 || 0) }}
               </div>
               <p class="text-sm text-neutral-500 mt-1">
                 monthly downloads
@@ -195,7 +195,7 @@ const { data: sponsors } = await useFetch('/api/github/sponsors.json', {
             <div class="text-center">
               <div class="text-3xl lg:text-4xl font-light flex items-center gap-2">
                 <UIcon name="i-carbon-star" class="w-8 h-8 text-amber-500" />
-                {{ humanNumber(stats.stars.stars) }}
+                {{ humanNumber(stats?.stars?.stars || 0) }}
               </div>
               <p class="text-sm text-neutral-500 mt-1">
                 GitHub stars

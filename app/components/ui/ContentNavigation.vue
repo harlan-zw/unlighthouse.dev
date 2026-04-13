@@ -3,21 +3,9 @@ import type { ContentNavigationItem } from '@nuxt/content'
 import type { AppConfig } from '@nuxt/schema'
 import type { BadgeProps, LinkProps } from '@nuxt/ui'
 import type { AccordionRootEmits, AccordionRootProps } from 'reka-ui'
-import type { VariantProps } from 'tailwind-variants'
 import _appConfig from '#build/app.config'
 import theme from '#build/ui/content/content-navigation'
 import { tv } from 'tailwind-variants'
-</script>
-
-<script setup lang="ts" generic="T extends ContentNavigationLink">
-import { useAppConfig } from '#imports'
-import { mapContentNavigationItem } from '#ui/utils/content'
-import { pickLinkProps } from '#ui/utils/link'
-import { createReusableTemplate, reactivePick } from '@vueuse/core'
-import { Primitive, useForwardPropsEmits } from 'reka-ui'
-import { computed } from 'vue'
-
-type ContentNavigationVariants = VariantProps<typeof contentNavigation>
 
 export interface ContentNavigationLink extends ContentNavigationItem {
   icon?: string
@@ -47,14 +35,14 @@ export interface ContentNavigationProps<T> extends Pick<AccordionRootProps, 'dis
    * @defaultValue appConfig.ui.icons.chevronDown
    */
   trailingIcon?: string
-  color?: ContentNavigationVariants['color']
-  variant?: ContentNavigationVariants['variant']
+  color?: any
+  variant?: any
   /**
    * Display a line next to the active link.
    * @defaultValue false
    */
   highlight?: boolean
-  highlightColor?: ContentNavigationVariants['highlightColor']
+  highlightColor?: any
   /**
    * When type is "single", allows closing content when clicking trigger for an open item.
    * When type is "multiple", this prop has no effect.
@@ -64,7 +52,7 @@ export interface ContentNavigationProps<T> extends Pick<AccordionRootProps, 'dis
   level?: number
   navigation?: T[]
   class?: any
-  ui?: Partial<typeof contentNavigation.slots>
+  ui?: any
 }
 
 export interface ContentNavigationEmits extends AccordionRootEmits {}
@@ -78,6 +66,15 @@ export interface ContentNavigationSlots<T> {
   'link-title': SlotProps<T>
   'link-trailing': SlotProps<T>
 }
+</script>
+
+<script setup lang="ts" generic="T extends ContentNavigationLink">
+import { useAppConfig } from '#imports'
+import { mapContentNavigationItem } from '#ui/utils/content'
+import { pickLinkProps } from '#ui/utils/link'
+import { createReusableTemplate, reactivePick } from '@vueuse/core'
+import { Primitive, useForwardPropsEmits } from 'reka-ui'
+import { computed } from 'vue'
 
 const props = withDefaults(defineProps<ContentNavigationProps<T>>(), {
   as: 'nav',
@@ -106,7 +103,7 @@ const ui = computed(() => contentNavigation({
 </script>
 
 <template>
-  <DefineLinkTemplate v-slot="{ link, active }">
+  <DefineLinkTemplate v-slot="{ link, active }: { link: ContentNavigationLink, active?: boolean }">
     <slot name="link" :link="(link as T)" :active="active">
       <slot name="link-leading" :link="(link as T)" :active="active">
         <UIcon v-if="link.icon" :name="link.icon" :class="ui.linkLeadingIcon({ class: props.ui?.linkLeadingIcon, active })" />
@@ -136,7 +133,7 @@ const ui = computed(() => contentNavigation({
 
   <Primitive v-bind="$attrs" :as="as" :as-child="level > 0" :class="ui.root({ class: [props.class, props.ui?.root] })">
     <ul :class="level > 0 ? ui.listWithChildren({ class: props.ui?.listWithChildren }) : ui.list({ class: props.ui?.list })">
-      <template v-for="(link, index) in navigation" :key="index">
+      <template v-for="(link, index) in (navigation as any[])" :key="index">
         <li v-if="link.children?.length" :class="ui.itemWithChildren({ class: props.ui?.itemWithChildren })" :value="String(index)">
           <div class="px-2">
             <ReuseLinkTemplate :link="link" />

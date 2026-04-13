@@ -11,7 +11,7 @@ useSeoMeta({
   description: 'Free bulk Core Web Vitals checker, Lighthouse score calculator, CLS debugger, LCP finder, and more. Test multiple pages at once with no signup.',
 })
 
-defineOgImage('NuxtSeo', {
+defineOgImage('NuxtSeo' as any, {
   title: 'Free Lighthouse & CWV Tools',
   description: 'Bulk testing, score calculators, and CWV analyzers',
   theme: '#a855f7',

@@ -26,9 +26,9 @@ if (!stats.value) {
 provide('stats', stats)
 const { data: navigation } = await useAsyncData(`navigation-error`, () => queryCollectionNavigation('root'), {
   default: () => [],
-  async transform(res) {
+  async transform(res: any) {
     const nav = mapPath(res)
-    return (nav || []).map((m) => {
+    return (nav || []).map((m: any) => {
       if (m.path.includes('/releases')) {
         m.icon = 'i-noto-sparkles'
         m.title = 'Releases'
@@ -41,13 +41,13 @@ const { data: navigation } = await useAsyncData(`navigation-error`, () => queryC
         m.title = 'Core Concepts'
       }
       if (m.children?.length) {
-        m.children = m.children.map((c) => {
+        m.children = m.children.map((c: any) => {
           if (c.children?.length === 1) {
             c = c.children[0]
           }
           return c
         })
-        m.children = m.children.map((c) => {
+        m.children = m.children.map((c: any) => {
           if (c.title.endsWith('()')) {
             c.html = true
             const [fnName] = c.title.split('()')
@@ -75,7 +75,7 @@ provide('search', search)
 // Don't do fuzzy redirects during prerender - it causes infinite redirect loops
 const isPrerendering = import.meta.server && !import.meta.dev
 if (props.error.statusCode && !isPrerendering) {
-  const walkChildren = (children: any[], parents: string[] = []) => {
+  const walkChildren = (children: any[], parents: string[] = []): any[] => {
     return (children || []).flatMap((item) => {
       if (item.children) {
         // If this is a parent with children, add its title to the parents array
@@ -91,7 +91,7 @@ if (props.error.statusCode && !isPrerendering) {
       }
     })
   }
-  const childrenOnly = walkChildren(navigation.value).map((i) => {
+  const childrenOnly = walkChildren(navigation.value as any[]).map((i: any) => {
     return {
       title: i.title,
       path: i.path,
@@ -101,8 +101,13 @@ if (props.error.statusCode && !isPrerendering) {
     }
   })
 
+  interface SearchItem {
+    path: string
+    lastPathSegment: string
+  }
+
   // do a fuse search for a page link it
-  const fuse = new Fuse<{ path: string, lastPathSegment: string }>(childrenOnly, {
+  const fuse = new Fuse<SearchItem>(childrenOnly, {
     keys: [
       {
         name: 'path',
@@ -120,9 +125,9 @@ if (props.error.statusCode && !isPrerendering) {
 
   const path = useRoute().path
   const lastSegment = path.split('/').slice(-1)[0]
-  const explicitMatch = childrenOnly.filter(i => i.lastPathSegment === lastSegment)
+  const explicitMatch = childrenOnly.filter(i => (i as any).lastPathSegment === lastSegment)
   // search for last segment see if we can find 1 direct match
-  if (explicitMatch?.length === 1) {
+  if (explicitMatch?.length === 1 && explicitMatch[0]) {
     // redirect to the found path
     await navigateTo(explicitMatch[0].path, { redirectCode: 301 })
   }
@@ -130,11 +135,11 @@ if (props.error.statusCode && !isPrerendering) {
     const res = fuse.search(path, {
       limit: 3,
     })
-    if (res.length) {
+    if (res.length > 0 && res[0]) {
       const { item, score } = res[0]
       // can't be ambigious
-      const matchingScore = res[1]?.score === score || res[2]?.score === score
-      if (score < 0.01 && !matchingScore) {
+      const matchingScore = (res[1]?.score === score || res[2]?.score === score)
+      if (score !== undefined && score < 0.01 && !matchingScore) {
         await navigateTo(item.path, { redirectCode: 301 })
       }
       else {

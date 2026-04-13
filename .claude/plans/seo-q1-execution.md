@@ -180,20 +180,23 @@ Last updated: February 27, 2026
    - CI integration → link to learn-lighthouse/lighthouse-ci
    - Puppeteer → link to learn-lighthouse/lcp/client-side-rendering
 
-### Week 4 (Mar 22-28): Q1 Review + Q2 Planning
+### Week 4 (Mar 22-28): Q1 Review + Q2 Planning ✅ COMPLETED (Apr 13)
 
 **Goal:** Measure Q1 results, perform technical SEO sweep, plan Q2 priorities.
 
 **Tasks:**
-1. **Full GSC data pull** — compare Jan baseline vs Mar end-of-month
-2. **Content audit** — which pages have impressions but low CTR? Another round of title fixes? Ensure content freshness (update "Last Updated" dates for evergreen guides like `/guide/recipes/large-sites`).
-3. **Identify new keyword clusters** — what new queries are we appearing for?
-4. **Technical SEO Sweep** — Verify site sitemap.xml, check for orphan pages in learn-lighthouse content, and run a full pass verifying Core Web Vitals (Target: LCP < 2.5s, INP < 200ms) for unlighthouse.dev.
-5. **Q2 priority ranking:**
-   - Framework pages (if content hub traffic justifies)
-   - Compare pages (if cloud is ready)
-   - New tool development (based on which tools drive most traffic)
-6. **Update seo-strategy-2026.md** with Q1 actuals and Q2 plan
+1. ✅ **Full GSC data pull** — 28d ending Apr 11: 1,134 clicks, 109,973 impressions, 1.03% CTR, pos 7.5. March click target (2,000) missed; peaked ~1,389 in early March.
+2. ✅ **Content audit** — Homepage dropped 731 clicks (-305 from March peak). Hub pages (seo, lcp, cls, lighthouse-ci) have 10K+ impressions with 0.1-0.4% CTR. Zero-click CLI clusters still unresolved after Feb 27 + Mar 4 fixes.
+3. ✅ **New keyword clusters identified** — `playwright lighthouse` (353 impr), `pagespeed insights vs lighthouse` (441 impr), `largest contentful paint optimization best practices 2026` (341 impr), `lhci` (173 impr, wrong intent), `json size calculator` (120 impr on new tool page).
+4. ✅ **Technical SEO sweep** — Sitemap clean: 141 URLs, 0 errors/warnings, last crawled Apr 7. GSC sync 544 days, healthy. Real CWV measurement on unlighthouse.dev itself deferred to standalone audit.
+5. ✅ **Q2 priority ranking** written into `seo-strategy-2026.md`:
+   - P1 Zero-click crisis (manual SERP audit, AI Overview investigation)
+   - P2 Homepage traffic recovery
+   - P3 Keyword cannibalization cleanup (lighthouse ci split across 2 pages)
+   - P4 High-leverage content expansion
+   - P5 Deferred items (cloud, compare, framework pages)
+   - P6 Strategic bets (Spanish i18n, State of Web Perf report)
+6. ✅ **seo-strategy-2026.md updated** with Q1 closeout section + Q2 plan.
 
 ---
 

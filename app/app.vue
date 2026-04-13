@@ -48,15 +48,15 @@ const {
   default: () => [],
   async transform(res) {
     const nav = mapPath(res)
-    return (nav || []).map((m) => {
+    return (nav || []).map((m: any) => {
       if (m.children?.length) {
-        m.children = m.children.map((c) => {
+        m.children = m.children.map((c: any) => {
           if (c.children?.length === 1) {
             c = c.children[0]
           }
           return c
         })
-        m.children = m.children.map((c) => {
+        m.children = m.children.map((c: any) => {
           if (c.title.endsWith('()')) {
             c.html = true
             const [fnName] = c.title.split('()')
@@ -99,7 +99,7 @@ onKeyStroke('Divide', () => {
     </NuxtLayout>
     <ClientOnly>
       <LazyUContentSearch
-        :key="openSearch"
+        :key="openSearch ? 'open' : 'closed'"
         v-model:search-term="searchTerm"
         shortcut="/"
         :files="search"

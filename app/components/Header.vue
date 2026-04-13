@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { NavigationMenuContent, NavigationMenuItem, NavigationMenuList, NavigationMenuRoot, NavigationMenuTrigger, NavigationMenuViewport } from 'reka-ui'
 import { useStats } from '../composables/data'
-import { productMenu, resourcesMenu } from '../composables/nav'
+import { resourcesMenu } from '../composables/nav'
 
 const { data: stats } = await useStats()
 const githubStars = computed(() => {
@@ -8,23 +9,28 @@ const githubStars = computed(() => {
   return Intl.NumberFormat('en', { notation: 'compact', compactDisplay: 'short' }).format(stars)
 })
 
-const navigation = inject('navigation')
+const navigation = inject<any>('navigation')
 const { open: openSearch } = useContentSearch()
 
 onKeyStroke('Divide', () => {
   openSearch.value = true
 })
 
-// Resources with dropdowns
 const learnNav = computed(() => resourcesMenu.value.find(i => i.label === 'Learn'))
 const toolsNav = computed(() => resourcesMenu.value.find(i => i.label === 'Tools'))
+
+const megaMenuItems = computed(() => [
+  { value: 'get-started', label: 'Get Started', icon: 'i-ph:book-open-duotone', to: '/guide/getting-started/installation' },
+  { value: 'learn', label: 'Learn', icon: 'i-heroicons-academic-cap', to: '/learn-lighthouse', hasDropdown: true },
+  { value: 'tools', label: 'Tools', icon: 'i-heroicons-wrench-screwdriver', to: '/tools', hasDropdown: true },
+])
 
 // Group docs navigation for mobile — use children to avoid redundant parent labels
 const mobileDocsGroups = computed(() => {
   const nav = toValue(navigation)
   if (!nav?.length)
     return []
-  const childrenOf = (prefix: string) => nav.find(n => n.path?.startsWith(prefix))?.children || []
+  const childrenOf = (prefix: string) => nav.find((n: any) => n.path?.startsWith(prefix))?.children || []
   return [
     { label: 'User Guide', nav: childrenOf('/guide') },
     { label: 'Integrations', nav: childrenOf('/integrations') },
@@ -38,7 +44,7 @@ const mobileDocsGroups = computed(() => {
     :to="undefined"
     :ui="{
       root: 'border-none bg-transparent pt-2 mb-3 px-5 h-auto',
-      container: 'max-w-[1452px] lg:bg-gray-600/3 lg:border border-[var(--ui-border)] lg:dark:bg-gray-900/10 mx-auto py-0 px-0 lg:px-5 sm:px-0 rounded-lg',
+      container: 'max-w-[1452px] lg:bg-white/3 lg:border border-default lg:dark:bg-gray-900/10 mx-auto py-0 px-0 lg:px-5 sm:px-0 rounded-lg',
     }"
   >
     <template #left>
@@ -46,17 +52,44 @@ const mobileDocsGroups = computed(() => {
     </template>
 
     <template #default>
-      <UNavigationMenu :items="productMenu" class="hidden lg:flex justify-center" />
-      <UNavigationMenu :ui="{ viewport: 'min-w-[580px]' }" :items="[learnNav]" class="hidden lg:flex justify-center">
-        <template #item-content>
-          <LearnMenu />
-        </template>
-      </UNavigationMenu>
-      <UNavigationMenu :ui="{ viewport: 'min-w-[680px]' }" :items="[toolsNav]" class="hidden lg:flex justify-center">
-        <template #item-content>
-          <ToolMenu />
-        </template>
-      </UNavigationMenu>
+      <NavigationMenuRoot class="hidden lg:flex justify-center relative py-2">
+        <NavigationMenuList class="flex items-center gap-0.5">
+          <NavigationMenuItem v-for="item in megaMenuItems" :key="item.value" :value="item.value">
+            <template v-if="item.hasDropdown">
+              <NavigationMenuTrigger as-child>
+                <NuxtLink
+                  :to="item.to"
+                  class="group relative flex items-center gap-1.5 font-medium text-sm px-2.5 py-1.5 before:absolute before:z-[-1] before:rounded-md before:inset-x-px before:inset-y-0 data-[state=open]:before:bg-elevated data-[state=open]:text-highlighted before:transition-colors transition-colors"
+                >
+                  <UIcon :name="item.icon" class="shrink-0 size-4 opacity-50 group-hover:opacity-80 group-data-[state=open]:opacity-90 transition-opacity" />
+                  {{ item.label }}
+                </NuxtLink>
+              </NavigationMenuTrigger>
+              <NavigationMenuContent
+                class="absolute top-0 left-0 w-auto data-[motion=from-start]:animate-[enter-from-left_200ms_ease] data-[motion=from-end]:animate-[enter-from-right_200ms_ease] data-[motion=to-start]:animate-[exit-to-left_200ms_ease] data-[motion=to-end]:animate-[exit-to-right_200ms_ease]"
+              >
+                <LearnMenu v-if="item.value === 'learn'" />
+                <ToolMenu v-else-if="item.value === 'tools'" />
+              </NavigationMenuContent>
+            </template>
+
+            <NuxtLink
+              v-else
+              :to="item.to"
+              class="group relative flex items-center gap-1.5 font-medium text-sm px-2.5 py-1.5 before:absolute before:z-[-1] before:rounded-md before:inset-x-px before:inset-y-0 before:transition-colors transition-colors"
+            >
+              <UIcon :name="item.icon" class="shrink-0 size-4 opacity-50 group-hover:opacity-80 transition-opacity" />
+              {{ item.label }}
+            </NuxtLink>
+          </NavigationMenuItem>
+        </NavigationMenuList>
+
+        <Teleport to="body">
+          <NavigationMenuViewport
+            class="fixed top-[60px] left-1/2 -translate-x-1/2 overflow-hidden bg-elevated shadow-xl rounded-md ring-1 ring-[var(--ui-border-accented)] h-(--reka-navigation-menu-viewport-height) w-(--reka-navigation-menu-viewport-width) transition-[width,height] duration-200 origin-[top_center] data-[state=open]:animate-[scale-in_100ms_ease-out] data-[state=closed]:animate-[scale-out_100ms_ease-in] z-[100]"
+          />
+        </Teleport>
+      </NavigationMenuRoot>
     </template>
 
     <template #body>
@@ -88,7 +121,7 @@ const mobileDocsGroups = computed(() => {
         <!-- Mobile: Docs navigation grouped -->
         <template v-for="group in mobileDocsGroups" :key="group.label">
           <!-- Nested: sections have their own children (e.g. User Guide) -->
-          <template v-if="group.nav.some(s => s.children?.length)">
+          <template v-if="group.nav.some((s: any) => s.children?.length)">
             <template v-for="section in group.nav" :key="section.path">
               <div class="space-y-1">
                 <p class="text-[11px] font-semibold text-muted uppercase tracking-wider px-2">

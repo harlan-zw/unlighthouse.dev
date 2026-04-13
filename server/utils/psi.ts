@@ -95,6 +95,7 @@ export interface PSIResult {
       displayValue?: string
       title?: string
       description?: string
+      metricSavings?: any
       details?: {
         items?: Array<{
           node?: ElementNode

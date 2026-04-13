@@ -253,6 +253,7 @@ export default defineNuxtConfig({
   },
 
   linkChecker: {
+    excludeLinks: ['/llms.txt', '/llms-full.txt'],
     report: {
       html: true,
       markdown: true,

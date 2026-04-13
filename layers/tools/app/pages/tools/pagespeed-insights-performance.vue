@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { ComponentPublicInstance } from 'vue'
+
 definePageMeta({
   breadcrumb: {
     icon: 'i-heroicons-chart-bar',
@@ -58,7 +60,7 @@ const { loading, error, result, run: runBg } = useToolBackgroundRequest<PsiResul
   title: 'PageSpeed Insights',
   path: '/tools/pagespeed-insights-performance',
 })
-const loadingContainerRef = ref<HTMLElement | null>(null)
+const loadingContainerRef = ref<HTMLElement | ComponentPublicInstance | null>(null)
 const screenshotRef = ref<HTMLElement | null>(null)
 const expandedThirdParties = ref<Set<string>>(new Set())
 

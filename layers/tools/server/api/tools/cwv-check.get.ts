@@ -162,6 +162,9 @@ export default defineCachedEventHandler(async (event) => {
   await trackToolLookup(event, 'cwv-check', url, strategy)
 
   const results = await fetchPSI(event, url, strategy)
+  if (!results) {
+    throw createError({ statusCode: 500, message: 'Failed to fetch Lighthouse results' })
+  }
   const audits = results.lighthouseResult.audits
 
   // Parse lab data

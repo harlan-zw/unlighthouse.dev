@@ -133,6 +133,8 @@ function transformLearnNav(res: any): NavSection[] {
 // Detect active section from current route
 function detectActiveSection(path: string): string {
   const segment = path.replace('/learn-lighthouse/', '').split('/')[0]
+  if (!segment)
+    return 'core-web-vitals'
   for (const [key, config] of Object.entries(sectionConfig)) {
     if (config.paths.includes(segment))
       return key
@@ -192,8 +194,8 @@ const breadcrumbs = useBreadcrumbItems({
       { icon: 'i-heroicons-academic-cap', label: 'Learn Google Lighthouse' },
       currSection ? { label: currSection.label } : false,
       currParent ? { label: currParent.title, to: currParent.to || currParent.path } : false,
-      { label: currItem?.title },
-    ]
+      { label: currItem?.title || '' },
+    ] as (false | { label: string, icon?: string, to?: string })[]
   }),
 })
 </script>
