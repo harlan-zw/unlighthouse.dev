@@ -5,6 +5,7 @@ import type {
   ParsedLighthouseReport,
   PerformanceMetric,
 } from '../types/lighthouse'
+import { computed, ref } from 'vue'
 
 // Performance metric definitions
 const PERF_METRIC_IDS = [

@@ -44,11 +44,22 @@ export async function useCurrentDocPage() {
 
       modifyRelativeDocLinksWithFramework(pageData.body.value)
 
+      if (Array.isArray(pageData.relatedPages)) {
+        pageData.relatedPages = pageData.relatedPages.map((p: any) => ({
+          ...p,
+          path: p.path?.replace(/\/index$/, '') || p.path,
+        }))
+      }
+
       const page = ref(pageData)
-      const surround = ref((surroundData || []).filter(Boolean).map((m: any) => ({
-        ...m,
-        _path: m.path,
-      })))
+      const surround = ref((surroundData || []).filter(Boolean).map((m: any) => {
+        const path = m.path.replace(/\/index$/, '') || '/'
+        return {
+          ...m,
+          path,
+          _path: path,
+        }
+      }))
 
       const lastCommitData = await $fetch(`/api/github/last-file-commit`, {
         query: {

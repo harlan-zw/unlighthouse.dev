@@ -18,7 +18,7 @@ export default defineNuxtConfig({
     '@nuxt/image',
     'nuxt-skew-protection',
     'nuxt-ai-ready',
-    '@nuxtjs/mcp-toolkit',
+    // '@nuxtjs/mcp-toolkit',
     'nuxt-auth-utils',
     async (_, nuxt) => {
       nuxt.hooks.hook('nitro:init', (nitro) => {
