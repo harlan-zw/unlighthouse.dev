@@ -205,7 +205,7 @@ const breadcrumbs = useBreadcrumbItems({
     <UMain class="relative mb-20 px-5">
       <!-- Ambient glow -->
       <div class="absolute inset-x-0 top-0 h-72 bg-gradient-to-b from-amber-500/[0.07] to-transparent pointer-events-none" />
-      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-px bg-gradient-to-r from-transparent via-amber-500/40 to-transparent" />
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[800px] h-px bg-gradient-to-r from-transparent via-amber-500/40 to-transparent" />
 
       <div class="max-w-[1400px] mx-auto lg:pt-5 relative">
         <UPage :ui="{ left: 'lg:col-span-3 xl:col-span-2', center: 'col-span-5 lg:col-span-7 xl:col-span-8' }">
