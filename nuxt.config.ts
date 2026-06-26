@@ -144,6 +144,9 @@ export default defineNuxtConfig({
   },
 
   nitro: {
+    plugins: [
+      resolve('./server/plugins/escape-inline-payload.ts'),
+    ],
     externals: {
       external: ['agents/mcp', 'drizzle-orm'],
     },
