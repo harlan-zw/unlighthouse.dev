@@ -1,6 +1,6 @@
-import { useAsyncData } from '#imports'
 import { titleCase } from 'scule'
 import { modifyRelativeDocLinksWithFramework } from '~~/utils/content'
+import { useAsyncData } from '#imports'
 
 export async function useStats() {
   const nuxtApp = useNuxtApp()

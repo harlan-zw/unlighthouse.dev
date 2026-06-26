@@ -9,7 +9,10 @@ export function useToolTracking(toolId: string) {
     $fetch('/api/tools/track', {
       method: 'POST',
       body: { tool: toolId, action: 'view' },
-    }).catch(() => {})
+    }).catch((error) => {
+      if (import.meta.dev)
+        console.warn('[tool-tracking] Failed to track view', error)
+    })
   }
 
   function trackUse() {
@@ -19,7 +22,10 @@ export function useToolTracking(toolId: string) {
     $fetch('/api/tools/track', {
       method: 'POST',
       body: { tool: toolId, action: 'use' },
-    }).catch(() => {})
+    }).catch((error) => {
+      if (import.meta.dev)
+        console.warn('[tool-tracking] Failed to track use', error)
+    })
   }
 
   function resetUseTracking() {

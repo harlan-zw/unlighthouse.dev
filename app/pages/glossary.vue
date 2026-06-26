@@ -13,7 +13,7 @@ useSeoMeta({
   description: 'Definitions and explanations of Core Web Vitals, Lighthouse metrics, and web performance terminology.',
 })
 
-defineOgImage('Docs', {
+defineOgImage('DocsSatori', {
   title: 'Web Performance Glossary',
   description: 'Core Web Vitals & Lighthouse Metrics',
   headline: 'Glossary',

@@ -2,9 +2,7 @@
 import type { Group } from 'three'
 import { useElementHover } from '@vueuse/core'
 import * as THREE from 'three'
-// @ts-expect-error missing types
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-// @ts-expect-error missing types
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js'
 import { ref } from 'vue'
 

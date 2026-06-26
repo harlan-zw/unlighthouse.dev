@@ -21,7 +21,7 @@ relatedPages:
 ::interactive-lcp-timeline
 ::
 
-Largest Contentful Paint (LCP) measures how long it takes for the largest visible element to render. It's one of Google's three [Core Web Vitals](/glossary/) and directly impacts search rankings.
+Largest Contentful Paint (LCP) measures how long it takes for the largest visible element to render. It's one of Google's three [Core Web Vitals](/glossary) and directly impacts search rankings.
 
 ## Thresholds
 

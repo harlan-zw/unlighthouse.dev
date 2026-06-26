@@ -44,6 +44,7 @@ relatedPages:
   npm install -g @lhci/cli
   lhci autorun
   ```
+
   ::
 
   ::div{label="Unlighthouse" icon="i-simple-icons-lighthouse"}
@@ -52,6 +53,7 @@ relatedPages:
   ```bash
   npx unlighthouse --site https://example.com
   ```
+
   ::
 ::
 
@@ -107,6 +109,7 @@ The tools complement each other. A common setup:
 - **Weekly scheduled job**: Unlighthouse scans the full site, posts a summary to Slack, flags any page scoring below 70.
 
 :::code-group
+
 ```yaml [PR Pipeline (LHCI)]
 name: Lighthouse CI
 on: [pull_request]
@@ -134,6 +137,7 @@ jobs:
           name: unlighthouse-report
           path: .unlighthouse
 ```
+
 :::
 
 ## Summary

@@ -1,10 +1,10 @@
 <script lang="ts">
+import type { AppConfig } from '@nuxt/schema'
 import type { AvatarProps, LinkProps } from '#ui/types'
 import type { DynamicSlots } from '#ui/types/utils'
-import type { AppConfig } from '@nuxt/schema'
+import { tv } from 'tailwind-variants'
 import _appConfig from '#build/app.config'
 import theme from '#build/ui/breadcrumb'
-import { tv } from 'tailwind-variants'
 
 const _config = _appConfig as AppConfig & { ui: { breadcrumb: Partial<typeof theme> } }
 const breadcrumb = tv({ extend: tv(theme), ...(_config.ui?.breadcrumb || {}) })
@@ -44,13 +44,13 @@ export type BreadcrumbSlots<T extends { slot?: string }> = {
 </script>
 
 <script setup lang="ts" generic="T extends BreadcrumbItem">
+import { Primitive } from 'reka-ui'
 import { useAppConfig } from '#imports'
 import UAvatar from '#ui/components/Avatar.vue'
 import UIcon from '#ui/components/Icon.vue'
 import ULink from '#ui/components/Link.vue'
 import ULinkBase from '#ui/components/LinkBase.vue'
 import { pickLinkProps } from '#ui/utils/link'
-import { Primitive } from 'reka-ui'
 
 const props = defineProps<BreadcrumbProps<T>>()
 const slots = defineSlots<BreadcrumbSlots<T>>()

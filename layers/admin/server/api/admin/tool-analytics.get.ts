@@ -1,5 +1,5 @@
-import { requireAdminAuth } from '~~/layers/admin/server/utils/admin'
 import { getTimeRangeFilter } from '~~/server/utils/analytics'
+import { requireAdminAuth } from '../../utils/admin'
 
 interface ToolAnalyticsSummary {
   totalEvents: number

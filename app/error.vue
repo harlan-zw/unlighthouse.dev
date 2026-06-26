@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { NuxtError } from '#app'
-import { queryCollectionNavigation, useAsyncData, useStats } from '#imports'
 import Fuse from 'fuse.js'
+import { queryCollectionNavigation, useAsyncData, useStats } from '#imports'
 
 const props = defineProps<{
   error: NuxtError

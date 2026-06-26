@@ -3,9 +3,9 @@ import type { ContentNavigationItem } from '@nuxt/content'
 import type { AppConfig } from '@nuxt/schema'
 import type { BadgeProps, LinkProps } from '@nuxt/ui'
 import type { AccordionRootEmits, AccordionRootProps } from 'reka-ui'
+import { tv } from 'tailwind-variants'
 import _appConfig from '#build/app.config'
 import theme from '#build/ui/content/content-navigation'
-import { tv } from 'tailwind-variants'
 
 export interface ContentNavigationLink extends ContentNavigationItem {
   icon?: string
@@ -69,12 +69,12 @@ export interface ContentNavigationSlots<T> {
 </script>
 
 <script setup lang="ts" generic="T extends ContentNavigationLink">
-import { useAppConfig } from '#imports'
-import { mapContentNavigationItem } from '#ui/utils/content'
-import { pickLinkProps } from '#ui/utils/link'
 import { createReusableTemplate, reactivePick } from '@vueuse/core'
 import { Primitive, useForwardPropsEmits } from 'reka-ui'
 import { computed } from 'vue'
+import { useAppConfig } from '#imports'
+import { mapContentNavigationItem } from '#ui/utils/content'
+import { pickLinkProps } from '#ui/utils/link'
 
 const props = withDefaults(defineProps<ContentNavigationProps<T>>(), {
   as: 'nav',

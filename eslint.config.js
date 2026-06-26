@@ -2,6 +2,10 @@ import antfu from '@antfu/eslint-config'
 import harlanzw from 'eslint-plugin-harlanzw'
 
 export default antfu({
+  vue: {
+    sfcBlocks: false,
+  },
+  typescript: true,
   rules: {
     'node/prefer-global/process': 'off',
     'node/prefer-global/buffer': 'off',

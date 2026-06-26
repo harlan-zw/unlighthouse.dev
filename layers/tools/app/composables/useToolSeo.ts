@@ -18,7 +18,7 @@ export function useToolSeo(opts: ToolSeoOptions) {
     description: opts.description,
   })
 
-  defineOgImage('NuxtSeo', {
+  defineOgImage('NuxtSeoSatori', {
     title: opts.title,
     description: opts.description,
     theme: '#10b981',

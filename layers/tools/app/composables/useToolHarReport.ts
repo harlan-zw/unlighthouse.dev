@@ -143,7 +143,9 @@ function parseHar(input: string | object): ParsedHar {
     try {
       domain = getDomain(e.request.url)
     }
-    catch {}
+    catch {
+      // Invalid HAR URLs are grouped under the empty-domain bucket.
+    }
 
     // Cache
     const fromCache = !!(e._fromCache || e._fromServiceWorker || (e.response?.status === 304))

@@ -8,7 +8,7 @@ useSeoMeta({
   description: 'Free guides to improve Lighthouse scores and Core Web Vitals. Fix LCP, CLS, INP, accessibility, and SEO audits with actionable tutorials and tools.',
 })
 
-defineOgImage('Docs' as any, {
+defineOgImage('DocsSatori', {
   title: 'Learn Google Lighthouse',
   description: 'Master Core Web Vitals with actionable guides',
   headline: 'Learn',

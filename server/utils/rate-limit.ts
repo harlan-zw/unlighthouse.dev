@@ -61,7 +61,9 @@ export async function checkFreeToolRateLimit(event: H3Event) {
     })
   }
 
-  await storage.setItem(dayKey, (count || 0) + 1, { ttl: 86400 }).catch(() => {})
+  await storage.setItem(dayKey, (count || 0) + 1, { ttl: 86400 }).catch((error) => {
+    console.warn('[rate-limit] Failed to persist daily count', error)
+  })
 
   setResponseHeaders(event, {
     'X-RateLimit-Limit': String(FREE_TOOL_DAILY_LIMIT),

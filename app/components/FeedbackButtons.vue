@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import type { FormSubmitEvent } from '#ui/types'
 import type { CommentFeedbackSchemaOutput, ThumbsFeedbackResponse } from '~~/types/schemas'
+import type { FormSubmitEvent } from '#ui/types'
 import { useTimeoutFn } from '@vueuse/core'
 import { CommentFeedbackSchema } from '~~/types/schemas'
 
