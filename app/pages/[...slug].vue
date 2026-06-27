@@ -136,7 +136,7 @@ watchEffect(() => {
           </div>
           <TableOfContents :links="page.body.toc.links" />
         </div>
-        <Ads />
+        <LazyAds hydrate-on-visible />
       </div>
     </div>
   </div>

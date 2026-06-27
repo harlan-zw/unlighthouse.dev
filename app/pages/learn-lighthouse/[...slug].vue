@@ -134,7 +134,7 @@ const humanUpdatedDate = computed(() => page.value?.updatedAt
           </div>
           <TableOfContents :links="page.body.toc.links" />
         </div>
-        <Ads />
+        <LazyAds hydrate-on-visible />
       </div>
     </div>
   </div>

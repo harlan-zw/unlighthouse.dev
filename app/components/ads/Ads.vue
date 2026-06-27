@@ -1,25 +1,25 @@
 <script lang="ts" setup>
 const route = useRoute()
-const key = ref(route.path)
-function attachRouteWatcher() {
-  watch(() => route.path, (newPath) => {
-    key.value = newPath
-  })
-}
+const { target: adRoot, isVisible: shouldLoadAd } = useVisibleWhenNearViewport({
+  rootMargin: '900px 0px',
+  idleTimeout: 6000,
+})
 </script>
 
 <template>
-  <div>
-    <ScriptCarbonAds
-      :key="key"
-      format="cover"
-      serve="CW7DTKJL"
-      placement="unlighthousedev"
-      trigger="onNuxtReady"
-      @ready="attachRouteWatcher"
-    >
-      <AdsFallback />
-    </ScriptCarbonAds>
+  <div ref="adRoot" class="min-h-36">
+    <ClientOnly>
+      <ScriptCarbonAds
+        v-if="shouldLoadAd"
+        :key="route.path"
+        format="cover"
+        serve="CW7DTKJL"
+        placement="unlighthousedev"
+        trigger="onNuxtReady"
+      >
+        <AdsFallback />
+      </ScriptCarbonAds>
+    </ClientOnly>
   </div>
 </template>
 

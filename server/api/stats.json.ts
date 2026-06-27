@@ -15,7 +15,7 @@ export default defineCachedEventHandler(async (e) => {
     e.$fetch(`/api/github/stars`),
     e.$fetch(`/api/github/commit-count`),
     e.$fetch(`/api/github/issues-closed`),
-    e.$fetch(`/api/github/releases`),
+    e.$fetch(`/api/github/releases?body=false&limit=100`),
     e.$fetch(`/api/npm/downloads`),
     e.$fetch(`/api/github/contributors`),
   ])

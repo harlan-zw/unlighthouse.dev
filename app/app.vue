@@ -1,17 +1,8 @@
 <script setup lang="ts">
 import { queryCollectionNavigation } from '#imports'
-import { useStats } from '~/composables/data'
-
-const { data: stats } = await useStats()
-if (!stats.value) {
-  createError({
-    statusText: 'Missing stats.json!',
-    status: 500,
-  })
-}
-provide('stats', stats)
 
 const appConfig = useAppConfig()
+const route = useRoute()
 
 useHead({
   style: [
@@ -29,16 +20,23 @@ useHead({
 
 const {
   data: search,
-} = await useLazyAsyncData(`search`, async () => {
-  const [root, glossary] = await Promise.all([
-    queryCollectionSearchSections('root'),
-    queryCollectionSearchSections('glossary'),
-  ])
-  return [...root, ...glossary]
+  execute: loadSearch,
+  status: searchStatus,
+} = useFetch('/api/search.json', {
+  key: 'content-search',
+  server: false,
+  immediate: false,
+  default: () => [],
 })
+
+function needsDocsNavigation(path: string) {
+  return /^\/(?:guide|integrations|api-doc|glossary)(?:\/|$)/.test(path)
+}
+
 const {
   data: navigation,
-} = await useLazyAsyncData(`navigation`, async () => {
+  execute: loadNavigation,
+} = await useAsyncData(`navigation`, async () => {
   const [root, glossary] = await Promise.all([
     queryCollectionNavigation('root'),
     queryCollectionNavigation('glossary'),
@@ -77,6 +75,8 @@ const {
       return m
     })
   },
+  immediate: needsDocsNavigation(route.path),
+  server: needsDocsNavigation(route.path),
 })
 provide('search', search)
 provide('navigation', navigation)
@@ -84,10 +84,39 @@ provide('navigation', navigation)
 const searchTerm = ref('')
 
 const { open: openSearch } = useContentSearch()
+const hasRequestedSearch = ref(false)
+const toolBackgroundRequests = useToolBackgroundRequests()
+
+function requestSearch() {
+  if (hasRequestedSearch.value)
+    return
+  hasRequestedSearch.value = true
+  void loadSearch()
+}
 
 onKeyStroke('Divide', () => {
   openSearch.value = true
 })
+
+watch(openSearch, (isOpen) => {
+  if (isOpen)
+    requestSearch()
+})
+
+if (import.meta.client) {
+  watch(() => route.path, (path) => {
+    if (needsDocsNavigation(path) && !navigation.value?.length)
+      void loadNavigation()
+  }, { immediate: true })
+}
+
+const shouldMountSearch = computed(() => openSearch.value || searchStatus.value === 'success')
+const hasLoadingToolBackgroundRequests = computed(() =>
+  Object.values(toolBackgroundRequests.value).some(request => request.status === 'loading'),
+)
+const shouldMountToolBackgroundIndicator = computed(() =>
+  route.path.startsWith('/tools') || hasLoadingToolBackgroundRequests.value,
+)
 </script>
 
 <template>
@@ -99,6 +128,7 @@ onKeyStroke('Divide', () => {
     </NuxtLayout>
     <ClientOnly>
       <LazyUContentSearch
+        v-if="shouldMountSearch"
         :key="openSearch ? 'open' : 'closed'"
         v-model:search-term="searchTerm"
         shortcut="/"
@@ -120,9 +150,9 @@ onKeyStroke('Divide', () => {
       />
     </ClientOnly>
 
-    <Footer />
+    <LazyFooter hydrate-on-visible />
     <ClientOnly>
-      <ToolBackgroundIndicator />
+      <LazyToolBackgroundIndicator v-if="shouldMountToolBackgroundIndicator" />
     </ClientOnly>
   </UApp>
 </template>

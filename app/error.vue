@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { NuxtError } from '#app'
 import Fuse from 'fuse.js'
-import { queryCollectionNavigation, useAsyncData, useStats } from '#imports'
+import { queryCollectionNavigation, useAsyncData } from '#imports'
 
 const props = defineProps<{
   error: NuxtError
@@ -16,14 +16,6 @@ useSeoMeta({
 
 const recommendedLinks = ref()
 
-const { data: stats } = await useStats()
-if (!stats.value) {
-  createError({
-    statusText: 'Missing stats.json!',
-    status: 500,
-  })
-}
-provide('stats', stats)
 const { data: navigation } = await useAsyncData(`navigation-error`, () => queryCollectionNavigation('root'), {
   default: () => [],
   async transform(res: any) {
@@ -70,8 +62,6 @@ const { data: navigation } = await useAsyncData(`navigation-error`, () => queryC
   },
 })
 provide('navigation', navigation)
-const { data: search } = await useLazyAsyncData(`search-error`, () => queryCollectionSearchSections('root'))
-provide('search', search)
 // Don't do fuzzy redirects during prerender - it causes infinite redirect loops
 const isPrerendering = import.meta.server && !import.meta.dev
 if (props.error.statusCode && !isPrerendering) {
@@ -219,6 +209,6 @@ if (props.error.statusCode && !isPrerendering) {
 
     <ClientOnly />
 
-    <Footer />
+    <LazyFooter hydrate-on-visible />
   </UApp>
 </template>

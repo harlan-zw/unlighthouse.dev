@@ -1,23 +1,36 @@
 <script setup lang="ts">
 import { NavigationMenuContent, NavigationMenuItem, NavigationMenuList, NavigationMenuRoot, NavigationMenuTrigger, NavigationMenuViewport } from 'reka-ui'
-import { useStats } from '../composables/data'
 import { resourcesMenu } from '../composables/nav'
 
-const { data: stats } = await useStats()
+const { data: stats } = useFetch('/api/github/stars', {
+  key: 'github-stars-header',
+  server: false,
+  lazy: true,
+  default: () => ({ stars: 0 }),
+})
+
 const githubStars = computed(() => {
-  const stars = stats.value?.stars?.stars || 0
-  return Intl.NumberFormat('en', { notation: 'compact', compactDisplay: 'short' }).format(stars)
+  const stars = stats.value?.stars || 0
+  return stars ? Intl.NumberFormat('en', { notation: 'compact', compactDisplay: 'short' }).format(stars) : ''
 })
 
 const navigation = inject<any>('navigation')
 const { open: openSearch } = useContentSearch()
 
-onKeyStroke('Divide', () => {
-  openSearch.value = true
-})
-
 const learnNav = computed(() => resourcesMenu.value.find(i => i.label === 'Learn'))
 const toolsNav = computed(() => resourcesMenu.value.find(i => i.label === 'Tools'))
+const activeMegaMenu = ref('')
+const loadedMegaMenus = ref(new Set<string>())
+
+watch(activeMegaMenu, (value) => {
+  if (!value || loadedMegaMenus.value.has(value))
+    return
+  loadedMegaMenus.value = new Set([...loadedMegaMenus.value, value])
+})
+
+function isMegaMenuLoaded(value: string) {
+  return loadedMegaMenus.value.has(value)
+}
 
 const megaMenuItems = computed(() => [
   { value: 'get-started', label: 'Get Started', icon: 'i-ph:book-open-duotone', to: '/guide/getting-started/installation' },
@@ -52,7 +65,7 @@ const mobileDocsGroups = computed(() => {
     </template>
 
     <template #default>
-      <NavigationMenuRoot class="hidden lg:flex justify-center relative py-2">
+      <NavigationMenuRoot v-model="activeMegaMenu" class="hidden lg:flex justify-center relative py-2">
         <NavigationMenuList class="flex items-center gap-0.5">
           <NavigationMenuItem v-for="item in megaMenuItems" :key="item.value" :value="item.value">
             <template v-if="item.hasDropdown">
@@ -68,8 +81,8 @@ const mobileDocsGroups = computed(() => {
               <NavigationMenuContent
                 class="absolute top-0 left-0 w-auto data-[motion=from-start]:animate-[enter-from-left_200ms_ease] data-[motion=from-end]:animate-[enter-from-right_200ms_ease] data-[motion=to-start]:animate-[exit-to-left_200ms_ease] data-[motion=to-end]:animate-[exit-to-right_200ms_ease]"
               >
-                <LearnMenu v-if="item.value === 'learn'" />
-                <ToolMenu v-else-if="item.value === 'tools'" />
+                <LazyLearnMenu v-if="item.value === 'learn' && isMegaMenuLoaded(item.value)" />
+                <LazyToolMenu v-else-if="item.value === 'tools' && isMegaMenuLoaded(item.value)" />
               </NavigationMenuContent>
             </template>
 
@@ -241,7 +254,7 @@ const mobileDocsGroups = computed(() => {
               </div>
             </template>
             <div class="font-semibold font-mono">
-              {{ githubStars }}
+              <span class="inline-block min-w-[4ch] text-right">{{ githubStars }}</span>
             </div>
           </UButton>
         </UTooltip>

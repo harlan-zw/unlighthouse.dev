@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { formatTimeAgo } from '@vueuse/core'
-import { useStats } from '~/composables/data'
 
 definePageMeta({
   breadcrumb: {
@@ -9,7 +8,18 @@ definePageMeta({
   },
 })
 
-const { data: stats } = await useStats()
+const { data: releaseData } = await useFetch('/api/github/releases', {
+  key: 'releases',
+  query: {
+    limit: 12,
+  },
+})
+
+const releases = computed(() => releaseData.value?.releases.map(release => ({
+  name: release.name,
+  publishedAt: release.publishedAt || releaseData.value?.fetchedAt || '1970-01-01T00:00:00.000Z',
+  body: release.body || '',
+})) || [])
 
 const DOT_SPLIT_RE = /(\.)/g
 
@@ -67,9 +77,9 @@ const HighlightedVersion = defineComponent({
     <section class="mb-10">
       <UContainer>
         <UPageHeader title="Unlighthouse Releases" description="See what has been shipping recently." />
-        <div class="mt-3 dark:text-neutral-300 text-sm">
+        <div v-if="releaseData?.fetchedAt" class="mt-3 dark:text-neutral-300 text-sm">
           Last fetched:
-          {{ formatTimeAgo(new Date(stats.fetchedAt)) }}.
+          {{ formatTimeAgo(new Date(releaseData.fetchedAt)) }}.
         </div>
         <div class="mt-3 dark:text-neutral-300 text-sm">
           Please use GitHub to check for realtime updates, this list is only updated every 24 hours.
@@ -79,7 +89,7 @@ const HighlightedVersion = defineComponent({
     <section class="mb-14">
       <UContainer>
         <ul class="space-y-5">
-          <li v-for="(release, key) in stats.releases.releases" :key="key" class="lg:grid grid-cols-12">
+          <li v-for="(release, key) in releases" :key="key" class="lg:grid grid-cols-12">
             <div class="flex lg:block items-center gap-2 col-span-2 mb-2 lg:mb-0">
               <time class="text-sm opacity-75" :datatime="new Date(release.publishedAt).toString()">{{ formatTimeAgo(new Date(release.publishedAt)) }}</time>
             </div>

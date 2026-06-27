@@ -12,7 +12,9 @@ defineOgImage('NuxtSeoSatori', {
   theme: '#a855f7',
 })
 
-const { data: stats } = await useStats()
+const { data: stats } = await useFetch('/api/stats/summary.json', {
+  key: 'stats-summary',
+})
 
 const { data: sponsors } = await useFetch('/api/github/sponsors.json', {
   key: 'sponsors',
@@ -203,9 +205,7 @@ const { data: sponsors } = await useFetch('/api/github/sponsors.json', {
             </div>
           </div>
         </div>
-        <ClientOnly>
-          <UnlighthouseDownloads class="rounded-xl mx-auto max-w-2xl w-full overflow-hidden" />
-        </ClientOnly>
+        <LazyUnlighthouseDownloads hydrate-on-visible class="rounded-xl mx-auto max-w-2xl w-full overflow-hidden" />
       </div>
     </section>
 
