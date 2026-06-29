@@ -54,7 +54,7 @@ const { data: sponsors } = await useFetch('/api/github/sponsors.json', {
           </div>
         </div>
         <p class="text-xs text-neutral-500">
-          Node 20+ · MIT licensed · Zero config
+          Node 22+ · MIT licensed · Zero config
         </p>
       </div>
     </section>
