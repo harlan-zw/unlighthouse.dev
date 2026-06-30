@@ -190,7 +190,7 @@ interface FeedbackEntry {
   path: string
   thumb: 'up' | 'down' | null
   comment: string | null
-  metadata: Record<string, unknown> | null
+  metadata: Record<string, unknown> | string | null
   userId: string | null
   sessionId: string | null
   createdAt: number | string | Date
@@ -229,6 +229,25 @@ const filteredFeedback = computed(() => {
 const feedbackComments = computed(() =>
   filteredFeedback.value.filter(e => e.comment),
 )
+
+function getFeedbackMetadata(entry: FeedbackEntry) {
+  if (!entry.metadata)
+    return {}
+  if (typeof entry.metadata === 'string') {
+    try {
+      return JSON.parse(entry.metadata) as Record<string, unknown>
+    }
+    catch {
+      return {}
+    }
+  }
+  return entry.metadata
+}
+
+function getLinkedThumbFeedbackId(entry: FeedbackEntry) {
+  const value = getFeedbackMetadata(entry).thumbFeedbackId
+  return typeof value === 'string' && value.length > 0 ? value : null
+}
 
 const feedbackColumns: TableColumn<FeedbackEntry>[] = [
   {
@@ -1005,6 +1024,10 @@ function toggleJourney(id: string) {
                       <span v-if="entry.sessionId" class="inline-flex items-center gap-1">
                         <span :class="`w-1.5 h-1.5 rounded-full ${entry.userId ? 'bg-emerald-500' : 'bg-gray-400'}`" />
                         <code class="font-mono">{{ entry.sessionId }}</code>
+                      </span>
+                      <span v-if="getLinkedThumbFeedbackId(entry)" class="inline-flex items-center gap-1">
+                        linked
+                        <code class="font-mono">{{ getLinkedThumbFeedbackId(entry)?.slice(0, 8) }}</code>
                       </span>
                       <time
                         class="font-mono tabular-nums ml-auto"

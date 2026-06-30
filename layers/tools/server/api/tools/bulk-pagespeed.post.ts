@@ -41,6 +41,28 @@ function extractMetric(audits: PSIResult['lighthouseResult']['audits'], id: stri
   }
 }
 
+function getErrorMessage(error: unknown, url: string) {
+  const err = error as {
+    status?: number
+    statusCode?: number
+    statusMessage?: string
+    message?: string
+    data?: { error?: { message?: string }, message?: string }
+  }
+  const status = err.status || err.statusCode
+  const message = err.data?.error?.message || err.data?.message || err.statusMessage || err.message
+
+  if (status === 429)
+    return 'PageSpeed Insights rate limit reached. Retry later or test fewer URLs.'
+  if (status === 400 && message)
+    return `PageSpeed Insights rejected this URL: ${message}`
+  if (status && message)
+    return `PageSpeed Insights returned ${status}: ${message}`
+  if (message)
+    return message
+  return `Failed to analyze ${url}`
+}
+
 async function processSingleUrl(
   event: H3Event,
   url: string,
@@ -146,7 +168,7 @@ export default defineEventHandler(async (event) => {
       fcp: null,
       tbt: null,
       si: null,
-      error: err?.message || 'Failed to analyze URL',
+      error: getErrorMessage(err, url),
     }))
 
     results[idx] = result
@@ -161,7 +183,7 @@ export default defineEventHandler(async (event) => {
   // Start initial batch of concurrent requests
   const initialBatch = Math.min(CONCURRENCY, urls.length)
   await Promise.all(
-    Array.from({ length: initialBatch }).fill(processNext()),
+    Array.from({ length: initialBatch }, () => processNext()),
   )
 
   // Calculate summary

@@ -12,6 +12,7 @@ const thumbSubmissionStatus = ref<false | 'loading' | 'submitted'>(false)
 const commentSubmissionStatus = ref<false | 'loading' | 'submitted'>(false)
 
 const toast = useToast()
+const route = useRoute()
 const thumbsResponse = ref<ThumbsFeedbackResponse>()
 
 const state = reactive<Partial<CommentFeedbackSchemaOutput>>({
@@ -29,7 +30,7 @@ function thumbs(thumbs: 'up' | 'down') {
   thumbSubmissionStatus.value = 'loading'
   $fetch<ThumbsFeedbackResponse>('/api/feedback-thumbs', {
     method: 'POST',
-    body: { thumbs },
+    body: { thumbs, path: route.path },
   })
     .then(thumbsNextStep)
     .catch((error) => {
@@ -42,7 +43,11 @@ async function onSubmit(event: FormSubmitEvent<CommentFeedbackSchemaOutput>) {
   commentSubmissionStatus.value = 'loading'
   $fetch('/api/feedback', {
     method: 'POST',
-    body: JSON.stringify(event.data),
+    body: JSON.stringify({
+      ...event.data,
+      path: route.path,
+      thumbFeedbackId: thumbsResponse.value?.feedbackId,
+    }),
   })
     .then(() => {
       toast.add({ title: 'Success', description: 'Your feedback has been submitted, thanks!', color: 'success' })

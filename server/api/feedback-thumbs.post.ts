@@ -7,21 +7,26 @@ import { feedback } from '../database/schema'
 import { getDB } from '../utils/db'
 
 export default defineEventHandler<Promise<ThumbsFeedbackResponse>>(async (event) => {
-  const { thumbs, toolId, context } = await readValidatedBody(event, ThumbsFeedbackSchema.parse)
+  const { thumbs, path: explicitPath, toolId, context } = await readValidatedBody(event, ThumbsFeedbackSchema.parse)
   const referrer = parseURL(getHeader(event, 'Referer')).pathname
-  const path = toolId || referrer || '/'
+  const path = toolId || explicitPath || referrer || '/'
+  const feedbackId = crypto.randomUUID()
 
   if (!import.meta.dev) {
     const session = await getUserSession(event).catch(() => null)
     const db = getDB(event)
 
-    db.insert(feedback).values({
+    await db.insert(feedback).values({
+      id: feedbackId,
       path,
       thumb: thumbs,
       metadata: { ...context, toolId },
       userId: (session?.user as Record<string, string> | undefined)?.id || null,
       sessionId: getSessionId(event),
-    }).catch(err => console.error('Failed to save thumbs feedback:', err))
+    }).catch((err) => {
+      console.error('Failed to save thumbs feedback:', err)
+      throw createError({ statusCode: 500, message: 'Failed to save feedback' })
+    })
 
     const rows = await db.select({
       thumb: feedback.thumb,
@@ -34,8 +39,8 @@ export default defineEventHandler<Promise<ThumbsFeedbackResponse>>(async (event)
         stats[row.thumb] = row.count
     }
 
-    return { thumbs, stats }
+    return { feedbackId, thumbs, stats }
   }
 
-  return { thumbs, stats: { up: thumbs === 'up' ? 1 : 0, down: thumbs === 'down' ? 1 : 0 } }
+  return { feedbackId, thumbs, stats: { up: thumbs === 'up' ? 1 : 0, down: thumbs === 'down' ? 1 : 0 } }
 })

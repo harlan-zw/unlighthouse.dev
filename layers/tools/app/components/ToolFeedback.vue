@@ -13,11 +13,18 @@ const thumbSubmissionStatus = ref<false | 'loading' | 'submitted'>(false)
 const commentSubmissionStatus = ref<false | 'loading' | 'submitted'>(false)
 
 const toast = useToast()
+const route = useRoute()
 const thumbsResponse = ref<ThumbsFeedbackResponse>()
+const commentField = ref<HTMLElement | null>(null)
 
 const state = reactive<Partial<CommentFeedbackSchemaOutput>>({
   comment: undefined,
 })
+
+async function focusCommentField() {
+  await nextTick()
+  commentField.value?.querySelector('textarea')?.focus()
+}
 
 function thumbsNextStep(val: ThumbsFeedbackResponse) {
   useTimeoutFn(() => {
@@ -30,9 +37,15 @@ function thumbs(thumbs: 'up' | 'down') {
   thumbSubmissionStatus.value = 'loading'
   $fetch<ThumbsFeedbackResponse>('/api/feedback-thumbs', {
     method: 'POST',
-    body: { thumbs, toolId: props.toolId, context: props.context },
+    body: { thumbs, path: route.path, toolId: props.toolId, context: props.context },
   })
-    .then(thumbsNextStep)
+    .then((response) => {
+      thumbsNextStep(response)
+      if (thumbs === 'down') {
+        state.comment = ''
+        focusCommentField()
+      }
+    })
     .catch((error) => {
       thumbSubmissionStatus.value = false
       toast.add({ title: 'Error', description: error.message, color: 'error' })
@@ -43,7 +56,13 @@ async function onSubmit(event: FormSubmitEvent<CommentFeedbackSchemaOutput>) {
   commentSubmissionStatus.value = 'loading'
   $fetch('/api/feedback', {
     method: 'POST',
-    body: JSON.stringify({ ...event.data, toolId: props.toolId, context: props.context }),
+    body: JSON.stringify({
+      ...event.data,
+      path: route.path,
+      toolId: props.toolId,
+      thumbFeedbackId: thumbsResponse.value?.feedbackId,
+      context: props.context,
+    }),
   })
     .then(() => {
       toast.add({ title: 'Thanks!', description: 'Your feedback helps us improve this tool.', color: 'success' })
@@ -114,9 +133,16 @@ async function onSubmit(event: FormSubmitEvent<CommentFeedbackSchemaOutput>) {
 
     <div v-if="commentSubmissionStatus !== 'submitted'" class="mt-4 pt-4 border-t border-default">
       <UForm :schema="CommentFeedbackSchema" :state="state" class="space-y-3" :validate-on="['change']" @submit="onSubmit">
-        <UFormField label="Anything that could be done better? :)" name="comment">
-          <UTextarea v-model="state.comment" placeholder="Tell us how we can improve this tool..." class="w-full" :rows="2" />
-        </UFormField>
+        <div ref="commentField">
+          <UFormField label="Anything that could be done better? :)" name="comment">
+            <UTextarea
+              v-model="state.comment"
+              :placeholder="thumbsResponse?.thumbs === 'down' ? 'What went wrong?' : 'Tell us how we can improve this tool...'"
+              class="w-full"
+              :rows="2"
+            />
+          </UFormField>
+        </div>
         <div class="flex items-center gap-2">
           <UButton type="submit" size="xs" color="primary" :loading="commentSubmissionStatus === 'loading'">
             Submit Feedback

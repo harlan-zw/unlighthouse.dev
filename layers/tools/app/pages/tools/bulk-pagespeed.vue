@@ -126,6 +126,10 @@ const sortedResults = computed(() => {
   })
 })
 
+const failedResults = computed(() =>
+  results.value.filter(r => r.status === 'error'),
+)
+
 function toggleSort(column: typeof sortColumn.value) {
   if (sortColumn.value === column) {
     sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
@@ -133,6 +137,23 @@ function toggleSort(column: typeof sortColumn.value) {
   else {
     sortColumn.value = column
     sortDirection.value = column === 'url' ? 'asc' : 'desc'
+  }
+}
+
+function buildSummary(resultList: BulkPSIResult[]): BulkResponse['summary'] {
+  const successfulResults = resultList.filter(r => r.status === 'success' && r.performance !== null)
+  const avgPerformance = successfulResults.length > 0
+    ? Math.round(successfulResults.reduce((sum, r) => sum + (r.performance || 0), 0) / successfulResults.length)
+    : 0
+
+  return {
+    totalUrls: resultList.length,
+    successCount: successfulResults.length,
+    errorCount: resultList.filter(r => r.status === 'error').length,
+    avgPerformance,
+    goodCount: successfulResults.filter(r => (r.performance || 0) >= 90).length,
+    needsWorkCount: successfulResults.filter(r => (r.performance || 0) >= 50 && (r.performance || 0) < 90).length,
+    poorCount: successfulResults.filter(r => (r.performance || 0) < 50).length,
   }
 }
 
@@ -159,9 +180,25 @@ function stopTest() {
   loading.value = false
 }
 
-async function runTest() {
-  const urls = urlInput.value
-    .split('\n')
+async function getResponseErrorMessage(response: Response) {
+  const fallback = `Failed to start bulk test (${response.status})`
+  const text = await response.text().catch(() => '')
+  if (!text)
+    return fallback
+
+  try {
+    const data = JSON.parse(text) as { message?: string, statusMessage?: string, data?: { message?: string } }
+    return data.data?.message || data.message || data.statusMessage || fallback
+  }
+  catch {
+    return text.length > 160 ? `${text.slice(0, 160)}...` : text
+  }
+}
+
+type RunMode = 'replace' | 'merge'
+
+async function runTest(urlsOverride?: string[], mode: RunMode = 'replace') {
+  const urls = (urlsOverride || urlInput.value.split('\n'))
     .map(u => u.trim())
     .filter(u => u.length > 0)
     .slice(0, 10)
@@ -176,7 +213,17 @@ async function runTest() {
 
   loading.value = true
   error.value = null
-  results.value = []
+  if (mode === 'replace') {
+    results.value = []
+  }
+  else {
+    const retrySet = new Set(urls)
+    results.value = results.value.map(result =>
+      retrySet.has(result.url)
+        ? { ...result, status: 'queued', performance: null, lcp: null, cls: null, fcp: null, tbt: null, si: null, error: undefined }
+        : result,
+    )
+  }
   summary.value = null
 
   // POST to get SSE stream
@@ -191,8 +238,20 @@ async function runTest() {
     return null
   })
 
-  if (!response?.body) {
+  if (!response) {
     error.value = 'Failed to start bulk test'
+    loading.value = false
+    return
+  }
+
+  if (!response.ok) {
+    error.value = await getResponseErrorMessage(response)
+    loading.value = false
+    return
+  }
+
+  if (!response.body) {
+    error.value = 'Failed to start bulk test: no response stream'
     loading.value = false
     return
   }
@@ -218,19 +277,30 @@ async function runTest() {
           const data = JSON.parse(line.slice(6))
 
           if (data.type === 'init') {
-            results.value = data.results as BulkPSIResult[]
+            if (mode === 'replace')
+              results.value = data.results as BulkPSIResult[]
           }
           else if (data.type === 'status') {
-            const current = results.value[data.index]
+            const targetIndex = mode === 'merge'
+              ? results.value.findIndex(r => r.url === data.url)
+              : data.index
+            const current = results.value[targetIndex]
             if (current) {
-              results.value[data.index] = { ...current, status: data.status as BulkPSIResult['status'] }
+              results.value[targetIndex] = { ...current, status: data.status as BulkPSIResult['status'] }
             }
           }
           else if (data.type === 'result') {
-            results.value[data.index] = data.result as BulkPSIResult
+            const result = data.result as BulkPSIResult
+            const targetIndex = mode === 'merge'
+              ? results.value.findIndex(r => r.url === result.url)
+              : data.index
+            if (targetIndex > -1)
+              results.value[targetIndex] = result
           }
           else if (data.type === 'complete') {
-            summary.value = data.summary
+            summary.value = mode === 'merge'
+              ? buildSummary(results.value)
+              : data.summary
             loading.value = false
             trackUse()
           }
@@ -245,15 +315,28 @@ async function runTest() {
   })
 }
 
+function retryFailed() {
+  if (failedResults.value.length === 0 || loading.value)
+    return
+  runTest(failedResults.value.map(r => r.url), 'merge')
+}
+
 onUnmounted(() => {
   stopTest()
 })
+
+function escapeCSVCell(value: unknown) {
+  const text = String(value ?? '')
+  if (!/[",\n\r]/.test(text))
+    return text
+  return `"${text.replace(/"/g, '""')}"`
+}
 
 function exportCSV() {
   if (results.value.length === 0)
     return
 
-  const headers = ['URL', 'Performance', 'LCP', 'CLS', 'FCP', 'TBT', 'Status']
+  const headers = ['URL', 'Performance', 'LCP', 'CLS', 'FCP', 'TBT', 'Status', 'Error']
   const rows = results.value.map(r => [
     r.url,
     r.performance ?? 'N/A',
@@ -262,9 +345,12 @@ function exportCSV() {
     r.fcp?.displayValue ?? 'N/A',
     r.tbt?.displayValue ?? 'N/A',
     r.status,
+    r.error ?? '',
   ])
 
-  const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+  const csv = [headers, ...rows]
+    .map(row => row.map(escapeCSVCell).join(','))
+    .join('\n')
   downloadFile(csv, 'bulk-pagespeed-results.csv', 'text/csv')
 }
 
@@ -346,7 +432,7 @@ https://example.com/pricing"
               :loading="loading"
               :disabled="urlCount === 0 || loading"
               class="bg-amber-600 hover:bg-amber-500 text-white font-medium w-full sm:w-auto"
-              @click="runTest"
+              @click="runTest()"
             >
               <UIcon name="i-heroicons-bolt" class="w-4 h-4" />
               Run Bulk Test
@@ -574,6 +660,13 @@ https://example.com/pricing"
                     >
                       {{ formatUrl(result.url) }}
                     </a>
+                    <p
+                      v-if="result.status === 'error' && result.error"
+                      class="mt-1 text-xs text-red-600 dark:text-red-400 truncate max-w-[220px] md:max-w-[360px]"
+                      :title="result.error"
+                    >
+                      {{ result.error }}
+                    </p>
                   </td>
                   <td class="px-3 py-3 text-center">
                     <div
@@ -652,10 +745,13 @@ https://example.com/pricing"
                     />
                     <!-- Error -->
                     <UTooltip v-else :text="result.error || 'Failed'">
-                      <UIcon
-                        name="i-heroicons-x-circle"
-                        class="w-5 h-5 text-red-500"
-                      />
+                      <span class="inline-flex items-center gap-1 text-xs text-red-600 dark:text-red-400">
+                        <UIcon
+                          name="i-heroicons-x-circle"
+                          class="w-4 h-4"
+                        />
+                        Failed
+                      </span>
                     </UTooltip>
                   </td>
                 </tr>
@@ -688,9 +784,20 @@ https://example.com/pricing"
               variant="outline"
               color="neutral"
               icon="i-heroicons-arrow-path"
-              @click="runTest"
+              @click="runTest()"
             >
               Re-test
+            </UButton>
+            <UButton
+              v-if="failedResults.length"
+              size="sm"
+              variant="soft"
+              color="error"
+              icon="i-heroicons-arrow-path"
+              :disabled="loading"
+              @click="retryFailed"
+            >
+              Retry Failed ({{ failedResults.length }})
             </UButton>
           </div>
         </div>
