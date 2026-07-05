@@ -7,9 +7,9 @@
           <img src="/logo-light.svg" alt="Unlighthouse Logo" class="hidden dark:block text-black dark:text-white w-5 h-5">
         </div>
         <div class="flex flex-col">
-          <h1 class="font-bold text-xl">
+          <span class="font-bold text-xl">
             Unlighthouse
-          </h1>
+          </span>
         </div>
       </div>
     </div>

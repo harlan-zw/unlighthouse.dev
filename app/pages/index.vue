@@ -19,6 +19,11 @@ const { data: stats } = await useFetch('/api/stats/summary.json', {
 const { data: sponsors } = await useFetch('/api/github/sponsors.json', {
   key: 'sponsors',
 })
+
+const { target: demoFrameRoot, isVisible: shouldLoadDemoFrame } = useVisibleWhenNearViewport({
+  rootMargin: '250px 0px',
+  idleTimeout: 8000,
+})
 </script>
 
 <template>
@@ -84,13 +89,17 @@ const { data: sponsors } = await useFetch('/api/github/sponsors.json', {
             </div>
 
             <!-- Demo iframe -->
-            <iframe
-              src="https://unlighthouse-demo.netlify.app/"
-              loading="lazy"
-              class="block w-full bg-white"
-              style="height: 70vh; min-height: 500px;"
-              title="Unlighthouse Demo Report"
-            />
+            <div ref="demoFrameRoot" class="block w-full h-[70vh] min-h-[500px] bg-white">
+              <ClientOnly>
+                <iframe
+                  v-if="shouldLoadDemoFrame"
+                  src="https://unlighthouse-demo.netlify.app/"
+                  loading="lazy"
+                  class="block w-full h-full bg-white"
+                  title="Unlighthouse Demo Report"
+                />
+              </ClientOnly>
+            </div>
           </div>
         </div>
       </div>

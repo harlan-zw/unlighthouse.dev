@@ -2,12 +2,26 @@
 import { NavigationMenuContent, NavigationMenuItem, NavigationMenuList, NavigationMenuRoot, NavigationMenuTrigger, NavigationMenuViewport } from 'reka-ui'
 import { resourcesMenu } from '../composables/nav'
 
-const { data: stats } = useFetch('/api/github/stars', {
+const { data: stats, execute: loadGithubStars } = useFetch('/api/github/stars', {
   key: 'github-stars-header',
   server: false,
+  immediate: false,
   lazy: true,
   default: () => ({ stars: 0 }),
 })
+
+if (import.meta.client) {
+  onNuxtReady(() => {
+    const loadStars = () => {
+      void loadGithubStars()
+    }
+
+    if (typeof window.requestIdleCallback === 'function')
+      window.requestIdleCallback(loadStars, { timeout: 3000 })
+    else
+      window.setTimeout(loadStars, 1500)
+  })
+}
 
 const githubStars = computed(() => {
   const stars = stats.value?.stars || 0
@@ -16,6 +30,10 @@ const githubStars = computed(() => {
 
 const navigation = inject<any>('navigation')
 const { open: openSearch } = useContentSearch()
+
+function showSearch() {
+  openSearch.value = true
+}
 
 const learnNav = computed(() => resourcesMenu.value.find(i => i.label === 'Learn'))
 const toolsNav = computed(() => resourcesMenu.value.find(i => i.label === 'Tools'))
@@ -109,7 +127,7 @@ const mobileDocsGroups = computed(() => {
       <div class="space-y-4">
         <!-- Mobile: Search & actions -->
         <div class="flex items-center gap-2">
-          <UButton class="flex-1" variant="outline" color="neutral" @click="openSearch = true">
+          <UButton class="flex-1" variant="outline" color="neutral" @click="showSearch">
             <template #leading>
               <UIcon name="i-heroicons-magnifying-glass" class="w-4 h-4 opacity-60" />
             </template>
@@ -223,17 +241,17 @@ const mobileDocsGroups = computed(() => {
           size="sm"
           class="cursor-pointer hidden lg:block w-[70px]"
           shortcut="divide"
-          @click="openSearch = true"
+          @click="showSearch"
         >
           <template #leading>
             <UContentSearchButton
               size="sm"
               class="cursor-pointer p-0 opacity-70 hover:opacity-100"
-              @click="openSearch = true"
+              @click="showSearch"
             />
           </template>
           <template #trailing>
-            <UKbd @click="openSearch = true">
+            <UKbd @click="showSearch">
               /
             </UKbd>
           </template>

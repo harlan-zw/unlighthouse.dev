@@ -29,6 +29,7 @@ const loadingType = computed(() => {
       :width="width"
       :src="src"
       :loading="loadingType"
+      decoding="async"
     >
     <figcaption v-if="alt" class="text-center">
       {{ alt }}

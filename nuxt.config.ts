@@ -4,6 +4,10 @@ import { defineNuxtConfig } from 'nuxt/config'
 import { resolve } from 'pathe'
 import { gray, logger } from './logger'
 
+const staticPageHeaders = {
+  'cache-control': 'public, max-age=300, s-maxage=86400, stale-while-revalidate=604800',
+}
+
 export default defineNuxtConfig({
   extends: ['./layers/tools', './layers/admin'],
 
@@ -134,6 +138,9 @@ export default defineNuxtConfig({
   },
 
   fonts: {
+    defaults: {
+      styles: ['normal'],
+    },
     experimental: {
       processCSSVariables: true,
     },
@@ -389,6 +396,18 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
+    '/': { prerender: true, headers: staticPageHeaders },
+    '/guide/**': { prerender: true, headers: staticPageHeaders },
+    '/integrations/**': { prerender: true, headers: staticPageHeaders },
+    '/api-doc': { prerender: true, headers: staticPageHeaders },
+    '/api-doc/**': { prerender: true, headers: staticPageHeaders },
+    '/glossary': { prerender: true, headers: staticPageHeaders },
+    '/glossary/**': { prerender: true, headers: staticPageHeaders },
+    '/learn-lighthouse': { prerender: true, headers: staticPageHeaders },
+    '/learn-lighthouse/**': { prerender: true, headers: staticPageHeaders },
+    '/tools': { prerender: true, headers: staticPageHeaders },
+    '/tools/**': { prerender: true, headers: staticPageHeaders },
+
     // auth endpoints must not be cached or prerendered
     '/auth/**': { prerender: false, cache: false, headers: { 'cache-control': 'no-store' } },
     '/admin/**': { prerender: false },

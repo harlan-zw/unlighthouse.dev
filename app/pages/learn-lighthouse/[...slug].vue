@@ -104,7 +104,15 @@ const humanUpdatedDate = computed(() => page.value?.updatedAt
       <UPageHeader v-bind="page" :ui="{ title: 'text-center text-balance xl:leading-normal min-w-full', description: 'text-center ' }">
         <div class="flex justify-center items-center gap-3 mt-5 text-sm text-dimmed flex-wrap">
           <NuxtLink to="https://x.com/harlan-zw" external target="_blank" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border border-default hover:border-accented transition">
-            <img alt="Harlan Wilton" src="https://avatars.githubusercontent.com/u/5326365?v=4" class="w-4 h-4 rounded-full">
+            <img
+              alt="Harlan Wilton"
+              src="https://avatars.githubusercontent.com/u/5326365?v=4"
+              width="16"
+              height="16"
+              decoding="async"
+              fetchpriority="low"
+              class="w-4 h-4 rounded-full"
+            >
             <span class="hover:text-default text-muted transition">Harlan Wilton</span>
           </NuxtLink>
           <span v-if="page?.readTime">{{ page.readTime }} read</span>
