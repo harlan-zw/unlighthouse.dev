@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { titleCase } from 'scule'
-import { joinURL } from 'ufo'
+import { buildSurroundLinks } from '~~/utils/surround-links'
 import { getLastPathSegment, getPathSegments } from '~~/utils/urls'
 import { useCurrentDocPage } from '~/composables/data'
 
@@ -29,18 +29,21 @@ useSeoMeta({
   titleTemplate: '%s %separator %siteName',
 })
 
-useHead({
-  link: () => {
-    return [
-      ...(surround.value?.length
-        ? surround.value.map((s: any, i: number) => ({
-            rel: i === 0 ? 'prev' : 'next',
-            href: joinURL('https://unlighthouse.dev/', s.path),
-          }))
-        : []),
-    ]
-  },
-})
+const surroundLinks = buildSurroundLinks(surround.value || [], 'https://unlighthouse.dev')
+const previousLink = surroundLinks.find(link => link.rel === 'prev')
+const nextLink = surroundLinks.find(link => link.rel === 'next')
+
+if (previousLink) {
+  useHead({
+    link: [{ rel: 'prev', href: previousLink.href }],
+  })
+}
+
+if (nextLink) {
+  useHead({
+    link: [{ rel: 'next', href: nextLink.href }],
+  })
+}
 
 const headline = computed(() => titleCase(getLastPathSegment(getPathSegments(route.path, route.path.split('/').length - 2))))
 

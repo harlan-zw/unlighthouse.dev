@@ -563,11 +563,11 @@ const ttfbTips = [
                   Scan Entire Site (Free)
                 </UButton>
                 <UButton
-                  to="/cloud"
+                  to="/integrations/ci"
                   variant="outline"
                   size="sm"
                 >
-                  Schedule Recurring Audits
+                  Automate Audits in CI
                 </UButton>
               </div>
             </div>

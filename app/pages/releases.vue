@@ -8,6 +8,11 @@ definePageMeta({
   },
 })
 
+useSeoMeta({
+  title: 'Unlighthouse Release Notes and Changelog',
+  description: 'Read the latest Unlighthouse release notes, improvements, fixes, and version history.',
+})
+
 const { data: releaseData } = await useFetch('/api/github/releases', {
   key: 'releases',
   query: {

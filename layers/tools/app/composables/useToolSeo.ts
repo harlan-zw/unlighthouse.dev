@@ -13,6 +13,10 @@ interface ToolSeoOptions {
 }
 
 export function useToolSeo(opts: ToolSeoOptions) {
+  const route = useRoute()
+  const site = useSiteConfig()
+  const canonicalUrl = new URL(route.path, site.url).href
+
   useSeoMeta({
     title: opts.title,
     description: opts.description,
@@ -29,7 +33,7 @@ export function useToolSeo(opts: ToolSeoOptions) {
       '@type': 'WebApplication',
       'name': opts.title,
       'description': opts.description,
-      'url': useRequestURL().href,
+      'url': canonicalUrl,
       'applicationCategory': 'DeveloperApplication',
       'operatingSystem': 'Web',
       'offers': {

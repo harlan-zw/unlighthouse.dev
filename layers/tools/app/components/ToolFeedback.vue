@@ -148,7 +148,7 @@ async function onSubmit(event: FormSubmitEvent<CommentFeedbackSchemaOutput>) {
             Submit Feedback
           </UButton>
           <UButton type="button" size="xs" variant="ghost" color="neutral" @click="commentSubmissionStatus = 'submitted'">
-            Skip
+            Dismiss feedback
           </UButton>
         </div>
       </UForm>

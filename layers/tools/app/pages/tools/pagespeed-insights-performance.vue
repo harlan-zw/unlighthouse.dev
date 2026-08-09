@@ -391,6 +391,8 @@ const totalResourceSize = computed(() => {
                   <img
                     :src="frame.data"
                     :alt="`Frame at ${formatMs(frame.timing)}`"
+                    width="96"
+                    height="176"
                     class="w-full h-full object-cover object-top"
                   >
                 </div>
@@ -811,11 +813,11 @@ const totalResourceSize = computed(() => {
                   Scan Entire Site (Free)
                 </UButton>
                 <UButton
-                  to="/cloud"
+                  to="/integrations/ci"
                   variant="outline"
                   size="sm"
                 >
-                  Schedule Recurring Audits
+                  Automate Audits in CI
                 </UButton>
               </div>
             </div>

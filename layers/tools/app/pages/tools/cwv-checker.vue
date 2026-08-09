@@ -350,6 +350,8 @@ const cwvMetrics = computed(() => {
                   <img
                     :src="frame.data"
                     :alt="`Frame at ${frame.timing >= 1000 ? `${(frame.timing / 1000).toFixed(1)}s` : `${frame.timing}ms`}`"
+                    width="80"
+                    height="144"
                     class="w-full h-full object-cover object-top"
                   >
                 </div>
@@ -534,11 +536,11 @@ const cwvMetrics = computed(() => {
                   Scan Entire Site (Free)
                 </UButton>
                 <UButton
-                  to="/cloud"
+                  to="/integrations/ci"
                   variant="outline"
                   size="sm"
                 >
-                  Schedule Recurring Audits
+                  Automate Audits in CI
                 </UButton>
               </div>
             </div>

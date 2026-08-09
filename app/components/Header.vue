@@ -73,6 +73,10 @@ const mobileDocsGroups = computed(() => {
 <template>
   <UHeader
     :to="undefined"
+    :menu="{
+      title: 'Site navigation',
+      description: 'Browse guides, Learn articles, and tools.',
+    }"
     :ui="{
       root: 'border-none bg-transparent pt-2 mb-3 px-5 h-auto',
       container: 'max-w-[1452px] lg:bg-white/3 lg:border border-default lg:dark:bg-gray-900/10 mx-auto py-0 px-0 lg:px-5 sm:px-0 rounded-lg',
@@ -83,7 +87,7 @@ const mobileDocsGroups = computed(() => {
     </template>
 
     <template #default>
-      <NavigationMenuRoot v-model="activeMegaMenu" class="hidden lg:flex justify-center relative py-2">
+      <NavigationMenuRoot v-model="activeMegaMenu" aria-label="Primary" class="hidden lg:flex justify-center relative py-2">
         <NavigationMenuList class="flex items-center gap-0.5">
           <NavigationMenuItem v-for="item in megaMenuItems" :key="item.value" :value="item.value">
             <template v-if="item.hasDropdown">
@@ -158,7 +162,7 @@ const mobileDocsGroups = computed(() => {
                 <p class="text-[11px] font-semibold text-muted uppercase tracking-wider px-2">
                   {{ `${group.label} - ${section.title}` }}
                 </p>
-                <nav class="space-y-0.5">
+                <nav :aria-label="`${group.label}: ${section.title}`" class="space-y-0.5">
                   <NuxtLink
                     v-for="child in (section.children || [section])"
                     :key="child.path"
@@ -178,7 +182,7 @@ const mobileDocsGroups = computed(() => {
               <p class="text-[11px] font-semibold text-muted uppercase tracking-wider px-2">
                 {{ group.label }}
               </p>
-              <nav class="space-y-0.5">
+              <nav :aria-label="group.label" class="space-y-0.5">
                 <NuxtLink
                   v-for="item in group.nav"
                   :key="item.path"
@@ -198,7 +202,7 @@ const mobileDocsGroups = computed(() => {
           <p class="text-[11px] font-semibold text-muted uppercase tracking-wider px-2">
             Learn
           </p>
-          <nav class="space-y-0.5">
+          <nav aria-label="Learn" class="space-y-0.5">
             <NuxtLink
               v-for="item in learnNav?.children"
               :key="item.to"
@@ -218,7 +222,7 @@ const mobileDocsGroups = computed(() => {
           <p class="text-[11px] font-semibold text-muted uppercase tracking-wider px-2">
             Tools
           </p>
-          <nav class="space-y-0.5">
+          <nav aria-label="Tools" class="space-y-0.5">
             <NuxtLink
               v-for="item in toolsNav?.children"
               :key="item.to"
@@ -236,30 +240,19 @@ const mobileDocsGroups = computed(() => {
     <template #right>
       <div class="flex items-center justify-end lg:-mr-1.5 ml-3 gap-2">
         <!-- Search -->
-        <UInput
-          type="search"
+        <UContentSearchButton
+          aria-label="Search site"
+          icon="i-heroicons-magnifying-glass"
+          label="Search site"
+          :kbds="['/']"
           size="sm"
-          class="cursor-pointer hidden lg:block w-[70px]"
-          shortcut="divide"
-          @click="showSearch"
-        >
-          <template #leading>
-            <UContentSearchButton
-              size="sm"
-              class="cursor-pointer p-0 opacity-70 hover:opacity-100"
-              @click="showSearch"
-            />
-          </template>
-          <template #trailing>
-            <UKbd @click="showSearch">
-              /
-            </UKbd>
-          </template>
-        </UInput>
+          class="cursor-pointer hidden lg:inline-flex"
+        />
 
         <!-- GitHub stars -->
         <UTooltip text="Star on GitHub">
           <UButton
+            aria-label="Star Unlighthouse on GitHub"
             class="hidden sm:flex"
             to="https://github.com/harlan-zw/unlighthouse"
             target="_blank"

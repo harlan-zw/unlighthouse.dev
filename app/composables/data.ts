@@ -1,5 +1,5 @@
 import { titleCase } from 'scule'
-import { modifyRelativeDocLinksWithFramework } from '~~/utils/content'
+import { markStyleTextAsHydrationSafe, modifyRelativeDocLinksWithFramework } from '~~/utils/content'
 import { useAsyncData } from '#imports'
 
 export async function useStats() {
@@ -20,63 +20,78 @@ function getCollectionForPath(path: string) {
   return 'root' as const
 }
 
-export async function useCurrentDocPage() {
-  const nuxtApp = useNuxtApp()
-  const route = useRouter().currentRoute.value
-  if (nuxtApp.static.data.docsCurrent?.path === route.path) {
-    return await nuxtApp.static.data.docsCurrent.promise
+interface LastCommit {
+  author: {
+    name?: string
+    avatar?: string
+    committer?: string
   }
+  date?: string
+  dateHuman: string
+  message: string
+  url: string
+}
+
+export async function useCurrentDocPage() {
+  const route = useRoute()
 
   const collection = getCollectionForPath(route.path)
-  const pagePromise = queryCollection(collection).path(route.path).first()
-  const surroundPromise = queryCollectionItemSurroundings(collection, route.path, {
-    fields: ['title', 'description', 'path'],
-  })
+  const { data } = await useAsyncData(`docs-current:${route.path}`, async () => {
+    const [pageData, surroundData] = await Promise.all([
+      queryCollection(collection).path(route.path).first(),
+      queryCollectionItemSurroundings(collection, route.path, {
+        fields: ['title', 'description', 'path'],
+      }),
+    ])
 
-  const p = Promise.all([
-    pagePromise as any,
-    surroundPromise as any,
-  ])
-    .then(async ([pageData, surroundData]) => {
-      if (!pageData?.body?.value) {
-        throw createError({ statusCode: 404, statusMessage: `Page not found: ${route.path}`, fatal: true })
-      }
+    if (!pageData?.body?.value) {
+      throw createError({ statusCode: 404, statusMessage: `Page not found: ${route.path}`, fatal: true })
+    }
 
-      modifyRelativeDocLinksWithFramework(pageData.body.value)
-
-      if (Array.isArray(pageData.relatedPages)) {
-        pageData.relatedPages = pageData.relatedPages.map((p: any) => ({
-          ...p,
-          path: p.path?.replace(/\/index$/, '') || p.path,
-        }))
-      }
-
-      const page = ref(pageData)
-      const surround = ref((surroundData || []).filter(Boolean).map((m: any) => {
-        const path = m.path.replace(/\/index$/, '') || '/'
-        return {
-          ...m,
-          path,
-          _path: path,
-        }
-      }))
-
-      const lastCommitData = await $fetch(`/api/github/last-file-commit`, {
-        query: {
-          file: `docs/${pageData.stem}`,
-        },
-      }).catch(() => null)
-      const lastCommit = ref(lastCommitData)
-
+    const surround = (surroundData || []).filter(Boolean).map((m: any) => {
+      const path = m.path.replace(/\/index$/, '') || '/'
       return {
-        page,
-        surround,
-        lastCommit,
+        ...m,
+        path,
+        _path: path,
       }
     })
 
-  nuxtApp.static.data.docsCurrent = { promise: p, path: toRaw(route.path) }
-  return p
+    const lastCommitData = await $fetch<LastCommit>(`/api/github/last-file-commit`, {
+      query: {
+        file: `docs/${pageData.stem}`,
+      },
+    }).catch((error) => {
+      console.warn('[docs] Failed to load optional commit metadata', error)
+      return null
+    })
+
+    return {
+      page: pageData,
+      surround,
+      lastCommit: lastCommitData,
+    }
+  })
+
+  if (!data.value)
+    throw createError({ statusCode: 500, statusMessage: `Failed to load page: ${route.path}`, fatal: true })
+
+  const pageData = structuredClone(toRaw(data.value.page))
+  modifyRelativeDocLinksWithFramework(pageData.body.value)
+  markStyleTextAsHydrationSafe(pageData.body.value)
+
+  if (Array.isArray(pageData.relatedPages)) {
+    pageData.relatedPages = pageData.relatedPages.map((page: any) => ({
+      ...page,
+      path: page.path?.replace(/\/index$/, '') || page.path,
+    }))
+  }
+
+  return {
+    page: ref(pageData),
+    surround: ref(data.value.surround),
+    lastCommit: ref(data.value.lastCommit),
+  }
 }
 
 export function movingAverage(data: number[], windowSize: number) {

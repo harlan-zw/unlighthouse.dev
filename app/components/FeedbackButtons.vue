@@ -82,12 +82,12 @@ async function onSubmit(event: FormSubmitEvent<CommentFeedbackSchemaOutput>) {
       </template>
       <template v-else>
         <UTooltip text="Looks good!">
-          <UButton type="button" class="cursor-pointer hover:bg-green-500/10 bg-neutral-500/10 text-neutral-600 dark:text-white" size="lg" @click="thumbs('up')">
+          <UButton aria-label="This page was helpful" type="button" class="cursor-pointer hover:bg-green-500/10 bg-neutral-500/10 text-neutral-600 dark:text-white" size="lg" @click="thumbs('up')">
             <UIcon name="i-carbon-thumbs-up" class="w-6 h-6" />
           </UButton>
         </UTooltip>
         <UTooltip text="It needs some work.">
-          <UButton type="button" class="cursor-pointer hover:bg-red-500/10 bg-neutral-500/10 text-neutral-600  dark:text-white" size="lg" color="neutral" @click="thumbs('down')">
+          <UButton aria-label="This page needs improvement" type="button" class="cursor-pointer hover:bg-red-500/10 bg-neutral-500/10 text-neutral-600  dark:text-white" size="lg" color="neutral" @click="thumbs('down')">
             <UIcon name="i-carbon-thumbs-down" class="w-6 h-6" />
           </UButton>
         </UTooltip>
@@ -98,7 +98,7 @@ async function onSubmit(event: FormSubmitEvent<CommentFeedbackSchemaOutput>) {
         <div class="flex items-center justify-between">
           Anything that could be done better? :)
           <div>
-            <UButton variant="ghost" color="neutral" @click="commentSubmissionStatus = 'submitted'">
+            <UButton aria-label="Dismiss feedback form" type="button" variant="ghost" color="neutral" @click="commentSubmissionStatus = 'submitted'">
               <UIcon name="i-carbon-close" class="w-4 h-4" />
             </UButton>
           </div>
@@ -114,7 +114,7 @@ async function onSubmit(event: FormSubmitEvent<CommentFeedbackSchemaOutput>) {
           <UTextarea v-model="state.comment" type="textarea" class="w-full" />
         </UFormField>
         <UButton type="submit" size="sm" color="secondary" :loading="commentSubmissionStatus === 'loading'">
-          Submit
+          Send feedback
         </UButton>
       </UForm>
     </UCard>

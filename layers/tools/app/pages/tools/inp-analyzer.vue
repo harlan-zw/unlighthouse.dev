@@ -696,7 +696,10 @@ const insights = computed<ToolInsight[]>(() => {
               in March 2024.
             </p>
             <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-              Since INP requires real user interactions, lab tools like Lighthouse use <strong class="text-gray-900 dark:text-white">Total Blocking Time (TBT)</strong>
+              Since INP requires real user interactions, lab tools like Lighthouse use
+              <NuxtLink to="/glossary/tbt" class="font-semibold text-gray-900 dark:text-white hover:text-cyan-600 dark:hover:text-cyan-400 hover:underline">
+                Total Blocking Time (TBT)
+              </NuxtLink>
               as a proxy. TBT measures how long the main thread was blocked by long tasks during page load—a strong predictor of poor INP.
             </p>
           </div>

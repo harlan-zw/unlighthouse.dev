@@ -41,6 +41,7 @@ function resolvableUnlighthouseCollection() {
         type: 'page',
         source: {
           include: '**/*.md',
+          exclude: ['glossary/**'],
           cwd: localDirPath,
           prefix: `/`,
         },
@@ -54,6 +55,7 @@ function resolvableUnlighthouseCollection() {
     source: {
       repository: `https://github.com/harlan-zw/unlighthouse`,
       include: 'docs/**/*.md',
+      exclude: ['docs/glossary/**'],
       prefix: `/`,
     },
   })

@@ -17,7 +17,7 @@ const bottom = computed(() => {
 
 <template>
   <div>
-    <nav aria-title="Documentation Navigation" class="flex flex-col gap-5">
+    <nav aria-label="Documentation" class="flex flex-col gap-5">
       <ContentNavigation
         as="div" default-open :collapsible="false" :navigation="bottom" highlight
         :ui="{ listWithChildren: 'sm:ml-0 mt-2' }"

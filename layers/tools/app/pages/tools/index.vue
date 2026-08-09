@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { toolCatalog } from '~~/shared/tool-catalog'
+
 definePageMeta({
   breadcrumb: {
     icon: 'i-heroicons-wrench-screwdriver',
@@ -16,121 +18,6 @@ defineOgImage('NuxtSeoSatori', {
   description: 'Bulk testing, score calculators, and CWV analyzers',
   theme: '#a855f7',
 })
-
-const tools = [
-  {
-    title: 'Bulk PageSpeed Test',
-    description: 'Test up to 10 URLs at once with PageSpeed Insights. Get performance scores for multiple pages in one batch.',
-    icon: 'i-heroicons-squares-2x2',
-    to: '/tools/bulk-pagespeed',
-    color: 'amber',
-    metrics: ['Batch Testing', 'Performance', 'Core Web Vitals'],
-  },
-  {
-    title: 'Core Web Vitals Checker',
-    description: 'Check if your page passes Google\'s Core Web Vitals. Test LCP, CLS, and INP with lab and real user data.',
-    icon: 'i-heroicons-check-badge',
-    to: '/tools/cwv-checker',
-    color: 'emerald',
-    metrics: ['LCP', 'CLS', 'INP', 'Core Web Vitals'],
-  },
-  {
-    title: 'Core Web Vitals History',
-    description: 'Track real user performance over 25 weeks. See how your LCP, CLS, and INP trends change over time with CrUX data.',
-    icon: 'i-heroicons-chart-bar',
-    to: '/tools/cwv-history',
-    color: 'indigo',
-    metrics: ['Field Data', 'Trends', 'CrUX'],
-  },
-  {
-    title: 'TTFB Checker',
-    description: 'Test Time to First Byte with real Chrome user data. Compare field vs lab TTFB and track server response trends.',
-    icon: 'i-heroicons-clock',
-    to: '/tools/ttfb-checker',
-    color: 'sky',
-    metrics: ['TTFB', 'Server Response', 'CrUX'],
-  },
-  {
-    title: 'CWV Compare',
-    description: 'Compare Core Web Vitals across multiple websites. Benchmark your site against competitors with real Chrome user data.',
-    icon: 'i-heroicons-scale',
-    to: '/tools/cwv-compare',
-    color: 'orange',
-    metrics: ['Competitor Analysis', 'CrUX', 'Benchmarking'],
-  },
-  {
-    title: 'Lighthouse Report Viewer',
-    description: 'Upload your Lighthouse JSON report to visualize scores, metrics, and audits interactively.',
-    icon: 'i-heroicons-document-chart-bar',
-    to: '/tools/lighthouse-report-viewer',
-    color: 'violet',
-    metrics: ['All Categories', 'Audits', 'Metrics'],
-  },
-  {
-    title: 'Lighthouse Score Calculator',
-    description: 'Calculate your performance score interactively. Adjust metrics to see how they impact your overall Lighthouse score.',
-    icon: 'i-heroicons-calculator',
-    to: '/tools/lighthouse-score-calculator',
-    color: 'violet',
-    metrics: ['FCP', 'SI', 'LCP', 'TBT', 'CLS'],
-  },
-  {
-    title: 'LCP Element Finder',
-    description: 'Identify which element is your Largest Contentful Paint and get actionable recommendations to improve it.',
-    icon: 'i-heroicons-photo',
-    to: '/tools/lcp-finder',
-    color: 'violet',
-    metrics: ['LCP', 'Core Web Vital'],
-  },
-  {
-    title: 'INP Analyzer',
-    description: 'Analyze Interaction to Next Paint issues. Find slow event handlers and optimize responsiveness.',
-    icon: 'i-heroicons-cursor-arrow-rays',
-    to: '/tools/inp-analyzer',
-    color: 'violet',
-    metrics: ['INP', 'Core Web Vital'],
-  },
-  {
-    title: 'CLS Debugger',
-    description: 'Debug Cumulative Layout Shift issues. Identify elements causing unexpected layout shifts.',
-    icon: 'i-heroicons-arrows-pointing-out',
-    to: '/tools/cls-debugger',
-    color: 'violet',
-    metrics: ['CLS', 'Core Web Vital'],
-  },
-  {
-    title: 'HAR File Viewer',
-    description: 'Analyze HTTP Archive files with network waterfall, request timing, resource breakdown, and protocol distribution. Entirely client-side.',
-    icon: 'i-heroicons-document-magnifying-glass',
-    to: '/tools/har-viewer',
-    color: 'teal',
-    metrics: ['Network Waterfall', 'Request Analysis', 'Performance'],
-  },
-  {
-    title: 'JSON Size Analyzer',
-    description: 'Calculate JSON payload size with minification savings, gzip/brotli estimates, key contributions, and duplicate key analysis. Entirely client-side.',
-    icon: 'i-heroicons-code-bracket-square',
-    to: '/tools/json-size',
-    color: 'teal',
-    metrics: ['Size Analysis', 'Minification', 'Compression'],
-  },
-  {
-    title: 'Page Size Checker',
-    description: 'Test page weight with resource breakdown, third-party analysis, unused code detection, and HTTP Archive percentile comparison.',
-    icon: 'i-heroicons-scale',
-    to: '/tools/page-size',
-    color: 'sky',
-    metrics: ['Page Weight', 'Resources', 'Third Parties'],
-  },
-  {
-    title: 'PageSpeed Insights Performance',
-    description: 'Get detailed PageSpeed Insights performance data with field and lab metrics.',
-    icon: 'i-heroicons-chart-bar',
-    to: '/tools/pagespeed-insights-performance',
-    color: 'violet',
-    metrics: ['Performance', 'Field Data'],
-  },
-]
 </script>
 
 <template>
@@ -153,7 +40,7 @@ const tools = [
       <div class="max-w-4xl mx-auto">
         <div class="grid gap-6">
           <NuxtLink
-            v-for="tool in tools"
+            v-for="tool in toolCatalog"
             :key="tool.to"
             :to="tool.to"
             class="group relative p-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 transition-all hover:shadow-lg"

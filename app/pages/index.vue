@@ -6,6 +6,11 @@ definePageMeta({
   },
 })
 
+useSeoMeta({
+  title: 'Unlighthouse: Site-Wide Google Lighthouse Audits',
+  description: 'Scan every page of your site with Google Lighthouse. Unlighthouse discovers URLs, runs audits in parallel, and combines results in one report.',
+})
+
 defineOgImage('NuxtSeoSatori', {
   title: 'Unlighthouse',
   description: 'Like Google Lighthouse, but it scans every single page.',
@@ -24,6 +29,33 @@ const { target: demoFrameRoot, isVisible: shouldLoadDemoFrame } = useVisibleWhen
   rootMargin: '250px 0px',
   idleTimeout: 8000,
 })
+
+const exploreLinks = [
+  {
+    title: 'Performance Tools',
+    description: 'Test Core Web Vitals, inspect reports, and diagnose page weight.',
+    icon: 'i-carbon-tool-box',
+    to: '/tools',
+  },
+  {
+    title: 'Learn Lighthouse',
+    description: 'Understand Lighthouse audits, metrics, and practical fixes.',
+    icon: 'i-ph-books-duotone',
+    to: '/learn-lighthouse',
+  },
+  {
+    title: 'Integrations',
+    description: 'Run Unlighthouse from the CLI, CI, Nuxt, Vite, or Webpack.',
+    icon: 'i-carbon-connection-signal',
+    to: '/integrations/cli',
+  },
+  {
+    title: 'Web Performance Glossary',
+    description: 'Look up Core Web Vitals and Lighthouse terminology.',
+    icon: 'i-carbon-book',
+    to: '/glossary',
+  },
+] as const
 </script>
 
 <template>
@@ -42,11 +74,11 @@ const { target: demoFrameRoot, isVisible: shouldLoadDemoFrame } = useVisibleWhen
         <!-- Terminal + CTAs inline -->
         <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
           <div class="inline-flex items-center gap-2 bg-neutral-100 dark:bg-neutral-900 rounded-lg px-4 py-3 font-mono text-sm border border-neutral-200 dark:border-neutral-800">
-            <span class="text-neutral-400 dark:text-neutral-500">$</span>
+            <span class="text-neutral-500 dark:text-neutral-400">$</span>
             <span class="text-emerald-600 dark:text-emerald-400">npx</span>
             <span class="text-neutral-900 dark:text-white">unlighthouse</span>
             <span class="text-amber-600 dark:text-amber-400">--site</span>
-            <span class="text-neutral-500 dark:text-neutral-500">example.com</span>
+            <span class="text-neutral-500 dark:text-neutral-400">example.com</span>
           </div>
           <div class="flex items-center gap-3">
             <UButton size="lg" to="/guide/getting-started/installation">
@@ -58,7 +90,7 @@ const { target: demoFrameRoot, isVisible: shouldLoadDemoFrame } = useVisibleWhen
             </UButton>
           </div>
         </div>
-        <p class="text-xs text-neutral-500">
+        <p class="text-xs text-neutral-500 dark:text-neutral-400">
           Node 22+ · MIT licensed · Zero config
         </p>
       </div>
@@ -181,6 +213,38 @@ const { target: demoFrameRoot, isVisible: shouldLoadDemoFrame } = useVisibleWhen
       </div>
     </section>
 
+    <!-- Explore -->
+    <section class="px-5 py-16 lg:py-20" aria-labelledby="explore-heading">
+      <div class="max-w-6xl mx-auto">
+        <div class="max-w-2xl mb-8">
+          <h2 id="explore-heading" class="text-2xl font-bold mb-3">
+            Improve every page
+          </h2>
+          <p class="text-neutral-600 dark:text-neutral-400">
+            Go from a site-wide audit to the tools and guidance needed to understand and fix each result.
+          </p>
+        </div>
+        <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <li v-for="link in exploreLinks" :key="link.to">
+            <NuxtLink
+              :to="link.to"
+              class="group flex h-full items-start gap-4 p-5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 hover:border-violet-400 dark:hover:border-violet-500 transition-colors"
+            >
+              <UIcon :name="link.icon" class="w-6 h-6 mt-0.5 text-violet-600 dark:text-violet-400 shrink-0" aria-hidden="true" />
+              <span>
+                <span class="block font-semibold mb-1 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                  {{ link.title }}
+                </span>
+                <span class="block text-sm text-neutral-600 dark:text-neutral-400">
+                  {{ link.description }}
+                </span>
+              </span>
+            </NuxtLink>
+          </li>
+        </ul>
+      </div>
+    </section>
+
     <!-- Stats -->
     <section class="px-5 py-16 lg:py-20">
       <div class="max-w-6xl mx-auto">
@@ -189,7 +253,7 @@ const { target: demoFrameRoot, isVisible: shouldLoadDemoFrame } = useVisibleWhen
             <div class="text-4xl lg:text-5xl font-bold mb-2">
               {{ humanNumber(stats?.downloads?.averageDownloads30 || 0) }}
             </div>
-            <p class="text-neutral-500">
+            <p class="text-neutral-500 dark:text-neutral-400">
               downloads per day
             </p>
           </div>
@@ -199,7 +263,7 @@ const { target: demoFrameRoot, isVisible: shouldLoadDemoFrame } = useVisibleWhen
                 <UIcon name="i-carbon-chart-line-smooth" class="w-8 h-8 text-violet-500" />
                 {{ humanNumber(stats?.downloads?.totalDownloads30 || 0) }}
               </div>
-              <p class="text-sm text-neutral-500 mt-1">
+              <p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
                 monthly downloads
               </p>
             </div>
@@ -208,7 +272,7 @@ const { target: demoFrameRoot, isVisible: shouldLoadDemoFrame } = useVisibleWhen
                 <UIcon name="i-carbon-star" class="w-8 h-8 text-amber-500" />
                 {{ humanNumber(stats?.stars?.stars || 0) }}
               </div>
-              <p class="text-sm text-neutral-500 mt-1">
+              <p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
                 GitHub stars
               </p>
             </div>
@@ -235,7 +299,7 @@ const { target: demoFrameRoot, isVisible: shouldLoadDemoFrame } = useVisibleWhen
           </div>
           <div v-if="sponsors">
             <div class="mb-6">
-              <h3 class="text-sm font-semibold text-neutral-500 uppercase tracking-wide mb-3">
+              <h3 class="text-sm font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide mb-3">
                 Top Sponsors
               </h3>
               <div class="flex flex-wrap gap-4">
@@ -246,7 +310,7 @@ const { target: demoFrameRoot, isVisible: shouldLoadDemoFrame } = useVisibleWhen
               </div>
             </div>
             <div class="mb-6">
-              <h3 class="text-sm font-semibold text-neutral-500 uppercase tracking-wide mb-3">
+              <h3 class="text-sm font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide mb-3">
                 Gold Sponsors
               </h3>
               <div class="flex flex-wrap gap-3">
@@ -256,7 +320,7 @@ const { target: demoFrameRoot, isVisible: shouldLoadDemoFrame } = useVisibleWhen
               </div>
             </div>
             <div>
-              <h3 class="text-sm font-semibold text-neutral-500 uppercase tracking-wide mb-3">
+              <h3 class="text-sm font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide mb-3">
                 Backers
               </h3>
               <div class="flex flex-wrap gap-2">

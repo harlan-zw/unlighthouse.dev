@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { searchContentEntries } from '~~/utils/content-search'
 import { queryCollectionNavigation } from '#imports'
 
 const appConfig = useAppConfig()
@@ -111,6 +112,18 @@ if (import.meta.client) {
 }
 
 const shouldMountSearch = computed(() => openSearch.value || searchStatus.value === 'success')
+const contentSearchStatus = computed<'idle' | 'loading' | 'ready' | 'error'>(() => {
+  if (searchStatus.value === 'pending')
+    return 'loading'
+  if (searchStatus.value === 'success')
+    return 'ready'
+  return searchStatus.value
+})
+
+async function searchContent(query: string, options?: { limit?: number }) {
+  return searchContentEntries(search.value, query, options?.limit || 12)
+}
+
 const hasLoadingToolBackgroundRequests = computed(() =>
   Object.values(toolBackgroundRequests.value).some(request => request.status === 'loading'),
 )
@@ -122,10 +135,18 @@ const shouldMountToolBackgroundIndicator = computed(() =>
 <template>
   <UApp :toaster="appConfig.toaster" :tooltip="{ delayDuration: 0 }">
     <NuxtLoadingIndicator color="#FFF" />
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-md focus:bg-default focus:px-4 focus:py-3 focus:text-highlighted focus:ring-2 focus:ring-primary"
+    >
+      Skip to main content
+    </a>
     <Header class="z-100" />
-    <NuxtLayout>
-      <NuxtPage />
-    </NuxtLayout>
+    <main id="main-content" tabindex="-1">
+      <NuxtLayout>
+        <NuxtPage />
+      </NuxtLayout>
+    </main>
     <ClientOnly>
       <LazyUContentSearch
         v-if="shouldMountSearch"
@@ -134,6 +155,8 @@ const shouldMountToolBackgroundIndicator = computed(() =>
         shortcut="/"
         :files="search"
         :navigation="navigation"
+        :search="searchContent"
+        :search-status="contentSearchStatus"
         :fuse="{ resultLimit: 42 }"
         :links="[{
                    label: 'llms.txt',

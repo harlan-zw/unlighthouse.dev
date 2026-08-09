@@ -65,10 +65,11 @@ export default defineNuxtConfig({
     exclude: [
       '**/.navigation',
       '/__nuxt_content/**',
-      '/glossary',
       '/api-doc',
       '/api-doc/config',
       '/api-doc/glossary',
+      '/admin',
+      '/admin/**',
     ],
     xslColumns: [
       { label: 'URL', width: '100%' },
@@ -166,6 +167,11 @@ export default defineNuxtConfig({
         account_id: '5904138d55ca25d5670dca6adf99894e',
         compatibility_date: '2025-01-01',
         compatibility_flags: ['nodejs_compat'],
+        // Required for application redirects and headers to run before static HTML assets.
+        // This trades static asset-only requests for Worker invocations.
+        assets: {
+          run_worker_first: true,
+        },
         limits: {
           cpu_ms: 120_000, // 2 min for slow PSI calls
         },
@@ -358,33 +364,6 @@ export default defineNuxtConfig({
       '/api/github/sponsors.json': { prerender: true },
       '/api/_mdc/highlight': { cache: { group: 'mdc', name: 'highlight', maxAge: 60 * 60 } },
       '/api/_nuxt_icon': { cache: { group: 'icon', name: 'icon', maxAge: 60 * 60 * 24 * 7 } },
-      // /api/config -> /api-doc/config
-      '/api/config': { redirect: { to: '/api-doc/config', statusCode: 301 } },
-      // /api/glossary -> /api-doc/glossary
-      '/api/glossary': { redirect: { to: '/api-doc/glossary', statusCode: 301 } },
-      // /guide/getting-started/unlighthouse-cli -> /guide/getting-started/installation
-      '/guide/getting-started/unlighthouse-cli': { redirect: { to: '/guide/getting-started/installation', statusCode: 301 } },
-      // /api/index -> /api-doc/index
-      '/api': { redirect: { to: '/api-doc', statusCode: 301 } },
-
-      // Fix redirects for broken links
-      '/cloud': { redirect: { to: '/', statusCode: 301 } },
-      '/guide/getting-started': { redirect: { to: '/guide/getting-started/installation', statusCode: 301 } },
-      '/learn-lighthouse/tbt': { redirect: { to: '/glossary/tbt', statusCode: 301 } },
-      '/glossary/index': { redirect: { to: '/glossary', statusCode: 301 } },
-      '/api-doc.md': { redirect: { to: '/api-doc', statusCode: 301 } },
-      '/api-doc/config.md': { redirect: { to: '/api-doc/config', statusCode: 301 } },
-      '/api-doc/glossary.md': { redirect: { to: '/api-doc/glossary', statusCode: 301 } },
-      '/api-doc/.md': { redirect: { to: '/api-doc', statusCode: 301 } },
-      '/api-doc/index.md': { redirect: { to: '/api-doc', statusCode: 301 } },
-
-      // Learn Lighthouse Fix redirects
-      '/learn-lighthouse/accessibility/fix': { redirect: { to: '/learn-lighthouse/accessibility#common-accessibility-issues', statusCode: 301 } },
-      '/learn-lighthouse/best-practices/fix': { redirect: { to: '/learn-lighthouse/best-practices#all-best-practices-issues', statusCode: 301 } },
-      '/learn-lighthouse/lcp/fix': { redirect: { to: '/learn-lighthouse/lcp#common-lcp-issues', statusCode: 301 } },
-      '/learn-lighthouse/cls/fix': { redirect: { to: '/learn-lighthouse/cls#common-cls-issues', statusCode: 301 } },
-      '/learn-lighthouse/inp/fix': { redirect: { to: '/learn-lighthouse/inp#common-inp-issues', statusCode: 301 } },
-      '/learn-lighthouse/seo/fix': { redirect: { to: '/learn-lighthouse/seo#all-seo-audits', statusCode: 301 } },
     },
     scripts: {
       registry: {
@@ -396,6 +375,28 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
+    '/api/config': { redirect: { to: '/api-doc/config', statusCode: 301 } },
+    '/api/glossary': { redirect: { to: '/api-doc/glossary', statusCode: 301 } },
+    '/guide/getting-started/unlighthouse-cli': { redirect: { to: '/guide/getting-started/installation', statusCode: 301 } },
+    '/api': { redirect: { to: '/api-doc', statusCode: 301 } },
+    '/cloud': { redirect: { to: '/', statusCode: 301 } },
+    '/guide': { redirect: { to: '/guide/getting-started/installation', statusCode: 301 } },
+    '/guide/': { redirect: { to: '/guide/getting-started/installation', statusCode: 301 } },
+    '/guide/getting-started': { redirect: { to: '/guide/getting-started/installation', statusCode: 301 } },
+    '/learn-lighthouse/tbt': { redirect: { to: '/glossary/tbt', statusCode: 301 } },
+    '/glossary/index': { redirect: { to: '/glossary', statusCode: 301 } },
+    '/api-doc.md': { redirect: { to: '/api-doc', statusCode: 301 } },
+    '/api-doc/config.md': { redirect: { to: '/api-doc/config', statusCode: 301 } },
+    '/api-doc/glossary.md': { redirect: { to: '/api-doc/glossary', statusCode: 301 } },
+    '/api-doc/.md': { redirect: { to: '/api-doc', statusCode: 301 } },
+    '/api-doc/index.md': { redirect: { to: '/api-doc', statusCode: 301 } },
+    '/learn-lighthouse/accessibility/fix': { redirect: { to: '/learn-lighthouse/accessibility#common-accessibility-issues', statusCode: 301 } },
+    '/learn-lighthouse/best-practices/fix': { redirect: { to: '/learn-lighthouse/best-practices#all-best-practices-issues', statusCode: 301 } },
+    '/learn-lighthouse/lcp/fix': { redirect: { to: '/learn-lighthouse/lcp#common-lcp-issues', statusCode: 301 } },
+    '/learn-lighthouse/cls/fix': { redirect: { to: '/learn-lighthouse/cls#common-cls-issues', statusCode: 301 } },
+    '/learn-lighthouse/inp/fix': { redirect: { to: '/learn-lighthouse/inp#common-inp-issues', statusCode: 301 } },
+    '/learn-lighthouse/seo/fix': { redirect: { to: '/learn-lighthouse/seo#all-seo-audits', statusCode: 301 } },
+
     '/': { prerender: true, headers: staticPageHeaders },
     '/guide/**': { prerender: true, headers: staticPageHeaders },
     '/integrations/**': { prerender: true, headers: staticPageHeaders },
@@ -410,7 +411,22 @@ export default defineNuxtConfig({
 
     // auth endpoints must not be cached or prerendered
     '/auth/**': { prerender: false, cache: false, headers: { 'cache-control': 'no-store' } },
-    '/admin/**': { prerender: false },
+    '/admin': {
+      prerender: false,
+      cache: false,
+      headers: {
+        'cache-control': 'no-store',
+        'x-robots-tag': 'noindex, nofollow',
+      },
+    },
+    '/admin/**': {
+      prerender: false,
+      cache: false,
+      headers: {
+        'cache-control': 'no-store',
+        'x-robots-tag': 'noindex, nofollow',
+      },
+    },
     '/api/debug/**': { prerender: false },
   },
 

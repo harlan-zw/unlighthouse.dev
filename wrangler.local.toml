@@ -3,7 +3,7 @@ account_id = "5904138d55ca25d5670dca6adf99894e"
 compatibility_date = "2025-01-01"
 compatibility_flags = [ "nodejs_compat_v2" ]
 main = ".output/server/index.mjs"
-assets = { directory = ".output/public", binding = "ASSETS" }
+assets = { directory = ".output/public", binding = "ASSETS", run_worker_first = true }
 
 [[kv_namespaces]]
 binding = "KV"

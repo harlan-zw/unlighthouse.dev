@@ -41,6 +41,8 @@ const toolsLinks = [
   { label: 'JSON Size Analyzer', icon: 'i-heroicons-code-bracket-square', to: '/tools/json-size' },
   { label: 'Page Size Checker', icon: 'i-heroicons-scale', to: '/tools/page-size' },
 ]
+
+const copyrightYear = useState('footer-copyright-year', () => new Date().getFullYear())
 </script>
 
 <template>
@@ -86,7 +88,7 @@ const toolsLinks = [
               <Logo />
             </h3>
             <div class="mb-7">
-              <nav>
+              <nav aria-label="Documentation">
                 <ul class="space-y-4">
                   <li v-for="(link, key) in docsLinks" :key="key">
                     <ULink :to="link.to" class="flex items-center gap-1 hover:underline transition">
@@ -101,7 +103,7 @@ const toolsLinks = [
               <div class="text-sm text-toned mb-5 font-semibold">
                 Integrations
               </div>
-              <nav>
+              <nav aria-label="Integrations">
                 <ul class="grid grid-cols-2 gap-4">
                   <li v-for="(link, key) in integrationsLinks" :key="key">
                     <ULink :to="link.to" class="flex items-center gap-1 hover:underline transition">
@@ -122,7 +124,7 @@ const toolsLinks = [
                 Learn Lighthouse
               </NuxtLink>
             </h3>
-            <nav>
+            <nav aria-label="Learn Lighthouse">
               <ul class="grid grid-cols-2 gap-x-6 gap-y-4">
                 <li v-for="(link, key) in learnLinks" :key="key">
                   <ULink :to="link.to" class="flex items-center gap-1 hover:underline transition">
@@ -142,7 +144,7 @@ const toolsLinks = [
                 Tools
               </NuxtLink>
             </h3>
-            <nav>
+            <nav aria-label="Performance tools">
               <ul class="space-y-4">
                 <li v-for="(link, key) in toolsLinks" :key="key">
                   <ULink :to="link.to" class="flex items-center gap-1 hover:underline transition">
@@ -159,7 +161,8 @@ const toolsLinks = [
     <div class="border-t border-neutral-200 dark:border-neutral-800">
       <UContainer>
         <div class="py-10">
-          Copyright © 2023-{{ new Date().getFullYear() }} Harlan Wilton - <a href="https://github.com/harlan-zw/unlighthouse/blob/main/license">MIT License</a>
+          <!-- eslint-disable-next-line harlanzw/link-lowercase -->
+          Copyright © 2023-{{ copyrightYear }} Harlan Wilton · <a href="https://github.com/harlan-zw/unlighthouse/blob/main/LICENSE.md">MIT License</a>
         </div>
       </UContainer>
     </div>

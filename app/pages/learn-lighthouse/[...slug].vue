@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { titleCase } from 'scule'
-import { joinURL } from 'ufo'
+import { buildSurroundLinks } from '~~/utils/surround-links'
 import { getLastPathSegment, getPathSegments } from '~~/utils/urls'
 
 definePageMeta({
@@ -15,10 +15,12 @@ const [{ data: page }, { data: surround }] = await Promise.all([
     fields: ['title', 'description', 'path'],
   }), {
     transform(items) {
-      return items.map(m => ({
-        ...m,
-        _path: m.path,
-      }))
+      return items.map(m => m
+        ? {
+            ...m,
+            _path: m.path,
+          }
+        : null)
     },
   }),
 ])
@@ -31,18 +33,21 @@ useSeoMeta({
   description: () => page.value?.description,
 })
 
-useHead({
-  link: () => {
-    return [
-      ...(surround.value?.length
-        ? surround.value.filter(Boolean).map((s: any, i: number) => ({
-            rel: i === 0 ? 'prev' : 'next',
-            href: joinURL('https://unlighthouse.dev/', s.path),
-          }))
-        : []),
-    ]
-  },
-})
+const surroundLinks = buildSurroundLinks(surround.value || [], 'https://unlighthouse.dev')
+const previousLink = surroundLinks.find(link => link.rel === 'prev')
+const nextLink = surroundLinks.find(link => link.rel === 'next')
+
+if (previousLink) {
+  useHead({
+    link: [{ rel: 'prev', href: previousLink.href }],
+  })
+}
+
+if (nextLink) {
+  useHead({
+    link: [{ rel: 'next', href: nextLink.href }],
+  })
+}
 
 const headline = computed(() => titleCase(getLastPathSegment(getPathSegments(route.path, route.path.split('/').length - 2))))
 

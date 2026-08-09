@@ -376,11 +376,13 @@ function exportJSON() {
       <div class="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-800">
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label for="bulk-pagespeed-urls" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Enter URLs <span class="text-gray-400">(one per line, max 10)</span>
             </label>
             <UTextarea
+              id="bulk-pagespeed-urls"
               v-model="urlInput"
+              name="urls"
               :rows="10"
               placeholder="https://example.com
 https://example.com/about
@@ -834,6 +836,10 @@ https://example.com/pricing"
               <UIcon name="i-heroicons-book-open" class="w-4 h-4 mr-1" />
               Bulk Testing Guide
             </UButton>
+            <UButton to="/glossary/speed-index" variant="ghost" size="sm">
+              <UIcon name="i-heroicons-clock" class="w-4 h-4 mr-1" />
+              Understand Speed Index
+            </UButton>
           </div>
         </div>
       </div>
@@ -877,14 +883,14 @@ https://example.com/pricing"
                 Try Unlighthouse CLI (Free)
               </UButton>
               <UButton
-                to="/cloud"
+                to="/integrations/ci"
                 size="lg"
                 variant="outline"
                 color="neutral"
                 class="w-full sm:w-auto justify-center"
               >
                 <UIcon name="i-heroicons-cloud" class="w-4 h-4" />
-                Schedule with Cloud
+                Automate Audits in CI
               </UButton>
             </div>
           </div>

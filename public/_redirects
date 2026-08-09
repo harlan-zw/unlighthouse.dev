@@ -1,0 +1,22 @@
+# Keep these in sync with Nuxt routeRules. Cloudflare applies them before static HTML assets.
+/api/config /api-doc/config 301
+/api/glossary /api-doc/glossary 301
+/guide/getting-started/unlighthouse-cli /guide/getting-started/installation 301
+/api /api-doc 301
+/cloud / 301
+/guide /guide/getting-started/installation 301
+/guide/ /guide/getting-started/installation 301
+/guide/getting-started /guide/getting-started/installation 301
+/learn-lighthouse/tbt /glossary/tbt 301
+/glossary/index /glossary 301
+/api-doc.md /api-doc 301
+/api-doc/config.md /api-doc/config 301
+/api-doc/glossary.md /api-doc/glossary 301
+/api-doc/.md /api-doc 301
+/api-doc/index.md /api-doc 301
+/learn-lighthouse/accessibility/fix /learn-lighthouse/accessibility#common-accessibility-issues 301
+/learn-lighthouse/best-practices/fix /learn-lighthouse/best-practices#all-best-practices-issues 301
+/learn-lighthouse/lcp/fix /learn-lighthouse/lcp#common-lcp-issues 301
+/learn-lighthouse/cls/fix /learn-lighthouse/cls#common-cls-issues 301
+/learn-lighthouse/inp/fix /learn-lighthouse/inp#common-inp-issues 301
+/learn-lighthouse/seo/fix /learn-lighthouse/seo#all-seo-audits 301

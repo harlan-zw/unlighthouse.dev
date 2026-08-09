@@ -6,6 +6,10 @@ definePageMeta({
   layout: false,
 })
 
+useSeoMeta({
+  robots: 'noindex, nofollow',
+})
+
 const ADMIN_EMAILS = ['harlan@harlanzw.com']
 
 const { loggedIn, user, clear } = useUserSession()
@@ -430,7 +434,7 @@ function toggleJourney(id: string) {
       </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-6 py-8">
+    <div class="max-w-6xl mx-auto px-6 py-8">
       <!-- Auth States -->
       <div v-if="!loggedIn" class="flex flex-col items-center justify-center py-24">
         <div class="w-20 h-20 rounded-2xl bg-elevated border border-default flex items-center justify-center mb-6">
@@ -1022,7 +1026,7 @@ function toggleJourney(id: string) {
                         <span>{{ getToolMeta(entry.path).name }}</span>
                       </div>
                       <span v-if="entry.sessionId" class="inline-flex items-center gap-1">
-                        <span :class="`w-1.5 h-1.5 rounded-full ${entry.userId ? 'bg-emerald-500' : 'bg-gray-400'}`" />
+                        <span class="w-1.5 h-1.5 rounded-full" :class="entry.userId ? 'bg-emerald-500' : 'bg-gray-400'" />
                         <code class="font-mono">{{ entry.sessionId }}</code>
                       </span>
                       <span v-if="getLinkedThumbFeedbackId(entry)" class="inline-flex items-center gap-1">
@@ -1153,6 +1157,6 @@ function toggleJourney(id: string) {
           </div>
         </section>
       </div>
-    </main>
+    </div>
   </div>
 </template>
