@@ -21,9 +21,12 @@ const { data: stats } = await useFetch('/api/stats/summary.json', {
   key: 'stats-summary',
 })
 
-const { data: sponsors } = await useFetch('/api/github/sponsors.json', {
+const { data: sponsors, error: sponsorsError, refresh: refreshSponsors } = await useFetch('/api/github/sponsors.json', {
   key: 'sponsors',
 })
+
+if (import.meta.client && sponsorsError.value)
+  await refreshSponsors()
 
 const { target: demoFrameRoot, isVisible: shouldLoadDemoFrame } = useVisibleWhenNearViewport({
   rootMargin: '250px 0px',

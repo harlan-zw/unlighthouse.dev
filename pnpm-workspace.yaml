@@ -1,5 +1,8 @@
 minimumReleaseAgeExclude:
   - '@types/three@0.185.0'
+  - nuxt-ai-ready@1.7.7
+  - nuxtseo-shared@5.3.11
+  - sitemapd@0.2.2
 
 shellEmulator: true
 
@@ -59,7 +62,7 @@ catalog:
   motion-v: ^2.3.0
   nitro-cloudflare-dev: ^0.2.2
   nuxt: ^4.5.2
-  nuxt-ai-ready: ^1.7.5
+  nuxt-ai-ready: ^1.7.7
   nuxt-auth-utils: ^0.5.30
   nuxt-build-cache: ^0.1.1
   nuxt-content-twoslash: ^0.4.0

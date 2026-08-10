@@ -70,9 +70,6 @@ export default defineEventHandler(async (event): Promise<TTFBCheckResponse> => {
   const includeHistory = body.includeHistory !== false
   const includeLab = body.includeLab !== false
 
-  await trackToolUsage(event, 'ttfb-checker', 'use')
-  await trackToolLookup(event, 'ttfb-checker', normalized, formFactor === 'DESKTOP' ? 'desktop' : 'mobile')
-
   // Fetch CrUX current data
   const cruxCurrentPromise = fetchCrUXCurrent(event, normalized, mode, formFactor)
 
@@ -83,14 +80,21 @@ export default defineEventHandler(async (event): Promise<TTFBCheckResponse> => {
 
   // Fetch lab data if requested
   const labPromise = includeLab
-    ? fetchPSI(event, normalized, formFactor === 'DESKTOP' ? 'desktop' : 'mobile').catch(() => null)
+    ? fetchPSI(event, normalized, formFactor === 'DESKTOP' ? 'desktop' : 'mobile').catch((error) => {
+        console.warn('[ttfb-check] Optional lab data unavailable', error)
+        return null
+      })
     : Promise.resolve(null)
 
-  const [cruxCurrent, cruxHistoryResult, labResult] = await Promise.all([
+  const [cruxCurrent, cruxHistoryResult, labResult] = await trackToolRequest(event, {
+    tool: 'ttfb-checker',
+    url: normalized,
+    strategy: formFactor === 'DESKTOP' ? 'desktop' : 'mobile',
+  }, () => Promise.all([
     cruxCurrentPromise,
     cruxHistoryPromise,
     labPromise,
-  ])
+  ]))
 
   // Process field data
   let field: TTFBCheckResponse['field'] = null

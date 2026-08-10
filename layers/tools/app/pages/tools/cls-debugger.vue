@@ -37,7 +37,7 @@ useToolSeo({
   faqs,
 })
 
-const { trackUse } = useToolTracking('cls-debugger')
+const { trackUse } = useToolTracking('cls')
 
 // Loading messages with tips - shown during PageSpeed API analysis
 const { current: loadingMessage, progress: loadingProgress, start: startMessages, stop: stopMessages } = useLoadingMessages([
@@ -650,7 +650,7 @@ const insights = computed<ToolInsight[]>(() => {
         </div>
 
         <!-- Feedback -->
-        <ToolFeedback tool-id="cls-debugger" :context="{ url: urlInput, strategy }" />
+        <ToolFeedback tool-id="cls" :context="{ url: urlInput, strategy }" />
       </div>
     </ToolCard>
 

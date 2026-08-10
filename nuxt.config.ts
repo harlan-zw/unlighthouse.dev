@@ -89,14 +89,14 @@ export default defineNuxtConfig({
   },
 
   aiReady: {
-    debug: true,
-    debugCron: true,
     database: {
       type: 'd1',
       bindingName: 'DB',
     },
     cron: true,
-    runtimeSync: true,
+    runtimeSync: {
+      ttl: 60 * 60,
+    },
     indexNow: true,
   },
 

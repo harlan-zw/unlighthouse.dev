@@ -37,7 +37,7 @@ useToolSeo({
   faqs,
 })
 
-const { trackUse } = useToolTracking('lcp-finder')
+const { trackUse } = useToolTracking('lcp')
 
 // Loading messages with tips - shown during PageSpeed API analysis
 const { current: loadingMessage, progress: loadingProgress, start: startMessages, stop: stopMessages } = useLoadingMessages([
@@ -848,7 +848,7 @@ const insights = computed<LcpInsight[]>(() => {
         </div>
 
         <!-- Feedback -->
-        <ToolFeedback tool-id="lcp-finder" :context="{ url: urlInput, strategy }" />
+        <ToolFeedback tool-id="lcp" :context="{ url: urlInput, strategy }" />
       </div>
       <ToolEmptyState v-if="!result && !loading && !error" icon="i-heroicons-photo" message="Enter a URL to find the LCP element" />
     </ToolCard>

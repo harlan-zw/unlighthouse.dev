@@ -35,7 +35,7 @@ useToolSeo({
   faqs,
 })
 
-const { trackUse } = useToolTracking('inp-analyzer')
+const { trackUse } = useToolTracking('inp')
 
 // Loading messages with tips - shown during PageSpeed API analysis
 const { current: loadingMessage, progress: loadingProgress, start: startMessages, stop: stopMessages } = useLoadingMessages([
@@ -674,7 +674,7 @@ const insights = computed<ToolInsight[]>(() => {
         </div>
 
         <!-- Feedback -->
-        <ToolFeedback tool-id="inp-analyzer" :context="{ url: urlInput, strategy }" />
+        <ToolFeedback tool-id="inp" :context="{ url: urlInput, strategy }" />
       </div>
     </ToolCard>
 

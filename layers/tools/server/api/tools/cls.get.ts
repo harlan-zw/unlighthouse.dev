@@ -39,13 +39,12 @@ export default defineCachedEventHandler(async (event) => {
   const url = await validateUrl(query.url as string)
   const strategy = (query.strategy === 'desktop' ? 'desktop' : 'mobile') as 'mobile' | 'desktop'
 
-  await trackToolUsage(event, 'cls', 'use')
-  await trackToolLookup(event, 'cls', url, strategy)
-
-  const results = await fetchPSI(event, url, strategy)
-  if (!results) {
-    throw createError({ statusCode: 500, message: 'Failed to fetch Lighthouse results' })
-  }
+  const results = await trackToolRequest(event, { tool: 'cls', url, strategy }, async () => {
+    const result = await fetchPSI(event, url, strategy)
+    if (!result)
+      throw createError({ statusCode: 500, message: 'Failed to fetch Lighthouse results' })
+    return result
+  })
   const audits = results.lighthouseResult.audits
 
   // CLS metric

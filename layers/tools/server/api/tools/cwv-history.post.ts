@@ -30,10 +30,11 @@ export default defineEventHandler(async (event): Promise<CWVHistoryResponse> => 
   const mode = body.mode || 'origin'
   const formFactor = body.formFactor || 'PHONE'
 
-  await trackToolUsage(event, 'cwv-history', 'use')
-  await trackToolLookup(event, 'cwv-history', normalized, formFactor === 'PHONE' ? 'mobile' : 'desktop')
-
-  const result = await fetchCrUXHistory(event, normalized, mode, formFactor)
+  const result = await trackToolRequest(event, {
+    tool: 'cwv-history',
+    url: normalized,
+    strategy: formFactor === 'PHONE' ? 'mobile' : 'desktop',
+  }, () => fetchCrUXHistory(event, normalized, mode, formFactor))
 
   if (!result?.record) {
     return {

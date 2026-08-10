@@ -65,12 +65,15 @@ const maxToolCount = computed(() => {
 // Tool Lookups (D1 database)
 interface ToolLookup {
   id: string
-  user_id: string | null
-  session_id: string | null
-  tool: 'pagespeed-insights' | 'lcp' | 'cls' | 'inp'
+  userId: string | null
+  sessionId: string | null
+  tool: string
   query: string
   strategy: 'mobile' | 'desktop' | null
-  created_at: number | string | Date
+  status: 'success' | 'error' | null
+  durationMs: number | null
+  errorCode: string | null
+  createdAt: number | string | Date
 }
 
 interface LookupResponse {
@@ -83,13 +86,15 @@ interface LookupResponse {
 
 const { data: lookupData, status: lookupStatus } = useFetch<LookupResponse>('/api/admin/tool-lookups')
 
-const lookupTools = [
+const lookupTools = computed(() => [
   { value: 'all', label: 'All', icon: 'i-carbon-grid' },
-  { value: 'pagespeed-insights', label: 'PageSpeed', icon: 'i-carbon-meter' },
-  { value: 'lcp', label: 'LCP', icon: 'i-carbon-image' },
-  { value: 'cls', label: 'CLS', icon: 'i-carbon-move' },
-  { value: 'inp', label: 'INP', icon: 'i-carbon-touch-interaction' },
-]
+  ...Object.keys(lookupData.value?.stats ?? {})
+    .sort((a, b) => (lookupData.value?.stats[b] ?? 0) - (lookupData.value?.stats[a] ?? 0))
+    .map((value) => {
+      const meta = getToolMeta(value)
+      return { value, label: meta.name, icon: meta.icon }
+    }),
+])
 
 const activeLookupTab = ref('all')
 
@@ -141,11 +146,33 @@ const lookupColumns: TableColumn<ToolLookup>[] = [
     },
   },
   {
-    accessorKey: 'session_id',
+    accessorKey: 'status',
+    header: 'Outcome',
+    cell: ({ row }) => {
+      const { status, durationMs, errorCode } = row.original
+      if (!status)
+        return h('span', { class: 'text-xs text-dimmed' }, 'Legacy')
+
+      const duration = durationMs === null
+        ? null
+        : durationMs < 1000 ? `${durationMs}ms` : `${(durationMs / 1000).toFixed(1)}s`
+      const statusClass = status === 'success'
+        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+        : 'bg-red-500/10 text-red-600 dark:text-red-400'
+
+      return h('div', { class: 'flex items-center gap-2 text-xs' }, [
+        h('span', { class: `rounded-full px-2 py-0.5 font-medium capitalize ${statusClass}` }, status),
+        duration ? h('span', { class: 'font-mono text-muted tabular-nums' }, duration) : null,
+        errorCode ? h('code', { class: 'text-red-500' }, errorCode) : null,
+      ])
+    },
+  },
+  {
+    accessorKey: 'sessionId',
     header: 'Session',
     cell: ({ row }) => {
-      const sessionId = row.original.session_id
-      const userId = row.original.user_id
+      const sessionId = row.original.sessionId
+      const userId = row.original.userId
       if (!sessionId && !userId)
         return h('span', { class: 'text-dimmed' }, '—')
       return h('span', { class: 'inline-flex items-center gap-1.5 text-xs' }, [
@@ -155,10 +182,10 @@ const lookupColumns: TableColumn<ToolLookup>[] = [
     },
   },
   {
-    accessorKey: 'created_at',
+    accessorKey: 'createdAt',
     header: 'Time',
     cell: ({ row }) => {
-      const raw = row.original.created_at
+      const raw = row.original.createdAt
       const date = raw instanceof Date ? raw : new Date(typeof raw === 'number' ? raw * 1000 : raw)
       if (Number.isNaN(date.getTime()))
         return h('span', { class: 'text-dimmed' }, '—')

@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
   await requireAdminAuth(event)
   const db = getDB(event)
 
-  const [lookups, stats, topDomains, sessionCounts] = await Promise.all([
+  const [lookups, stats, topDomains, sessionCounts, totals] = await Promise.all([
     db.select().from(toolLookups).orderBy(desc(toolLookups.createdAt)).limit(100),
     db.select({
       tool: toolLookups.tool,
@@ -26,6 +26,7 @@ export default defineEventHandler(async (event) => {
         HAVING lookup_count >= 2
       )
     `),
+    db.select({ total: sql<number>`count(*)`.as('total') }).from(toolLookups),
   ])
 
   const statsByTool = Object.fromEntries(
@@ -44,7 +45,7 @@ export default defineEventHandler(async (event) => {
   return {
     lookups,
     stats: statsByTool,
-    total: lookups.length,
+    total: totals[0]?.total ?? 0,
     topDomains,
     engagement: { repeat, single: total - repeat },
   }

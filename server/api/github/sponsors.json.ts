@@ -1,8 +1,13 @@
 import { fetchGitHubSponsors } from 'sponsorkit'
 import { appStorage } from '~~/server/storage'
+import { preparePublicSponsors } from '~~/server/utils/sponsors'
 
 export default defineCachedEventHandler(async (e) => {
-  const token = await appStorage().get<string>('github:token').catch(() => null) || useRuntimeConfig(e).githubAuthToken
+  const storedToken = await appStorage().get<string>('github:token').catch((error) => {
+    console.error('[sponsors] Failed to read the stored GitHub token, using runtime config.', error)
+    return null
+  })
+  const token = storedToken || useRuntimeConfig(e).githubAuthToken
   if (!token) {
     return {
       others: [],
@@ -17,33 +22,7 @@ export default defineCachedEventHandler(async (e) => {
     return []
   })
 
-  const sponsors = _sponsors.map((s) => {
-    if (s.sponsor.name === 'Kintell-labs') {
-      s.sponsor.name = 'Kintell'
-      s.sponsor.websiteUrl = 'https://kintell.com'
-    }
-    if (s.sponsor.name === 'Massive Monster') {
-      s.sponsor.websiteUrl = 'https://massivemonster.co'
-    }
-    return s
-  })
-
-  return sponsors.reduce((acc, sponsor) => {
-    if (sponsor.monthlyDollars >= 25 && sponsor.monthlyDollars < 50) {
-      acc.$25.push(sponsor)
-    }
-    else if (sponsor.monthlyDollars > 50) {
-      acc.$50.push(sponsor)
-    }
-    else {
-      acc.others.push(sponsor)
-    }
-    return acc
-  }, {
-    others: [] as typeof sponsors,
-    $25: [] as typeof sponsors,
-    $50: [] as typeof sponsors,
-  })
+  return preparePublicSponsors(_sponsors)
 }, {
   // last for 1 day
   getKey() {

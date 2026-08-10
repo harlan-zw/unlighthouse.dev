@@ -33,7 +33,7 @@ useToolSeo({
   faqs,
 })
 
-const { trackUse } = useToolTracking('cwv-checker')
+const { trackUse } = useToolTracking('cwv-check')
 
 interface MetricResult {
   value: number
@@ -571,7 +571,7 @@ const cwvMetrics = computed(() => {
         </div>
 
         <!-- Feedback -->
-        <ToolFeedback tool-id="cwv-checker" :context="{ url: urlInput, strategy }" />
+        <ToolFeedback tool-id="cwv-check" :context="{ url: urlInput, strategy }" />
       </div>
 
       <ToolEmptyState v-if="!result && !loading && !error" icon="i-heroicons-check-badge" message="Enter a URL to check Core Web Vitals" />

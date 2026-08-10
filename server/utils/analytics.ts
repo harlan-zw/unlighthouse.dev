@@ -1,7 +1,8 @@
 import type { H3Event } from 'h3'
-import type { ToolName } from '../database/schema'
+import type { ToolId } from '../../shared/tool-catalog'
 import { toolLookups } from '../database/schema'
 import { getDB } from './db'
+import { runWithToolOutcome } from './tool-outcome'
 
 const SESSION_COOKIE = 'analytics-session'
 const SESSION_MAX_AGE = 60 * 60 * 24 * 365 // 1 year
@@ -27,7 +28,7 @@ export function getAnalyticsEngine(event: H3Event) {
 
 export async function trackToolUsage(
   event: H3Event,
-  toolId: string,
+  toolId: ToolId,
   action: 'view' | 'use' | 'share' | 'export' | 'copy',
   metadata?: {
     resultCount?: number
@@ -75,31 +76,51 @@ export function getTimeRangeFilter(range: string): { value: string, unit: string
 
 const PROTOCOL_RE = /^https?:\/\//
 
-export async function trackToolLookup(
+async function persistToolOutcome(
   event: H3Event,
-  tool: ToolName,
+  tool: ToolId,
   url: string,
+  outcome: { status: 'success' | 'error', durationMs: number, errorCode: string | null },
   strategy?: 'mobile' | 'desktop',
 ): Promise<void> {
-  // Skip in dev mode when D1 may not be available
   if (import.meta.dev)
     return
 
-  // Extract domain from URL
   let domain = url.trim()
-  if (PROTOCOL_RE.test(domain)) {
-    const parsed = new URL(domain).hostname
-    domain = parsed
-  }
+  if (PROTOCOL_RE.test(domain))
+    domain = new URL(domain).hostname
 
-  const session = await getUserSession(event).catch(() => null)
+  const session = await getUserSession(event).catch((error) => {
+    console.warn('[tool-analytics] Unable to resolve user session', error)
+    return null
+  })
 
   const db = getDB(event)
-  db.insert(toolLookups).values({
+  await db.insert(toolLookups).values({
     userId: (session?.user as { id?: string } | undefined)?.id || null,
     sessionId: getSessionId(event),
     tool,
     query: domain,
     strategy,
-  }).catch(err => console.error('Failed to track tool lookup:', err))
+    status: outcome.status,
+    durationMs: outcome.durationMs,
+    errorCode: outcome.errorCode,
+  })
+}
+
+export function trackToolRequest<T>(
+  event: H3Event,
+  input: { tool: ToolId, url: string, strategy?: 'mobile' | 'desktop' },
+  run: () => Promise<T>,
+): Promise<T> {
+  return runWithToolOutcome(run, async (outcome) => {
+    await Promise.all([
+      trackToolUsage(event, input.tool, 'use', {
+        responseTime: outcome.durationMs,
+        error: outcome.status === 'error',
+      }).catch(error => console.error('[tool-analytics] Analytics Engine write failed', error)),
+      persistToolOutcome(event, input.tool, input.url, outcome, input.strategy)
+        .catch(error => console.error('[tool-analytics] D1 write failed', error)),
+    ])
+  })
 }

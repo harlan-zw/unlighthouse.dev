@@ -1,3 +1,4 @@
+import type { ToolId } from '../../shared/tool-catalog'
 import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
 export const users = sqliteTable('users', {
@@ -11,16 +12,17 @@ export const users = sqliteTable('users', {
   updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 })
 
-export type ToolName = 'pagespeed-insights' | 'lcp' | 'cls' | 'inp' | 'cwv-check' | 'cwv-history' | 'ttfb-checker' | 'bulk-pagespeed' | 'cwv-compare' | 'lighthouse-report-viewer' | 'lighthouse-score-calculator' | 'page-size' | 'har-viewer' | 'json-size'
-
 export const toolLookups = sqliteTable('tool_lookups', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
   userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
   sessionId: text('session_id'),
-  tool: text('tool').notNull().$type<ToolName>(),
+  tool: text('tool').notNull().$type<ToolId>(),
   query: text('query').notNull(),
   strategy: text('strategy', { enum: ['mobile', 'desktop'] }),
   params: text('params', { mode: 'json' }).$type<Record<string, unknown>>(),
+  status: text('status', { enum: ['success', 'error'] }),
+  durationMs: integer('duration_ms'),
+  errorCode: text('error_code'),
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 }, t => [
   index('tool_lookups_tool_idx').on(t.tool),

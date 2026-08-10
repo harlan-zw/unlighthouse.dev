@@ -1,5 +1,6 @@
 export const toolCatalog = [
   {
+    id: 'bulk-pagespeed',
     title: 'Bulk PageSpeed Test',
     description: 'Test up to 10 URLs at once with PageSpeed Insights. Get performance scores for multiple pages in one batch.',
     icon: 'i-heroicons-squares-2x2',
@@ -8,6 +9,7 @@ export const toolCatalog = [
     metrics: ['Batch Testing', 'Performance', 'Core Web Vitals'],
   },
   {
+    id: 'cwv-check',
     title: 'Core Web Vitals Checker',
     description: 'Check if your page passes Google\'s Core Web Vitals. Test LCP, CLS, and INP with lab and real user data.',
     icon: 'i-heroicons-check-badge',
@@ -16,6 +18,7 @@ export const toolCatalog = [
     metrics: ['LCP', 'CLS', 'INP', 'Core Web Vitals'],
   },
   {
+    id: 'cwv-history',
     title: 'Core Web Vitals History',
     description: 'Track real user performance over 25 weeks. See how your LCP, CLS, and INP trends change over time with CrUX data.',
     icon: 'i-heroicons-chart-bar',
@@ -24,6 +27,7 @@ export const toolCatalog = [
     metrics: ['Field Data', 'Trends', 'CrUX'],
   },
   {
+    id: 'ttfb-checker',
     title: 'TTFB Checker',
     description: 'Test Time to First Byte with real Chrome user data. Compare field vs lab TTFB and track server response trends.',
     icon: 'i-heroicons-clock',
@@ -32,6 +36,7 @@ export const toolCatalog = [
     metrics: ['TTFB', 'Server Response', 'CrUX'],
   },
   {
+    id: 'cwv-compare',
     title: 'CWV Compare',
     description: 'Compare Core Web Vitals across multiple websites. Benchmark your site against competitors with real Chrome user data.',
     icon: 'i-heroicons-scale',
@@ -40,6 +45,7 @@ export const toolCatalog = [
     metrics: ['Competitor Analysis', 'CrUX', 'Benchmarking'],
   },
   {
+    id: 'lighthouse-report-viewer',
     title: 'Lighthouse Report Viewer',
     description: 'Upload your Lighthouse JSON report to visualize scores, metrics, and audits interactively.',
     icon: 'i-heroicons-document-chart-bar',
@@ -48,6 +54,7 @@ export const toolCatalog = [
     metrics: ['All Categories', 'Audits', 'Metrics'],
   },
   {
+    id: 'lighthouse-score-calculator',
     title: 'Lighthouse Score Calculator',
     description: 'Calculate your performance score interactively. Adjust metrics to see how they impact your overall Lighthouse score.',
     icon: 'i-heroicons-calculator',
@@ -56,6 +63,7 @@ export const toolCatalog = [
     metrics: ['FCP', 'SI', 'LCP', 'TBT', 'CLS'],
   },
   {
+    id: 'lcp',
     title: 'LCP Element Finder',
     description: 'Identify which element is your Largest Contentful Paint and get actionable recommendations to improve it.',
     icon: 'i-heroicons-photo',
@@ -64,6 +72,7 @@ export const toolCatalog = [
     metrics: ['LCP', 'Core Web Vital'],
   },
   {
+    id: 'inp',
     title: 'INP Analyzer',
     description: 'Analyze Interaction to Next Paint issues. Find slow event handlers and optimize responsiveness.',
     icon: 'i-heroicons-cursor-arrow-rays',
@@ -72,6 +81,7 @@ export const toolCatalog = [
     metrics: ['INP', 'Core Web Vital'],
   },
   {
+    id: 'cls',
     title: 'CLS Debugger',
     description: 'Debug Cumulative Layout Shift issues. Identify elements causing unexpected layout shifts.',
     icon: 'i-heroicons-arrows-pointing-out',
@@ -80,6 +90,7 @@ export const toolCatalog = [
     metrics: ['CLS', 'Core Web Vital'],
   },
   {
+    id: 'har-viewer',
     title: 'HAR File Viewer',
     description: 'Analyze HTTP Archive files with network waterfall, request timing, resource breakdown, and protocol distribution. Entirely client-side.',
     icon: 'i-heroicons-document-magnifying-glass',
@@ -88,6 +99,7 @@ export const toolCatalog = [
     metrics: ['Network Waterfall', 'Request Analysis', 'Performance'],
   },
   {
+    id: 'json-size',
     title: 'JSON Size Analyzer',
     description: 'Calculate JSON payload size with minification savings, gzip/brotli estimates, key contributions, and duplicate key analysis. Entirely client-side.',
     icon: 'i-heroicons-code-bracket-square',
@@ -96,6 +108,7 @@ export const toolCatalog = [
     metrics: ['Size Analysis', 'Minification', 'Compression'],
   },
   {
+    id: 'page-size',
     title: 'Page Size Checker',
     description: 'Test page weight with resource breakdown, third-party analysis, unused code detection, and HTTP Archive percentile comparison.',
     icon: 'i-heroicons-scale',
@@ -104,6 +117,7 @@ export const toolCatalog = [
     metrics: ['Page Weight', 'Resources', 'Third Parties'],
   },
   {
+    id: 'pagespeed-insights',
     title: 'PageSpeed Insights Performance',
     description: 'Get detailed PageSpeed Insights performance data with field and lab metrics.',
     icon: 'i-heroicons-chart-bar',
@@ -112,3 +126,5 @@ export const toolCatalog = [
     metrics: ['Performance', 'Field Data'],
   },
 ] as const
+
+export type ToolId = typeof toolCatalog[number]['id']
