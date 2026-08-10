@@ -3,15 +3,21 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { defineNuxtConfig } from 'nuxt/config'
 import { resolve } from 'pathe'
 import { gray, logger } from './logger'
+import { SENTRY_DSN, sentryRelease } from './shared/sentry'
 
 const staticPageHeaders = {
   'cache-control': 'public, max-age=300, s-maxage=86400, stale-while-revalidate=604800',
 }
 
+const hasSentryAuthToken = Boolean(process.env.SENTRY_AUTH_TOKEN)
+  || existsSync('.env.sentry-build-plugin')
+
 export default defineNuxtConfig({
   extends: ['./layers/tools', './layers/admin'],
 
   modules: [
+    '@harlan-zw/nuxt-dx',
+    '@harlan-zw/nuxt-github-sponsors',
     '@nuxtjs/seo',
     '@nuxt/ui',
     ['motion-v/nuxt', { directives: true }],
@@ -22,13 +28,11 @@ export default defineNuxtConfig({
     '@nuxt/image',
     'nuxt-skew-protection',
     'nuxt-ai-ready',
+    '@sentry/nuxt/module',
     // '@nuxtjs/mcp-toolkit',
     'nuxt-auth-utils',
     async (_, nuxt) => {
       nuxt.hooks.hook('nitro:init', (nitro) => {
-        // from sponsorkit
-        nitro.options.alias.sharp = 'unenv/mock/empty'
-        nitro.options.alias.pnpapi = 'unenv/mock/empty' // ?
         nitro.hooks.hook('compiled', async (_nitro) => {
           const routesPath = resolve(nitro.options.output.publicDir, '_routes.json')
           if (existsSync(routesPath)) {
@@ -101,13 +105,17 @@ export default defineNuxtConfig({
   },
 
   skewProtection: {
-    debug: true,
+    updateStrategy: 'ws',
+    reloadStrategy: 'idle',
     connectionTracking: true,
     routeTracking: true,
     ipTracking: true,
   },
 
   runtimeConfig: {
+    githubSponsors: {
+      token: process.env.NUXT_GITHUB_AUTH_TOKEN || '',
+    },
     oauth: {
       github: {
         redirectUrl: '', // NUXT_OAUTH_GITHUB_REDIRECT_URL
@@ -131,10 +139,31 @@ export default defineNuxtConfig({
     googleApiToken: '', // NUXT_GOOGLE_API_TOKEN (PageSpeed Insights)
     cloudflareAccountId: '', // NUXT_CLOUDFLARE_ACCOUNT_ID
     cloudflareAnalyticsApiToken: '', // NUXT_CLOUDFLARE_ANALYTICS_API_TOKEN
+    sentry: {
+      dsn: SENTRY_DSN,
+      enabled: process.env.NODE_ENV === 'production',
+      environment: 'production',
+      release: sentryRelease() ?? '',
+      tracesSampleRate: 0.05,
+    },
 
     public: {
       // moduleDeps: pkgJson.dependencies,
       // version: pkgJson.version,
+    },
+  },
+
+  githubSponsors: {
+    login: 'harlan-zw',
+    mode: 'prerender',
+    route: '/api/github/sponsors.json',
+    tiers: [
+      { key: 'top', minimumMonthlyDollars: 50 },
+      { key: 'gold', minimumMonthlyDollars: 25 },
+    ],
+    overrides: {
+      'Kintell-labs': { name: 'Kintell', websiteUrl: 'https://kintell.com' },
+      'Massive Monster': { websiteUrl: 'https://massivemonster.co' },
     },
   },
 
@@ -230,6 +259,7 @@ export default defineNuxtConfig({
           NUXT_GITHUB_ACCESS_TOKEN: process.env.NUXT_GITHUB_ACCESS_TOKEN || '',
           NUXT_EMAIL_OCTOPUS_TOKEN: process.env.NUXT_EMAIL_OCTOPUS_TOKEN || '',
           NUXT_GITHUB_AUTH_TOKEN: process.env.NUXT_GITHUB_AUTH_TOKEN || '',
+          NUXT_GITHUB_SPONSORS_TOKEN: process.env.NUXT_GITHUB_AUTH_TOKEN || '',
           NUXT_CLOUDFLARE_ANALYTICS_API_TOKEN: process.env.NUXT_CLOUDFLARE_ANALYTICS_API_TOKEN || '',
           NUXT_CLOUDFLARE_ACCOUNT_ID: process.env.NUXT_CLOUDFLARE_ACCOUNT_ID || '',
           NUXT_GOOGLE_API_TOKEN: process.env.NUXT_GOOGLE_API_TOKEN || '',
@@ -475,6 +505,29 @@ export default defineNuxtConfig({
         class: 'antialiased font-sans text-neutral-700 dark:text-neutral-200 bg-white dark:bg-neutral-900',
       },
     },
+  },
+
+  sentry: {
+    enabled: process.env.NODE_ENV === 'production',
+    org: 'harlan-zw',
+    project: 'unlighthouse',
+    authToken: process.env.SENTRY_AUTH_TOKEN,
+    release: { name: sentryRelease() },
+    sourcemaps: {
+      disable: !hasSentryAuthToken,
+      filesToDeleteAfterUpload: ['**/*.map'],
+    },
+    bundleSizeOptimizations: {
+      excludeReplayShadowDom: true,
+      excludeReplayIframe: true,
+      excludeReplayWorker: true,
+    },
+    telemetry: false,
+  },
+
+  sourcemap: {
+    client: hasSentryAuthToken ? 'hidden' : false,
+    server: false,
   },
 
   compatibilityDate: '2025-07-23',

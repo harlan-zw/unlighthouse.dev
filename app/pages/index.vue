@@ -21,9 +21,7 @@ const { data: stats } = await useFetch('/api/stats/summary.json', {
   key: 'stats-summary',
 })
 
-const { data: sponsors, error: sponsorsError, refresh: refreshSponsors } = await useFetch('/api/github/sponsors.json', {
-  key: 'sponsors',
-})
+const { data: sponsors, error: sponsorsError, refresh: refreshSponsors } = await useGitHubSponsors()
 
 if (import.meta.client && sponsorsError.value)
   await refreshSponsors()
@@ -306,9 +304,9 @@ const exploreLinks = [
                 Top Sponsors
               </h3>
               <div class="flex flex-wrap gap-4">
-                <NuxtLink v-for="(entry, key) in sponsors.$50 || {}" :key="key" :to="entry.sponsor.websiteUrl" class="flex items-center gap-2 hover:opacity-80 transition">
-                  <NuxtImg loading="lazy" :alt="entry.sponsor.name" width="40" height="40" :src="entry.sponsor.avatarUrl" class="w-10 h-10 rounded-full" />
-                  <span class="font-medium">{{ entry.sponsor.name }}</span>
+                <NuxtLink v-for="entry in sponsors.tiers.top" :key="entry.login" :to="entry.websiteUrl || entry.profileUrl" class="flex items-center gap-2 hover:opacity-80 transition">
+                  <NuxtImg loading="lazy" :alt="entry.name" width="40" height="40" :src="entry.avatarUrl" class="w-10 h-10 rounded-full" />
+                  <span class="font-medium">{{ entry.name }}</span>
                 </NuxtLink>
               </div>
             </div>
@@ -317,8 +315,8 @@ const exploreLinks = [
                 Gold Sponsors
               </h3>
               <div class="flex flex-wrap gap-3">
-                <NuxtLink v-for="(entry, key) in sponsors.$25 || {}" :key="key" :to="entry.sponsor.websiteUrl" class="hover:opacity-80 transition">
-                  <NuxtImg loading="lazy" :alt="entry.sponsor.name || entry.sponsor.login" width="36" height="36" :src="entry.sponsor.avatarUrl" class="w-9 h-9 rounded-full" />
+                <NuxtLink v-for="entry in sponsors.tiers.gold" :key="entry.login" :to="entry.websiteUrl || entry.profileUrl" class="hover:opacity-80 transition">
+                  <NuxtImg loading="lazy" :alt="entry.name || entry.login" width="36" height="36" :src="entry.avatarUrl" class="w-9 h-9 rounded-full" />
                 </NuxtLink>
               </div>
             </div>
@@ -327,9 +325,9 @@ const exploreLinks = [
                 Backers
               </h3>
               <div class="flex flex-wrap gap-2">
-                <UTooltip v-for="(entry, key) in sponsors.others || {}" :key="key" :text="entry.sponsor.name || entry.sponsor.login">
-                  <NuxtLink :to="(entry.monthlyDollars > 5 ? entry.sponsor.websiteUrl : entry.sponsor.linkUrl) || entry.sponsor.linkUrl" class="hover:opacity-80 transition">
-                    <NuxtImg loading="lazy" :alt="entry.sponsor.name || entry.sponsor.login" width="32" height="32" :src="entry.sponsor.avatarUrl" class="w-8 h-8 rounded-full" :class="entry.monthlyDollars > 5 ? ['ring-green-500 ring-2'] : []" />
+                <UTooltip v-for="entry in sponsors.ungrouped" :key="entry.login" :text="entry.name || entry.login">
+                  <NuxtLink :to="(entry.monthlyDollars > 5 ? entry.websiteUrl : entry.profileUrl) || entry.profileUrl" class="hover:opacity-80 transition">
+                    <NuxtImg loading="lazy" :alt="entry.name || entry.login" width="32" height="32" :src="entry.avatarUrl" class="w-8 h-8 rounded-full" :class="entry.monthlyDollars > 5 ? ['ring-green-500 ring-2'] : []" />
                   </NuxtLink>
                 </UTooltip>
               </div>
