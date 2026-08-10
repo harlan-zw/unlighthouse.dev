@@ -41,21 +41,14 @@ useToolSeo({
 
 const { trackUse } = useToolTracking('ttfb-checker')
 
-const { current: loadingMessage, progress: loadingProgress, start: startMessages, stop: stopMessages } = useLoadingMessages([
-  'Looking up CrUX data...',
-  'Measuring server response time...',
-  'Checking TTFB from real users...',
-  'Analyzing DNS and connection times...',
-  'Fetching historical TTFB data...',
-  'Generating TTFB report...',
-], 3000)
+const loadingMessage = 'Checking field and lab server response times...'
 
 type Mode = 'origin' | 'url'
 
 const urlInput = ref('')
 const mode = ref<Mode>('origin')
 const formFactor = ref<FormFactor>('PHONE')
-const { loading, error, result, run: runBg } = useToolBackgroundRequest<TTFBCheckResponse>('ttfb-checker', {
+const { loading, error, result, startedAt, run: runBg } = useToolBackgroundRequest<TTFBCheckResponse>('ttfb-checker', {
   title: 'TTFB Checker',
   path: '/tools/ttfb-checker',
 })
@@ -70,8 +63,6 @@ const { syncParam } = useToolUrlSync(urlInput, {
 })
 syncParam('mode', mode as Ref<string>, 'origin')
 syncParam('device', device, 'mobile')
-
-watch(loading, isLoading => isLoading ? startMessages() : stopMessages())
 
 function lookup() {
   if (!urlInput.value.trim() || loading.value)
@@ -173,7 +164,7 @@ const ttfbTips = [
 
 <template>
   <div class="min-h-screen">
-    <ToolFloatingLoader :show="loading && showFloatingLoader" :message="loadingMessage" />
+    <ToolFloatingLoader :show="loading && showFloatingLoader" :message="loadingMessage" :started-at="startedAt" color="sky" />
 
     <ToolPageHero
       title="TTFB"
@@ -236,7 +227,7 @@ const ttfbTips = [
         </form>
       </div>
 
-      <ToolLoadingPill v-if="loading" ref="loadingContainerRef" :progress="loadingProgress" :message="loadingMessage" color="sky" hint="Looking up real user data from CrUX." />
+      <ToolLoadingPill v-if="loading" ref="loadingContainerRef" :message="loadingMessage" color="sky" :started-at="startedAt" expected="Usually 10 to 30 seconds." background />
 
       <!-- Error -->
       <ToolError :error="error" />

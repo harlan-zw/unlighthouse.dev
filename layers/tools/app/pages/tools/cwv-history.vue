@@ -51,14 +51,7 @@ useToolSeo({
 
 const { trackUse } = useToolTracking('cwv-history')
 
-const { current: loadingMessage, progress: loadingProgress, start: startMessages, stop: stopMessages } = useLoadingMessages([
-  'Looking up CrUX history data...',
-  'Fetching 25 weeks of performance data...',
-  'Analyzing Core Web Vitals trends...',
-  'Checking LCP, CLS, and INP history...',
-  'Processing historical percentiles...',
-  'Generating performance timeline...',
-], 3000)
+const loadingMessage = 'Fetching 25 weeks of CrUX history...'
 
 type Mode = 'origin' | 'url'
 
@@ -93,7 +86,7 @@ const urlInput = ref('')
 const mode = ref<Mode>('origin')
 const formFactor = ref<FormFactor>('PHONE')
 const { device: deviceToggle } = useFormFactorBridge(formFactor)
-const { loading, error, result, run: runBg } = useToolBackgroundRequest<CWVHistoryResponse>('cwv-history', {
+const { loading, error, result, startedAt, run: runBg } = useToolBackgroundRequest<CWVHistoryResponse>('cwv-history', {
   title: 'CWV History',
   path: '/tools/cwv-history',
 })
@@ -111,8 +104,6 @@ const { syncParam } = useToolUrlSync(urlInput, {
 })
 syncParam('mode', mode as Ref<string>, 'origin')
 syncParam('device', deviceToggle as unknown as Ref<string>, 'phone')
-
-watch(loading, isLoading => isLoading ? startMessages() : stopMessages())
 
 function lookup() {
   if (!urlInput.value.trim() || loading.value)
@@ -286,7 +277,7 @@ function formatChartDate(date: string) {
 
 <template>
   <div class="min-h-screen">
-    <ToolFloatingLoader :show="loading && showFloatingLoader" :message="loadingMessage" />
+    <ToolFloatingLoader :show="loading && showFloatingLoader" :message="loadingMessage" :started-at="startedAt" color="indigo" />
 
     <ToolPageHero
       title="Core Web Vitals"
@@ -353,7 +344,7 @@ function formatChartDate(date: string) {
         </form>
       </div>
 
-      <ToolLoadingPill v-if="loading" ref="loadingContainerRef" :progress="loadingProgress" :message="loadingMessage || ''" color="indigo" hint="Fetching 25 weeks of real user data." />
+      <ToolLoadingPill v-if="loading" ref="loadingContainerRef" :message="loadingMessage" color="indigo" :started-at="startedAt" expected="Usually under 10 seconds." background />
 
       <!-- Error -->
       <ToolError :error="error" />

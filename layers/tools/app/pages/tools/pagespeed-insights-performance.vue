@@ -35,28 +35,12 @@ useToolSeo({
 
 const { trackUse } = useToolTracking('pagespeed-insights')
 
-// Loading messages with tips - shown during PageSpeed API analysis
-const { current: loadingMessage, progress: loadingProgress, start: startMessages, stop: stopMessages } = useLoadingMessages([
-  'Connecting to PageSpeed Insights API...',
-  'Tip: Core Web Vitals affect search rankings',
-  'Running Lighthouse audit on your page...',
-  'Tip: Test on mobile—it uses slower throttling',
-  'Analyzing page load performance...',
-  'Tip: Scores above 90 are considered good',
-  'Measuring First Contentful Paint (FCP)...',
-  'Tip: Reduce render-blocking resources',
-  'Calculating Largest Contentful Paint (LCP)...',
-  'Tip: Optimize your largest visible element',
-  'Measuring Total Blocking Time (TBT)...',
-  'Tip: Keep long tasks under 50ms each',
-  'Analyzing Cumulative Layout Shift (CLS)...',
-  'Generating full performance report...',
-], 3000)
+const loadingMessage = 'Running a full PageSpeed Insights audit...'
 
 // State
 const urlInput = ref('')
 const strategy = ref<'mobile' | 'desktop'>('mobile')
-const { loading, error, result, run: runBg } = useToolBackgroundRequest<PsiResult>('pagespeed-insights', {
+const { loading, error, result, startedAt, run: runBg } = useToolBackgroundRequest<PsiResult>('pagespeed-insights', {
   title: 'PageSpeed Insights',
   path: '/tools/pagespeed-insights-performance',
 })
@@ -142,8 +126,6 @@ const { syncParam } = useToolUrlSync(urlInput, {
 })
 syncParam('strategy', strategy as Ref<string>, 'mobile')
 
-watch(loading, isLoading => isLoading ? startMessages() : stopMessages())
-
 function analyze() {
   if (!urlInput.value.trim() || loading.value)
     return
@@ -219,7 +201,7 @@ const totalResourceSize = computed(() => {
 
 <template>
   <div class="min-h-screen">
-    <ToolFloatingLoader :show="loading && showFloatingLoader" :message="loadingMessage" />
+    <ToolFloatingLoader :show="loading && showFloatingLoader" :message="loadingMessage" :started-at="startedAt" color="blue" />
 
     <ToolPageHero
       title="PageSpeed Insights"
@@ -255,7 +237,7 @@ const totalResourceSize = computed(() => {
         </form>
       </div>
 
-      <ToolLoadingPill v-if="loading" ref="loadingContainerRef" :progress="loadingProgress" :message="loadingMessage" color="blue" hint="This can take up to 2 minutes. The API runs a full Lighthouse audit." />
+      <ToolLoadingPill v-if="loading" ref="loadingContainerRef" :message="loadingMessage" color="blue" :started-at="startedAt" expected="Usually 10 to 30 seconds." background />
 
       <!-- Error -->
       <div v-if="error" class="mx-4 sm:mx-6 my-4">

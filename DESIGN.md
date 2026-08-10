@@ -142,3 +142,5 @@ components:
 - The embedded report remains the homepage product proof. It loads near the viewport to protect initial performance.
 - Feature content may become contextual links, but its existing compact card rhythm stays.
 - Accessibility repairs use semantic HTML and Nuxt UI primitives without changing the visual hierarchy.
+- Opaque tool requests show stable operation copy and elapsed time. Percentages are reserved for measured progress.
+- Background capable tools explicitly permit navigation, preserve elapsed time, and notify completion globally.

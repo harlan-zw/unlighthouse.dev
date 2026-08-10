@@ -153,9 +153,9 @@ watch(() => props.formFactor, () => {
     <!-- Content -->
     <div class="p-4">
       <!-- Loading state -->
-      <div v-if="loading" class="flex items-center justify-center py-6">
+      <div v-if="loading" role="status" aria-live="polite" aria-busy="true" class="flex items-center justify-center py-6">
         <div class="flex items-center gap-2 text-sm text-gray-500">
-          <UIcon name="i-heroicons-arrow-path" class="w-4 h-4 animate-spin" />
+          <UIcon name="i-heroicons-arrow-path" class="w-4 h-4 animate-spin motion-reduce:animate-none" />
           <span>Fetching field data...</span>
         </div>
       </div>

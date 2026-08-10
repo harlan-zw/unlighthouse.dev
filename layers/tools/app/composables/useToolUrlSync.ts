@@ -1,4 +1,4 @@
-import { watchDebounced } from '@vueuse/core'
+import { useUrlSearchParams, watchDebounced } from '@vueuse/core'
 
 interface ToolUrlSyncOptions {
   /** Query param name for the URL input (default: 'url') */
@@ -13,47 +13,35 @@ interface ToolUrlSyncOptions {
 
 export function useToolUrlSync(urlInput: Ref<string>, options: ToolUrlSyncOptions = {}) {
   const { paramName = 'url', extraParams, onReady, debounce = 500 } = options
-  const route = useRoute()
+  const params = useUrlSearchParams<Record<string, string | undefined>>('history')
 
   onMounted(() => {
-    const urlParam = route.query[paramName] as string
+    const urlParam = params[paramName]
     if (extraParams) {
       for (const [queryKey, ref] of Object.entries(extraParams)) {
-        const val = route.query[queryKey] as string
+        const val = params[queryKey]
         if (val)
           ref.value = val
       }
     }
     if (urlParam) {
-      urlInput.value = decodeURIComponent(urlParam)
+      urlInput.value = urlParam
       onReady?.()
     }
   })
 
   watchDebounced(
     urlInput,
-    async (newUrl) => {
-      if (newUrl) {
-        await navigateTo({ query: { ...route.query, [paramName]: encodeURIComponent(newUrl) } }, { replace: true })
-      }
-      else {
-        const { [paramName]: _, ...rest } = route.query
-        await navigateTo({ query: rest }, { replace: true })
-      }
+    (newUrl) => {
+      params[paramName] = newUrl || undefined
     },
     { debounce },
   )
 
   /** Sync a single query param reactively */
   function syncParam(paramKey: string, value: Ref<string>, defaultValue?: string) {
-    watch(value, async (newVal) => {
-      if (defaultValue && newVal === defaultValue) {
-        const { [paramKey]: _, ...rest } = route.query
-        await navigateTo({ query: rest }, { replace: true })
-      }
-      else {
-        await navigateTo({ query: { ...route.query, [paramKey]: newVal } }, { replace: true })
-      }
+    watch(value, (newVal) => {
+      params[paramKey] = defaultValue && newVal === defaultValue ? undefined : newVal
     })
   }
 

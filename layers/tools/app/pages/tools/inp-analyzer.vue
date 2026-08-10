@@ -37,27 +37,12 @@ useToolSeo({
 
 const { trackUse } = useToolTracking('inp')
 
-// Loading messages with tips - shown during PageSpeed API analysis
-const { current: loadingMessage, progress: loadingProgress, start: startMessages, stop: stopMessages } = useLoadingMessages([
-  'Connecting to PageSpeed Insights API...',
-  'Tip: Break long tasks into smaller chunks',
-  'Running Lighthouse audit on your page...',
-  'Tip: Defer non-critical JavaScript',
-  'Profiling main thread activity...',
-  'Tip: Use code splitting to reduce bundle size',
-  'Measuring Total Blocking Time (TBT)...',
-  'Tip: Load third-party scripts with async/defer',
-  'Analyzing script evaluation time...',
-  'Tip: Use web workers for heavy computation',
-  'Detecting long tasks (>50ms)...',
-  'Tip: Consider progressive hydration strategies',
-  'Generating INP analysis report...',
-], 3000)
+const loadingMessage = 'Analyzing interaction readiness with Lighthouse...'
 
 // State
 const urlInput = ref('')
 const strategy = ref<'mobile' | 'desktop'>('mobile')
-const { loading, error, result, run: runBg } = useToolBackgroundRequest<InpResult>('inp-analyzer', {
+const { loading, error, result, startedAt, run: runBg } = useToolBackgroundRequest<InpResult>('inp-analyzer', {
   title: 'INP Analyzer',
   path: '/tools/inp-analyzer',
 })
@@ -136,8 +121,6 @@ interface InpResult {
   } | null
   strategy: 'mobile' | 'desktop'
 }
-
-watch(loading, isLoading => isLoading ? startMessages() : stopMessages())
 
 function analyze() {
   if (!urlInput.value.trim() || loading.value)
@@ -283,7 +266,7 @@ const insights = computed<ToolInsight[]>(() => {
 
 <template>
   <div class="min-h-screen">
-    <ToolFloatingLoader :show="loading && showFloatingLoader" :message="loadingMessage" />
+    <ToolFloatingLoader :show="loading && showFloatingLoader" :message="loadingMessage" :started-at="startedAt" color="cyan" />
 
     <ToolPageHero
       title="INP"
@@ -320,7 +303,7 @@ const insights = computed<ToolInsight[]>(() => {
       </div>
 
       <!-- Loading State -->
-      <ToolLoadingPill v-if="loading" ref="loadingContainerRef" :progress="loadingProgress" :message="loadingMessage || 'Analyzing...'" color="cyan" hint="This can take up to 2 minutes. The API runs a full Lighthouse audit." />
+      <ToolLoadingPill v-if="loading" ref="loadingContainerRef" :message="loadingMessage" color="cyan" :started-at="startedAt" expected="Usually 10 to 30 seconds." background />
 
       <!-- Error -->
       <ToolError :error="error" />

@@ -87,29 +87,20 @@ interface CWVResult {
 
 const urlInput = ref('')
 const strategy = ref<'mobile' | 'desktop'>('mobile')
-const { loading, error, result, run: runBg } = useToolBackgroundRequest<CWVResult>('cwv-checker', {
+const { loading, error, result, startedAt, run: runBg } = useToolBackgroundRequest<CWVResult>('cwv-checker', {
   title: 'CWV Checker',
   path: '/tools/cwv-checker',
 })
 const loadingContainerRef = ref<HTMLElement | ComponentPublicInstance | null>(null)
 
 const { showFloatingLoader } = useToolFloatingLoader(loading, loadingContainerRef)
-const { current: loadingMessage, progress: loadingProgress, start: startLoadingMessages, stop: stopLoadingMessages } = useLoadingMessages([
-  'Connecting to PageSpeed Insights API...',
-  'Running Lighthouse audit...',
-  'Measuring Core Web Vitals...',
-  'Checking real user data (CrUX)...',
-  'Analyzing page performance...',
-  'Generating recommendations...',
-], 3000)
+const loadingMessage = 'Checking field and lab Core Web Vitals...'
 
 const { syncParam } = useToolUrlSync(urlInput, {
   extraParams: { strategy: strategy as Ref<string> },
   onReady: () => analyze(),
 })
 syncParam('strategy', strategy as Ref<string>, 'mobile')
-
-watch(loading, isLoading => isLoading ? startLoadingMessages() : stopLoadingMessages())
 
 function analyze() {
   if (!urlInput.value.trim() || loading.value)
@@ -184,7 +175,7 @@ const cwvMetrics = computed(() => {
 
 <template>
   <div class="min-h-screen">
-    <ToolFloatingLoader :show="loading && showFloatingLoader" :message="loadingMessage" />
+    <ToolFloatingLoader :show="loading && showFloatingLoader" :message="loadingMessage" :started-at="startedAt" color="emerald" />
 
     <ToolPageHero
       title="Core Web Vitals"
@@ -220,7 +211,7 @@ const cwvMetrics = computed(() => {
         </form>
       </div>
 
-      <ToolLoadingPill v-if="loading" ref="loadingContainerRef" :progress="loadingProgress" :message="loadingMessage" color="emerald" hint="This can take up to 2 minutes. The API runs a full Lighthouse audit." />
+      <ToolLoadingPill v-if="loading" ref="loadingContainerRef" :message="loadingMessage" color="emerald" :started-at="startedAt" expected="Usually 10 to 30 seconds." background />
 
       <!-- Error -->
       <ToolError :error="error" />

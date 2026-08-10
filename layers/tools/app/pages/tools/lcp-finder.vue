@@ -39,29 +39,12 @@ useToolSeo({
 
 const { trackUse } = useToolTracking('lcp')
 
-// Loading messages with tips - shown during PageSpeed API analysis
-const { current: loadingMessage, progress: loadingProgress, start: startMessages, stop: stopMessages } = useLoadingMessages([
-  'Connecting to PageSpeed Insights API...',
-  'Tip: Add fetchpriority="high" to your LCP image',
-  'Running Lighthouse audit on your page...',
-  'Tip: Preload LCP images with <link rel="preload">',
-  'Analyzing page render timeline...',
-  'Tip: Avoid lazy-loading images above the fold',
-  'Identifying the largest contentful element...',
-  'Tip: Use WebP or AVIF for smaller image files',
-  'Measuring Time to First Byte (TTFB)...',
-  'Tip: A fast server response improves all metrics',
-  'Calculating resource load delays...',
-  'Tip: Inline critical CSS to speed up first paint',
-  'Measuring element render timing...',
-  'Tip: Reduce JavaScript blocking the main thread',
-  'Generating performance report...',
-], 3000)
+const loadingMessage = 'Finding the largest contentful paint with Lighthouse...'
 
 // State
 const urlInput = ref('')
 const strategy = ref<'mobile' | 'desktop'>('mobile')
-const { loading, error, result, run: runBg } = useToolBackgroundRequest<LcpResult>('lcp-finder', {
+const { loading, error, result, startedAt, run: runBg } = useToolBackgroundRequest<LcpResult>('lcp-finder', {
   title: 'LCP Finder',
   path: '/tools/lcp-finder',
 })
@@ -281,8 +264,6 @@ interface LcpResult {
   performanceScore: number
 }
 
-watch(loading, isLoading => isLoading ? startMessages() : stopMessages())
-
 function analyze() {
   if (!urlInput.value.trim() || loading.value)
     return
@@ -497,7 +478,7 @@ const insights = computed<LcpInsight[]>(() => {
         </form>
       </div>
 
-      <ToolLoadingPill v-if="loading" ref="loadingContainerRef" :progress="loadingProgress" :message="loadingMessage" color="violet" hint="This can take up to 2 minutes. The API runs a full Lighthouse audit." />
+      <ToolLoadingPill v-if="loading" ref="loadingContainerRef" :message="loadingMessage" color="violet" :started-at="startedAt" expected="Usually 10 to 30 seconds." background />
 
       <!-- Error -->
       <ToolError :error="error" />
@@ -1581,7 +1562,7 @@ const insights = computed<LcpInsight[]>(() => {
       </div>
     </section>
 
-    <ToolFloatingLoader :show="showFloatingLoader" :message="loadingMessage" />
+    <ToolFloatingLoader :show="showFloatingLoader" :message="loadingMessage" :started-at="startedAt" color="violet" />
   </div>
 </template>
 

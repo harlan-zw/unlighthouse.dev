@@ -43,25 +43,12 @@ useToolSeo({
 
 const { trackUse } = useToolTracking('page-size')
 
-const { current: loadingMessage, progress: loadingProgress, start: startMessages, stop: stopMessages } = useLoadingMessages([
-  'Connecting to PageSpeed Insights API...',
-  'Tip: The median page weighs 2.5 MB on mobile',
-  'Running Lighthouse audit on your page...',
-  'Tip: JavaScript costs more than images per byte',
-  'Analyzing resource breakdown...',
-  'Tip: Enable brotli compression for best savings',
-  'Measuring total page weight...',
-  'Tip: Third parties often account for 30-50% of weight',
-  'Checking compression efficiency...',
-  'Tip: AVIF images save 50% over JPEG',
-  'Scanning for unused code...',
-  'Generating page size report...',
-], 3000)
+const loadingMessage = 'Measuring page weight with Lighthouse...'
 
 // State
 const urlInput = ref('')
 const strategy = ref<'mobile' | 'desktop'>('mobile')
-const { loading, error, result, run: runBg } = useToolBackgroundRequest<PageSizeResult>('page-size', {
+const { loading, error, result, startedAt, run: runBg } = useToolBackgroundRequest<PageSizeResult>('page-size', {
   title: 'Page Size',
   path: '/tools/page-size',
 })
@@ -93,8 +80,6 @@ const { syncParam } = useToolUrlSync(urlInput, {
   onReady: () => analyze(),
 })
 syncParam('strategy', strategy as Ref<string>, 'mobile')
-
-watch(loading, isLoading => isLoading ? startMessages() : stopMessages())
 
 function analyze() {
   if (!urlInput.value.trim() || loading.value)
@@ -216,7 +201,7 @@ const visualResources = computed(() => {
 
 <template>
   <div class="min-h-screen">
-    <ToolFloatingLoader :show="loading && showFloatingLoader" :message="loadingMessage" />
+    <ToolFloatingLoader :show="loading && showFloatingLoader" :message="loadingMessage" :started-at="startedAt" color="green" />
 
     <ToolPageHero
       title="Page Size"
@@ -248,7 +233,7 @@ const visualResources = computed(() => {
       </div>
 
       <!-- Loading -->
-      <ToolLoadingPill v-if="loading" ref="loadingContainerRef" :progress="loadingProgress" :message="loadingMessage" color="green" hint="This can take up to 2 minutes. The API runs a full Lighthouse audit." />
+      <ToolLoadingPill v-if="loading" ref="loadingContainerRef" :message="loadingMessage" color="green" :started-at="startedAt" expected="Usually 10 to 30 seconds." background />
 
       <!-- Error -->
       <ToolError :error="error" />

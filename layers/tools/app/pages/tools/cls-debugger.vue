@@ -39,27 +39,12 @@ useToolSeo({
 
 const { trackUse } = useToolTracking('cls')
 
-// Loading messages with tips - shown during PageSpeed API analysis
-const { current: loadingMessage, progress: loadingProgress, start: startMessages, stop: stopMessages } = useLoadingMessages([
-  'Connecting to PageSpeed Insights API...',
-  'Tip: Always set width and height on images',
-  'Running Lighthouse audit on your page...',
-  'Tip: Reserve space for ads and embeds',
-  'Analyzing layout stability during load...',
-  'Tip: Use font-display: optional for web fonts',
-  'Detecting elements causing layout shifts...',
-  'Tip: Avoid inserting content above existing content',
-  'Measuring cumulative layout shift score...',
-  'Tip: Use CSS aspect-ratio for responsive images',
-  'Identifying unsized images and media...',
-  'Tip: Add skeleton loaders for async content',
-  'Generating CLS analysis report...',
-], 3000)
+const loadingMessage = 'Finding layout shifts with Lighthouse...'
 
 // State
 const urlInput = ref('')
 const strategy = ref<'mobile' | 'desktop'>('mobile')
-const { loading, error, result, run: runBg } = useToolBackgroundRequest<ClsResult>('cls-debugger', {
+const { loading, error, result, startedAt, run: runBg } = useToolBackgroundRequest<ClsResult>('cls-debugger', {
   title: 'CLS Debugger',
   path: '/tools/cls-debugger',
 })
@@ -152,8 +137,6 @@ function scrollToShiftElement(idx: number) {
   const scrollTop = Math.max(0, scaledTop - containerHeight / 3)
   container.scrollTo({ top: scrollTop, behavior: 'smooth' })
 }
-
-watch(loading, isLoading => isLoading ? startMessages() : stopMessages())
 
 function analyze() {
   if (!urlInput.value.trim() || loading.value)
@@ -325,7 +308,7 @@ const insights = computed<ToolInsight[]>(() => {
       </div>
 
       <!-- Loading State -->
-      <ToolLoadingPill v-if="loading" ref="loadingContainerRef" :progress="loadingProgress" :message="loadingMessage" color="amber" hint="This can take up to 2 minutes. The API runs a full Lighthouse audit." />
+      <ToolLoadingPill v-if="loading" ref="loadingContainerRef" :message="loadingMessage" color="amber" :started-at="startedAt" expected="Usually 10 to 30 seconds." background />
 
       <!-- Error -->
       <ToolError :error="error" />
@@ -869,6 +852,6 @@ const insights = computed<ToolInsight[]>(() => {
       </div>
     </section>
 
-    <ToolFloatingLoader :show="showFloatingLoader" :message="loadingMessage" />
+    <ToolFloatingLoader :show="showFloatingLoader" :message="loadingMessage" :started-at="startedAt" color="amber" />
   </div>
 </template>

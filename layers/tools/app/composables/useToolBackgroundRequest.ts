@@ -17,13 +17,12 @@ export function useToolBackgroundRequest<T = any>(toolId: string, opts: {
   path: string
 }) {
   const store = useToolBackgroundRequests()
-  const toast = useToast()
-  const route = useRoute()
 
   const state = computed(() => store.value[toolId] as ToolBackgroundState<T> | undefined)
   const loading = computed(() => state.value?.status === 'loading')
   const error = computed(() => state.value?.error ?? null)
   const result = computed(() => (state.value?.result as T) ?? null)
+  const startedAt = computed(() => state.value?.startedAt)
 
   function run(fetchFn: () => Promise<T>, url: string, onSuccess?: () => void) {
     store.value[toolId] = {
@@ -45,22 +44,6 @@ export function useToolBackgroundRequest<T = any>(toolId: string, opts: {
         store.value[toolId].result = data
         store.value[toolId].status = 'success'
         onSuccess?.()
-
-        // Toast if user navigated away from the tool page
-        if (route.path !== opts.path) {
-          toast.add({
-            title: `${opts.title} ready`,
-            description: `Results for ${url}`,
-            icon: 'i-heroicons-check-circle',
-            color: 'success',
-            actions: [{
-              label: 'View Results',
-              onClick: async () => {
-                await navigateTo(opts.path)
-              },
-            }],
-          })
-        }
       })
       .catch((err) => {
         if (!store.value[toolId] || store.value[toolId].status !== 'loading')
@@ -69,15 +52,6 @@ export function useToolBackgroundRequest<T = any>(toolId: string, opts: {
         const message = err.data?.message || err.message || 'Request failed'
         store.value[toolId].error = message
         store.value[toolId].status = 'error'
-
-        if (route.path !== opts.path) {
-          toast.add({
-            title: `${opts.title} failed`,
-            description: message,
-            icon: 'i-heroicons-x-circle',
-            color: 'error',
-          })
-        }
       })
   }
 
@@ -85,5 +59,5 @@ export function useToolBackgroundRequest<T = any>(toolId: string, opts: {
     delete store.value[toolId]
   }
 
-  return { loading, error, result, run, clear, state }
+  return { loading, error, result, startedAt, run, clear, state }
 }

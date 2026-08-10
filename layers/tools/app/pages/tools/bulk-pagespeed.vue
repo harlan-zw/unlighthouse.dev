@@ -77,6 +77,7 @@ const loading = ref(false)
 const error = ref<string | null>(null)
 const results = ref<BulkPSIResult[]>([])
 const summary = ref<BulkResponse['summary'] | null>(null)
+const startedAt = ref<number>()
 const sortColumn = ref<'url' | 'performance' | 'lcp' | 'cls' | 'fcp' | 'tbt'>('performance')
 const sortDirection = ref<'asc' | 'desc'>('desc')
 let eventSource: EventSource | null = null
@@ -89,6 +90,11 @@ const progressStats = computed(() => {
   const completed = results.value.filter(r => r.status === 'success' || r.status === 'error').length
   return { total, queued, processing, completed }
 })
+const progressPercent = computed(() => progressStats.value.total > 0
+  ? (progressStats.value.completed / progressStats.value.total) * 100
+  : 0,
+)
+const { elapsedLabel } = useToolElapsed(startedAt)
 
 const urlCount = computed(() => {
   const urls = urlInput.value.split('\n').map(u => u.trim()).filter(u => u.length > 0)
@@ -212,6 +218,7 @@ async function runTest(urlsOverride?: string[], mode: RunMode = 'replace') {
   stopTest()
 
   loading.value = true
+  startedAt.value = Date.now()
   error.value = null
   if (mode === 'replace') {
     results.value = []
@@ -444,7 +451,7 @@ https://example.com/pricing"
       </div>
 
       <!-- Progress State -->
-      <div v-if="loading && results.length > 0" class="p-4 sm:p-6">
+      <div v-if="loading && results.length > 0" role="status" aria-live="polite" aria-busy="true" class="p-4 sm:p-6">
         <div
           v-motion
           :initial="{ opacity: 0, y: 10 }"
@@ -458,13 +465,13 @@ https://example.com/pricing"
                 Testing {{ progressStats.total }} URLs
               </span>
               <span class="text-amber-700 dark:text-amber-300">
-                {{ progressStats.completed }}/{{ progressStats.total }} complete
+                {{ progressStats.completed }}/{{ progressStats.total }} complete · {{ Math.round(progressPercent) }}% · {{ elapsedLabel }}
               </span>
             </div>
-            <div class="h-2 bg-amber-200 dark:bg-amber-800 rounded-full overflow-hidden">
+            <div role="progressbar" aria-label="Bulk test progress" :aria-valuenow="Math.round(progressPercent)" aria-valuemin="0" aria-valuemax="100" class="h-2 bg-amber-200 dark:bg-amber-800 rounded-full overflow-hidden">
               <div
                 class="h-full bg-amber-500 transition-all duration-300"
-                :style="{ width: `${(progressStats.completed / progressStats.total) * 100}%` }"
+                :style="{ width: `${progressPercent}%` }"
               />
             </div>
           </div>
@@ -472,7 +479,7 @@ https://example.com/pricing"
           <!-- Status breakdown -->
           <div class="flex flex-wrap gap-4 text-sm">
             <div class="flex items-center gap-2">
-              <div class="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              <div class="w-2 h-2 rounded-full bg-amber-500 animate-pulse motion-reduce:animate-none" />
               <span class="text-amber-700 dark:text-amber-300">{{ progressStats.processing }} processing</span>
             </div>
             <div class="flex items-center gap-2">
@@ -492,7 +499,7 @@ https://example.com/pricing"
       </div>
 
       <!-- Initial Loading State (before results arrive) -->
-      <ToolLoadingPill v-else-if="loading" message="Starting bulk test..." color="amber" hint="Connecting to PageSpeed Insights API" />
+      <ToolLoadingPill v-else-if="loading" message="Starting bulk PageSpeed test..." color="amber" :started-at="startedAt" expected="The first result usually arrives within 30 seconds." />
 
       <!-- Error -->
       <UAlert
@@ -682,7 +689,7 @@ https://example.com/pricing"
                       v-else-if="result.status === 'processing'"
                       class="inline-flex items-center justify-center w-10 h-10 rounded-full border-2 border-amber-300 dark:border-amber-700"
                     >
-                      <UIcon name="i-heroicons-arrow-path" class="w-5 h-5 text-amber-500 animate-spin" />
+                      <UIcon name="i-heroicons-arrow-path" class="w-5 h-5 text-amber-500 animate-spin motion-reduce:animate-none" />
                     </div>
                     <span v-else class="text-gray-400">—</span>
                   </td>
@@ -736,7 +743,7 @@ https://example.com/pricing"
                       v-else-if="result.status === 'processing'"
                       class="inline-flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400"
                     >
-                      <UIcon name="i-heroicons-arrow-path" class="w-4 h-4 animate-spin" />
+                      <UIcon name="i-heroicons-arrow-path" class="w-4 h-4 animate-spin motion-reduce:animate-none" />
                       Testing
                     </span>
                     <!-- Success -->

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { CWVCompareResponse, SiteComparison } from '../../../server/api/tools/cwv-compare.post'
-import { watchDebounced } from '@vueuse/core'
+import { useUrlSearchParams, watchDebounced } from '@vueuse/core'
 
 definePageMeta({
   breadcrumb: {
@@ -36,28 +36,30 @@ useToolSeo({
 
 const { trackUse } = useToolTracking('cwv-compare')
 
-const route = useRoute()
+const params = useUrlSearchParams<Record<string, string | undefined>>('history')
 
 const DOMAIN_RE = /^(?:https?:\/\/)?(?:www\.)?([^/]+)/i
 
 const urls = ref<string[]>(['', ''])
 const formFactor = ref<FormFactor>('PHONE')
 const { device: deviceToggle } = useFormFactorBridge(formFactor)
-const { loading, error, result, run: runBg } = useToolBackgroundRequest<CWVCompareResponse>('cwv-compare', {
+const { loading, error, result, startedAt, run: runBg } = useToolBackgroundRequest<CWVCompareResponse>('cwv-compare', {
   title: 'CWV Compare',
   path: '/tools/cwv-compare',
 })
+const loadingContainerRef = ref<HTMLElement | null>(null)
+const { showFloatingLoader } = useToolFloatingLoader(loading, loadingContainerRef)
 const selectedTrendMetric = ref<MetricKey>('lcp')
 
 onMounted(() => {
-  const sitesParam = route.query.sites as string
-  const deviceParam = route.query.device as string
+  const sitesParam = params.sites
+  const deviceParam = params.device
 
   if (deviceParam === 'desktop')
     formFactor.value = 'DESKTOP'
 
   if (sitesParam) {
-    const parsed = sitesParam.split(',').map(s => decodeURIComponent(s.trim())).filter(Boolean)
+    const parsed = sitesParam.split(',').map(s => s.trim()).filter(Boolean)
     if (parsed.length >= 2) {
       urls.value = parsed.slice(0, 4)
       while (urls.value.length < 2)
@@ -69,21 +71,15 @@ onMounted(() => {
 
 watchDebounced(
   urls,
-  async (newUrls) => {
+  (newUrls) => {
     const validUrls = newUrls.filter(u => u.trim())
-    if (validUrls.length >= 2) {
-      await navigateTo({ query: { ...route.query, sites: validUrls.map(u => encodeURIComponent(u)).join(',') } }, { replace: true })
-    }
-    else {
-      const { sites: _, ...rest } = route.query
-      await navigateTo({ query: rest }, { replace: true })
-    }
+    params.sites = validUrls.length >= 2 ? validUrls.join(',') : undefined
   },
   { debounce: 500, deep: true },
 )
 
-watch(formFactor, async (newFactor) => {
-  await navigateTo({ query: { ...route.query, device: newFactor === 'DESKTOP' ? 'desktop' : undefined } }, { replace: true })
+watch(formFactor, (newFactor) => {
+  params.device = newFactor === 'DESKTOP' ? 'desktop' : undefined
 })
 
 function addUrl() {
@@ -253,6 +249,8 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
 
 <template>
   <div class="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+    <ToolFloatingLoader :show="loading && showFloatingLoader" message="Comparing real-user Core Web Vitals..." :started-at="startedAt" color="orange" />
+
     <!-- Hero with racing stripe motif -->
     <section class="relative pt-10 pb-6 lg:pt-12 lg:pb-8 overflow-hidden">
       <!-- Diagonal stripes background -->
@@ -409,18 +407,8 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
             </div>
 
             <!-- Loading State -->
-            <div v-if="loading" class="p-12 text-center">
-              <div class="relative w-20 h-20 mx-auto mb-4">
-                <div class="absolute inset-0 rounded-full border-4 border-orange-200 dark:border-orange-900" />
-                <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-orange-500 animate-spin" />
-                <UIcon name="i-heroicons-scale" class="absolute inset-0 m-auto w-8 h-8 text-orange-500" />
-              </div>
-              <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Gathering performance data...
-              </p>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Fetching CrUX metrics for {{ urls.filter(u => u.trim()).length }} sites
-              </p>
+            <div v-if="loading" ref="loadingContainerRef">
+              <ToolLoadingPill message="Comparing real-user Core Web Vitals..." color="orange" :started-at="startedAt" expected="Usually under 10 seconds." background :hint="`Fetching CrUX metrics for ${urls.filter(u => u.trim()).length} sites.`" />
             </div>
 
             <!-- Error -->

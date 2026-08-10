@@ -109,15 +109,8 @@ const urlInput = ref('')
 const fetchLoading = ref(false)
 const fetchError = ref<string | null>(null)
 const testedUrl = ref<string | null>(null)
-
-const { current: loadingMessage, progress: loadingProgress, start: startMessages, stop: stopMessages } = useLoadingMessages([
-  'Running Lighthouse audit...',
-  'Measuring First Contentful Paint...',
-  'Analyzing Largest Contentful Paint...',
-  'Calculating Total Blocking Time...',
-  'Checking Cumulative Layout Shift...',
-  'Computing performance score...',
-], 2500)
+const fetchStartedAt = ref<number>()
+const loadingMessage = 'Importing metrics from PageSpeed Insights...'
 
 const loadingContainerRef = ref<HTMLElement | ComponentPublicInstance | null>(null)
 const { showFloatingLoader } = useToolFloatingLoader(fetchLoading, loadingContainerRef)
@@ -136,8 +129,8 @@ function fetchFromUrl() {
     return
   fetchError.value = null
   fetchLoading.value = true
+  fetchStartedAt.value = Date.now()
   testedUrl.value = null
-  startMessages()
 
   $fetch('/api/tools/pagespeed-insights', {
     query: { url, strategy: device.value },
@@ -156,14 +149,13 @@ function fetchFromUrl() {
     })
     .finally(() => {
       fetchLoading.value = false
-      stopMessages()
     })
 }
 </script>
 
 <template>
   <div class="min-h-screen">
-    <ToolFloatingLoader :show="fetchLoading && showFloatingLoader" :message="loadingMessage" />
+    <ToolFloatingLoader :show="fetchLoading && showFloatingLoader" :message="loadingMessage" :started-at="fetchStartedAt" color="violet" />
 
     <ToolPageHero title="Lighthouse Score" accent="Calculator" description="See exactly how each metric contributes to your performance score." color="violet" />
 
@@ -196,7 +188,7 @@ function fetchFromUrl() {
                 Fetch Metrics
               </UButton>
             </form>
-            <ToolLoadingPill v-if="fetchLoading" ref="loadingContainerRef" :progress="loadingProgress" :message="loadingMessage" color="violet" hint="Fetching real metrics from PageSpeed Insights." />
+            <ToolLoadingPill v-if="fetchLoading" ref="loadingContainerRef" :message="loadingMessage" color="violet" :started-at="fetchStartedAt" expected="Usually 10 to 30 seconds." />
 
             <p v-if="fetchError" class="mt-2 text-xs text-red-500 pl-1">
               {{ fetchError }}
