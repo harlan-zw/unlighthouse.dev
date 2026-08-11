@@ -18,7 +18,6 @@ export default defineNuxtConfig({
   nuxtDx: {
     report: true,
     sizeBudget: {
-      ignoreModules: ['@nuxt/icon', '@nuxt/ui', '@sentry/nuxt/module', 'motion-v'],
       overridesKb: { 'server/plugins/sentry.ts': 326 },
     },
   },
