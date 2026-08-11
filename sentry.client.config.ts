@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/nuxt'
-import { createSentryDataCollection, SENTRY_DSN } from './shared/sentry'
+import { createSentryDataCollection, filterKnownClientNoise, SENTRY_DSN } from './shared/sentry'
 
 if (!import.meta.dev) {
   Sentry.init({
@@ -7,6 +7,8 @@ if (!import.meta.dev) {
     environment: 'production',
     tracesSampleRate: 0.05,
     dataCollection: createSentryDataCollection(),
+    beforeSend: filterKnownClientNoise,
+    denyUrls: [/^iabjs:\/\//i],
     ignoreErrors: [
       /Failed to fetch dynamically imported module/i,
       /Importing a module script failed/i,

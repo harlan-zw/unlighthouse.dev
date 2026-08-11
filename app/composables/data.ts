@@ -36,7 +36,7 @@ export async function useCurrentDocPage() {
   const route = useRoute()
 
   const collection = getCollectionForPath(route.path)
-  const { data } = await useAsyncData(`docs-current:${route.path}`, async () => {
+  const { data, error } = await useAsyncData(`docs-current:${route.path}`, async () => {
     const [pageData, surroundData] = await Promise.all([
       queryCollection(collection).path(route.path).first(),
       queryCollectionItemSurroundings(collection, route.path, {
@@ -73,8 +73,12 @@ export async function useCurrentDocPage() {
     }
   })
 
-  if (!data.value)
-    throw createError({ statusCode: 500, statusMessage: `Failed to load page: ${route.path}`, fatal: true })
+  if (!data.value) {
+    if (error.value)
+      throw error.value
+
+    throw createError({ statusCode: 404, statusMessage: `Page not found: ${route.path}`, fatal: true })
+  }
 
   const pageData = structuredClone(toRaw(data.value.page))
   modifyRelativeDocLinksWithFramework(pageData.body.value)
