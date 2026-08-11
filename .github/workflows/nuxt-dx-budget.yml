@@ -35,6 +35,8 @@ jobs:
       - run: pnpm build
         env:
           NODE_OPTIONS: --max-old-space-size=14000
+          NUXT_GITHUB_ACCESS_TOKEN: ${{ secrets.NUXT_GITHUB_ACCESS_TOKEN || github.token }}
+          NUXT_GITHUB_AUTH_TOKEN: ${{ secrets.NUXT_GITHUB_AUTH_TOKEN || github.token }}
       - uses: harlan-zw/harlan-nuxt/.github/actions/nuxt-dx-budget@main
         with:
           report-path: .nuxt/dx/size-budget.json
