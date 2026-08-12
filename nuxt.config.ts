@@ -3,11 +3,8 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { defineNuxtConfig } from 'nuxt/config'
 import { resolve } from 'pathe'
 import { gray, logger } from './logger'
+import { CLOUDFLARE_REQUIRED_SECRETS } from './shared/cloudflare'
 import { SENTRY_DSN, sentryRelease } from './shared/sentry'
-
-const staticPageHeaders = {
-  'cache-control': 'public, max-age=300, s-maxage=86400, stale-while-revalidate=604800',
-}
 
 const hasSentryAuthToken = Boolean(process.env.SENTRY_AUTH_TOKEN)
   || existsSync('.env.sentry-build-plugin')
@@ -16,6 +13,7 @@ export default defineNuxtConfig({
   extends: ['./layers/tools', './layers/admin'],
 
   modules: [
+    '@harlan-zw/nuxt-cloudflare',
     '@harlan-zw/nuxt-dx',
     '@harlan-zw/nuxt-github-sponsors',
     '@nuxtjs/seo',
@@ -63,6 +61,11 @@ export default defineNuxtConfig({
       })
     },
   ],
+
+  nuxtCloudflare: {
+    kvCache: { binding: 'CACHE' },
+    requiredSecrets: CLOUDFLARE_REQUIRED_SECRETS,
+  },
 
   sitemap: {
     zeroRuntime: true,
@@ -114,7 +117,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     githubSponsors: {
-      token: process.env.NUXT_GITHUB_AUTH_TOKEN || '',
+      token: '', // NUXT_GITHUB_SPONSORS_TOKEN
     },
     oauth: {
       github: {
@@ -135,7 +138,7 @@ export default defineNuxtConfig({
     githubAccessToken: '', // NUXT_GITHUB_ACCESS_TOKEN
     githubAuthToken: '', // NUXT_GITHUB_AUTH_TOKEN
     githubAuthClientId: '', // NUXT_GITHUB_AUTH_CLIENT_ID
-    githubAuthClientSecret: '', // NUXT_GITHUB_AUTH_SECRET_ID
+    githubAuthClientSecret: '', // NUXT_GITHUB_AUTH_CLIENT_SECRET
     googleApiToken: '', // NUXT_GOOGLE_API_TOKEN (PageSpeed Insights)
     cloudflareAccountId: '', // NUXT_CLOUDFLARE_ACCOUNT_ID
     cloudflareAnalyticsApiToken: '', // NUXT_CLOUDFLARE_ANALYTICS_API_TOKEN
@@ -196,11 +199,6 @@ export default defineNuxtConfig({
         account_id: '5904138d55ca25d5670dca6adf99894e',
         compatibility_date: '2025-01-01',
         compatibility_flags: ['nodejs_compat'],
-        // Required for application redirects and headers to run before static HTML assets.
-        // This trades static asset-only requests for Worker invocations.
-        assets: {
-          run_worker_first: true,
-        },
         limits: {
           cpu_ms: 120_000, // 2 min for slow PSI calls
         },
@@ -252,17 +250,9 @@ export default defineNuxtConfig({
           },
         },
         vars: {
-          NUXT_SESSION_PASSWORD: process.env.NUXT_SESSION_PASSWORD || '',
           NUXT_OAUTH_GITHUB_CLIENT_ID: process.env.NUXT_OAUTH_GITHUB_CLIENT_ID || '',
-          NUXT_OAUTH_GITHUB_CLIENT_SECRET: process.env.NUXT_OAUTH_GITHUB_CLIENT_SECRET || '',
           NUXT_OAUTH_GITHUB_REDIRECT_URL: process.env.NUXT_OAUTH_GITHUB_REDIRECT_URL || '',
-          NUXT_GITHUB_ACCESS_TOKEN: process.env.NUXT_GITHUB_ACCESS_TOKEN || '',
-          NUXT_EMAIL_OCTOPUS_TOKEN: process.env.NUXT_EMAIL_OCTOPUS_TOKEN || '',
-          NUXT_GITHUB_AUTH_TOKEN: process.env.NUXT_GITHUB_AUTH_TOKEN || '',
-          NUXT_GITHUB_SPONSORS_TOKEN: process.env.NUXT_GITHUB_AUTH_TOKEN || '',
-          NUXT_CLOUDFLARE_ANALYTICS_API_TOKEN: process.env.NUXT_CLOUDFLARE_ANALYTICS_API_TOKEN || '',
           NUXT_CLOUDFLARE_ACCOUNT_ID: process.env.NUXT_CLOUDFLARE_ACCOUNT_ID || '',
-          NUXT_GOOGLE_API_TOKEN: process.env.NUXT_GOOGLE_API_TOKEN || '',
         },
       },
     },
@@ -279,10 +269,6 @@ export default defineNuxtConfig({
       tasks: true,
     },
     storage: {
-      cache: {
-        driver: 'cloudflare-kv-binding',
-        binding: 'CACHE',
-      },
       kv: {
         driver: 'cloudflare-kv-binding',
         binding: 'KV',
@@ -427,17 +413,17 @@ export default defineNuxtConfig({
     '/learn-lighthouse/inp/fix': { redirect: { to: '/learn-lighthouse/inp#common-inp-issues', statusCode: 301 } },
     '/learn-lighthouse/seo/fix': { redirect: { to: '/learn-lighthouse/seo#all-seo-audits', statusCode: 301 } },
 
-    '/': { prerender: true, headers: staticPageHeaders },
-    '/guide/**': { prerender: true, headers: staticPageHeaders },
-    '/integrations/**': { prerender: true, headers: staticPageHeaders },
-    '/api-doc': { prerender: true, headers: staticPageHeaders },
-    '/api-doc/**': { prerender: true, headers: staticPageHeaders },
-    '/glossary': { prerender: true, headers: staticPageHeaders },
-    '/glossary/**': { prerender: true, headers: staticPageHeaders },
-    '/learn-lighthouse': { prerender: true, headers: staticPageHeaders },
-    '/learn-lighthouse/**': { prerender: true, headers: staticPageHeaders },
-    '/tools': { prerender: true, headers: staticPageHeaders },
-    '/tools/**': { prerender: true, headers: staticPageHeaders },
+    '/': { prerender: true },
+    '/guide/**': { prerender: true },
+    '/integrations/**': { prerender: true },
+    '/api-doc': { prerender: true },
+    '/api-doc/**': { prerender: true },
+    '/glossary': { prerender: true },
+    '/glossary/**': { prerender: true },
+    '/learn-lighthouse': { prerender: true },
+    '/learn-lighthouse/**': { prerender: true },
+    '/tools': { prerender: true },
+    '/tools/**': { prerender: true },
 
     // auth endpoints must not be cached or prerendered
     '/auth/**': { prerender: false, cache: false, headers: { 'cache-control': 'no-store' } },

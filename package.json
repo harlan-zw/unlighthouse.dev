@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "nuxi dev",
+    "deploy": "node --experimental-strip-types scripts/deploy-cloudflare.ts",
     "build": "nuxi prepare && nuxi build",
     "postinstall": "nuxt prepare && simple-git-hooks",
     "lint": "eslint .",
@@ -38,6 +39,7 @@
   "devDependencies": {
     "@antfu/eslint-config": "catalog:",
     "@cloudflare/workers-types": "catalog:",
+    "@harlan-zw/nuxt-cloudflare": "catalog:",
     "@harlan-zw/nuxt-dx": "catalog:",
     "@harlan-zw/nuxt-github-sponsors": "catalog:",
     "@iconify-json/carbon": "catalog:",
