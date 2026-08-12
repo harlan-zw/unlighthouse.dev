@@ -1,7 +1,5 @@
 import { spawn } from 'node:child_process'
-import { randomUUID } from 'node:crypto'
-import { tmpdir } from 'node:os'
-import { join, resolve } from 'node:path'
+import { resolve } from 'node:path'
 import { resolveWorkerSecrets, withWorkerSecretsFile } from '@harlan-zw/nuxt-cloudflare/deploy'
 import { CLOUDFLARE_REQUIRED_SECRETS } from '../shared/cloudflare.ts'
 
@@ -24,7 +22,6 @@ async function main(): Promise<void> {
     throw new Error(`Missing Worker secrets: ${resolvedSecrets.names.join(', ')}`)
 
   await withWorkerSecretsFile({
-    path: join(tmpdir(), `unlighthouse-worker-secrets-${process.pid}-${randomUUID()}.json`),
     secrets: resolvedSecrets.secrets,
     use: secretsPath => runCommand(
       resolve(process.cwd(), 'node_modules/.bin/wrangler'),
