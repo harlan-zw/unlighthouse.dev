@@ -101,6 +101,15 @@ const urlCount = computed(() => {
   return Math.min(urls.length, 10)
 })
 
+// Five run at a time server side, each PageSpeed run taking about half a minute.
+// Saying so up front is the difference between waiting and wondering.
+const estimatedWaitLabel = computed(() => {
+  if (urlCount.value === 0)
+    return ''
+  const seconds = Math.ceil(urlCount.value / 5) * 35
+  return seconds < 60 ? `about ${seconds}s` : `about ${Math.ceil(seconds / 60)} min`
+})
+
 const sortedResults = computed(() => {
   if (results.value.length === 0)
     return []
@@ -403,7 +412,7 @@ https://example.com/pricing"
             />
             <div class="mt-2 flex items-center justify-between">
               <span class="text-xs text-gray-500 dark:text-gray-400">
-                {{ urlCount }}/10 URLs
+                {{ urlCount }}/10 URLs<template v-if="estimatedWaitLabel">, {{ estimatedWaitLabel }} to run</template>
               </span>
               <div class="flex gap-2">
                 <UButton
