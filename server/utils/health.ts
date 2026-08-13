@@ -34,6 +34,8 @@ export interface ToolBreakdown {
   lookups: number
   statused: number
   errors: number
+  /** Distinct targets behind those errors. One target is a bad URL, not an outage. */
+  errorQueries: number
 }
 
 export interface HealthMetrics {
@@ -126,10 +128,28 @@ function toolFindings(tools: HealthMetrics['tools']): { findings: Finding[], war
       findings.push({ status: 'AMBER', message })
   }
 
+  // One broken tool hides inside a healthy site-wide rate: cwv-check erroring on
+  // 4 of 6 runs is 15% of a 26-run day and would otherwise pass unreported.
+  //
+  // Errors concentrated on a single target are a different fact. On 2026-08-13
+  // all four cwv-check failures were one visitor retrying one URL that upstream
+  // answered 400. That visitor still got nothing, so it is worth saying, but the
+  // tool works and calling it an outage teaches the report to be ignored.
   for (const tool of byTool) {
-    if (tool.statused < HEALTH_THRESHOLDS.minToolStatusedForRate || tool.errors < tool.statused)
+    if (tool.statused < HEALTH_THRESHOLDS.minToolStatusedForRate)
       continue
-    findings.push({ status: 'RED', message: `Tool ${tool.tool} failed all ${tool.statused} recorded runs in the last 24h` })
+    const rate = tool.errors / tool.statused
+    if (rate < HEALTH_THRESHOLDS.amberErrorRate)
+      continue
+    const share = `${tool.errors} of ${tool.statused} recorded runs (${percent(tool.errors, tool.statused)})`
+    if (tool.errorQueries <= 1) {
+      warnings.push(`Tool ${tool.tool} errored on ${share}, all for one target`)
+      continue
+    }
+    findings.push({
+      status: rate >= HEALTH_THRESHOLDS.redErrorRate ? 'RED' : 'AMBER',
+      message: `Tool ${tool.tool} errored on ${share} across ${tool.errorQueries} targets`,
+    })
   }
 
   // A dead window is only meaningful against a baseline that proves traffic
@@ -140,8 +160,12 @@ function toolFindings(tools: HealthMetrics['tools']): { findings: Finding[], war
     findings.push({ status: 'AMBER', message: `Tool traffic fell to ${last24h.lookups} lookups against a ${Math.round(baselineDaily)}/day baseline` })
   }
 
-  if (last24h.slow > 0)
-    warnings.push(`${plural(last24h.slow, 'lookup', 'lookups')} took over ${HEALTH_THRESHOLDS.slowDurationMs / 1000}s, slowest ${last24h.maxDurationMs}ms`)
+  // The tools wrap PageSpeed Insights, which is slow by nature, so duration is a
+  // warning with the average alongside it rather than a verdict on its own.
+  if (last24h.slow > 0) {
+    const average = last24h.avgDurationMs === null ? '' : `, average ${Math.round(last24h.avgDurationMs / 100) / 10}s`
+    warnings.push(`${plural(last24h.slow, 'lookup', 'lookups')} of ${last24h.statused} took over ${HEALTH_THRESHOLDS.slowDurationMs / 1000}s${average}, slowest ${last24h.maxDurationMs}ms`)
+  }
 
   return { findings, warnings }
 }

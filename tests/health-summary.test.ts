@@ -72,22 +72,52 @@ describe('summarizeHealth', () => {
     assert.equal(red.status, 'RED')
   })
 
-  it('convicts a single tool that fails every recorded run', () => {
+  it('convicts a tool that errors on most of its runs while the site rate stays low', () => {
     const summary = summarize(metrics({
       last24h: { lookups: 30, statused: 25, errors: 5 },
       byTool: [
-        { tool: 'pagespeed-insights', lookups: 20, statused: 20, errors: 0 },
-        { tool: 'cwv-history', lookups: 6, statused: 5, errors: 5 },
+        { tool: 'pagespeed-insights', lookups: 20, statused: 20, errors: 0, errorQueries: 0 },
+        { tool: 'cwv-history', lookups: 6, statused: 5, errors: 5, errorQueries: 4 },
       ],
     }))
     assert.equal(summary.status, 'RED')
-    assert.deepEqual(summary.reasons, ['Tool cwv-history failed all 5 recorded runs in the last 24h'])
+    assert.deepEqual(summary.reasons, ['Tool cwv-history errored on 5 of 5 recorded runs (100%) across 4 targets'])
+  })
+
+  it('reproduces the live case a site-wide rate hides', () => {
+    const summary = summarize(metrics({
+      last24h: { lookups: 26, statused: 26, errors: 4 },
+      byTool: [
+        { tool: 'cwv-check', lookups: 6, statused: 6, errors: 4, errorQueries: 3 },
+        { tool: 'pagespeed-insights', lookups: 6, statused: 6, errors: 0, errorQueries: 0 },
+      ],
+    }))
+    assert.equal(summary.status, 'RED')
+    assert.deepEqual(summary.reasons, ['Tool cwv-check errored on 4 of 6 recorded runs (67%) across 3 targets'])
+  })
+
+  it('turns amber on a tool erroring above a quarter of its runs', () => {
+    const summary = summarize(metrics({
+      last24h: { lookups: 40, statused: 40, errors: 3 },
+      byTool: [{ tool: 'lcp', lookups: 8, statused: 8, errors: 3, errorQueries: 2 }],
+    }))
+    assert.equal(summary.status, 'AMBER')
+    assert.deepEqual(summary.reasons, ['Tool lcp errored on 3 of 8 recorded runs (38%) across 2 targets'])
+  })
+
+  it('keeps errors concentrated on one target out of the verdict', () => {
+    const summary = summarize(metrics({
+      last24h: { lookups: 26, statused: 26, errors: 4 },
+      byTool: [{ tool: 'cwv-check', lookups: 6, statused: 6, errors: 4, errorQueries: 1 }],
+    }))
+    assert.equal(summary.status, 'GREEN')
+    assert.deepEqual(summary.warnings, ['Tool cwv-check errored on 4 of 6 recorded runs (67%), all for one target'])
   })
 
   it('leaves a low-sample tool failure alone', () => {
     const summary = summarize(metrics({
       last24h: { lookups: 8, statused: 4, errors: 4 },
-      byTool: [{ tool: 'cwv-history', lookups: 4, statused: 4, errors: 4 }],
+      byTool: [{ tool: 'cwv-history', lookups: 4, statused: 4, errors: 4, errorQueries: 4 }],
     }))
     assert.equal(summary.status, 'GREEN')
   })
@@ -107,7 +137,7 @@ describe('summarizeHealth', () => {
     const summary = summarize(metrics({
       feedback: { last24h: { total: 1, up: 0, down: 1, comments: 0 } },
       last24h: { lookups: 20, statused: 20, errors: 20 },
-      byTool: [{ tool: 'lcp', lookups: 20, statused: 20, errors: 20 }],
+      byTool: [{ tool: 'lcp', lookups: 20, statused: 20, errors: 20, errorQueries: 9 }],
     }))
     assert.equal(summary.status, 'RED')
     assert.equal(summary.reasons[0], 'Tool error rate is 100% over 20 recorded runs')
@@ -115,9 +145,9 @@ describe('summarizeHealth', () => {
   })
 
   it('warns on slow lookups without changing the verdict', () => {
-    const summary = summarize(metrics({ last24h: { lookups: 20, statused: 20, slow: 2, maxDurationMs: 24000 } }))
+    const summary = summarize(metrics({ last24h: { lookups: 20, statused: 20, slow: 2, avgDurationMs: 25762, maxDurationMs: 76201 } }))
     assert.equal(summary.status, 'GREEN')
-    assert.deepEqual(summary.warnings, ['2 lookups took over 10s, slowest 24000ms'])
+    assert.deepEqual(summary.warnings, ['2 lookups of 20 took over 10s, average 25.8s, slowest 76201ms'])
   })
 
   it('warns when a week of feedback is mostly negative', () => {

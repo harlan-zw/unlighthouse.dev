@@ -16,6 +16,8 @@ import { summarizeHealth } from '../utils/health'
 
 const DAY_SECONDS = 24 * 60 * 60
 const SLOW_MS = 10_000
+// Ordered by errors first, so a low-traffic tool that is failing cannot fall
+// off the end of the list and read as healthy.
 const TOP_TOOLS = 12
 
 interface HealthResponse extends HealthSummary {
@@ -83,8 +85,9 @@ async function readMetrics(db: D1Database, nowSeconds: number): Promise<Probe<He
     db.prepare(`SELECT tool,
         COUNT(*) AS lookups,
         COALESCE(SUM(status IS NOT NULL), 0) AS statused,
-        COALESCE(SUM(status = 'error'), 0) AS errors
-      FROM tool_lookups WHERE created_at >= ? GROUP BY tool ORDER BY lookups DESC LIMIT ?`).bind(dayAgo, TOP_TOOLS),
+        COALESCE(SUM(status = 'error'), 0) AS errors,
+        COUNT(DISTINCT CASE WHEN status = 'error' THEN query END) AS error_queries
+      FROM tool_lookups WHERE created_at >= ? GROUP BY tool ORDER BY errors DESC, lookups DESC LIMIT ?`).bind(dayAgo, TOP_TOOLS),
   ]).then(results => ({ _tag: 'ok' as const, results })).catch((error: unknown) => ({
     _tag: 'error' as const,
     message: error instanceof Error ? error.message : String(error),
@@ -112,6 +115,7 @@ async function readMetrics(db: D1Database, nowSeconds: number): Promise<Probe<He
           lookups: count(row.lookups),
           statused: count(row.statused),
           errors: count(row.errors),
+          errorQueries: count(row.error_queries),
         })),
       },
     },

@@ -27,7 +27,7 @@ Produce one read-only morning report that answers two questions first: what did 
 5. Detect anomalies as steps, not levels:
    - Tool error rate: `d1.tools24h` against `d1.toolsPrior6d`. A rate that held all week is a known fault; the same rate appearing overnight is the lead.
    - Traffic: `d1.tools24h.lookups` and `d1.sessions24h` against the six-day baseline. A collapse means the tools broke silently.
-   - Per-tool: a tool in `d1.toolsByTool24h` that errors on every recorded run is broken, whatever the site-wide rate says.
+   - Per-tool: a tool in `d1.toolsByTool24h` erroring on a quarter or more of its recorded runs is broken, whatever the site-wide rate says. Check `d1.toolErrorFingerprints` for how many distinct targets those errors cover: many targets is an outage, one target repeated is a visitor stuck on a URL the upstream API rejects, which is a UX finding rather than an incident.
    - `status` is null for lookups written by a page load, so every rate is taken over `statused`, never over `lookups`.
    - `d1.topQueries24h` shows what people came to do. A query repeated by many sessions with errors is the highest-value fix on the page.
 6. Write `docs/ops/checkins/YYYY-MM-DD.md`:
