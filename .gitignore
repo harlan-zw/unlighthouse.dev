@@ -29,3 +29,6 @@ wrangler.toml
 
 page-speed.dev
 lighthouse
+
+# Daily check-in archives hold user feedback text; this repo is public
+docs/ops/checkins/
