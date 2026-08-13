@@ -1,9 +1,11 @@
 name: Deploy to Cloudflare
 
+# Runs only after CI passes on main. Before, this workflow built and shipped every
+# push to main with no check of any kind in front of it.
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -11,29 +13,37 @@ permissions:
 
 concurrency:
   group: deploy-cloudflare-production
-  cancel-in-progress: true
+  # A deploy in flight must finish. Wrangler uploads and activates a Worker
+  # version, and cancelling part-way leaves it uploaded but not activated.
+  cancel-in-progress: false
 
 jobs:
   deploy:
+    # `github.sha` is the default branch tip for a `workflow_run` event, not the
+    # commit the run covered, so it cannot be compared against `head_sha` and
+    # cannot be checked out. Use `head_sha` throughout.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
-
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 22
-          cache: pnpm
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
-      - run: pnpm install --frozen-lockfile
+      # Node was pinned to 22 here while every other site had moved to 24.
+      - uses: harlan-zw/harlan-nuxt/.github/actions/setup@main
+        with:
+          # `postinstall` runs `nuxt prepare`, which the build depends on.
+          install-args: ''
 
       - name: Cache for Nuxt SEO
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: node_modules/.cache/nuxt-seo
-          key: nuxt-skew-${{ github.sha }}
+          key: nuxt-skew-${{ github.event.workflow_run.head_sha || github.sha }}
           restore-keys: |
             nuxt-skew-
 
