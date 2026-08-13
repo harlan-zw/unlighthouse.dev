@@ -807,7 +807,7 @@ const totalResourceSize = computed(() => {
         </div>
 
         <!-- Feedback -->
-        <ToolFeedback tool-id="pagespeed-insights" :context="{ url: urlInput, strategy }" />
+        <ToolFeedback tool-id="pagespeed-insights" :ready="!!result" :context="{ url: urlInput, strategy }" />
 
         <!-- Related Guides -->
         <div class="text-center mt-12">

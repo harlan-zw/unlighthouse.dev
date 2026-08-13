@@ -562,7 +562,7 @@ const cwvMetrics = computed(() => {
         </div>
 
         <!-- Feedback -->
-        <ToolFeedback tool-id="cwv-check" :context="{ url: urlInput, strategy }" />
+        <ToolFeedback tool-id="cwv-check" :ready="!!result" :context="{ url: urlInput, strategy }" />
       </div>
 
       <ToolEmptyState v-if="!result && !loading && !error" icon="i-heroicons-check-badge" message="Enter a URL to check Core Web Vitals" />
