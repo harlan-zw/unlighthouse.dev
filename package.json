@@ -16,6 +16,7 @@
     "lint:docs": "markdownlint ./content && case-police 'content/**/*.md' *.md",
     "lint:docs:fix": "markdownlint ./content --fix && case-police 'content/**/*.md' *.md --fix",
     "lint:links": "node check_external_links.mjs",
+    "checkin": "node scripts/tools/daily-checkin-data.mjs --save",
     "test": "node --test --experimental-strip-types tests/*.test.ts",
     "typecheck": "nuxt typecheck",
     "twoslash:verify": "nuxt-content-twoslash verify --content-dir content"
