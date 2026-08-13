@@ -26,6 +26,7 @@
     "agents": "catalog:",
     "drizzle-orm": "catalog:",
     "fuse.js": "catalog:",
+    "h3": "catalog:",
     "nuxt-auth-utils": "catalog:",
     "pathe": "catalog:",
     "reka-ui": "catalog:",

@@ -28,7 +28,10 @@ export async function validateUrl(url?: string) {
     method: 'HEAD',
     timeout: 5_000,
     redirect: 'follow',
-  }).catch(() => null)
+  }).catch((error) => {
+    console.warn(`[url-validation] URL is unreachable: ${normalized}`, error)
+    return null
+  })
 
   if (!reachable)
     throw createError({ message: `URL not reachable: ${normalized}`, statusCode: 400 })
