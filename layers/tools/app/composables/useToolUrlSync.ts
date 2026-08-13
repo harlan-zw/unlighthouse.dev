@@ -1,4 +1,5 @@
-import { useUrlSearchParams, watchDebounced } from '@vueuse/core'
+import { watchDebounced } from '@vueuse/core'
+import { readToolQueryValue, replaceToolQuery } from '../utils/tool-url'
 
 interface ToolUrlSyncOptions {
   /** Query param name for the URL input (default: 'url') */
@@ -13,13 +14,20 @@ interface ToolUrlSyncOptions {
 
 export function useToolUrlSync(urlInput: Ref<string>, options: ToolUrlSyncOptions = {}) {
   const { paramName = 'url', extraParams, onReady, debounce = 500 } = options
-  const params = useUrlSearchParams<Record<string, string | undefined>>('history')
+  const route = useRoute()
+  const router = useRouter()
+
+  function syncQueryParam(paramKey: string, value: string, defaultValue?: string) {
+    void replaceToolQuery(router, paramKey, value, defaultValue).catch((error) => {
+      console.error('[tool-url] Failed to sync query parameter', error)
+    })
+  }
 
   onMounted(() => {
-    const urlParam = params[paramName]
+    const urlParam = readToolQueryValue(route.query[paramName])
     if (extraParams) {
       for (const [queryKey, ref] of Object.entries(extraParams)) {
-        const val = params[queryKey]
+        const val = readToolQueryValue(route.query[queryKey])
         if (val)
           ref.value = val
       }
@@ -33,7 +41,7 @@ export function useToolUrlSync(urlInput: Ref<string>, options: ToolUrlSyncOption
   watchDebounced(
     urlInput,
     (newUrl) => {
-      params[paramName] = newUrl || undefined
+      syncQueryParam(paramName, newUrl)
     },
     { debounce },
   )
@@ -41,7 +49,7 @@ export function useToolUrlSync(urlInput: Ref<string>, options: ToolUrlSyncOption
   /** Sync a single query param reactively */
   function syncParam(paramKey: string, value: Ref<string>, defaultValue?: string) {
     watch(value, (newVal) => {
-      params[paramKey] = defaultValue && newVal === defaultValue ? undefined : newVal
+      syncQueryParam(paramKey, newVal, defaultValue)
     })
   }
 
