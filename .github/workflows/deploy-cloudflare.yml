@@ -34,7 +34,7 @@ jobs:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       # Node was pinned to 22 here while every other site had moved to 24.
-      - uses: harlan-zw/harlan-nuxt/.github/actions/setup@main
+      - uses: harlan-zw/harlan-nuxt/.github/actions/harlan-desktop-setup@main
         with:
           # `postinstall` runs `nuxt prepare`, which the build depends on.
           install-args: ''
