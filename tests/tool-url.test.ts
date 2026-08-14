@@ -1,7 +1,11 @@
 /* eslint-disable test/no-import-node-test */
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { replaceToolQuery } from '../layers/tools/app/utils/tool-url.ts'
+import { readToolQueryValue, replaceToolQuery } from '../layers/tools/app/utils/tool-url.ts'
+
+test('reads the first query value when repeated values include empty entries', () => {
+  assert.equal(readToolQueryValue([null, 'https://example.com']), undefined)
+})
 
 test('replaces tool query through the router without pre-encoding values', async () => {
   const locations: unknown[] = []
