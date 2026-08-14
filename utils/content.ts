@@ -84,3 +84,15 @@ export function markStyleTextAsHydrationSafe(payload: any): void {
     },
   )
 }
+
+interface ContentPage {
+  body?: {
+    value?: unknown
+  }
+}
+
+export function prepareContentForHydration<T extends ContentPage>(page: T): T {
+  const prepared = structuredClone(page)
+  markStyleTextAsHydrationSafe(prepared.body?.value)
+  return prepared
+}
