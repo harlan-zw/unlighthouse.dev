@@ -9,6 +9,20 @@ import { SENTRY_DSN, sentryRelease } from './shared/sentry'
 const hasSentryAuthToken = Boolean(process.env.SENTRY_AUTH_TOKEN)
   || existsSync('.env.sentry-build-plugin')
 
+// workerd installs its Node-compatible `console` as soon as anything in the
+// bundle imports `node:console` (undici, via node-fetch-native, does). That
+// console declares `createTask` but throws ERR_METHOD_NOT_IMPLEMENTED when it
+// is called. `hookable` feature-detects the property once at module scope and
+// then calls it on every hook, so every non-prerendered route returned a 500.
+//
+// The swap happens at link time, so no import ordering avoids it and a Nitro
+// plugin runs far too late. This banner is the only code that runs before
+// hookable's module body. It probes the method and, when the probe throws,
+// removes it so hookable's detection fails and it uses its own no-op runner.
+// Wrapped in an IIFE: a bare `var` at chunk scope collides with Terser's own
+// minified bindings and fails the build.
+const workerdConsoleTaskFix = `;(function(){try{var c=globalThis.console;if(c&&typeof c.createTask==="function"&&!c.__ctProbed){c.__ctProbed=1;try{c.createTask("probe")}catch(e){c.createTask=void 0}}}catch(e){}})();`
+
 export default defineNuxtConfig({
   extends: ['./layers/tools', './layers/admin'],
 
@@ -183,6 +197,11 @@ export default defineNuxtConfig({
   },
 
   nitro: {
+    rollupConfig: {
+      output: {
+        banner: workerdConsoleTaskFix,
+      },
+    },
     plugins: [
       resolve('./server/plugins/escape-inline-payload.ts'),
     ],
