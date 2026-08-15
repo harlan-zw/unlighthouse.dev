@@ -1,5 +1,5 @@
 import { titleCase } from 'scule'
-import { modifyRelativeDocLinksWithFramework, prepareContentForHydration } from '~~/utils/content'
+import { modifyRelativeDocLinksWithFramework } from '~~/utils/content'
 import { useAsyncData } from '#imports'
 
 export async function useStats() {
@@ -44,7 +44,7 @@ export async function useCurrentDocPage() {
       }),
     ])
 
-    if (!pageData?.body?.value) {
+    if (!pageData?.body?.nodes) {
       throw createError({ statusCode: 404, statusMessage: `Page not found: ${route.path}`, fatal: true })
     }
 
@@ -80,8 +80,9 @@ export async function useCurrentDocPage() {
     throw createError({ statusCode: 404, statusMessage: `Page not found: ${route.path}`, fatal: true })
   }
 
-  const pageData = prepareContentForHydration(toRaw(data.value.page))
-  modifyRelativeDocLinksWithFramework(pageData.body.value)
+  const pageData = structuredClone(toRaw(data.value.page))
+  modifyRelativeDocLinksWithFramework(pageData.body.nodes)
+  markStyleTextAsHydrationSafe(pageData.body.nodes)
 
   if (Array.isArray(pageData.relatedPages)) {
     pageData.relatedPages = pageData.relatedPages.map((page: any) => ({

@@ -1,5 +1,15 @@
 <script setup lang="ts">
+import type { ShikiTransformer } from 'shiki'
+import shiki from '@comark/nuxt/plugins/shiki'
+import githubLight from '@shikijs/themes/github-light'
+import materialThemePalenight from '@shikijs/themes/material-theme-palenight'
 import { formatTimeAgo } from '@vueuse/core'
+import { transformerColorHighlight } from 'shiki-transformer-color-highlight'
+
+const markdownPlugins = [shiki({
+  themes: { light: githubLight, dark: materialThemePalenight },
+  transformers: [transformerColorHighlight() as unknown as ShikiTransformer],
+})]
 
 definePageMeta({
   breadcrumb: {
@@ -105,7 +115,7 @@ const HighlightedVersion = defineComponent({
                   Latest
                 </UBadge>
               </div>
-              <MDC :value="release.body" />
+              <Markdown :value="release.body" :plugins="markdownPlugins" />
             </UCard>
           </li>
         </ul>

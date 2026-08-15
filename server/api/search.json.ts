@@ -1,4 +1,4 @@
-import { queryCollectionSearchSections } from '@nuxt/content/server'
+import { queryCollectionSearchSections } from '@harlan-zw/comark-content/server'
 import { toolCatalog } from '~~/shared/tool-catalog'
 
 const toolSearchSections = [
