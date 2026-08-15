@@ -44,7 +44,7 @@ export async function useCurrentDocPage() {
       }),
     ])
 
-    if (!pageData?.body?.value) {
+    if (!pageData?.body?.nodes) {
       throw createError({ statusCode: 404, statusMessage: `Page not found: ${route.path}`, fatal: true })
     }
 
@@ -81,8 +81,8 @@ export async function useCurrentDocPage() {
   }
 
   const pageData = structuredClone(toRaw(data.value.page))
-  modifyRelativeDocLinksWithFramework(pageData.body.value)
-  markStyleTextAsHydrationSafe(pageData.body.value)
+  modifyRelativeDocLinksWithFramework(pageData.body.nodes)
+  markStyleTextAsHydrationSafe(pageData.body.nodes)
 
   if (Array.isArray(pageData.relatedPages)) {
     pageData.relatedPages = pageData.relatedPages.map((page: any) => ({

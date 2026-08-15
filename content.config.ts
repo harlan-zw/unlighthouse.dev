@@ -1,12 +1,12 @@
 import { existsSync } from 'node:fs'
-import { defineCollection, defineContentConfig } from '@nuxt/content'
+import { defineCollection, defineContentConfig } from '@harlan-zw/comark-content'
 import { defineRobotsSchema } from '@nuxtjs/robots/content'
 import { defineSitemapSchema } from '@nuxtjs/sitemap/content'
 import { defineOgImageSchema } from 'nuxt-og-image/content'
 import { defineSchemaOrgSchema } from 'nuxt-schema-org/content'
 import { relative, resolve } from 'pathe'
 import { z } from 'zod'
-import { logger } from './logger'
+import { logger } from './logger.ts'
 
 const schema = z.object({
   icon: z.string().optional(),

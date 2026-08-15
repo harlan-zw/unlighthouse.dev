@@ -17,9 +17,10 @@ export default defineNuxtConfig({
     '@harlan-zw/nuxt-dx',
     '@harlan-zw/nuxt-github-sponsors',
     '@nuxtjs/seo',
+    '@comark/nuxt',
     '@nuxt/ui',
     ['motion-v/nuxt', { directives: true }],
-    '@nuxt/content',
+    '@harlan-zw/comark-content',
     '@vueuse/nuxt',
     'nitro-cloudflare-dev',
     '@nuxt/scripts',
@@ -71,7 +72,6 @@ export default defineNuxtConfig({
     zeroRuntime: true,
     exclude: [
       '**/.navigation',
-      '/__nuxt_content/**',
       '/api-doc',
       '/api-doc/config',
       '/api-doc/glossary',
@@ -87,7 +87,6 @@ export default defineNuxtConfig({
     experimental: {
       componentDetection: true,
     },
-    mdc: true,
     content: true,
   },
 
@@ -301,31 +300,6 @@ export default defineNuxtConfig({
     titleSeparator: '·',
   },
 
-  content: {
-    database: { type: 'd1', bindingName: 'DB' },
-    build: {
-      markdown: {
-        highlight: {
-          theme: {
-            light: 'github-light',
-            default: 'github-light',
-            dark: 'material-theme-palenight',
-          },
-          langs: [
-            'ts',
-            'vue',
-            'json',
-            'html',
-            'bash',
-            'diff',
-            'md',
-            'dotenv',
-          ],
-        },
-      },
-    },
-  },
-
   components: [
     {
       path: '~/components',
@@ -343,26 +317,7 @@ export default defineNuxtConfig({
     },
   },
 
-  mdc: {
-    highlight: {
-      noApiRoute: false,
-      theme: {
-        light: 'github-light',
-        default: 'github-light',
-        dark: 'material-theme-palenight',
-      },
-      langs: [
-        'ts',
-        'vue',
-        'json',
-        'html',
-        'bash',
-        'diff',
-        'md',
-        'dotenv',
-      ],
-    },
-  },
+  content: { highlight: true },
 
   schemaOrg: {
     identity: {
@@ -378,7 +333,6 @@ export default defineNuxtConfig({
       '/api/stats/summary.json': { prerender: true },
       '/api/search.json': { prerender: true },
       '/api/github/sponsors.json': { prerender: true },
-      '/api/_mdc/highlight': { cache: { group: 'mdc', name: 'highlight', maxAge: 60 * 60 } },
       '/api/_nuxt_icon': { cache: { group: 'icon', name: 'icon', maxAge: 60 * 60 * 24 * 7 } },
     },
     scripts: {
