@@ -196,8 +196,15 @@ export default defineNuxtConfig({
       wrangler: {
         name: 'unlighthouse-dev',
         account_id: '5904138d55ca25d5670dca6adf99894e',
-        compatibility_date: '2025-01-01',
-        compatibility_flags: ['nodejs_compat'],
+        // workerd only exposes `node:console` (which Nitro emits as an external
+        // import) from a much later date than this was pinned at. Matches the
+        // value nuxtseo.com deploys on.
+        compatibility_date: '2026-08-11',
+        // `no_nodejs_compat_v2` is required, not cosmetic: something upstream
+        // injects `nodejs_compat_v2`, and from this compatibility date workerd
+        // rejects `nodejs_compat` + `nodejs_compat_v2` together. Nitro drops v2
+        // when both it and `no_nodejs_compat_v2` are present.
+        compatibility_flags: ['nodejs_compat', 'no_nodejs_compat_v2'],
         limits: {
           cpu_ms: 120_000, // 2 min for slow PSI calls
         },
