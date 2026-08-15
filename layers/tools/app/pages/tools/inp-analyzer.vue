@@ -81,11 +81,26 @@ interface ScriptItem {
   scriptParseCompile: number
 }
 
+interface FieldMetric {
+  value: number
+  displayValue: string
+  rating: 'good' | 'needs-improvement' | 'poor'
+  percentiles: { good: number, needsImprovement: number, poor: number }
+}
+
 interface InpResult {
   url: string
   fetchedUrl: string
   timestamp: number
   framework: 'nuxt' | 'next' | 'vite' | null
+  /** Real user data from CrUX. Null when the URL has too little traffic to report. */
+  field: {
+    lcp: FieldMetric | null
+    cls: FieldMetric | null
+    inp: FieldMetric | null
+    fcp: FieldMetric | null
+    ttfb: FieldMetric | null
+  } | null
   performanceScore: number
   tbt: {
     value: number
@@ -313,6 +328,41 @@ const insights = computed<ToolInsight[]>(() => {
 
       <!-- Results -->
       <div v-if="result" class="p-4 sm:p-6">
+        <!-- Real INP, when CrUX has enough traffic on this URL to report it -->
+        <div
+          v-if="result.field?.inp"
+          class="mb-6 p-4 rounded-xl border"
+          :class="{
+            'border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-950/30': result.field.inp.rating === 'good',
+            'border-orange-200 dark:border-orange-900 bg-orange-50 dark:bg-orange-950/30': result.field.inp.rating === 'needs-improvement',
+            'border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/30': result.field.inp.rating === 'poor',
+          }"
+        >
+          <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <span
+              class="text-2xl sm:text-3xl font-bold tabular-nums"
+              :class="{
+                'text-green-700 dark:text-green-400': result.field.inp.rating === 'good',
+                'text-orange-700 dark:text-orange-400': result.field.inp.rating === 'needs-improvement',
+                'text-red-700 dark:text-red-400': result.field.inp.rating === 'poor',
+              }"
+            >{{ result.field.inp.displayValue }}</span>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Real INP, 75th percentile</span>
+            <span class="text-xs text-gray-500">Chrome UX Report, last 28 days</span>
+          </div>
+          <div class="mt-3 flex h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+            <div class="bg-green-500" :style="{ width: `${result.field.inp.percentiles.good}%` }" />
+            <div class="bg-orange-400" :style="{ width: `${result.field.inp.percentiles.needsImprovement}%` }" />
+            <div class="bg-red-500" :style="{ width: `${result.field.inp.percentiles.poor}%` }" />
+          </div>
+          <div class="mt-2 text-xs text-gray-600 dark:text-gray-400">
+            {{ result.field.inp.percentiles.good }}% of visits are good, {{ result.field.inp.percentiles.needsImprovement }}% need improvement, {{ result.field.inp.percentiles.poor }}% are poor.
+          </div>
+        </div>
+        <div v-else class="mb-6 p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-600 dark:text-gray-400">
+          No real user INP exists for this URL. Chrome only reports it once a page gets enough traffic, so everything below is lab data, with Total Blocking Time standing in for INP.
+        </div>
+
         <!-- Hero: Score + TBT Info -->
         <div class="flex flex-col sm:flex-row gap-4 mb-6">
           <!-- TBT Score Card -->
@@ -657,7 +707,7 @@ const insights = computed<ToolInsight[]>(() => {
         </div>
 
         <!-- Feedback -->
-        <ToolFeedback tool-id="inp" :context="{ url: urlInput, strategy }" />
+        <ToolFeedback tool-id="inp" :ready="!!result" :context="{ url: urlInput, strategy }" />
       </div>
     </ToolCard>
 

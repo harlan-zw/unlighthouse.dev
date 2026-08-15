@@ -1,5 +1,15 @@
 <script setup lang="ts">
 import { formatTimeAgo } from '@vueuse/core'
+import { markdownPlugins } from '~~/shared/markdown'
+import contentComponents from '#comark-content/components'
+
+// Release bodies render outside a content collection, so `<Markdown>` gets no
+// component map and falls back to bare tags. Reuse the map `ContentRenderer`
+// uses for docs pages, so release notes get the same Nuxt UI prose components.
+const markdownComponents = Object.fromEntries(
+  Object.entries(contentComponents as Record<string, { component: unknown }>)
+    .map(([tag, entry]) => [tag, entry.component]),
+)
 
 definePageMeta({
   breadcrumb: {
@@ -105,7 +115,7 @@ const HighlightedVersion = defineComponent({
                   Latest
                 </UBadge>
               </div>
-              <MDC :value="release.body" />
+              <Markdown :value="release.body" :plugins="markdownPlugins" :components="markdownComponents" />
             </UCard>
           </li>
         </ul>

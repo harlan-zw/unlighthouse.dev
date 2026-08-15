@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { ContentNavigationItem } from '@nuxt/content'
+import type { ContentNavigationItem } from '@harlan-zw/comark-content'
 import type { AppConfig } from '@nuxt/schema'
 import type { BadgeProps, LinkProps } from '@nuxt/ui'
 import type { AccordionRootEmits, AccordionRootProps } from 'reka-ui'

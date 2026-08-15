@@ -3,14 +3,25 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { defineNuxtConfig } from 'nuxt/config'
 import { resolve } from 'pathe'
 import { gray, logger } from './logger'
+import { CLOUDFLARE_REQUIRED_SECRETS } from './shared/cloudflare'
 import { SENTRY_DSN, sentryRelease } from './shared/sentry'
-
-const staticPageHeaders = {
-  'cache-control': 'public, max-age=300, s-maxage=86400, stale-while-revalidate=604800',
-}
 
 const hasSentryAuthToken = Boolean(process.env.SENTRY_AUTH_TOKEN)
   || existsSync('.env.sentry-build-plugin')
+
+// workerd installs its Node-compatible `console` as soon as anything in the
+// bundle imports `node:console` (undici, via node-fetch-native, does). That
+// console declares `createTask` but throws ERR_METHOD_NOT_IMPLEMENTED when it
+// is called. `hookable` feature-detects the property once at module scope and
+// then calls it on every hook, so every non-prerendered route returned a 500.
+//
+// The swap happens at link time, so no import ordering avoids it and a Nitro
+// plugin runs far too late. This banner is the only code that runs before
+// hookable's module body. It probes the method and, when the probe throws,
+// removes it so hookable's detection fails and it uses its own no-op runner.
+// Wrapped in an IIFE: a bare `var` at chunk scope collides with Terser's own
+// minified bindings and fails the build.
+const workerdConsoleTaskFix = `;(function(){try{var c=globalThis.console;if(c&&typeof c.createTask==="function"&&!c.__ctProbed){c.__ctProbed=1;try{c.createTask("probe")}catch(e){c.createTask=void 0}}}catch(e){}})();`
 
 export default defineNuxtConfig({
   extends: ['./layers/tools', './layers/admin'],
@@ -23,12 +34,14 @@ export default defineNuxtConfig({
   },
 
   modules: [
+    '@harlan-zw/nuxt-cloudflare',
     '@harlan-zw/nuxt-dx',
     '@harlan-zw/nuxt-github-sponsors',
     '@nuxtjs/seo',
+    '@comark/nuxt',
     '@nuxt/ui',
     ['motion-v/nuxt', { directives: true }],
-    '@nuxt/content',
+    '@harlan-zw/comark-content',
     '@vueuse/nuxt',
     'nitro-cloudflare-dev',
     '@nuxt/scripts',
@@ -71,11 +84,15 @@ export default defineNuxtConfig({
     },
   ],
 
+  nuxtCloudflare: {
+    kvCache: { binding: 'CACHE' },
+    requiredSecrets: CLOUDFLARE_REQUIRED_SECRETS,
+  },
+
   sitemap: {
     zeroRuntime: true,
     exclude: [
       '**/.navigation',
-      '/__nuxt_content/**',
       '/api-doc',
       '/api-doc/config',
       '/api-doc/glossary',
@@ -91,7 +108,6 @@ export default defineNuxtConfig({
     experimental: {
       componentDetection: true,
     },
-    mdc: true,
     content: true,
   },
 
@@ -121,7 +137,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     githubSponsors: {
-      token: process.env.NUXT_GITHUB_AUTH_TOKEN || '',
+      token: '', // NUXT_GITHUB_SPONSORS_TOKEN
     },
     oauth: {
       github: {
@@ -142,7 +158,7 @@ export default defineNuxtConfig({
     githubAccessToken: '', // NUXT_GITHUB_ACCESS_TOKEN
     githubAuthToken: '', // NUXT_GITHUB_AUTH_TOKEN
     githubAuthClientId: '', // NUXT_GITHUB_AUTH_CLIENT_ID
-    githubAuthClientSecret: '', // NUXT_GITHUB_AUTH_SECRET_ID
+    githubAuthClientSecret: '', // NUXT_GITHUB_AUTH_CLIENT_SECRET
     googleApiToken: '', // NUXT_GOOGLE_API_TOKEN (PageSpeed Insights)
     cloudflareAccountId: '', // NUXT_CLOUDFLARE_ACCOUNT_ID
     cloudflareAnalyticsApiToken: '', // NUXT_CLOUDFLARE_ANALYTICS_API_TOKEN
@@ -188,6 +204,11 @@ export default defineNuxtConfig({
   },
 
   nitro: {
+    rollupConfig: {
+      output: {
+        banner: workerdConsoleTaskFix,
+      },
+    },
     plugins: [
       resolve('./server/plugins/escape-inline-payload.ts'),
     ],
@@ -201,13 +222,15 @@ export default defineNuxtConfig({
       wrangler: {
         name: 'unlighthouse-dev',
         account_id: '5904138d55ca25d5670dca6adf99894e',
-        compatibility_date: '2025-01-01',
-        compatibility_flags: ['nodejs_compat'],
-        // Required for application redirects and headers to run before static HTML assets.
-        // This trades static asset-only requests for Worker invocations.
-        assets: {
-          run_worker_first: true,
-        },
+        // workerd only exposes `node:console` (which Nitro emits as an external
+        // import) from a much later date than this was pinned at. Matches the
+        // value nuxtseo.com deploys on.
+        compatibility_date: '2026-08-11',
+        // `no_nodejs_compat_v2` is required, not cosmetic: something upstream
+        // injects `nodejs_compat_v2`, and from this compatibility date workerd
+        // rejects `nodejs_compat` + `nodejs_compat_v2` together. Nitro drops v2
+        // when both it and `no_nodejs_compat_v2` are present.
+        compatibility_flags: ['nodejs_compat', 'no_nodejs_compat_v2'],
         limits: {
           cpu_ms: 120_000, // 2 min for slow PSI calls
         },
@@ -259,17 +282,9 @@ export default defineNuxtConfig({
           },
         },
         vars: {
-          NUXT_SESSION_PASSWORD: process.env.NUXT_SESSION_PASSWORD || '',
           NUXT_OAUTH_GITHUB_CLIENT_ID: process.env.NUXT_OAUTH_GITHUB_CLIENT_ID || '',
-          NUXT_OAUTH_GITHUB_CLIENT_SECRET: process.env.NUXT_OAUTH_GITHUB_CLIENT_SECRET || '',
           NUXT_OAUTH_GITHUB_REDIRECT_URL: process.env.NUXT_OAUTH_GITHUB_REDIRECT_URL || '',
-          NUXT_GITHUB_ACCESS_TOKEN: process.env.NUXT_GITHUB_ACCESS_TOKEN || '',
-          NUXT_EMAIL_OCTOPUS_TOKEN: process.env.NUXT_EMAIL_OCTOPUS_TOKEN || '',
-          NUXT_GITHUB_AUTH_TOKEN: process.env.NUXT_GITHUB_AUTH_TOKEN || '',
-          NUXT_GITHUB_SPONSORS_TOKEN: process.env.NUXT_GITHUB_AUTH_TOKEN || '',
-          NUXT_CLOUDFLARE_ANALYTICS_API_TOKEN: process.env.NUXT_CLOUDFLARE_ANALYTICS_API_TOKEN || '',
           NUXT_CLOUDFLARE_ACCOUNT_ID: process.env.NUXT_CLOUDFLARE_ACCOUNT_ID || '',
-          NUXT_GOOGLE_API_TOKEN: process.env.NUXT_GOOGLE_API_TOKEN || '',
         },
       },
     },
@@ -286,10 +301,6 @@ export default defineNuxtConfig({
       tasks: true,
     },
     storage: {
-      cache: {
-        driver: 'cloudflare-kv-binding',
-        binding: 'CACHE',
-      },
       kv: {
         driver: 'cloudflare-kv-binding',
         binding: 'KV',
@@ -322,31 +333,6 @@ export default defineNuxtConfig({
     titleSeparator: '·',
   },
 
-  content: {
-    database: { type: 'd1', bindingName: 'DB' },
-    build: {
-      markdown: {
-        highlight: {
-          theme: {
-            light: 'github-light',
-            default: 'github-light',
-            dark: 'material-theme-palenight',
-          },
-          langs: [
-            'ts',
-            'vue',
-            'json',
-            'html',
-            'bash',
-            'diff',
-            'md',
-            'dotenv',
-          ],
-        },
-      },
-    },
-  },
-
   components: [
     {
       path: '~/components',
@@ -364,26 +350,7 @@ export default defineNuxtConfig({
     },
   },
 
-  mdc: {
-    highlight: {
-      noApiRoute: false,
-      theme: {
-        light: 'github-light',
-        default: 'github-light',
-        dark: 'material-theme-palenight',
-      },
-      langs: [
-        'ts',
-        'vue',
-        'json',
-        'html',
-        'bash',
-        'diff',
-        'md',
-        'dotenv',
-      ],
-    },
-  },
+  content: { highlight: true },
 
   schemaOrg: {
     identity: {
@@ -399,7 +366,6 @@ export default defineNuxtConfig({
       '/api/stats/summary.json': { prerender: true },
       '/api/search.json': { prerender: true },
       '/api/github/sponsors.json': { prerender: true },
-      '/api/_mdc/highlight': { cache: { group: 'mdc', name: 'highlight', maxAge: 60 * 60 } },
       '/api/_nuxt_icon': { cache: { group: 'icon', name: 'icon', maxAge: 60 * 60 * 24 * 7 } },
     },
     scripts: {
@@ -434,17 +400,17 @@ export default defineNuxtConfig({
     '/learn-lighthouse/inp/fix': { redirect: { to: '/learn-lighthouse/inp#common-inp-issues', statusCode: 301 } },
     '/learn-lighthouse/seo/fix': { redirect: { to: '/learn-lighthouse/seo#all-seo-audits', statusCode: 301 } },
 
-    '/': { prerender: true, headers: staticPageHeaders },
-    '/guide/**': { prerender: true, headers: staticPageHeaders },
-    '/integrations/**': { prerender: true, headers: staticPageHeaders },
-    '/api-doc': { prerender: true, headers: staticPageHeaders },
-    '/api-doc/**': { prerender: true, headers: staticPageHeaders },
-    '/glossary': { prerender: true, headers: staticPageHeaders },
-    '/glossary/**': { prerender: true, headers: staticPageHeaders },
-    '/learn-lighthouse': { prerender: true, headers: staticPageHeaders },
-    '/learn-lighthouse/**': { prerender: true, headers: staticPageHeaders },
-    '/tools': { prerender: true, headers: staticPageHeaders },
-    '/tools/**': { prerender: true, headers: staticPageHeaders },
+    '/': { prerender: true },
+    '/guide/**': { prerender: true },
+    '/integrations/**': { prerender: true },
+    '/api-doc': { prerender: true },
+    '/api-doc/**': { prerender: true },
+    '/glossary': { prerender: true },
+    '/glossary/**': { prerender: true },
+    '/learn-lighthouse': { prerender: true },
+    '/learn-lighthouse/**': { prerender: true },
+    '/tools': { prerender: true },
+    '/tools/**': { prerender: true },
 
     // auth endpoints must not be cached or prerendered
     '/auth/**': { prerender: false, cache: false, headers: { 'cache-control': 'no-store' } },

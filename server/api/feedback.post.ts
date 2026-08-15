@@ -12,7 +12,10 @@ export default defineEventHandler<Promise<CommentFeedbackResponse>>(async (event
   const feedbackId = crypto.randomUUID()
 
   if (!import.meta.dev) {
-    const session = await getUserSession(event).catch(() => null)
+    const session = await getUserSession(event).catch((error) => {
+      console.warn('[feedback] Failed to read the user session; recording anonymous feedback', error)
+      return null
+    })
 
     const db = getDB(event)
     await db.insert(feedback).values({

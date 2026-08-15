@@ -2,85 +2,8 @@ const NUXT_PAYLOAD_MARKER = 'data-nuxt-data="nuxt-app"'
 const SCRIPT_CLOSE = '</script>'
 const ESCAPED_SCRIPT_CLOSE = '<\\u002Fscript>'
 
-function minifyShikiCss(css: string) {
-  return css
-    .replace(/\s+/g, ' ')
-    .replace(/\s*\{\s*/g, '{')
-    .replace(/:\s*/g, ':')
-    .replace(/;\s*\}/g, '}')
-    .replace(/;\s*/g, ';')
-    .replace(/,\s*/g, ',')
-    .replace(/\s*\}\s*/g, '}')
-    .trim()
-}
-
-function isShikiCss(value: string) {
-  return value.includes('--shiki-') && value.includes('.shiki')
-}
-
-function minifyShikiCssStrings(value: unknown): boolean {
-  let changed = false
-
-  if (Array.isArray(value)) {
-    for (let i = 0; i < value.length; i++) {
-      const item = value[i]
-      if (typeof item === 'string' && isShikiCss(item)) {
-        const minified = minifyShikiCss(item)
-        if (minified !== item) {
-          value[i] = minified
-          changed = true
-        }
-      }
-      else if (item && typeof item === 'object') {
-        changed = minifyShikiCssStrings(item) || changed
-      }
-    }
-    return changed
-  }
-
-  if (value && typeof value === 'object') {
-    const record = value as Record<string, unknown>
-    for (const key of Object.keys(record)) {
-      const item = record[key]
-      if (typeof item === 'string' && isShikiCss(item)) {
-        const minified = minifyShikiCss(item)
-        if (minified !== item) {
-          record[key] = minified
-          changed = true
-        }
-      }
-      else if (item && typeof item === 'object') {
-        changed = minifyShikiCssStrings(item) || changed
-      }
-    }
-  }
-
-  return changed
-}
-
-function minifyShikiCssJsonStrings(payload: string) {
-  return payload.replace(/"html \.[^"]*--shiki-[^"]*"/g, (match) => {
-    const value = match.slice(1, -1)
-    return isShikiCss(value) ? `"${minifyShikiCss(value)}"` : match
-  })
-}
-
 function normalizeInlinePayload(payload: string) {
-  let normalized = payload
-
-  if (payload.includes('--shiki-')) {
-    try {
-      const parsed = JSON.parse(payload) as unknown
-      if (minifyShikiCssStrings(parsed)) {
-        normalized = JSON.stringify(parsed)
-      }
-    }
-    catch {
-      normalized = minifyShikiCssJsonStrings(payload)
-    }
-  }
-
-  return normalized.replaceAll(SCRIPT_CLOSE, ESCAPED_SCRIPT_CLOSE)
+  return payload.replaceAll(SCRIPT_CLOSE, ESCAPED_SCRIPT_CLOSE)
 }
 
 function findJsonValueEnd(source: string, start: number) {

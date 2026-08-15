@@ -758,7 +758,7 @@ function getTimingPhaseWidths(entry: ParsedHarEntry) {
         </div>
 
         <!-- Feedback -->
-        <ToolFeedback tool-id="har-viewer" :context="{ hasReport: !!report }" />
+        <ToolFeedback tool-id="har-viewer" :ready="!!report" :context="{ hasReport: !!report }" />
 
         <!-- FAQ -->
         <ToolFaq :faqs="faqs" color="cyan" />

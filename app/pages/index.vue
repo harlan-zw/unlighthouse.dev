@@ -21,10 +21,7 @@ const { data: stats } = await useFetch('/api/stats/summary.json', {
   key: 'stats-summary',
 })
 
-const { data: sponsors, error: sponsorsError, refresh: refreshSponsors } = await useGitHubSponsors()
-
-if (import.meta.client && sponsorsError.value)
-  await refreshSponsors()
+const { data: sponsors } = await useGitHubSponsors()
 
 const { target: demoFrameRoot, isVisible: shouldLoadDemoFrame } = useVisibleWhenNearViewport({
   rootMargin: '250px 0px',
@@ -298,8 +295,8 @@ const exploreLinks = [
               Become a sponsor
             </UButton>
           </div>
-          <div v-if="sponsors">
-            <div class="mb-6">
+          <div v-if="sponsors?._tag === 'available'">
+            <div v-if="sponsors.tiers.top?.length" class="mb-6">
               <h3 class="text-sm font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide mb-3">
                 Top Sponsors
               </h3>
@@ -310,7 +307,7 @@ const exploreLinks = [
                 </NuxtLink>
               </div>
             </div>
-            <div class="mb-6">
+            <div v-if="sponsors.tiers.gold?.length" class="mb-6">
               <h3 class="text-sm font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide mb-3">
                 Gold Sponsors
               </h3>
@@ -320,7 +317,7 @@ const exploreLinks = [
                 </NuxtLink>
               </div>
             </div>
-            <div>
+            <div v-if="sponsors.ungrouped.length">
               <h3 class="text-sm font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide mb-3">
                 Backers
               </h3>

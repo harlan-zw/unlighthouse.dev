@@ -1,6 +1,45 @@
 /*
   Strict-Transport-Security: max-age=31536000; includeSubDomains
 
+/
+  Cache-Control: public, max-age=300, s-maxage=86400, stale-while-revalidate=604800
+
+/guide/*
+  Cache-Control: public, max-age=300, s-maxage=86400, stale-while-revalidate=604800
+
+/guide
+  Cache-Control: public, max-age=300, s-maxage=86400, stale-while-revalidate=604800
+
+/integrations/*
+  Cache-Control: public, max-age=300, s-maxage=86400, stale-while-revalidate=604800
+
+/integrations
+  Cache-Control: public, max-age=300, s-maxage=86400, stale-while-revalidate=604800
+
+/api-doc
+  Cache-Control: public, max-age=300, s-maxage=86400, stale-while-revalidate=604800
+
+/api-doc/*
+  Cache-Control: public, max-age=300, s-maxage=86400, stale-while-revalidate=604800
+
+/glossary
+  Cache-Control: public, max-age=300, s-maxage=86400, stale-while-revalidate=604800
+
+/glossary/*
+  Cache-Control: public, max-age=300, s-maxage=86400, stale-while-revalidate=604800
+
+/learn-lighthouse
+  Cache-Control: public, max-age=300, s-maxage=86400, stale-while-revalidate=604800
+
+/learn-lighthouse/*
+  Cache-Control: public, max-age=300, s-maxage=86400, stale-while-revalidate=604800
+
+/tools
+  Cache-Control: public, max-age=300, s-maxage=86400, stale-while-revalidate=604800
+
+/tools/*
+  Cache-Control: public, max-age=300, s-maxage=86400, stale-while-revalidate=604800
+
 /*.md
   X-Robots-Tag: noindex, follow
 

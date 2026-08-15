@@ -70,7 +70,7 @@ useSeoMeta({
   articleModifiedTime,
   twitterData1: 'Harlan Wilton',
   twitterLabel1: 'Author',
-  twitterData2: page.value?.readTime,
+  twitterData2: page.value?.readTime === undefined ? undefined : String(page.value.readTime),
   twitterLabel2: 'Read Time',
 })
 

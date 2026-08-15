@@ -663,7 +663,7 @@ const visualResources = computed(() => {
           </div>
         </div>
 
-        <ToolFeedback tool-id="page-size" :context="{ hasResult: !!result }" />
+        <ToolFeedback tool-id="page-size" :ready="!!result" :context="{ hasResult: !!result }" />
         <ToolFaq :faqs="faqs" color="cyan" />
 
         <!-- Related Tools -->

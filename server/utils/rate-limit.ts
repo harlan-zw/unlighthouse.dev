@@ -47,7 +47,10 @@ export async function checkFreeToolRateLimit(event: H3Event) {
   const dayKey = `ratelimit:tool:${key}:${today}`
   const storage = appStorage()
 
-  const count = await storage.getItem<number>(dayKey).catch(() => null)
+  const count = await storage.getItem<number>(dayKey).catch((error) => {
+    console.warn('[rate-limit] Failed to read the daily count; using the native limiter only', error)
+    return null
+  })
 
   if (count !== null && count >= FREE_TOOL_DAILY_LIMIT) {
     setResponseHeaders(event, {

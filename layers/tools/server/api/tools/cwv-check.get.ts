@@ -1,15 +1,11 @@
+import type { FieldData, WebVitalMetric } from '../../utils/web-vitals'
+import { formatMetricValue, getRating, parseFieldData } from '../../utils/web-vitals'
+
 interface MetricResult {
   value: number
   displayValue: string
   rating: 'good' | 'needs-improvement' | 'poor'
   score: number
-}
-
-interface FieldMetric {
-  value: number
-  displayValue: string
-  rating: 'good' | 'needs-improvement' | 'poor'
-  percentiles: { good: number, needsImprovement: number, poor: number }
 }
 
 interface Recommendation {
@@ -20,80 +16,7 @@ interface Recommendation {
   toolUrl?: string
 }
 
-// CWV thresholds from web.dev
-const thresholds = {
-  lcp: { good: 2500, poor: 4000 },
-  cls: { good: 0.1, poor: 0.25 },
-  inp: { good: 200, poor: 500 },
-  fcp: { good: 1800, poor: 3000 },
-  tbt: { good: 200, poor: 600 },
-  ttfb: { good: 800, poor: 1800 },
-  si: { good: 3400, poor: 5800 },
-}
-
-function getRating(value: number, metric: keyof typeof thresholds): 'good' | 'needs-improvement' | 'poor' {
-  const t = thresholds[metric]
-  if (value <= t.good)
-    return 'good'
-  if (value <= t.poor)
-    return 'needs-improvement'
-  return 'poor'
-}
-
-function formatMetricValue(value: number, metric: string): string {
-  if (metric === 'cls')
-    return value.toFixed(3)
-  if (value >= 1000)
-    return `${(value / 1000).toFixed(1)} s`
-  return `${Math.round(value)} ms`
-}
-
-function parseFieldData(loadingExperience: Record<string, unknown> | undefined) {
-  if (!loadingExperience)
-    return null
-
-  const metrics = loadingExperience.metrics as Record<string, {
-    percentile: number
-    distributions: Array<{ min: number, max: number, proportion: number }>
-    category: string
-  }> | undefined
-
-  if (!metrics)
-    return null
-
-  const parseMetric = (key: string, metricKey: keyof typeof thresholds): FieldMetric | null => {
-    const m = metrics[key]
-    if (!m)
-      return null
-
-    const value = m.percentile
-    const rating = m.category?.toLowerCase() as 'good' | 'needs-improvement' | 'poor' || getRating(value, metricKey)
-
-    // Calculate percentile distribution
-    const dist = m.distributions || []
-    const good = Math.round((dist[0]?.proportion || 0) * 100)
-    const needsImprovement = Math.round((dist[1]?.proportion || 0) * 100)
-    const poor = Math.round((dist[2]?.proportion || 0) * 100)
-
-    return {
-      value,
-      displayValue: formatMetricValue(value, metricKey),
-      rating,
-      percentiles: { good, needsImprovement, poor },
-    }
-  }
-
-  return {
-    lcp: parseMetric('LARGEST_CONTENTFUL_PAINT_MS', 'lcp'),
-    cls: parseMetric('CUMULATIVE_LAYOUT_SHIFT_SCORE', 'cls'),
-    inp: parseMetric('INTERACTION_TO_NEXT_PAINT', 'inp'),
-    fcp: parseMetric('FIRST_CONTENTFUL_PAINT_MS', 'fcp'),
-    ttfb: parseMetric('EXPERIMENTAL_TIME_TO_FIRST_BYTE', 'ttfb'),
-    originFallback: loadingExperience.origin_fallback === true,
-  }
-}
-
-function generateRecommendations(lab: Record<string, MetricResult>, field: ReturnType<typeof parseFieldData>): Recommendation[] {
+function generateRecommendations(lab: Record<string, MetricResult>, field: FieldData | null): Recommendation[] {
   const recs: Recommendation[] = []
 
   // LCP
@@ -184,7 +107,7 @@ export default defineCachedEventHandler(async (event) => {
       labMetrics[key] = {
         value,
         displayValue: audit.displayValue || formatMetricValue(value, key),
-        rating: getRating(value, key as keyof typeof thresholds),
+        rating: getRating(value, key as WebVitalMetric),
         score: Math.round((audit.score || 0) * 100),
       }
     }

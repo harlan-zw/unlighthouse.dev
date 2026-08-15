@@ -15,6 +15,12 @@ export default antfu({
     '.claude/**',
   ],
 }, ...harlanzw(), {
+  files: ['content/**/*.md/*.{js,jsx,ts,tsx}'],
+  rules: {
+    'harlanzw/nuxt-no-side-effects-in-setup': 'off',
+  },
+}, {
+  files: ['**/AGENTS.md', '**/CLAUDE.md', '**/SKILL.md', '**/*.prompt', '**/*.prompt.md'],
   rules: {
     'harlanzw/prompt-missing-examples': 'off',
   },
