@@ -26,6 +26,13 @@ const workerdConsoleTaskFix = `;(function(){try{var c=globalThis.console;if(c&&t
 export default defineNuxtConfig({
   extends: ['./layers/tools', './layers/admin'],
 
+  nuxtDx: {
+    report: true,
+    sizeBudget: {
+      overridesKb: { 'server/plugins/sentry.ts': 326 },
+    },
+  },
+
   modules: [
     '@harlan-zw/nuxt-cloudflare',
     '@harlan-zw/nuxt-dx',
