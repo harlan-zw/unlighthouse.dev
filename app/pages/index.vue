@@ -296,7 +296,7 @@ const exploreLinks = [
             </UButton>
           </div>
           <div v-if="sponsors?._tag === 'available'">
-            <div v-if="sponsors.tiers.top.length" class="mb-6">
+            <div v-if="sponsors.tiers.top?.length" class="mb-6">
               <h3 class="text-sm font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide mb-3">
                 Top Sponsors
               </h3>
@@ -307,7 +307,7 @@ const exploreLinks = [
                 </NuxtLink>
               </div>
             </div>
-            <div v-if="sponsors.tiers.gold.length" class="mb-6">
+            <div v-if="sponsors.tiers.gold?.length" class="mb-6">
               <h3 class="text-sm font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide mb-3">
                 Gold Sponsors
               </h3>
