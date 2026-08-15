@@ -70,29 +70,3 @@ export function modifyRelativeDocLinksWithFramework(
   )
   return links
 }
-
-export function markStyleTextAsHydrationSafe(payload: any): void {
-  walk(
-    payload,
-    node => Array.isArray(node) && node[0] === 'style' && typeof node[2] === 'string',
-    (node: any[]) => {
-      node[1] = {
-        ...node[1],
-        textContent: node[2],
-      }
-      node.splice(2, 1)
-    },
-  )
-}
-
-interface ContentPage {
-  body?: {
-    value?: unknown
-  }
-}
-
-export function prepareContentForHydration<T extends ContentPage>(page: T): T {
-  const prepared = structuredClone(page)
-  markStyleTextAsHydrationSafe(prepared.body?.value)
-  return prepared
-}

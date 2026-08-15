@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { titleCase } from 'scule'
-import { prepareContentForHydration } from '~~/utils/content'
 import { buildSurroundLinks } from '~~/utils/surround-links'
 import { getLastPathSegment, getPathSegments } from '~~/utils/urls'
 
@@ -11,11 +10,7 @@ definePageMeta({
 const route = useRoute()
 
 const [{ data: page }, { data: surround }] = await Promise.all([
-  useAsyncData(`learn-${route.path}`, () => queryCollection('learnLighthouse').path(route.path).first(), {
-    transform(page) {
-      return page ? prepareContentForHydration(page) : page
-    },
-  }),
+  useAsyncData(`learn-${route.path}`, () => queryCollection('learnLighthouse').path(route.path).first()),
   useAsyncData(`learn-${route.path}-surround`, () => queryCollectionItemSurroundings('learnLighthouse', route.path, {
     fields: ['title', 'description', 'path'],
   }), {

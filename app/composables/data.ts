@@ -82,7 +82,6 @@ export async function useCurrentDocPage() {
 
   const pageData = structuredClone(toRaw(data.value.page))
   modifyRelativeDocLinksWithFramework(pageData.body.nodes)
-  markStyleTextAsHydrationSafe(pageData.body.nodes)
 
   if (Array.isArray(pageData.relatedPages)) {
     pageData.relatedPages = pageData.relatedPages.map((page: any) => ({
