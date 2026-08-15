@@ -137,3 +137,6 @@ allowBuilds:
   simple-git-hooks: true
   vue-demi: true
   workerd: true
+patchedDependencies:
+  hookable@5.5.3: patches/hookable@5.5.3.patch
+  hookable@6.1.1: patches/hookable@6.1.1.patch
