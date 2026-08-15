@@ -1,3 +1,5 @@
+import { parseFieldData } from '../../utils/web-vitals'
+
 export default defineCachedEventHandler(async (event) => {
   await checkFreeToolRateLimit(event)
   const query = getQuery(event)
@@ -11,6 +13,11 @@ export default defineCachedEventHandler(async (event) => {
     return result
   })
   const audits = results.lighthouseResult.audits
+
+  // INP is a field-only metric. When CrUX has the origin, the real number is
+  // already in this response and the tool should lead with it instead of
+  // quietly substituting a lab proxy.
+  const field = parseFieldData((results as unknown as { loadingExperience?: Record<string, unknown> }).loadingExperience)
 
   // TBT is the lab proxy for INP (Total Blocking Time)
   const tbt = audits['total-blocking-time']
@@ -101,6 +108,7 @@ export default defineCachedEventHandler(async (event) => {
     timestamp: Date.now(),
     strategy,
     framework: detectFramework(audits),
+    field,
     performanceScore: Math.round((results.lighthouseResult.categories.performance?.score || 0) * 100),
     tbt: {
       value: tbtValue,

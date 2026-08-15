@@ -1,4 +1,4 @@
-export type ToolQueryValue = string | string[] | null | undefined
+export type ToolQueryValue = string | Array<string | null> | null | undefined
 export type ToolQuery = Record<string, ToolQueryValue>
 
 export interface ToolQueryRouter {
@@ -27,5 +27,5 @@ export function replaceToolQuery(
 }
 
 export function readToolQueryValue(value: ToolQueryValue): string | undefined {
-  return Array.isArray(value) ? value[0] : value ?? undefined
+  return (Array.isArray(value) ? value[0] : value) ?? undefined
 }

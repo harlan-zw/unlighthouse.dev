@@ -829,7 +829,7 @@ const insights = computed<LcpInsight[]>(() => {
         </div>
 
         <!-- Feedback -->
-        <ToolFeedback tool-id="lcp" :context="{ url: urlInput, strategy }" />
+        <ToolFeedback tool-id="lcp" :ready="!!result" :context="{ url: urlInput, strategy }" />
       </div>
       <ToolEmptyState v-if="!result && !loading && !error" icon="i-heroicons-photo" message="Enter a URL to find the LCP element" />
     </ToolCard>

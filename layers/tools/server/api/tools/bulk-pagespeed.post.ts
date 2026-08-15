@@ -19,7 +19,10 @@ interface MetricResult {
 }
 
 const MAX_URLS = 10
-const CONCURRENCY = 3
+// PageSpeed Insights takes 20 to 40 seconds per URL, so a full batch at three
+// at a time is roughly two minutes of waiting. Both thumbs-down this tool has
+// collected were full batches; both thumbs-up were one and four URLs.
+const CONCURRENCY = 5
 
 function getMetricRating(score: number): 'good' | 'needs-improvement' | 'poor' {
   if (score >= 0.9)

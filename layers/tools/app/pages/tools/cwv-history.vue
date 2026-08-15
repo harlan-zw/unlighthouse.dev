@@ -710,7 +710,7 @@ function formatChartDate(date: string) {
         </div>
 
         <!-- Feedback -->
-        <ToolFeedback tool-id="cwv-history" :context="{ url: urlInput, mode, formFactor }" />
+        <ToolFeedback tool-id="cwv-history" :ready="!!result" :context="{ url: urlInput, mode, formFactor }" />
       </div>
 
       <ToolEmptyState v-if="!result && !loading && !error" icon="i-heroicons-chart-bar" message="Enter a domain to view CrUX history" hint="Tracks real Chrome user data over 25 weeks" />

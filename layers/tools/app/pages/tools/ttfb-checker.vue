@@ -566,7 +566,7 @@ const ttfbTips = [
         </div>
 
         <!-- Feedback -->
-        <ToolFeedback tool-id="ttfb-checker" :context="{ url: urlInput, mode, formFactor }" />
+        <ToolFeedback tool-id="ttfb-checker" :ready="!!result" :context="{ url: urlInput, mode, formFactor }" />
       </div>
 
       <ToolEmptyState v-if="!result && !loading && !error" icon="i-heroicons-clock" message="Enter a domain to check TTFB" hint="Measures Time to First Byte (server response time)" />

@@ -6,6 +6,13 @@ import { CommentFeedbackSchema } from '../../../../types/schemas'
 
 const props = defineProps<{
   toolId: string
+  /**
+   * Whether the tool has produced a result yet. The one comment this widget
+   * collected in three months was "too slow! jeez!", rated with `hasResult:
+   * false` while the request was still running. Rating something that has not
+   * happened yet cannot say anything useful about it, so the widget waits.
+   */
+  ready?: boolean
   context?: Record<string, unknown>
 }>()
 
@@ -77,7 +84,7 @@ async function onSubmit(event: FormSubmitEvent<CommentFeedbackSchemaOutput>) {
 </script>
 
 <template>
-  <UCard class="mt-6">
+  <UCard v-if="ready !== false" class="mt-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <div class="text-sm font-medium text-highlighted">

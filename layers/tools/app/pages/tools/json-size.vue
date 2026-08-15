@@ -602,7 +602,7 @@ const keyBarColors = ['bg-teal-500', 'bg-cyan-500', 'bg-blue-500', 'bg-indigo-50
           </div>
         </div>
 
-        <ToolFeedback tool-id="json-size" :context="{ hasAnalysis: !!analysis }" />
+        <ToolFeedback tool-id="json-size" :ready="!!analysis" :context="{ hasAnalysis: !!analysis }" />
         <ToolFaq :faqs="faqs" color="cyan" />
 
         <!-- Related Tools -->

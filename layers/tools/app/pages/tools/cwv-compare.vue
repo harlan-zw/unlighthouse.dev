@@ -842,7 +842,7 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
               </div>
 
               <!-- Feedback -->
-              <ToolFeedback tool-id="cwv-compare" :context="{ urls: urls.filter(u => u.trim()), formFactor }" />
+              <ToolFeedback tool-id="cwv-compare" :ready="!!result" :context="{ urls: urls.filter(u => u.trim()), formFactor }" />
             </div>
 
             <!-- Empty state -->

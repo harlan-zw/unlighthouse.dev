@@ -633,7 +633,7 @@ const insights = computed<ToolInsight[]>(() => {
         </div>
 
         <!-- Feedback -->
-        <ToolFeedback tool-id="cls" :context="{ url: urlInput, strategy }" />
+        <ToolFeedback tool-id="cls" :ready="!!result" :context="{ url: urlInput, strategy }" />
       </div>
     </ToolCard>
 

@@ -1,5 +1,5 @@
 import { titleCase } from 'scule'
-import { markStyleTextAsHydrationSafe, modifyRelativeDocLinksWithFramework } from '~~/utils/content'
+import { modifyRelativeDocLinksWithFramework } from '~~/utils/content'
 import { useAsyncData } from '#imports'
 
 export async function useStats() {
