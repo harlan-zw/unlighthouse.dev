@@ -1,14 +1,19 @@
 import type { H3Event } from 'h3'
+import { buildPsiRequestUrl, describePsiFailure } from '../../shared/psi-request'
 
 const _fetchPSI = cachedFunction(async (url: string, strategy: 'mobile' | 'desktop', token: string) => {
-  const psiUrl = new URL('https://www.googleapis.com/pagespeedonline/v5/runPagespeed')
-  psiUrl.searchParams.set('url', url)
-  psiUrl.searchParams.set('category', 'PERFORMANCE')
-  psiUrl.searchParams.set('strategy', strategy)
-  psiUrl.searchParams.set('key', token)
-
-  return $fetch<PSIResult>(psiUrl.toString(), {
+  return $fetch<PSIResult>(buildPsiRequestUrl(url, strategy), {
     timeout: 120_000, // 2 min - PSI can be slow
+    headers: { 'X-Goog-Api-Key': token },
+  }).catch((error) => {
+    // ofetch puts the full request URL in its message, so never forward it.
+    const failure = describePsiFailure(error)
+    throw createError({
+      statusCode: failure.statusCode,
+      statusMessage: failure.message,
+      message: failure.message,
+      data: { upstreamStatus: failure.upstreamStatus },
+    })
   })
 }, {
   base: 'psi',
