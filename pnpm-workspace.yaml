@@ -30,10 +30,10 @@ patchedDependencies:
   hookable@6.1.1: patches/hookable@6.1.1.patch
 catalog:
   '@antfu/eslint-config': ^9.3.0
-  '@cloudflare/workers-types': ^5.20260814.1
+  '@cloudflare/workers-types': ^5.20260815.1
   '@comark/nuxt': 0.6.2
   '@harlan-zw/comark-content': 0.0.17
-  '@harlan-zw/nuxt-cloudflare': 0.0.14
+  '@harlan-zw/nuxt-cloudflare': 0.0.16
   '@harlan-zw/nuxt-dx': 0.0.8
   '@harlan-zw/nuxt-github-sponsors': 0.0.2
   '@iconify-json/carbon': ^1.2.25
@@ -51,9 +51,9 @@ catalog:
   '@nuxt/devtools': 4.0.0-alpha.7
   '@nuxt/fonts': ^0.14.0
   '@nuxt/image': ^2.1.0
-  '@nuxt/scripts': 1.3.4
+  '@nuxt/scripts': 1.3.5
   '@nuxt/ui': ^4.10.0
-  '@nuxtjs/mcp-toolkit': ^0.18.1
+  '@nuxtjs/mcp-toolkit': ^0.19.0
   '@nuxtjs/robots': ^6.1.4
   '@nuxtjs/seo': ^5.3.12
   '@nuxtjs/sitemap': ^8.3.4
@@ -79,10 +79,10 @@ catalog:
   h3: ^1.15.11
   lint-staged: ^17.3.0
   markdownlint-cli: ^0.49.1
-  motion-v: ^2.3.0
+  motion-v: ^2.4.0
   nitro-cloudflare-dev: ^0.2.2
   nuxt: ^4.5.2
-  nuxt-ai-ready: ^1.7.12
+  nuxt-ai-ready: ^1.7.13
   nuxt-auth-utils: ^0.5.30
   nuxt-build-cache: ^0.1.1
   nuxt-lodash: ^2.5.3
@@ -106,7 +106,7 @@ catalog:
   typescript: 6.0.3
   ufo: ^1.6.4
   unhead: ^3.3.2
-  vue-tsc: ^3.3.9
+  vue-tsc: ^3.3.10
   wrangler: ^4.123.0
   zod: ^4.4.3
 
