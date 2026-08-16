@@ -1,4 +1,6 @@
 import type { H3Event } from 'h3'
+import type { CruxEndpoint } from '~~/shared/crux-request'
+import { buildCruxRequestUrl, describeCruxFailure, readUpstreamStatus } from '~~/shared/crux-request'
 
 export type FormFactor = 'PHONE' | 'DESKTOP' | 'TABLET' | 'ALL_FORM_FACTORS'
 
@@ -181,8 +183,10 @@ export async function fetchCrUXHistory(event: H3Event, url: string, mode: 'origi
   if (!apiKey)
     throw createError({ statusCode: 500, message: 'Google API key not configured' })
 
-  const endpoint = `https://chromeuxreport.googleapis.com/v1/records:queryHistoryRecord?key=${apiKey}`
+  return fetchCrux<CrUXHistoryResult>(event, 'history', apiKey, buildCruxPayload(url, mode, formFactor))
+}
 
+function buildCruxPayload(url: string, mode: 'origin' | 'url', formFactor: FormFactor): Record<string, unknown> {
   const payload: Record<string, unknown> = {}
   if (formFactor !== 'ALL_FORM_FACTORS')
     payload.formFactor = formFactor
@@ -196,15 +200,27 @@ export async function fetchCrUXHistory(event: H3Event, url: string, mode: 'origi
     payload.url = url
   }
 
-  return $fetch<{ record: CrUXHistoryResult }>(endpoint, {
+  return payload
+}
+
+async function fetchCrux<RecordType>(event: H3Event, endpoint: CruxEndpoint, apiKey: string, payload: Record<string, unknown>) {
+  return $fetch<{ record: RecordType }>(buildCruxRequestUrl(endpoint), {
     method: 'POST',
+    headers: { 'X-Goog-Api-Key': apiKey },
     body: payload,
-  }).catch((e) => {
-    const status = e?.status || e?.statusCode
+  }).catch((error) => {
+    // The 404 and 400 cases mean "no data for this URL", which is a normal outcome.
+    const status = readUpstreamStatus(error)
     if (status === 404 || status === 400)
       return null
-    const apiMessage = e?.data?.error?.message || e?.message || 'CrUX API error'
-    throw createError({ statusCode: status || 502, message: `CrUX API: ${apiMessage}` })
+
+    // ofetch puts the full request URL in its message, so never forward it.
+    const failure = describeCruxFailure(error)
+    throw createError({
+      statusCode: failure.statusCode,
+      statusMessage: failure.message,
+      message: failure.message,
+    })
   })
 }
 
@@ -284,28 +300,5 @@ export async function fetchCrUXCurrent(event: H3Event, url: string, mode: 'origi
   if (!apiKey)
     throw createError({ statusCode: 500, message: 'Google API key not configured' })
 
-  const endpoint = `https://chromeuxreport.googleapis.com/v1/records:queryRecord?key=${apiKey}`
-
-  const payload: Record<string, unknown> = {}
-  if (formFactor !== 'ALL_FORM_FACTORS')
-    payload.formFactor = formFactor
-
-  if (mode === 'origin') {
-    const parsed = new URL(url.startsWith('http') ? url : `https://${url}`)
-    payload.origin = `${parsed.protocol}//${parsed.host}`
-  }
-  else {
-    payload.url = url
-  }
-
-  return $fetch<{ record: CrUXCurrentResult }>(endpoint, {
-    method: 'POST',
-    body: payload,
-  }).catch((e) => {
-    const status = e?.status || e?.statusCode
-    if (status === 404 || status === 400)
-      return null
-    const apiMessage = e?.data?.error?.message || e?.message || 'CrUX API error'
-    throw createError({ statusCode: status || 502, message: `CrUX API: ${apiMessage}` })
-  })
+  return fetchCrux<CrUXCurrentResult>(event, 'current', apiKey, buildCruxPayload(url, mode, formFactor))
 }

@@ -1,0 +1,43 @@
+name: Nuxt DX budget
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/cache@v6
+        with:
+          path: node_modules/.cache/nuxt-seo
+          key: nuxt-skew-${{ github.sha }}
+          restore-keys: |
+            nuxt-skew-
+      - run: pnpm build
+        env:
+          NODE_OPTIONS: --max-old-space-size=14000
+          NUXT_GITHUB_ACCESS_TOKEN: ${{ secrets.NUXT_GITHUB_ACCESS_TOKEN || github.token }}
+          NUXT_GITHUB_AUTH_TOKEN: ${{ secrets.NUXT_GITHUB_AUTH_TOKEN || github.token }}
+      - uses: harlan-zw/harlan-nuxt/.github/actions/nuxt-dx-budget@main
+        with:
+          report-path: .nuxt/dx/size-budget.json
+          threshold-kb: 10
