@@ -13,6 +13,7 @@ minimumReleaseAgeExclude:
   - '@nuxtjs/seo@5.3.12'
   - '@harlan-zw/comark-content'
   - rangi
+  - '@nuxt/scripts@1.3.5'
 
 shellEmulator: true
 autoInstallPeers: false
@@ -25,9 +26,6 @@ trustPolicyExclude:
 overrides:
   vite: ^8.2.1
 
-patchedDependencies:
-  hookable@5.5.3: patches/hookable@5.5.3.patch
-  hookable@6.1.1: patches/hookable@6.1.1.patch
 catalog:
   '@antfu/eslint-config': ^9.3.0
   '@cloudflare/workers-types': ^5.20260815.1
