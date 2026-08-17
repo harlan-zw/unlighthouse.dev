@@ -1,5 +1,5 @@
 import type { H3Event } from 'h3'
-import { buildPsiRequestUrl, describePsiFailure } from '../../shared/psi-request'
+import { buildPsiRequestUrl, psiFailureErrorOptions } from '../../shared/psi-request'
 
 const _fetchPSI = cachedFunction(async (url: string, strategy: 'mobile' | 'desktop', token: string) => {
   return $fetch<PSIResult>(buildPsiRequestUrl(url, strategy), {
@@ -7,13 +7,7 @@ const _fetchPSI = cachedFunction(async (url: string, strategy: 'mobile' | 'deskt
     headers: { 'X-Goog-Api-Key': token },
   }).catch((error) => {
     // ofetch puts the full request URL in its message, so never forward it.
-    const failure = describePsiFailure(error)
-    throw createError({
-      statusCode: failure.statusCode,
-      statusMessage: failure.message,
-      message: failure.message,
-      data: { upstreamStatus: failure.upstreamStatus },
-    })
+    throw createError(psiFailureErrorOptions(error))
   })
 }, {
   base: 'psi',

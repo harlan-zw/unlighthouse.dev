@@ -42,6 +42,53 @@ export function filterKnownClientNoise<T extends SentryClientEvent>(event: T): T
     : event
 }
 
+/**
+ * Marks an error this site raised on purpose because a provider we call failed.
+ *
+ * A Google outage is not a defect in this site. The endpoints still answer the browser with a
+ * gateway status, but Sentry drops the event so the outage cannot fill the issue feed.
+ */
+export const EXPECTED_UPSTREAM_FAILURE = 'expected-upstream-failure'
+
+/** `createError` input for a provider failure. The marker in `data` is what Sentry drops on. */
+export interface UpstreamFailureErrorOptions {
+  statusCode: number
+  statusMessage: string
+  message: string
+  data: {
+    reason: typeof EXPECTED_UPSTREAM_FAILURE
+    upstreamStatus: number | null
+  }
+}
+
+/** Depth guard, so a cyclic `cause` chain cannot loop forever. */
+const MAX_CAUSE_DEPTH = 5
+
+interface UpstreamFailureCarrier {
+  data?: { reason?: unknown }
+  cause?: unknown
+}
+
+export function isExpectedUpstreamFailure(error: unknown, depth = 0): boolean {
+  if (!error || typeof error !== 'object' || depth > MAX_CAUSE_DEPTH)
+    return false
+
+  const carrier = error as UpstreamFailureCarrier
+  if (carrier.data?.reason === EXPECTED_UPSTREAM_FAILURE)
+    return true
+
+  return isExpectedUpstreamFailure(carrier.cause, depth + 1)
+}
+
+interface SentryEventHint {
+  originalException?: unknown
+}
+
+/** Drop the deliberate upstream failure responses. Keep everything else. */
+export function filterExpectedUpstreamFailures<T>(event: T | null, hint?: SentryEventHint): T | null {
+  return isExpectedUpstreamFailure(hint?.originalException) ? null : event
+}
+
 const SECRET_QUERY_PARAM_RE = /\b(key|api_?key|access_token|auth_?token|token|password|secret|signature)=[^&"'\s]+/gi
 
 /** Replace credential query parameter values with a placeholder. */

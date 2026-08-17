@@ -1,3 +1,6 @@
+import type { UpstreamFailureErrorOptions } from './sentry.ts'
+import { EXPECTED_UPSTREAM_FAILURE } from './sentry.ts'
+
 export type PsiStrategy = 'mobile' | 'desktop'
 
 const PSI_ENDPOINT = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed'
@@ -63,5 +66,25 @@ export function describePsiFailure(error: unknown): PsiFailure {
     statusCode: 502,
     upstreamStatus,
     message: 'PageSpeed Insights did not return a result for this URL. This is a Google outage, not a problem with the page.',
+  }
+}
+
+/**
+ * Build the `createError` input for a failed PageSpeed Insights call.
+ *
+ * The marker in `data` is what keeps a Google outage out of Sentry. Raise every PageSpeed failure
+ * through here, never through a bare `createError`, or the outage returns as an issue.
+ */
+export function psiFailureErrorOptions(error: unknown): UpstreamFailureErrorOptions {
+  const failure = describePsiFailure(error)
+
+  return {
+    statusCode: failure.statusCode,
+    statusMessage: failure.message,
+    message: failure.message,
+    data: {
+      reason: EXPECTED_UPSTREAM_FAILURE,
+      upstreamStatus: failure.upstreamStatus,
+    },
   }
 }
