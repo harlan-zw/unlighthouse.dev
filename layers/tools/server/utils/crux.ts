@@ -1,6 +1,6 @@
 import type { H3Event } from 'h3'
 import type { CruxEndpoint } from '~~/shared/crux-request'
-import { buildCruxRequestUrl, describeCruxFailure, readUpstreamStatus } from '~~/shared/crux-request'
+import { buildCruxRequestUrl, cruxFailureErrorOptions, readUpstreamStatus } from '~~/shared/crux-request'
 
 export type FormFactor = 'PHONE' | 'DESKTOP' | 'TABLET' | 'ALL_FORM_FACTORS'
 
@@ -215,12 +215,7 @@ async function fetchCrux<RecordType>(event: H3Event, endpoint: CruxEndpoint, api
       return null
 
     // ofetch puts the full request URL in its message, so never forward it.
-    const failure = describeCruxFailure(error)
-    throw createError({
-      statusCode: failure.statusCode,
-      statusMessage: failure.message,
-      message: failure.message,
-    })
+    throw createError(cruxFailureErrorOptions(error))
   })
 }
 

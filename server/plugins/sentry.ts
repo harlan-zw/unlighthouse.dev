@@ -1,5 +1,5 @@
 import { sentryCloudflareNitroPlugin } from '@sentry/nuxt/module/plugins'
-import { createSentryDataCollection, redactSentrySecrets } from '../../shared/sentry'
+import { createSentryDataCollection, filterExpectedUpstreamFailures, redactSentrySecrets } from '../../shared/sentry'
 
 export default defineNitroPlugin((nitroApp) => {
   const { sentry } = useRuntimeConfig()
@@ -12,6 +12,6 @@ export default defineNitroPlugin((nitroApp) => {
     release: sentry.release || undefined,
     tracesSampleRate: sentry.tracesSampleRate,
     dataCollection: createSentryDataCollection(),
-    beforeSend: redactSentrySecrets,
+    beforeSend: (event, hint) => redactSentrySecrets(filterExpectedUpstreamFailures(event, hint)),
   })(nitroApp)
 })

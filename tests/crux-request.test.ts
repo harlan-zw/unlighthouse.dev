@@ -1,7 +1,8 @@
 /* eslint-disable test/no-import-node-test */
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { buildCruxRequestUrl, describeCruxFailure } from '../shared/crux-request.ts'
+import { buildCruxRequestUrl, cruxFailureErrorOptions, describeCruxFailure } from '../shared/crux-request.ts'
+import { EXPECTED_UPSTREAM_FAILURE } from '../shared/sentry.ts'
 
 test('keeps the api key out of the crux request url', () => {
   const url = buildCruxRequestUrl('current')
@@ -45,4 +46,12 @@ test('maps a missing-data 404 to an unprocessable response when it escapes the n
   const failure = describeCruxFailure(Object.assign(new Error('no data'), { statusCode: 404 }))
 
   assert.equal(failure.statusCode, 422)
+})
+
+test('marks a CrUX outage response as an expected upstream failure', () => {
+  const options = cruxFailureErrorOptions(new Error('fetch failed'))
+
+  assert.equal(options.statusCode, 502)
+  assert.equal(options.data.reason, EXPECTED_UPSTREAM_FAILURE)
+  assert.equal(options.message, options.statusMessage)
 })

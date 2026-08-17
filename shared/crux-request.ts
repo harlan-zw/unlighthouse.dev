@@ -1,3 +1,6 @@
+import type { UpstreamFailureErrorOptions } from './sentry.ts'
+import { EXPECTED_UPSTREAM_FAILURE } from './sentry.ts'
+
 export type CruxEndpoint = 'current' | 'history'
 
 const CRUX_ENDPOINTS = {
@@ -57,5 +60,25 @@ export function describeCruxFailure(error: unknown): CruxFailure {
   return {
     statusCode: upstreamStatus ?? 502,
     message: 'Chrome UX Report did not return a result for this URL. This is a Google outage, not a problem with the page.',
+  }
+}
+
+/**
+ * Build the `createError` input for a failed Chrome UX Report call.
+ *
+ * The marker in `data` is what keeps a Google outage out of Sentry. Raise every CrUX failure
+ * through here, never through a bare `createError`, or the outage returns as an issue.
+ */
+export function cruxFailureErrorOptions(error: unknown): UpstreamFailureErrorOptions {
+  const failure = describeCruxFailure(error)
+
+  return {
+    statusCode: failure.statusCode,
+    statusMessage: failure.message,
+    message: failure.message,
+    data: {
+      reason: EXPECTED_UPSTREAM_FAILURE,
+      upstreamStatus: readUpstreamStatus(error),
+    },
   }
 }

@@ -1,7 +1,8 @@
 /* eslint-disable test/no-import-node-test */
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { buildPsiRequestUrl, describePsiFailure } from '../shared/psi-request.ts'
+import { buildPsiRequestUrl, describePsiFailure, psiFailureErrorOptions } from '../shared/psi-request.ts'
+import { EXPECTED_UPSTREAM_FAILURE } from '../shared/sentry.ts'
 
 test('keeps the api key out of the request url', () => {
   const url = new URL(buildPsiRequestUrl('https://corporate.walmart.com', 'mobile'))
@@ -43,4 +44,20 @@ test('maps a network failure with no status to a gateway failure', () => {
 
   assert.equal(failure.statusCode, 502)
   assert.equal(failure.upstreamStatus, null)
+})
+
+test('marks a PageSpeed outage response as an expected upstream failure', () => {
+  const options = psiFailureErrorOptions(Object.assign(new Error('fetch failed'), { response: { status: 500 } }))
+
+  assert.equal(options.statusCode, 502)
+  assert.equal(options.data.reason, EXPECTED_UPSTREAM_FAILURE)
+  assert.equal(options.data.upstreamStatus, 500)
+  assert.equal(options.message, options.statusMessage)
+})
+
+test('marks a rejected target url as an expected upstream failure too', () => {
+  const options = psiFailureErrorOptions(Object.assign(new Error('bad request'), { statusCode: 400 }))
+
+  assert.equal(options.statusCode, 422)
+  assert.equal(options.data.reason, EXPECTED_UPSTREAM_FAILURE)
 })
