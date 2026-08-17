@@ -30,6 +30,9 @@ catalogs:
     '@iconify-json/carbon':
       specifier: ^1.2.25
       version: 1.2.25
+    '@iconify-json/catppuccin':
+      specifier: ^1.2.17
+      version: 1.2.17
     '@iconify-json/heroicons':
       specifier: ^1.2.3
       version: 1.2.3
@@ -51,6 +54,9 @@ catalogs:
     '@iconify-json/simple-icons':
       specifier: ^1.2.93
       version: 1.2.93
+    '@iconify-json/tabler':
+      specifier: ^1.2.38
+      version: 1.2.38
     '@iconify-json/uil':
       specifier: ^1.2.3
       version: 1.2.3
@@ -333,6 +339,9 @@ importers:
       '@iconify-json/carbon':
         specifier: 'catalog:'
         version: 1.2.25
+      '@iconify-json/catppuccin':
+        specifier: 'catalog:'
+        version: 1.2.17
       '@iconify-json/heroicons':
         specifier: 'catalog:'
         version: 1.2.3
@@ -354,6 +363,9 @@ importers:
       '@iconify-json/simple-icons':
         specifier: 'catalog:'
         version: 1.2.93
+      '@iconify-json/tabler':
+        specifier: 'catalog:'
+        version: 1.2.38
       '@iconify-json/uil':
         specifier: 'catalog:'
         version: 1.2.3
@@ -1609,6 +1621,9 @@ packages:
   '@iconify-json/carbon@1.2.25':
     resolution: {integrity: sha512-7GLgXnmi47Skh8DcPPiP8U3vgm3rOVziEe+flCdG/kwiVaeb649U3Eqt/ej4f3NvlZK8BrOxpR3xQlWFLZYblQ==}
 
+  '@iconify-json/catppuccin@1.2.17':
+    resolution: {integrity: sha512-l1pFOADEUlw+j7V+yfFzBowdE4deeMuI4amqfKaN+7uTI9B0Ho24C86DitQk5zb62NkEM9poOyfuG7WS2bw6jg==}
+
   '@iconify-json/heroicons@1.2.3':
     resolution: {integrity: sha512-n+vmCEgTesRsOpp5AB5ILB6srsgsYK+bieoQBNlafvoEhjVXLq8nIGN4B0v/s4DUfa0dOrjwE/cKJgIKdJXOEg==}
 
@@ -1629,6 +1644,9 @@ packages:
 
   '@iconify-json/simple-icons@1.2.93':
     resolution: {integrity: sha512-/XhANjfGYOuqvSR3TmUnkQkINvQ4GVjVuukvymRbxtVFBvIq/yiXJqCDycKcQPT401OYT9H2vIY6ihAlz1QIAw==}
+
+  '@iconify-json/tabler@1.2.38':
+    resolution: {integrity: sha512-9v6ooRU/bKOK/Whv4w2aiK5gBnfCV9Ei+uD1iDDeLu2b+EnF3G3ZKkRKWEOOLG8bJyfKn6XEia6gUQ9oO7cF+Q==}
 
   '@iconify-json/uil@1.2.3':
     resolution: {integrity: sha512-if91+UBhDQc6glPsIaXecGIcXnbQZfEO4Gdv89TV2xQ+V5e9GWbY5rNl2fsKZd8COsRQ5lRQAKimVQVL0CZZVg==}
@@ -10433,6 +10451,10 @@ snapshots:
     dependencies:
       '@iconify/types': 2.0.0
 
+  '@iconify-json/catppuccin@1.2.17':
+    dependencies:
+      '@iconify/types': 2.0.0
+
   '@iconify-json/heroicons@1.2.3':
     dependencies:
       '@iconify/types': 2.0.0
@@ -10458,6 +10480,10 @@ snapshots:
       '@iconify/types': 2.0.0
 
   '@iconify-json/simple-icons@1.2.93':
+    dependencies:
+      '@iconify/types': 2.0.0
+
+  '@iconify-json/tabler@1.2.38':
     dependencies:
       '@iconify/types': 2.0.0
 

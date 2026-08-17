@@ -17,6 +17,7 @@ export default ({
       document: 'i-carbon-document',
       external: 'i-carbon-launch',
       hash: 'i-carbon-hashtag',
+      info: 'i-carbon-information',
       light: 'i-carbon-sun',
       menu: 'i-carbon-menu',
       next: 'i-carbon-arrow-right',
