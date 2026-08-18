@@ -66,6 +66,10 @@ jobs:
           NUXT_OAUTH_GITHUB_REDIRECT_URL: ${{ secrets.NUXT_OAUTH_GITHUB_REDIRECT_URL }}
           NUXT_SESSION_PASSWORD: ${{ secrets.NUXT_SESSION_PASSWORD }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          # `GITHUB_SHA` is the default branch tip on a `workflow_run` event, so
+          # the release tag named a commit this build does not contain. Sentry
+          # then blamed live errors on code that was never deployed.
+          SENTRY_RELEASE: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - run: pnpm deploy
         env:

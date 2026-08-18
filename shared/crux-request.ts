@@ -66,8 +66,8 @@ export function describeCruxFailure(error: unknown): CruxFailure {
 /**
  * Build the `createError` input for a failed Chrome UX Report call.
  *
- * The marker in `data` is what keeps a Google outage out of Sentry. Raise every CrUX failure
- * through here, never through a bare `createError`, or the outage returns as an issue.
+ * Raise every CrUX failure through here, never through a bare `createError`. The message is what
+ * keeps a Google outage out of Sentry, through `EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE`.
  */
 export function cruxFailureErrorOptions(error: unknown): UpstreamFailureErrorOptions {
   const failure = describeCruxFailure(error)

@@ -4,10 +4,7 @@ import { defineNuxtConfig } from 'nuxt/config'
 import { resolve } from 'pathe'
 import { gray, logger } from './logger'
 import { CLOUDFLARE_REQUIRED_SECRETS } from './shared/cloudflare'
-import { SENTRY_DSN, sentryRelease } from './shared/sentry'
-
-const hasSentryAuthToken = Boolean(process.env.SENTRY_AUTH_TOKEN)
-  || existsSync('.env.sentry-build-plugin')
+import { EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE } from './shared/sentry'
 
 // workerd installs its Node-compatible `console` as soon as anything in the
 // bundle imports `node:console` (undici, via node-fetch-native, does). That
@@ -30,6 +27,18 @@ export default defineNuxtConfig({
     report: true,
   },
 
+  nuxtSentry: {
+    dsn: 'https://51433a56963f6765e73969dbca31337e@o4510507748163584.ingest.us.sentry.io/4511887362555904',
+    project: 'unlighthouse',
+    policy: {
+      // Every PageSpeed Insights and Chrome UX Report failure this site raises on
+      // purpose. A Google outage is not a defect here, and it used to fill the
+      // issue feed. The module reads no marker from `data`, so the Drop Rule
+      // matches the message instead.
+      ignoreErrors: [EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE],
+    },
+  },
+
   modules: [
     '@harlan-zw/nuxt-cloudflare',
     '@harlan-zw/nuxt-dx',
@@ -46,6 +55,7 @@ export default defineNuxtConfig({
     'nuxt-skew-protection',
     'nuxt-ai-ready',
     '@sentry/nuxt/module',
+    '@harlan-zw/nuxt-sentry',
     // '@nuxtjs/mcp-toolkit',
     'nuxt-auth-utils',
     async (_, nuxt) => {
@@ -156,14 +166,6 @@ export default defineNuxtConfig({
     googleApiToken: '', // NUXT_GOOGLE_API_TOKEN (PageSpeed Insights)
     cloudflareAccountId: '', // NUXT_CLOUDFLARE_ACCOUNT_ID
     cloudflareAnalyticsApiToken: '', // NUXT_CLOUDFLARE_ANALYTICS_API_TOKEN
-    sentry: {
-      dsn: SENTRY_DSN,
-      enabled: process.env.NODE_ENV === 'production',
-      environment: 'production',
-      release: sentryRelease() ?? '',
-      tracesSampleRate: 0.05,
-    },
-
     public: {
       // moduleDeps: pkgJson.dependencies,
       // version: pkgJson.version,
@@ -501,29 +503,6 @@ export default defineNuxtConfig({
         class: 'antialiased font-sans text-neutral-700 dark:text-neutral-200 bg-white dark:bg-neutral-900',
       },
     },
-  },
-
-  sentry: {
-    enabled: process.env.NODE_ENV === 'production',
-    org: 'harlan-zw',
-    project: 'unlighthouse',
-    authToken: process.env.SENTRY_AUTH_TOKEN,
-    release: { name: sentryRelease() },
-    sourcemaps: {
-      disable: !hasSentryAuthToken,
-      filesToDeleteAfterUpload: ['**/*.map'],
-    },
-    bundleSizeOptimizations: {
-      excludeReplayShadowDom: true,
-      excludeReplayIframe: true,
-      excludeReplayWorker: true,
-    },
-    telemetry: false,
-  },
-
-  sourcemap: {
-    client: hasSentryAuthToken ? 'hidden' : false,
-    server: false,
   },
 
   compatibilityDate: '2025-07-23',

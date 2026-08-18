@@ -72,8 +72,8 @@ export function describePsiFailure(error: unknown): PsiFailure {
 /**
  * Build the `createError` input for a failed PageSpeed Insights call.
  *
- * The marker in `data` is what keeps a Google outage out of Sentry. Raise every PageSpeed failure
- * through here, never through a bare `createError`, or the outage returns as an issue.
+ * Raise every PageSpeed failure through here, never through a bare `createError`. The message is
+ * what keeps a Google outage out of Sentry, through `EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE`.
  */
 export function psiFailureErrorOptions(error: unknown): UpstreamFailureErrorOptions {
   const failure = describePsiFailure(error)

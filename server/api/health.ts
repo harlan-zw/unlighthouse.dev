@@ -1,4 +1,6 @@
 import type { D1Database } from '@cloudflare/workers-types'
+import type { SentryRuntimeConfig } from '@harlan-zw/nuxt-sentry/server'
+import type { H3Event } from 'h3'
 import type { HealthMetrics, HealthSummary, Probe, ToolBreakdown } from '../utils/health'
 import { getD1 } from '../utils/db'
 import { summarizeHealth } from '../utils/health'
@@ -122,6 +124,12 @@ async function readMetrics(db: D1Database, nowSeconds: number): Promise<Probe<He
   }
 }
 
+/** The release identity `@harlan-zw/nuxt-sentry` resolved for this build. */
+function sentryRelease(event: H3Event): string | null {
+  const { target } = useRuntimeConfig(event).public.nuxtSentry as SentryRuntimeConfig
+  return target._tag === 'enabled' ? target.release : null
+}
+
 export default defineEventHandler(async (event): Promise<HealthResponse> => {
   const now = new Date()
   const nowSeconds = Math.floor(now.getTime() / 1000)
@@ -136,7 +144,7 @@ export default defineEventHandler(async (event): Promise<HealthResponse> => {
   return {
     ...summary,
     generatedAt: now.toISOString(),
-    release: useRuntimeConfig(event).sentry?.release || null,
+    release: sentryRelease(event),
     window: {
       from: new Date((nowSeconds - DAY_SECONDS) * 1000).toISOString(),
       to: now.toISOString(),
