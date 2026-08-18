@@ -1,9 +1,10 @@
 minimumReleaseAgeExclude:
+  - '@harlan-zw/nuxt-cloudflare@0.0.18'
   - '@comark/nuxt'
   - '@comark/vue'
   - comark
   - '@harlan-zw/nuxt-cloudflare'
-  - '@harlan-zw/nuxt-dx@0.0.1'
+  - '@harlan-zw/nuxt-dx@0.0.1 || 0.0.9'
   - '@harlan-zw/nuxt-github-sponsors@0.0.1'
   - '@types/three@0.185.0'
   - nuxt-ai-ready@1.7.9
@@ -31,8 +32,8 @@ catalog:
   '@cloudflare/workers-types': ^5.20260815.1
   '@comark/nuxt': 0.6.2
   '@harlan-zw/comark-content': 0.0.17
-  '@harlan-zw/nuxt-cloudflare': 0.0.16
-  '@harlan-zw/nuxt-dx': 0.0.8
+  '@harlan-zw/nuxt-cloudflare': 0.0.18
+  '@harlan-zw/nuxt-dx': 0.0.9
   '@harlan-zw/nuxt-github-sponsors': 0.0.2
   '@iconify-json/carbon': ^1.2.25
   '@iconify-json/catppuccin': ^1.2.17
