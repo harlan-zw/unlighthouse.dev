@@ -4,7 +4,7 @@ minimumReleaseAgeExclude:
   - '@comark/vue'
   - comark
   - '@harlan-zw/nuxt-dx@0.0.1 || 0.0.9 || 0.1.0'
-  - '@harlan-zw/nuxt-github-sponsors@0.0.1 ||  0.1.0 || 0.1.2'
+  - '@harlan-zw/nuxt-github-sponsors@0.1.2'
   - '@types/three@0.185.0'
   - nuxt-ai-ready@1.7.9
   - nuxt-skew-protection@1.4.3
