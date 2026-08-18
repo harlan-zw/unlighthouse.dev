@@ -6,15 +6,7 @@ export default antfu({
     sfcBlocks: false,
   },
   typescript: true,
-  rules: {
-    'node/prefer-global/process': 'off',
-    'node/prefer-global/buffer': 'off',
-  },
-  ignores: [
-    '.data/**',
-    '.claude/**',
-  ],
-}, ...harlanzw(), {
+}, ...harlanzw({ base: { type: 'app' } }), {
   files: ['content/**/*.md/*.{js,jsx,ts,tsx}'],
   rules: {
     'harlanzw/nuxt-no-side-effects-in-setup': 'off',
