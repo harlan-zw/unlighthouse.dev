@@ -1,10 +1,11 @@
 import rangi from '@comark/nuxt/plugins/rangi'
-import { contentRangiTheme } from './rangi'
+import { contentRangiLanguages, contentRangiTheme } from '@harlan-zw/comark-content'
 
 // Comark plugin set for `<Markdown>` outside a content collection (release
 // notes). Matches the highlighting `@harlan-zw/comark-content` applies to docs.
 export const markdownPlugins = [rangi({
   classPrefix: 'rangi',
+  languages: contentRangiLanguages,
   lineNumbers: true,
   preStyles: false,
   theme: contentRangiTheme,

@@ -28,9 +28,6 @@ export default defineNuxtConfig({
 
   nuxtDx: {
     report: true,
-    sizeBudget: {
-      overridesKb: { 'server/plugins/sentry.ts': 326 },
-    },
   },
 
   modules: [
@@ -136,9 +133,6 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    githubSponsors: {
-      token: '', // NUXT_GITHUB_SPONSORS_TOKEN
-    },
     oauth: {
       github: {
         redirectUrl: '', // NUXT_OAUTH_GITHUB_REDIRECT_URL
@@ -178,12 +172,8 @@ export default defineNuxtConfig({
 
   githubSponsors: {
     login: 'harlan-zw',
-    mode: 'prerender',
     route: '/api/github/sponsors.json',
-    tiers: [
-      { key: 'top', minimumMonthlyDollars: 50 },
-      { key: 'gold', minimumMonthlyDollars: 25 },
-    ],
+    tokenEnv: 'NUXT_GITHUB_AUTH_TOKEN',
     overrides: {
       'Kintell-labs': { name: 'Kintell', websiteUrl: 'https://kintell.com' },
       'Massive Monster': { websiteUrl: 'https://massivemonster.co' },
@@ -226,11 +216,6 @@ export default defineNuxtConfig({
         // import) from a much later date than this was pinned at. Matches the
         // value nuxtseo.com deploys on.
         compatibility_date: '2026-08-11',
-        // `no_nodejs_compat_v2` is required, not cosmetic: something upstream
-        // injects `nodejs_compat_v2`, and from this compatibility date workerd
-        // rejects `nodejs_compat` + `nodejs_compat_v2` together. Nitro drops v2
-        // when both it and `no_nodejs_compat_v2` are present.
-        compatibility_flags: ['nodejs_compat', 'no_nodejs_compat_v2'],
         limits: {
           cpu_ms: 120_000, // 2 min for slow PSI calls
         },
@@ -275,11 +260,8 @@ export default defineNuxtConfig({
           experimental_remote: true,
         },
         observability: {
-          logs: {
-            enabled: true,
-            head_sampling_rate: 1,
-            invocation_logs: true,
-          },
+          // Full log volume. The module default is 0.01.
+          logs: { head_sampling_rate: 1 },
         },
         vars: {
           NUXT_OAUTH_GITHUB_CLIENT_ID: process.env.NUXT_OAUTH_GITHUB_CLIENT_ID || '',
@@ -350,8 +332,6 @@ export default defineNuxtConfig({
     },
   },
 
-  content: { highlight: true },
-
   schemaOrg: {
     identity: {
       type: 'Organization',
@@ -365,7 +345,6 @@ export default defineNuxtConfig({
       '/api/stats.json': { prerender: true },
       '/api/stats/summary.json': { prerender: true },
       '/api/search.json': { prerender: true },
-      '/api/github/sponsors.json': { prerender: true },
       '/api/_nuxt_icon': { cache: { group: 'icon', name: 'icon', maxAge: 60 * 60 * 24 * 7 } },
     },
     scripts: {
