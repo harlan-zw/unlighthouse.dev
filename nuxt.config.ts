@@ -506,4 +506,11 @@ export default defineNuxtConfig({
   },
 
   compatibilityDate: '2025-07-23',
+  // `@harlan-zw/nuxt-sentry` sets `sourcemap.client` when a Sentry auth token is
+  // present, and deliberately leaves the server alone, where Nuxt defaults to true.
+  // Without this the server bundle ships its own source maps.
+  sourcemap: {
+    server: false,
+  },
+
 })
