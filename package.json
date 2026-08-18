@@ -4,7 +4,7 @@
   "private": true,
   "packageManager": "pnpm@11.21.0",
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=22.12.0"
   },
   "scripts": {
     "dev": "nuxi dev",
@@ -48,6 +48,7 @@
     "@harlan-zw/nuxt-cloudflare": "catalog:",
     "@harlan-zw/nuxt-dx": "catalog:",
     "@harlan-zw/nuxt-github-sponsors": "catalog:",
+    "@harlan-zw/nuxt-sentry": "catalog:",
     "@iconify-json/carbon": "catalog:",
     "@iconify-json/catppuccin": "catalog:",
     "@iconify-json/heroicons": "catalog:",

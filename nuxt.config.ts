@@ -4,10 +4,7 @@ import { defineNuxtConfig } from 'nuxt/config'
 import { resolve } from 'pathe'
 import { gray, logger } from './logger'
 import { CLOUDFLARE_REQUIRED_SECRETS } from './shared/cloudflare'
-import { SENTRY_DSN, sentryRelease } from './shared/sentry'
-
-const hasSentryAuthToken = Boolean(process.env.SENTRY_AUTH_TOKEN)
-  || existsSync('.env.sentry-build-plugin')
+import { EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE, STACKLESS_FETCH_FAILURE_MESSAGE_RE } from './shared/sentry'
 
 // workerd installs its Node-compatible `console` as soon as anything in the
 // bundle imports `node:console` (undici, via node-fetch-native, does). That
@@ -28,8 +25,21 @@ export default defineNuxtConfig({
 
   nuxtDx: {
     report: true,
-    sizeBudget: {
-      overridesKb: { 'server/plugins/sentry.ts': 326 },
+  },
+
+  nuxtSentry: {
+    dsn: 'https://51433a56963f6765e73969dbca31337e@o4510507748163584.ingest.us.sentry.io/4511887362555904',
+    project: 'unlighthouse',
+    policy: {
+      // Every PageSpeed Insights and Chrome UX Report failure this site raises on
+      // purpose. A Google outage is not a defect here, and it used to fill the
+      // issue feed. The module reads no marker from `data`, so the Drop Rule
+      // matches the message instead.
+      ignoreErrors: [EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE],
+      // The app manifest poll that fails with no stack. Matching the message alone
+      // would also drop the same failure raised from site code, so this rule needs
+      // the empty frame list as well.
+      dropStacklessErrors: [STACKLESS_FETCH_FAILURE_MESSAGE_RE],
     },
   },
 
@@ -49,6 +59,7 @@ export default defineNuxtConfig({
     'nuxt-skew-protection',
     'nuxt-ai-ready',
     '@sentry/nuxt/module',
+    '@harlan-zw/nuxt-sentry',
     // '@nuxtjs/mcp-toolkit',
     'nuxt-auth-utils',
     async (_, nuxt) => {
@@ -137,7 +148,10 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     githubSponsors: {
-      token: '', // NUXT_GITHUB_SPONSORS_TOKEN
+      // Empty on purpose. The Worker secret binding NUXT_GITHUB_SPONSORS_TOKEN
+      // supplies it at runtime. A token read at build time is baked into the
+      // deployed bundle, and `@harlan-zw/nuxt-cloudflare` fails the build for it.
+      token: '',
     },
     oauth: {
       github: {
@@ -162,14 +176,6 @@ export default defineNuxtConfig({
     googleApiToken: '', // NUXT_GOOGLE_API_TOKEN (PageSpeed Insights)
     cloudflareAccountId: '', // NUXT_CLOUDFLARE_ACCOUNT_ID
     cloudflareAnalyticsApiToken: '', // NUXT_CLOUDFLARE_ANALYTICS_API_TOKEN
-    sentry: {
-      dsn: SENTRY_DSN,
-      enabled: process.env.NODE_ENV === 'production',
-      environment: 'production',
-      release: sentryRelease() ?? '',
-      tracesSampleRate: 0.05,
-    },
-
     public: {
       // moduleDeps: pkgJson.dependencies,
       // version: pkgJson.version,
@@ -178,12 +184,7 @@ export default defineNuxtConfig({
 
   githubSponsors: {
     login: 'harlan-zw',
-    mode: 'prerender',
     route: '/api/github/sponsors.json',
-    tiers: [
-      { key: 'top', minimumMonthlyDollars: 50 },
-      { key: 'gold', minimumMonthlyDollars: 25 },
-    ],
     overrides: {
       'Kintell-labs': { name: 'Kintell', websiteUrl: 'https://kintell.com' },
       'Massive Monster': { websiteUrl: 'https://massivemonster.co' },
@@ -226,11 +227,6 @@ export default defineNuxtConfig({
         // import) from a much later date than this was pinned at. Matches the
         // value nuxtseo.com deploys on.
         compatibility_date: '2026-08-11',
-        // `no_nodejs_compat_v2` is required, not cosmetic: something upstream
-        // injects `nodejs_compat_v2`, and from this compatibility date workerd
-        // rejects `nodejs_compat` + `nodejs_compat_v2` together. Nitro drops v2
-        // when both it and `no_nodejs_compat_v2` are present.
-        compatibility_flags: ['nodejs_compat', 'no_nodejs_compat_v2'],
         limits: {
           cpu_ms: 120_000, // 2 min for slow PSI calls
         },
@@ -275,11 +271,8 @@ export default defineNuxtConfig({
           experimental_remote: true,
         },
         observability: {
-          logs: {
-            enabled: true,
-            head_sampling_rate: 1,
-            invocation_logs: true,
-          },
+          // Full log volume. The module default is 0.01.
+          logs: { head_sampling_rate: 1 },
         },
         vars: {
           NUXT_OAUTH_GITHUB_CLIENT_ID: process.env.NUXT_OAUTH_GITHUB_CLIENT_ID || '',
@@ -350,8 +343,6 @@ export default defineNuxtConfig({
     },
   },
 
-  content: { highlight: true },
-
   schemaOrg: {
     identity: {
       type: 'Organization',
@@ -365,7 +356,6 @@ export default defineNuxtConfig({
       '/api/stats.json': { prerender: true },
       '/api/stats/summary.json': { prerender: true },
       '/api/search.json': { prerender: true },
-      '/api/github/sponsors.json': { prerender: true },
       '/api/_nuxt_icon': { cache: { group: 'icon', name: 'icon', maxAge: 60 * 60 * 24 * 7 } },
     },
     scripts: {
@@ -524,28 +514,12 @@ export default defineNuxtConfig({
     },
   },
 
-  sentry: {
-    enabled: process.env.NODE_ENV === 'production',
-    org: 'harlan-zw',
-    project: 'unlighthouse',
-    authToken: process.env.SENTRY_AUTH_TOKEN,
-    release: { name: sentryRelease() },
-    sourcemaps: {
-      disable: !hasSentryAuthToken,
-      filesToDeleteAfterUpload: ['**/*.map'],
-    },
-    bundleSizeOptimizations: {
-      excludeReplayShadowDom: true,
-      excludeReplayIframe: true,
-      excludeReplayWorker: true,
-    },
-    telemetry: false,
-  },
-
+  compatibilityDate: '2025-07-23',
+  // `@harlan-zw/nuxt-sentry` sets `sourcemap.client` when a Sentry auth token is
+  // present, and deliberately leaves the server alone, where Nuxt defaults to true.
+  // Without this the server bundle ships its own source maps.
   sourcemap: {
-    client: hasSentryAuthToken ? 'hidden' : false,
     server: false,
   },
 
-  compatibilityDate: '2025-07-23',
 })

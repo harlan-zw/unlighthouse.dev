@@ -330,6 +330,12 @@ const exploreLinks = [
               </div>
             </div>
           </div>
+          <div v-else-if="sponsors?._tag === 'unavailable'" class="text-neutral-600 dark:text-neutral-400">
+            The sponsor list is unavailable right now. See it on
+            <NuxtLink to="https://github.com/sponsors/harlan-zw" class="underline">
+              GitHub Sponsors
+            </NuxtLink>.
+          </div>
         </div>
       </div>
     </section>
