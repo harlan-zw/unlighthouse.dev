@@ -1,9 +1,11 @@
 /* eslint-disable test/no-import-node-test */
+import type { ErrorReport, ReportPolicy } from '@harlan-zw/nuxt-sentry/server'
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { decideReport } from '@harlan-zw/nuxt-sentry/server'
 import { describeCruxFailure } from '../shared/crux-request.ts'
 import { describePsiFailure } from '../shared/psi-request.ts'
-import { EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE } from '../shared/sentry.ts'
+import { EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE, STACKLESS_FETCH_FAILURE_MESSAGE_RE } from '../shared/sentry.ts'
 
 const upstreamErrors = [
   Object.assign(new Error('rate limited'), { response: { status: 429 } }),
@@ -24,4 +26,45 @@ test('drops every Chrome UX Report failure this site raises', () => {
 
 test('keeps a defect in this site', () => {
   assert.doesNotMatch('Cannot read properties of undefined', EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE)
+})
+
+/** The client Report Policy this site configures, resolved the way the module resolves it. */
+const clientPolicy: ReportPolicy = {
+  scope: 'client',
+  dataCollection: 'scrubbed',
+  dropStatus: [],
+  dropTransient: false,
+  ignoreErrors: [],
+  dropStacklessErrors: [{
+    _tag: 'pattern',
+    source: STACKLESS_FETCH_FAILURE_MESSAGE_RE.source,
+    flags: STACKLESS_FETCH_FAILURE_MESSAGE_RE.flags,
+  }],
+  dropBreadcrumbMessages: [],
+  denyUrls: [],
+  secretKeys: [],
+}
+
+function fetchFailureReport(frames: Array<{ filename: string }>): ErrorReport {
+  return {
+    exception: {
+      values: [{
+        type: 'TypeError',
+        value: 'Failed to fetch',
+        stacktrace: { frames },
+      }],
+    },
+  }
+}
+
+test('drops the app manifest fetch failure that carries no stack', () => {
+  const decision = decideReport(fetchFailureReport([]), undefined, clientPolicy)
+
+  assert.deepEqual(decision, { _tag: 'drop', rule: 'stackless-message' })
+})
+
+test('keeps the same failure when a stack names site code', () => {
+  const report = fetchFailureReport([{ filename: 'https://unlighthouse.dev/_nuxt/entry.js' }])
+
+  assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'send' })
 })

@@ -26,3 +26,15 @@ export interface UpstreamFailureErrorOptions {
  */
 export const EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE
   = /(?:PageSpeed Insights|Chrome UX Report) (?:is rate limited right now|could not (?:analyse|look up) this URL|did not return a result for this URL)/
+
+/**
+ * The Nuxt app manifest fetch failure a browser reports with no stack.
+ *
+ * Nuxt polls `/_nuxt/builds/meta/*` for the app manifest. When the network drops that poll,
+ * the browser rejects on the global handler and Sentry records `TypeError: Failed to fetch`
+ * with an empty frame list. No frame names site code, so the report cannot be acted on.
+ *
+ * `nuxtSentry.policy.dropStacklessErrors` drops this message only when the report carries no
+ * stack frame. The same message with a stack is a defect here and still reports.
+ */
+export const STACKLESS_FETCH_FAILURE_MESSAGE_RE = /^TypeError: Failed to fetch$/

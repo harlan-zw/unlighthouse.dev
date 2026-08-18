@@ -1,10 +1,20 @@
-import type { ShjToken } from 'rangi'
-import { contentRangiLanguages, contentRangiTheme } from '@harlan-zw/comark-content'
+import type { ShjThemePair, ShjToken } from 'rangi'
 import { tokenize } from 'rangi'
+import { githubDark, githubLight } from 'rangi/themes'
 
-// Highlights code outside a content collection (navigation titles, release
-// notes). `@harlan-zw/comark-content` ships the theme and the extra languages it
-// uses for markdown code fences, so both paths render the same colours.
+// Single source of truth for code highlighting. `@harlan-zw/comark-content`
+// highlights markdown code fences with the same rangi theme; this module covers
+// the places that highlight code outside a content collection (navigation
+// titles, release notes).
+export const contentRangiTheme: ShjThemePair = {
+  light: {
+    ...githubLight,
+    name: 'unlighthouse-github-light-aa',
+    // Default github-light comment grey fails AA on white.
+    tokens: { ...githubLight.tokens, cmnt: '#57606a' },
+  },
+  dark: githubDark,
+}
 
 export interface HighlightedCode {
   className: string
@@ -26,8 +36,9 @@ function tokenStyle(token: ShjToken): string {
 }
 
 export function highlightCode(code: string, lang: string): HighlightedCode {
-  const language = lang.toLowerCase().replace(/[^a-z0-9-]/g, '') || 'plain'
-  const html = tokenize(code, { lang: language, languages: contentRangiLanguages }).map((token) => {
+  const requestedLanguage = lang.toLowerCase().replace(/[^a-z0-9-]/g, '') || 'plain'
+  const language = requestedLanguage === 'dotenv' || requestedLanguage === 'env' ? 'ini' : requestedLanguage
+  const html = tokenize(code, { lang: language }).map((token) => {
     const value = escapeHtml(token.text)
     if (!token.type)
       return value
@@ -37,7 +48,7 @@ export function highlightCode(code: string, lang: string): HighlightedCode {
 
   return {
     html,
-    className: `rangi shj-lang-${language}`,
+    className: `rangi shj-lang-${requestedLanguage}`,
   }
 }
 
