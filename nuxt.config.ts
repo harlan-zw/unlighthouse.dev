@@ -147,6 +147,12 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    githubSponsors: {
+      // Empty on purpose. The Worker secret binding NUXT_GITHUB_SPONSORS_TOKEN
+      // supplies it at runtime. A token read at build time is baked into the
+      // deployed bundle, and `@harlan-zw/nuxt-cloudflare` fails the build for it.
+      token: '',
+    },
     oauth: {
       github: {
         redirectUrl: '', // NUXT_OAUTH_GITHUB_REDIRECT_URL
@@ -179,7 +185,6 @@ export default defineNuxtConfig({
   githubSponsors: {
     login: 'harlan-zw',
     route: '/api/github/sponsors.json',
-    tokenEnv: 'NUXT_GITHUB_AUTH_TOKEN',
     overrides: {
       'Kintell-labs': { name: 'Kintell', websiteUrl: 'https://kintell.com' },
       'Massive Monster': { websiteUrl: 'https://massivemonster.co' },
