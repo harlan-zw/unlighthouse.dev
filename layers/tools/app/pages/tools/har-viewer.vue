@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ParsedHarEntry } from '../../composables/useToolHarReport'
+import type { ParsedHarEntry } from '../../utils/har'
 
 definePageMeta({
   breadcrumb: {
