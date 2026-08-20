@@ -4,7 +4,7 @@ import { defineNuxtConfig } from 'nuxt/config'
 import { resolve } from 'pathe'
 import { gray, logger } from './logger'
 import { CLOUDFLARE_REQUIRED_SECRETS } from './shared/cloudflare'
-import { EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE, STACKLESS_FETCH_FAILURE_MESSAGE_RE } from './shared/sentry'
+import { CARBON_ADS_SCRIPT_URL_RE, EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE, STACKLESS_FETCH_FAILURE_MESSAGE_RE } from './shared/sentry'
 
 // workerd installs its Node-compatible `console` as soon as anything in the
 // bundle imports `node:console` (undici, via node-fetch-native, does). That
@@ -40,6 +40,10 @@ export default defineNuxtConfig({
       // would also drop the same failure raised from site code, so this rule needs
       // the empty frame list as well.
       dropStacklessErrors: [STACKLESS_FETCH_FAILURE_MESSAGE_RE],
+      // The Carbon Ads script crashes on its own timer after a client navigation
+      // unmounts it. This site cannot change the provider's code, so it drops
+      // every report whose crash frame is that script.
+      denyUrls: [CARBON_ADS_SCRIPT_URL_RE],
     },
   },
 

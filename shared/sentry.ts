@@ -38,3 +38,18 @@ export const EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE
  * stack frame. The same message with a stack is a defect here and still reports.
  */
 export const STACKLESS_FETCH_FAILURE_MESSAGE_RE = /^TypeError: Failed to fetch$/
+
+/**
+ * The Carbon Ads script, which `ScriptCarbonAds` loads on every documentation page.
+ *
+ * The component keys the ad on the route path, so a client navigation unmounts it and
+ * `@nuxt/scripts` removes the `#_carbonads_js` script element. carbon.js still holds a timer
+ * that reads `document.getElementById('_carbonads_js').src`, so the timer throws on an element
+ * this site already removed. The crash is in the provider's code, and no site frame appears
+ * below the Sentry timer wrapper.
+ *
+ * `nuxtSentry.policy.denyUrls` feeds the Sentry client `denyUrls` option, which matches the
+ * crash frame URL. The Report Policy `denyUrls` Drop Rule needs every frame to match, so it
+ * does not drop this report on its own.
+ */
+export const CARBON_ADS_SCRIPT_URL_RE = /^https?:\/\/(?:[^/]*\.)?carbonads\.(?:com|net)\//i
