@@ -150,7 +150,7 @@ export interface PerformanceMetric {
 export interface ParsedLighthouseReport {
   raw: LighthouseResult
   url: string
-  fetchTime: Date
+  fetchTime: Date | null
   device: 'mobile' | 'desktop'
   version: string
   categories: {

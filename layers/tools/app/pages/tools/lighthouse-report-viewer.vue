@@ -216,7 +216,7 @@ const categoryDisplayData = computed(() => {
               {{ report.url }}
             </a>
           </div>
-          <div class="text-xs text-gray-500 shrink-0">
+          <div v-if="report.fetchTime" class="text-xs text-gray-500 shrink-0">
             {{ report.fetchTime.toLocaleString() }}
           </div>
         </div>

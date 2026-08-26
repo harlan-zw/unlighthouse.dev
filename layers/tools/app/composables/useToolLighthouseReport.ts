@@ -1,152 +1,24 @@
-import type {
-  LighthouseAudit,
-  LighthouseCategory,
-  LighthouseResult,
-  ParsedLighthouseReport,
-  PerformanceMetric,
-} from '../types/lighthouse'
+import type { ParsedLighthouseReport } from '../types/lighthouse'
 import { computed, ref } from 'vue'
-
-// Performance metric definitions
-const PERF_METRIC_IDS = [
-  'first-contentful-paint',
-  'speed-index',
-  'largest-contentful-paint',
-  'total-blocking-time',
-  'cumulative-layout-shift',
-  'interactive', // TTI
-]
-
-const CORE_WEB_VITALS = [
-  'largest-contentful-paint',
-  'cumulative-layout-shift',
-  'total-blocking-time', // Proxy for INP in lab
-]
-
-const METRIC_SHORT_NAMES: Record<string, string> = {
-  'first-contentful-paint': 'FCP',
-  'speed-index': 'SI',
-  'largest-contentful-paint': 'LCP',
-  'total-blocking-time': 'TBT',
-  'cumulative-layout-shift': 'CLS',
-  'interactive': 'TTI',
-}
-
-function getDevice(report: LighthouseResult): 'mobile' | 'desktop' {
-  if (report.configSettings.formFactor)
-    return report.configSettings.formFactor
-  if (report.configSettings.screenEmulation?.mobile)
-    return 'mobile'
-  return 'desktop'
-}
-
-function extractPerformanceMetrics(report: LighthouseResult): PerformanceMetric[] {
-  const metrics: PerformanceMetric[] = []
-
-  for (const id of PERF_METRIC_IDS) {
-    const audit = report.audits[id]
-    if (!audit)
-      continue
-
-    metrics.push({
-      id,
-      name: METRIC_SHORT_NAMES[id] || audit.title,
-      value: audit.numericValue ?? 0,
-      displayValue: audit.displayValue ?? '',
-      score: audit.score,
-      unit: audit.numericUnit === 'unitless' ? 'unitless' : 'ms',
-      isCoreWebVital: CORE_WEB_VITALS.includes(id),
-    })
-  }
-
-  return metrics
-}
-
-function getAuditsByType(report: LighthouseResult, category: LighthouseCategory | undefined) {
-  if (!category)
-    return { opportunities: [], diagnostics: [], passed: [] }
-
-  const opportunities: LighthouseAudit[] = []
-  const diagnostics: LighthouseAudit[] = []
-  const passed: LighthouseAudit[] = []
-
-  for (const ref of category.auditRefs) {
-    const audit = report.audits[ref.id]
-    if (!audit)
-      continue
-
-    // Skip metrics, they're handled separately
-    if (ref.group === 'metrics')
-      continue
-
-    if (audit.score === 1 || audit.scoreDisplayMode === 'notApplicable') {
-      passed.push(audit)
-    }
-    else if (audit.details?.type === 'opportunity') {
-      opportunities.push(audit)
-    }
-    else if (ref.group === 'diagnostics' || audit.scoreDisplayMode === 'informative') {
-      diagnostics.push(audit)
-    }
-    else if (audit.score !== null && audit.score < 1) {
-      diagnostics.push(audit)
-    }
-  }
-
-  // Sort opportunities by savings
-  opportunities.sort((a, b) => {
-    const aSavings = a.details?.type === 'opportunity'
-      ? (a.details.overallSavingsMs ?? 0)
-      : 0
-    const bSavings = b.details?.type === 'opportunity'
-      ? (b.details.overallSavingsMs ?? 0)
-      : 0
-    return bSavings - aSavings
-  })
-
-  return { opportunities, diagnostics, passed }
-}
-
-function parseReport(input: string | object): ParsedLighthouseReport {
-  const raw: LighthouseResult = typeof input === 'string' ? JSON.parse(input) : input
-
-  // Validate it's a Lighthouse report
-  if (!raw.lighthouseVersion || !raw.categories) {
-    throw new Error('Invalid Lighthouse report format. Expected lighthouseVersion and categories.')
-  }
-
-  const perfCategory = raw.categories.performance
-  const { opportunities, diagnostics, passed } = getAuditsByType(raw, perfCategory)
-
-  return {
-    raw,
-    url: raw.finalUrl || raw.requestedUrl,
-    fetchTime: new Date(raw.fetchTime),
-    device: getDevice(raw),
-    version: raw.lighthouseVersion,
-    categories: {
-      performance: raw.categories.performance ?? null,
-      accessibility: raw.categories.accessibility ?? null,
-      bestPractices: raw.categories['best-practices'] ?? null,
-      seo: raw.categories.seo ?? null,
-      pwa: raw.categories.pwa ?? null,
-    },
-    performanceMetrics: extractPerformanceMetrics(raw),
-    opportunities,
-    diagnostics,
-    passedAudits: passed,
-    screenshot: raw.fullPageScreenshot?.screenshot ?? null,
-  }
-}
+import { parseLighthouseReport } from '../utils/lighthouse'
 
 export function useToolLighthouseReport() {
   const report = ref<ParsedLighthouseReport | null>(null)
   const error = ref<string | null>(null)
   const loading = ref(false)
 
+  function apply(input: string | object) {
+    const outcome = parseLighthouseReport(input)
+    if (outcome._tag === 'Err')
+      error.value = outcome.message
+    else
+      report.value = outcome.report
+    loading.value = false
+  }
+
   function loadReport(input: string | object) {
     error.value = null
-    report.value = parseReport(input)
+    apply(input)
   }
 
   function loadFromFile(file: File): Promise<void> {
@@ -155,40 +27,26 @@ export function useToolLighthouseReport() {
 
     return new Promise<void>((resolve) => {
       const reader = new FileReader()
-
+      // `FileReader` runs this outside the promise chain, so a throw here reaches
+      // `window.onerror` and no `catch` below can see it. `parseLighthouseReport` returns its
+      // failure instead of throwing, which is what keeps a bad upload out of Sentry.
       reader.onload = (e) => {
-        const content = e.target?.result as string
-        report.value = parseReport(content)
-        loading.value = false
+        apply(String(e.target?.result ?? ''))
         resolve()
       }
-
       reader.onerror = () => {
         error.value = 'Failed to read file'
         loading.value = false
         resolve()
       }
-
       reader.readAsText(file)
-    }).catch((err: Error) => {
-      error.value = err.message || 'Failed to parse JSON'
-      loading.value = false
     })
   }
 
   function loadFromText(text: string) {
     loading.value = true
     error.value = null
-
-    Promise.resolve()
-      .then(() => {
-        report.value = parseReport(text)
-        loading.value = false
-      })
-      .catch((err) => {
-        error.value = err.message || 'Failed to parse JSON'
-        loading.value = false
-      })
+    apply(text)
   }
 
   function clear() {
@@ -196,7 +54,6 @@ export function useToolLighthouseReport() {
     error.value = null
   }
 
-  // Computed helpers
   const hasPerformance = computed(() => !!report.value?.categories.performance)
   const hasAccessibility = computed(() => !!report.value?.categories.accessibility)
   const hasBestPractices = computed(() => !!report.value?.categories.bestPractices)
