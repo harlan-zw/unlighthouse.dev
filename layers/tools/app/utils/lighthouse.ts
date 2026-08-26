@@ -156,7 +156,8 @@ export function parseLighthouseReport(input: string | object): ParseLighthouseRe
   const performance = readCategory(categories, 'performance')
   const { opportunities, diagnostics, passed } = getAuditsByType(audits, performance ?? undefined)
 
-  const fetchTime = new Date(typeof raw.fetchTime === 'string' ? raw.fetchTime : Number.NaN)
+  const parsedFetchTime = typeof raw.fetchTime === 'string' ? new Date(raw.fetchTime) : null
+  const fetchTime = parsedFetchTime && !Number.isNaN(parsedFetchTime.getTime()) ? parsedFetchTime : null
   const screenshot = isRecord(raw.fullPageScreenshot) && isRecord(raw.fullPageScreenshot.screenshot)
     ? raw.fullPageScreenshot.screenshot as ParsedLighthouseReport['screenshot']
     : null

@@ -112,6 +112,16 @@ test('reads a report that carries no audits or configSettings', () => {
   assert.equal(result.report.categories.seo?.score, 0.9)
 })
 
+test('keeps fetchTime null when the report has no timestamp', () => {
+  const result = parseLighthouseReport(JSON.stringify({
+    lighthouseVersion: '12',
+    categories: { seo: { id: 'seo', title: 'SEO', score: 0.9, auditRefs: [] } },
+  }))
+
+  assert.equal(result._tag, 'Ok')
+  assert.equal(result._tag === 'Ok' && result.report.fetchTime, null)
+})
+
 test('reads a report whose category auditRefs are missing', () => {
   const result = parseLighthouseReport(lighthouseReport({
     categories: { performance: { id: 'performance', title: 'Performance', score: 0.5 } },
