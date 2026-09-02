@@ -5,7 +5,7 @@ import test from 'node:test'
 import { decideReport } from '@harlan-zw/nuxt-sentry/server'
 import { describeCruxFailure } from '../shared/crux-request.ts'
 import { describePsiFailure } from '../shared/psi-request.ts'
-import { EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE, STACKLESS_FETCH_FAILURE_MESSAGE_RE } from '../shared/sentry.ts'
+import { EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE, STACKLESS_FETCH_FAILURE_MESSAGE_RE, STACKLESS_UNHANDLED_REJECTION_EVENT_MESSAGE_RE } from '../shared/sentry.ts'
 
 const upstreamErrors = [
   Object.assign(new Error('rate limited'), { response: { status: 429 } }),
@@ -39,6 +39,10 @@ const clientPolicy: ReportPolicy = {
     _tag: 'pattern',
     source: STACKLESS_FETCH_FAILURE_MESSAGE_RE.source,
     flags: STACKLESS_FETCH_FAILURE_MESSAGE_RE.flags,
+  }, {
+    _tag: 'pattern',
+    source: STACKLESS_UNHANDLED_REJECTION_EVENT_MESSAGE_RE.source,
+    flags: STACKLESS_UNHANDLED_REJECTION_EVENT_MESSAGE_RE.flags,
   }],
   dropBreadcrumbMessages: [],
   denyUrls: [],
@@ -65,6 +69,36 @@ test('drops the app manifest fetch failure that carries no stack', () => {
 
 test('keeps the same failure when a stack names site code', () => {
   const report = fetchFailureReport([{ filename: 'https://unlighthouse.dev/_nuxt/entry.js' }])
+
+  assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'send' })
+})
+
+/**
+ * The report Sentry's browser SDK synthesizes for the Safari unhandledrejection CustomEvent.
+ *
+ * The SDK reads no stack from the event, so the exception value it records is the
+ * `CustomEvent: …` text below with an empty frame list.
+ */
+function unhandledRejectionEventReport(frames: Array<{ filename: string }>): ErrorReport {
+  return {
+    exception: {
+      values: [{
+        type: 'CustomEvent',
+        value: 'Event `CustomEvent` (type=unhandledrejection) captured as promise rejection',
+        stacktrace: { frames },
+      }],
+    },
+  }
+}
+
+test('drops the Safari unhandledrejection CustomEvent that carries no stack', () => {
+  const decision = decideReport(unhandledRejectionEventReport([]), undefined, clientPolicy)
+
+  assert.deepEqual(decision, { _tag: 'drop', rule: 'stackless-message' })
+})
+
+test('keeps the same rejection event when a stack names site code', () => {
+  const report = unhandledRejectionEventReport([{ filename: 'https://unlighthouse.dev/_nuxt/entry.js' }])
 
   assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'send' })
 })

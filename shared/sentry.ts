@@ -38,3 +38,17 @@ export const EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE
  * stack frame. The same message with a stack is a defect here and still reports.
  */
 export const STACKLESS_FETCH_FAILURE_MESSAGE_RE = /^TypeError: Failed to fetch$/
+
+/**
+ * The Safari promise-rejection report Sentry's browser SDK synthesizes from a CustomEvent.
+ *
+ * Safari, and some browser extensions, raise `unhandledrejection` events whose reason is the
+ * event itself. The SDK cannot read a stack from it, so it records
+ * `CustomEvent: Event \`CustomEvent\` (type=unhandledrejection) captured as promise rejection`
+ * with an empty frame list. No frame names site code, so the report cannot be acted on.
+ *
+ * `nuxtSentry.policy.dropStacklessErrors` drops this message only when the report carries no
+ * stack frame. The same message with a stack is a defect here and still reports.
+ */
+export const STACKLESS_UNHANDLED_REJECTION_EVENT_MESSAGE_RE
+  = /^CustomEvent: Event `CustomEvent` \(type=unhandledrejection\) captured as promise rejection$/
