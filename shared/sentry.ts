@@ -38,3 +38,15 @@ export const EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE
  * stack frame. The same message with a stack is a defect here and still reports.
  */
 export const STACKLESS_FETCH_FAILURE_MESSAGE_RE = /^TypeError: Failed to fetch$/
+
+/**
+ * The network failure a plain-http page load reports with no stack.
+ *
+ * A page served over plain http rejects a resource load with `NetworkError: A network
+ * error occurred.` on the global handler. No frame names site code, so the report
+ * cannot be acted on.
+ *
+ * `nuxtSentry.policy.dropStacklessErrors` drops this message only when the report carries no
+ * stack frame. The same message with a stack is a defect here and still reports.
+ */
+export const STACKLESS_NETWORK_ERROR_MESSAGE_RE = /^NetworkError: A network error occurred\.$/

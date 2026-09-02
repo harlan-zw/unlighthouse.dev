@@ -4,7 +4,7 @@ import { defineNuxtConfig } from 'nuxt/config'
 import { resolve } from 'pathe'
 import { gray, logger } from './logger'
 import { CLOUDFLARE_REQUIRED_SECRETS } from './shared/cloudflare'
-import { EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE, STACKLESS_FETCH_FAILURE_MESSAGE_RE } from './shared/sentry'
+import { EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE, STACKLESS_FETCH_FAILURE_MESSAGE_RE, STACKLESS_NETWORK_ERROR_MESSAGE_RE } from './shared/sentry'
 
 // workerd installs its Node-compatible `console` as soon as anything in the
 // bundle imports `node:console` (undici, via node-fetch-native, does). That
@@ -36,10 +36,11 @@ export default defineNuxtConfig({
       // issue feed. The module reads no marker from `data`, so the Drop Rule
       // matches the message instead.
       ignoreErrors: [EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE],
-      // The app manifest poll that fails with no stack. Matching the message alone
-      // would also drop the same failure raised from site code, so this rule needs
-      // the empty frame list as well.
-      dropStacklessErrors: [STACKLESS_FETCH_FAILURE_MESSAGE_RE],
+      // Browser failures that arrive with no stack: the app manifest poll when the
+      // network drops, and a plain-http page load the browser rejects as a network
+      // error. Matching the message alone would also drop the same failure raised
+      // from site code, so these rules need the empty frame list as well.
+      dropStacklessErrors: [STACKLESS_FETCH_FAILURE_MESSAGE_RE, STACKLESS_NETWORK_ERROR_MESSAGE_RE],
     },
   },
 
