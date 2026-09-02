@@ -4,7 +4,7 @@ import { defineNuxtConfig } from 'nuxt/config'
 import { resolve } from 'pathe'
 import { gray, logger } from './logger'
 import { CLOUDFLARE_REQUIRED_SECRETS } from './shared/cloudflare'
-import { EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE, STACKLESS_FETCH_FAILURE_MESSAGE_RE, STACKLESS_UNHANDLED_REJECTION_EVENT_MESSAGE_RE } from './shared/sentry'
+import { EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE, STACKLESS_FETCH_FAILURE_MESSAGE_RE, STACKLESS_UNHANDLED_REJECTION_EVENT_MESSAGE_RE, STACKLESS_UNHANDLED_REJECTION_OBJECT_MESSAGE_RE } from './shared/sentry'
 
 // workerd installs its Node-compatible `console` as soon as anything in the
 // bundle imports `node:console` (undici, via node-fetch-native, does). That
@@ -44,6 +44,9 @@ export default defineNuxtConfig({
         // Safari raises unhandledrejection as a frameless CustomEvent the SDK cannot
         // stack. See shared/sentry.ts for the full story.
         STACKLESS_UNHANDLED_REJECTION_EVENT_MESSAGE_RE,
+        // A plain object reaching the global rejection handler is serialized the same
+        // way, with the stringified keys as a varying tail. See shared/sentry.ts.
+        STACKLESS_UNHANDLED_REJECTION_OBJECT_MESSAGE_RE,
       ],
     },
   },
