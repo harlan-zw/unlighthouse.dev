@@ -5,7 +5,12 @@ import test from 'node:test'
 import { decideReport } from '@harlan-zw/nuxt-sentry/server'
 import { describeCruxFailure } from '../shared/crux-request.ts'
 import { describePsiFailure } from '../shared/psi-request.ts'
-import { EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE, STACKLESS_FETCH_FAILURE_MESSAGE_RE } from '../shared/sentry.ts'
+import {
+  EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE,
+  SAFARI_CUSTOM_EVENT_REJECTION_MESSAGE_RE,
+  SAFARI_KEYLESS_OBJECT_REJECTION_MESSAGE_RE,
+  STACKLESS_FETCH_FAILURE_MESSAGE_RE,
+} from '../shared/sentry.ts'
 
 const upstreamErrors = [
   Object.assign(new Error('rate limited'), { response: { status: 429 } }),
@@ -34,7 +39,10 @@ const clientPolicy: ReportPolicy = {
   dataCollection: 'scrubbed',
   dropStatus: [],
   dropTransient: false,
-  ignoreErrors: [],
+  ignoreErrors: [
+    SAFARI_CUSTOM_EVENT_REJECTION_MESSAGE_RE,
+    SAFARI_KEYLESS_OBJECT_REJECTION_MESSAGE_RE,
+  ],
   dropStacklessErrors: [{
     _tag: 'pattern',
     source: STACKLESS_FETCH_FAILURE_MESSAGE_RE.source,
@@ -65,6 +73,48 @@ test('drops the app manifest fetch failure that carries no stack', () => {
 
 test('keeps the same failure when a stack names site code', () => {
   const report = fetchFailureReport([{ filename: 'https://unlighthouse.dev/_nuxt/entry.js' }])
+
+  assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'send' })
+})
+
+/** A report whose rejected value is not an `Error`, so Sentry serializes it into text. */
+function nonErrorRejectionReport(type: string, value: string): ErrorReport {
+  return {
+    exception: {
+      values: [{ type, value }],
+    },
+  }
+}
+
+test('drops the Safari CustomEvent promise rejection that carries no stack', () => {
+  const report = nonErrorRejectionReport(
+    'CustomEvent',
+    'Event `CustomEvent` (type=unhandledrejection) captured as promise rejection',
+  )
+
+  assert.deepEqual(
+    decideReport(report, undefined, clientPolicy),
+    { _tag: 'drop', rule: 'ignore-message' },
+  )
+})
+
+test('drops the Safari keyless object promise rejection that carries no stack', () => {
+  const report = nonErrorRejectionReport(
+    'UnhandledRejection',
+    'Object captured as promise rejection with keys: [object has no keys]',
+  )
+
+  assert.deepEqual(
+    decideReport(report, undefined, clientPolicy),
+    { _tag: 'drop', rule: 'ignore-message' },
+  )
+})
+
+test('keeps a Safari rejection whose serialization differs', () => {
+  const report = nonErrorRejectionReport(
+    'UnhandledRejection',
+    'Object captured as promise rejection with keys: detail, type',
+  )
 
   assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'send' })
 })

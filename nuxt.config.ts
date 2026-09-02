@@ -4,7 +4,12 @@ import { defineNuxtConfig } from 'nuxt/config'
 import { resolve } from 'pathe'
 import { gray, logger } from './logger'
 import { CLOUDFLARE_REQUIRED_SECRETS } from './shared/cloudflare'
-import { EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE, STACKLESS_FETCH_FAILURE_MESSAGE_RE } from './shared/sentry'
+import {
+  EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE,
+  SAFARI_CUSTOM_EVENT_REJECTION_MESSAGE_RE,
+  SAFARI_KEYLESS_OBJECT_REJECTION_MESSAGE_RE,
+  STACKLESS_FETCH_FAILURE_MESSAGE_RE,
+} from './shared/sentry'
 
 // workerd installs its Node-compatible `console` as soon as anything in the
 // bundle imports `node:console` (undici, via node-fetch-native, does). That
@@ -35,7 +40,16 @@ export default defineNuxtConfig({
       // purpose. A Google outage is not a defect here, and it used to fill the
       // issue feed. The module reads no marker from `data`, so the Drop Rule
       // matches the message instead.
-      ignoreErrors: [EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE],
+      ignoreErrors: [
+        EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE,
+        // Safari-only promise rejections whose rejected value is not an `Error` (a
+        // CustomEvent and a keyless object). Sentry serializes each into one exact
+        // string, the report carries no stack frame, and both followed a failed
+        // Carbon ad fetch, so the failing script is not this site's. Anchored, so a
+        // different serialization still reports.
+        SAFARI_CUSTOM_EVENT_REJECTION_MESSAGE_RE,
+        SAFARI_KEYLESS_OBJECT_REJECTION_MESSAGE_RE,
+      ],
       // The app manifest poll that fails with no stack. Matching the message alone
       // would also drop the same failure raised from site code, so this rule needs
       // the empty frame list as well.

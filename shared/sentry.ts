@@ -38,3 +38,24 @@ export const EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE
  * stack frame. The same message with a stack is a defect here and still reports.
  */
 export const STACKLESS_FETCH_FAILURE_MESSAGE_RE = /^TypeError: Failed to fetch$/
+
+/**
+ * A Safari promise rejection whose rejected value is a `CustomEvent`, not an `Error`.
+ *
+ * Safari reports some third-party script failures by rejecting with the event object
+ * itself. Sentry serializes the value into this exact text, and the report carries no
+ * stack frame, so it names no site code. Both sightings followed a failed Carbon ad
+ * fetch, so the script is the Carbon ad, and this site cannot fix it.
+ */
+export const SAFARI_CUSTOM_EVENT_REJECTION_MESSAGE_RE
+  = /^CustomEvent: Event `CustomEvent` \(type=unhandledrejection\) captured as promise rejection$/
+
+/**
+ * A Safari promise rejection whose rejected value is an object with no keys.
+ *
+ * Sentry serializes the value into this exact text and, with no stack frame, the
+ * report names no site code. Sightings followed a failed Carbon ad fetch, so the
+ * script is the Carbon ad, and this site cannot fix it.
+ */
+export const SAFARI_KEYLESS_OBJECT_REJECTION_MESSAGE_RE
+  = /^UnhandledRejection: Object captured as promise rejection with keys: \[object has no keys\]$/
