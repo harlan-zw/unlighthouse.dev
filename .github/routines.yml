@@ -15,3 +15,10 @@ routines:
     timezone: Australia/Sydney
     mode: propose
     enabled: true
+  - name: daily-checkin
+    on:
+      schedule:
+        - cron: '0 8 * * *'
+    timezone: Australia/Sydney
+    mode: propose
+    enabled: true
