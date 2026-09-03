@@ -7,6 +7,8 @@ description: Gather unlighthouse.dev production evidence (user feedback, tool er
 
 Produce one read-only morning report that answers two questions first: what did users tell us, and what changed that nobody asked for. Everything else is context.
 
+Archive home: every `docs/ops/checkins/` path below means `$DAILY_CHECKIN_DIR` when that variable is set. The scheduled agent runs in a disposable worktree and sets it to a persistent directory, so each morning still has yesterday's JSON and `state.json` to diff against. Write the report `.md` there too.
+
 ## Workflow
 
 1. Run `node scripts/tools/daily-checkin-data.mjs --save` from the repo root. Keep every probe error as a finding. The command archives raw evidence in `docs/ops/checkins/YYYY-MM-DD.json`; a same-day rerun writes a timestamped sibling and does not move the next baseline. Archives are gitignored because they hold user feedback text.

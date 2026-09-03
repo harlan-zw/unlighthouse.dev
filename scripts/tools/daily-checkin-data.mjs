@@ -13,13 +13,16 @@
 import { spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
-import { dirname, join } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseSentryIssuesResponse, parseWorkflowName, summarizeWorkflowRuns } from './checkin-observability.mjs'
 import { runReadOnlyProcess } from './read-only-process.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
-const checkinDir = join(root, 'docs/ops/checkins')
+// The scheduled agent runs in a disposable worktree, so its archive lives
+// outside the checkout. DAILY_CHECKIN_DIR names that home; unset means the
+// repository directory, which the desktop uses.
+const checkinDir = process.env.DAILY_CHECKIN_DIR ? resolve(process.env.DAILY_CHECKIN_DIR) : join(root, 'docs/ops/checkins')
 const statePath = join(checkinDir, 'state.json')
 const save = process.argv.includes('--save')
 const now = new Date()
