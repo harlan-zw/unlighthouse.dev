@@ -1,8 +1,9 @@
 /* eslint-disable test/no-import-node-test */
 import type { H3Event } from 'h3'
+import type { RateLimitStorage } from '../server/utils/rate-limit.ts'
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { checkFeedbackRateLimit, FEEDBACK_DAILY_LIMIT } from '../server/utils/rate-limit.ts'
+import { checkFeedbackRateLimit, createRateLimitStore, FEEDBACK_DAILY_LIMIT } from '../server/utils/rate-limit.ts'
 import { CommentFeedbackSchema, ThumbsFeedbackSchema } from '../types/schemas.ts'
 
 function createEvent(ip: string): H3Event {
@@ -15,26 +16,25 @@ function createEvent(ip: string): H3Event {
   } as unknown as H3Event
 }
 
-function createMemoryStore() {
+function createMemoryStorage({ tick = false } = {}): RateLimitStorage & { entries: Map<string, unknown> } {
   const entries = new Map<string, unknown>()
+  const wait = () => (tick ? new Promise<void>(resolve => setTimeout(resolve, 0)) : Promise.resolve())
   return {
     entries,
-    async getItem(key: string) {
+    async getItem(key) {
+      await wait()
       return entries.get(key) ?? null
     },
-    async setItem(key: string, value: unknown) {
+    async setItem(key, value) {
+      await wait()
       entries.set(key, value)
-    },
-    async incrementItem(key: string) {
-      const next = (Number(entries.get(key)) || 0) + 1
-      entries.set(key, next)
-      return next
     },
   }
 }
 
 test('feedback throttle counts submissions per ip until the daily limit', async () => {
-  const store = createMemoryStore()
+  const storage = createMemoryStorage()
+  const store = createRateLimitStore(storage)
   const event = createEvent('203.0.113.10')
 
   for (let i = 0; i < FEEDBACK_DAILY_LIMIT; i++)
@@ -44,31 +44,34 @@ test('feedback throttle counts submissions per ip until the daily limit', async 
     checkFeedbackRateLimit(event, store),
     error => (error as { statusCode?: number }).statusCode === 429,
   )
-  assert.equal(store.entries.size, 1)
+  assert.equal(storage.entries.size, 1)
 })
 
 test('feedback throttle tracks each ip in its own bucket', async () => {
-  const store = createMemoryStore()
+  const storage = createMemoryStorage()
+  const store = createRateLimitStore(storage)
 
   await checkFeedbackRateLimit(createEvent('203.0.113.10'), store)
   await checkFeedbackRateLimit(createEvent('203.0.113.11'), store)
 
-  assert.equal(store.entries.size, 2)
+  assert.equal(storage.entries.size, 2)
 })
 
-test('feedback throttle rejects concurrent bursts without losing counts', async () => {
-  const store = createMemoryStore()
+test('feedback throttle rejects concurrent bursts beyond the daily limit', async () => {
+  const storage = createMemoryStorage({ tick: true })
+  const store = createRateLimitStore(storage)
   const event = createEvent('203.0.113.20')
 
   const results = await Promise.allSettled(
     Array.from({ length: 15 }, () => checkFeedbackRateLimit(event, store)),
   )
 
-  assert.equal([...store.entries.values()][0], 15)
   const rejected = results.filter(
     result => result.status === 'rejected' && (result.reason as { statusCode?: number }).statusCode === 429,
   )
-  assert.ok(rejected.length >= 1, 'expected at least one 429 rejection')
+  assert.equal(results.length - rejected.length, FEEDBACK_DAILY_LIMIT)
+  assert.equal(rejected.length, 15 - FEEDBACK_DAILY_LIMIT)
+  assert.equal([...storage.entries.values()][0], 15)
 })
 
 test('comment feedback schema truncates long metadata values instead of rejecting', () => {

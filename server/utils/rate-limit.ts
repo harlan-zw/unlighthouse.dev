@@ -6,6 +6,11 @@ interface RateLimiter {
   limit: (opts: { key: string }) => Promise<{ success: boolean }>
 }
 
+export interface RateLimitStorage {
+  getItem: (key: string) => Promise<unknown>
+  setItem: (key: string, value: unknown, opts?: { ttl?: number }) => Promise<unknown>
+}
+
 export interface RateLimitStore {
   /** Atomically adds 1 to the stored counter and returns the new value, so concurrent callers never share a stale snapshot. */
   incrementItem: (key: string, opts?: { ttl?: number }) => Promise<number>
@@ -20,16 +25,29 @@ function getEndOfDayTimestamp(): number {
   return Math.floor(endOfDay.getTime() / 1000)
 }
 
-function appStorageRateLimitStore(): RateLimitStore {
-  const storage = appStorage()
+export function createRateLimitStore(storage: RateLimitStorage): RateLimitStore {
+  const queues = new Map<string, Promise<unknown>>()
   return {
-    incrementItem: async (key, opts) => {
-      const current = Number(await storage.getItem(key)) || 0
-      const next = current + 1
-      await storage.setItem(key, next, opts)
-      return next
+    incrementItem: (key, opts) => {
+      const task = (queues.get(key) ?? Promise.resolve()).then(async () => {
+        const current = Number(await storage.getItem(key)) || 0
+        const next = current + 1
+        await storage.setItem(key, next, opts)
+        return next
+      })
+      const settled = task.then(() => undefined, () => undefined)
+      queues.set(key, settled)
+      settled.then(() => {
+        if (queues.get(key) === settled)
+          queues.delete(key)
+      })
+      return task
     },
   }
+}
+
+function appStorageRateLimitStore(): RateLimitStore {
+  return createRateLimitStore(appStorage())
 }
 
 export function getRequestIp(event: H3Event): string {
