@@ -46,8 +46,11 @@ export function createRateLimitStore(storage: RateLimitStorage): RateLimitStore 
   }
 }
 
+let sharedAppStorageStore: RateLimitStore | undefined
+
 function appStorageRateLimitStore(): RateLimitStore {
-  return createRateLimitStore(appStorage())
+  sharedAppStorageStore ??= createRateLimitStore(appStorage())
+  return sharedAppStorageStore
 }
 
 export function getRequestIp(event: H3Event): string {

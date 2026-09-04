@@ -74,6 +74,23 @@ test('feedback throttle rejects concurrent bursts beyond the daily limit', async
   assert.equal([...storage.entries.values()][0], 15)
 })
 
+test('feedback throttle shares one store across concurrent requests without an injected store', async () => {
+  const storage = createMemoryStorage({ tick: true });
+  (globalThis as { useStorage?: (name: string) => unknown }).useStorage = () => storage
+  const event = createEvent('203.0.113.30')
+
+  const results = await Promise.allSettled(
+    Array.from({ length: 15 }, () => checkFeedbackRateLimit(event)),
+  )
+
+  const rejected = results.filter(
+    result => result.status === 'rejected' && (result.reason as { statusCode?: number }).statusCode === 429,
+  )
+  assert.equal(results.length - rejected.length, FEEDBACK_DAILY_LIMIT)
+  assert.equal(rejected.length, 15 - FEEDBACK_DAILY_LIMIT)
+  assert.equal([...storage.entries.values()][0], 15)
+})
+
 test('comment feedback schema truncates long metadata values instead of rejecting', () => {
   const url = `https://example.test/?q=${'a'.repeat(301)}`
   const parsed = CommentFeedbackSchema.safeParse({ comment: 'Great tool, thanks', context: { url } })
