@@ -23,11 +23,13 @@ export function parseWorkflowName(source) {
 }
 
 function completedState(runs) {
-  // Only `success` and `failure` carry a deploy verdict. A `skipped`,
-  // `cancelled` or `neutral` run is the gate deciding not to run, such as the
-  // deploy workflow skipping a PR-triggered run, so it is ignored rather than
-  // read as green.
-  const substantive = runs.filter(run => run.status === 'completed' && (run.conclusion === 'success' || run.conclusion === 'failure'))
+  // These conclusions are the gate deciding not to give a verdict, such as the
+  // deploy workflow skipping a PR-triggered run. They are ignored rather than
+  // read as green. Any other completed conclusion, including `timed_out` and
+  // `startup_failure`, carries a deploy verdict, so an unknown conclusion
+  // keeps the louder reading and counts as a failure.
+  const ignorableConclusions = new Set(['skipped', 'cancelled', 'neutral', 'action_required', 'stale'])
+  const substantive = runs.filter(run => run.status === 'completed' && !ignorableConclusions.has(run.conclusion))
   const latest = substantive[0] ?? null
   if (!latest)
     return { _tag: 'missing' }
@@ -36,7 +38,7 @@ function completedState(runs) {
 
   let consecutiveFailures = 0
   for (const run of substantive) {
-    if (run.conclusion !== 'failure')
+    if (run.conclusion === 'success')
       break
     consecutiveFailures++
   }
