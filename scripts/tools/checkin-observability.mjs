@@ -23,18 +23,19 @@ export function parseWorkflowName(source) {
 }
 
 function completedState(runs) {
-  const completed = runs.filter(run => run.status === 'completed')
-  const latest = completed[0] ?? null
+  // Only `success` and `failure` carry a deploy verdict. A `skipped`,
+  // `cancelled` or `neutral` run is the gate deciding not to run, such as the
+  // deploy workflow skipping a PR-triggered run, so it is ignored rather than
+  // read as green.
+  const substantive = runs.filter(run => run.status === 'completed' && (run.conclusion === 'success' || run.conclusion === 'failure'))
+  const latest = substantive[0] ?? null
   if (!latest)
     return { _tag: 'missing' }
-  // A `skipped` conclusion is the gate deciding not to run, such as the deploy
-  // workflow skipping a PR-triggered run. An absent run is not a broken gate,
-  // so it reads green exactly like a success.
-  if (latest.conclusion === 'success' || latest.conclusion === 'skipped')
+  if (latest.conclusion === 'success')
     return { _tag: 'success' }
 
   let consecutiveFailures = 0
-  for (const run of completed) {
+  for (const run of substantive) {
     if (run.conclusion !== 'failure')
       break
     consecutiveFailures++

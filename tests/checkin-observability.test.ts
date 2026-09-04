@@ -17,6 +17,24 @@ test('a skipped run keeps the deploy gate green', () => {
   assert.deepEqual(workflow.state, { _tag: 'success' })
 })
 
+test('a newer skipped run does not mask an older deploy failure', () => {
+  const [workflow] = summarizeWorkflowRuns([
+    run('completed', 'skipped'),
+    run('completed', 'failure'),
+  ], ['Deploy to Cloudflare'])
+
+  assert.deepEqual(workflow.state, { _tag: 'failure', consecutiveFailures: 1 })
+})
+
+test('skipped and cancelled runs carry no verdict, so the gate reads missing', () => {
+  const [workflow] = summarizeWorkflowRuns([
+    run('completed', 'skipped'),
+    run('completed', 'cancelled'),
+  ], ['Deploy to Cloudflare'])
+
+  assert.deepEqual(workflow.state, { _tag: 'missing' })
+})
+
 test('consecutive failures stop at a skipped run, not only at a success', () => {
   const [workflow] = summarizeWorkflowRuns([
     run('completed', 'failure'),
