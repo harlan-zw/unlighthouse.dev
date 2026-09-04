@@ -5,7 +5,7 @@ import test from 'node:test'
 import { decideReport } from '@harlan-zw/nuxt-sentry/server'
 import { describeCruxFailure } from '../shared/crux-request.ts'
 import { describePsiFailure } from '../shared/psi-request.ts'
-import { CARBONADS_SCRIPT_ELEMENT_RE, EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE, STACKLESS_FETCH_FAILURE_MESSAGE_RE } from '../shared/sentry.ts'
+import { CARBONADS_SCRIPT_ELEMENT_RE, CARBONADS_VENDOR_ORIGIN_RE, EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE, STACKLESS_FETCH_FAILURE_MESSAGE_RE } from '../shared/sentry.ts'
 
 const upstreamErrors = [
   Object.assign(new Error('rate limited'), { response: { status: 429 } }),
@@ -45,7 +45,11 @@ const clientPolicy: ReportPolicy = {
     flags: STACKLESS_FETCH_FAILURE_MESSAGE_RE.flags,
   }],
   dropBreadcrumbMessages: [],
-  denyUrls: [],
+  denyUrls: [{
+    _tag: 'pattern',
+    source: CARBONADS_VENDOR_ORIGIN_RE.source,
+    flags: CARBONADS_VENDOR_ORIGIN_RE.flags,
+  }],
   secretKeys: [],
 }
 
@@ -104,4 +108,31 @@ test('keeps a site defect whose null element read never names the carbon ad', ()
   }
 
   assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'send' })
+})
+
+/**
+ * The same vendor failure as the Safari report above, worded the way Chrome's V8 words it.
+ * V8 omits the evaluated expression from the message, so the message never names the
+ * element id and only the stack frame names the vendor origin.
+ */
+function carbonAdsChromeFailureReport(): ErrorReport {
+  return {
+    exception: {
+      values: [{
+        type: 'TypeError',
+        value: 'Cannot read properties of null (reading \'src\')',
+        stacktrace: {
+          frames: [{
+            filename: 'https://cdn.carbonads.com/carbon.js?serve=CW7DTKJL&placement=unlighthousedev',
+          }],
+        },
+      }],
+    },
+  }
+}
+
+test('drops the chrome worded carbon ads failure whose every frame is vendor side', () => {
+  const decision = decideReport(carbonAdsChromeFailureReport(), undefined, clientPolicy)
+
+  assert.deepEqual(decision, { _tag: 'drop', rule: 'deny-url' })
 })

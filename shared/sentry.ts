@@ -53,3 +53,14 @@ export const STACKLESS_FETCH_FAILURE_MESSAGE_RE = /^TypeError: Failed to fetch$/
  * vendor script.
  */
 export const CARBONADS_SCRIPT_ELEMENT_RE = /_carbonads_js/
+
+/**
+ * The origin that serves the Carbon Ads vendor script.
+ *
+ * Browsers word the null read differently and V8 omits the evaluated expression, so the
+ * Chrome wording of the failure never names the element id `CARBONADS_SCRIPT_ELEMENT_RE`
+ * matches. The origin names the vendor script alone, and `nuxtSentry.policy.denyUrls` drops
+ * a report only when every stack frame matches, so a failure reaching site code still
+ * reports.
+ */
+export const CARBONADS_VENDOR_ORIGIN_RE = /cdn\.carbonads\.com/
