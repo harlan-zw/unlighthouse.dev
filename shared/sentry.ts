@@ -38,3 +38,18 @@ export const EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE
  * stack frame. The same message with a stack is a defect here and still reports.
  */
 export const STACKLESS_FETCH_FAILURE_MESSAGE_RE = /^TypeError: Failed to fetch$/
+
+/**
+ * Rejections whose captured value is not an `Error`.
+ *
+ * When the Carbon Ads script's fetch fails, Safari rejects on the global handler with a
+ * `CustomEvent` or a bare object instead of an `Error`. Sentry serializes those reasons as
+ * `Event \`CustomEvent\` (type=unhandledrejection) captured as promise rejection` and
+ * `Object captured as promise rejection with keys: [object has no keys]`. No frame names
+ * site code, so the report cannot be acted on.
+ *
+ * `nuxtSentry.policy.dropStacklessErrors` drops these messages only when the report carries no
+ * stack frame. The same capture with a stack is a defect here and still reports.
+ */
+export const STACKLESS_NON_ERROR_REJECTION_DROP_RULE
+  = /(?:Event `[^`]+` \(type=[^)]+\)|Object) captured as promise rejection/
