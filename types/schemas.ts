@@ -3,6 +3,30 @@ import { z } from 'zod'
 const FEEDBACK_HTML_RE = /<\/?[a-z][\s\S]*>/i
 const FEEDBACK_URL_RE = /\b(?:https?:\/\/|www\.)\S+/gi
 
+const FEEDBACK_CONTEXT_MAX_KEYS = 10
+const FEEDBACK_CONTEXT_MAX_KEY_LENGTH = 40
+const FEEDBACK_CONTEXT_MAX_VALUE_LENGTH = 300
+const FEEDBACK_CONTEXT_MAX_ARRAY_LENGTH = 20
+
+const FeedbackContextValueSchema = z.union([
+  z.string().max(FEEDBACK_CONTEXT_MAX_VALUE_LENGTH),
+  z.number(),
+  z.boolean(),
+  z.null(),
+  z.array(z.union([
+    z.string().max(FEEDBACK_CONTEXT_MAX_VALUE_LENGTH),
+    z.number(),
+    z.boolean(),
+    z.null(),
+  ])).max(FEEDBACK_CONTEXT_MAX_ARRAY_LENGTH),
+])
+
+const FeedbackContextSchema = z.record(z.string().max(FEEDBACK_CONTEXT_MAX_KEY_LENGTH), FeedbackContextValueSchema)
+  .refine(
+    context => Object.keys(context).length <= FEEDBACK_CONTEXT_MAX_KEYS,
+    `Must contain at most ${FEEDBACK_CONTEXT_MAX_KEYS} fields`,
+  )
+
 const FeedbackCommentSchema = z.string()
   .trim()
   .min(3, 'Must be at least 3 characters')
@@ -26,17 +50,17 @@ export interface CommentFeedbackResponse {
 
 export const ThumbsFeedbackSchema = z.object({
   thumbs: z.enum(['up', 'down']),
-  path: z.string().optional(),
-  toolId: z.string().optional(),
-  context: z.record(z.string(), z.unknown()).optional(),
+  path: z.string().max(500).optional(),
+  toolId: z.string().max(100).optional(),
+  context: FeedbackContextSchema.optional(),
 })
 
 export const CommentFeedbackSchema = z.object({
   comment: FeedbackCommentSchema,
-  path: z.string().optional(),
-  toolId: z.string().optional(),
-  thumbFeedbackId: z.string().optional(),
-  context: z.record(z.string(), z.unknown()).optional(),
+  path: z.string().max(500).optional(),
+  toolId: z.string().max(100).optional(),
+  thumbFeedbackId: z.string().max(100).optional(),
+  context: FeedbackContextSchema.optional(),
 })
 
 export type CommentFeedbackSchemaOutput = z.output<typeof CommentFeedbackSchema>
