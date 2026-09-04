@@ -27,12 +27,15 @@ function completedState(runs) {
   const latest = completed[0] ?? null
   if (!latest)
     return { _tag: 'missing' }
-  if (latest.conclusion === 'success')
+  // A `skipped` conclusion is the gate deciding not to run, such as the deploy
+  // workflow skipping a PR-triggered run. An absent run is not a broken gate,
+  // so it reads green exactly like a success.
+  if (latest.conclusion === 'success' || latest.conclusion === 'skipped')
     return { _tag: 'success' }
 
   let consecutiveFailures = 0
   for (const run of completed) {
-    if (run.conclusion === 'success')
+    if (run.conclusion !== 'failure')
       break
     consecutiveFailures++
   }
