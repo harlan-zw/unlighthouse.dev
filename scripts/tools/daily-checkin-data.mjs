@@ -110,13 +110,14 @@ const ci = probe(() => {
     .filter(Boolean)
     .sort()
   // A low-cadence workflow falls outside a flat recent-runs page, and an absent
-  // row reads as `missing`, so each workflow is paged on its own name.
+  // row reads as `missing`, so each workflow is paged on its own name. That
+  // paging is also why no flat recent-runs listing runs beside it: an optional
+  // call inside this probe must not be able to fail the data it runs next to.
   const perWorkflowRows = definedWorkflows.flatMap(name =>
     commandJson('gh', ['run', 'list', '--workflow', name, '--limit', '10', '--json', runFields]),
   )
   return {
     workflows: summarizeWorkflowRuns(perWorkflowRows, definedWorkflows),
-    recent: commandJson('gh', ['run', 'list', '--limit', '10', '--json', runFields]),
   }
 })
 
