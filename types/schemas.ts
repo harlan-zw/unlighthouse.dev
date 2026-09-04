@@ -8,13 +8,23 @@ const FEEDBACK_CONTEXT_MAX_KEY_LENGTH = 40
 const FEEDBACK_CONTEXT_MAX_VALUE_LENGTH = 300
 const FEEDBACK_CONTEXT_MAX_ARRAY_LENGTH = 20
 
+/**
+ * Tools send pasted URLs and other metadata that can legitimately exceed the
+ * stored length cap, so over-long values are truncated instead of rejected.
+ */
+function truncateContextValue(value: string): string {
+  return value.length > FEEDBACK_CONTEXT_MAX_VALUE_LENGTH
+    ? value.slice(0, FEEDBACK_CONTEXT_MAX_VALUE_LENGTH)
+    : value
+}
+
 const FeedbackContextValueSchema = z.union([
-  z.string().max(FEEDBACK_CONTEXT_MAX_VALUE_LENGTH),
+  z.string().transform(truncateContextValue),
   z.number(),
   z.boolean(),
   z.null(),
   z.array(z.union([
-    z.string().max(FEEDBACK_CONTEXT_MAX_VALUE_LENGTH),
+    z.string().transform(truncateContextValue),
     z.number(),
     z.boolean(),
     z.null(),

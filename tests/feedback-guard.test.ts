@@ -25,6 +25,11 @@ function createMemoryStore() {
     async setItem(key: string, value: unknown) {
       entries.set(key, value)
     },
+    async incrementItem(key: string) {
+      const next = (Number(entries.get(key)) || 0) + 1
+      entries.set(key, next)
+      return next
+    },
   }
 }
 
@@ -51,6 +56,30 @@ test('feedback throttle tracks each ip in its own bucket', async () => {
   assert.equal(store.entries.size, 2)
 })
 
+test('feedback throttle rejects concurrent bursts without losing counts', async () => {
+  const store = createMemoryStore()
+  const event = createEvent('203.0.113.20')
+
+  const results = await Promise.allSettled(
+    Array.from({ length: 15 }, () => checkFeedbackRateLimit(event, store)),
+  )
+
+  assert.equal([...store.entries.values()][0], 15)
+  const rejected = results.filter(
+    result => result.status === 'rejected' && (result.reason as { statusCode?: number }).statusCode === 429,
+  )
+  assert.ok(rejected.length >= 1, 'expected at least one 429 rejection')
+})
+
+test('comment feedback schema truncates long metadata values instead of rejecting', () => {
+  const url = `https://example.test/?q=${'a'.repeat(301)}`
+  const parsed = CommentFeedbackSchema.safeParse({ comment: 'Great tool, thanks', context: { url } })
+
+  assert.equal(parsed.success, true)
+  assert.ok(parsed.success)
+  assert.equal(parsed.data.context?.url, url.slice(0, 300))
+})
+
 test('comment feedback schema bounds the context record', () => {
   const comment = 'Great tool, thanks'
 
@@ -62,10 +91,10 @@ test('comment feedback schema bounds the context record', () => {
     CommentFeedbackSchema.safeParse({ comment, context: { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11 } }).success,
     false,
   )
-  assert.equal(
-    CommentFeedbackSchema.safeParse({ comment, context: { spam: 'x'.repeat(301) } }).success,
-    false,
-  )
+  const truncatedSpam = CommentFeedbackSchema.safeParse({ comment, context: { spam: 'x'.repeat(301) } })
+  assert.equal(truncatedSpam.success, true)
+  assert.ok(truncatedSpam.success)
+  assert.equal(truncatedSpam.data.context?.spam, 'x'.repeat(300))
   assert.equal(
     CommentFeedbackSchema.safeParse({ comment, context: { spam: { deep: 'object' } } }).success,
     false,
@@ -93,8 +122,16 @@ test('thumbs feedback schema bounds the context record', () => {
     ThumbsFeedbackSchema.safeParse({ thumbs: 'up', context: { urls: Array.from({ length: 21 }, (_, i) => `https://${i}.test`) } }).success,
     false,
   )
+  const truncatedThumbs = ThumbsFeedbackSchema.safeParse({ thumbs: 'up', context: { spam: 'y'.repeat(301) } })
+  assert.equal(truncatedThumbs.success, true)
+  assert.ok(truncatedThumbs.success)
+  assert.equal(truncatedThumbs.data.context?.spam, 'y'.repeat(300))
+  const truncatedArrayValue = ThumbsFeedbackSchema.safeParse({ thumbs: 'up', context: { urls: ['z'.repeat(301)] } })
+  assert.equal(truncatedArrayValue.success, true)
+  assert.ok(truncatedArrayValue.success)
+  assert.deepEqual(truncatedArrayValue.data.context?.urls, ['z'.repeat(300)])
   assert.equal(
-    ThumbsFeedbackSchema.safeParse({ thumbs: 'up', context: { spam: 'y'.repeat(301) } }).success,
+    ThumbsFeedbackSchema.safeParse({ thumbs: 'up', context: { urls: ['https://a.test', { deep: 'object' }] } }).success,
     false,
   )
 })

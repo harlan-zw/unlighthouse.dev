@@ -7,8 +7,8 @@ interface RateLimiter {
 }
 
 export interface RateLimitStore {
-  getItem: (key: string) => Promise<unknown>
-  setItem: (key: string, value: unknown, opts?: { ttl?: number }) => Promise<unknown>
+  /** Atomically adds 1 to the stored counter and returns the new value, so concurrent callers never share a stale snapshot. */
+  incrementItem: (key: string, opts?: { ttl?: number }) => Promise<number>
 }
 
 const FREE_TOOL_DAILY_LIMIT = 50
@@ -18,6 +18,18 @@ function getEndOfDayTimestamp(): number {
   const now = new Date()
   const endOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1))
   return Math.floor(endOfDay.getTime() / 1000)
+}
+
+function appStorageRateLimitStore(): RateLimitStore {
+  const storage = appStorage()
+  return {
+    incrementItem: async (key, opts) => {
+      const current = Number(await storage.getItem(key)) || 0
+      const next = current + 1
+      await storage.setItem(key, next, opts)
+      return next
+    },
+  }
 }
 
 export function getRequestIp(event: H3Event): string {
@@ -84,7 +96,7 @@ export async function checkFreeToolRateLimit(event: H3Event) {
   })
 }
 
-export async function checkFeedbackRateLimit(event: H3Event, store: RateLimitStore = appStorage()) {
+export async function checkFeedbackRateLimit(event: H3Event, store: RateLimitStore = appStorageRateLimitStore()) {
   // Skip rate limiting in development
   if (import.meta.dev)
     return
@@ -92,12 +104,15 @@ export async function checkFeedbackRateLimit(event: H3Event, store: RateLimitSto
   const today = new Date().toISOString().slice(0, 10)
   const dayKey = `ratelimit:feedback:ip:${getRequestIp(event)}:${today}`
 
-  const count = await store.getItem(dayKey).catch((error) => {
-    console.warn('[rate-limit] Failed to read the feedback count; allowing the request', error)
+  const count = await store.incrementItem(dayKey, { ttl: 86400 }).catch((error) => {
+    console.warn('[rate-limit] Failed to count the feedback request; allowing the request', error)
     return null
   })
 
-  if (count !== null && Number(count) >= FEEDBACK_DAILY_LIMIT) {
+  if (count === null)
+    return
+
+  if (count > FEEDBACK_DAILY_LIMIT) {
     setResponseHeaders(event, {
       'X-RateLimit-Limit': String(FEEDBACK_DAILY_LIMIT),
       'X-RateLimit-Remaining': '0',
@@ -109,12 +124,8 @@ export async function checkFeedbackRateLimit(event: H3Event, store: RateLimitSto
     })
   }
 
-  await store.setItem(dayKey, (Number(count) || 0) + 1, { ttl: 86400 }).catch((error) => {
-    console.warn('[rate-limit] Failed to persist feedback count', error)
-  })
-
   setResponseHeaders(event, {
     'X-RateLimit-Limit': String(FEEDBACK_DAILY_LIMIT),
-    'X-RateLimit-Remaining': String(FEEDBACK_DAILY_LIMIT - (Number(count) || 0) - 1),
+    'X-RateLimit-Remaining': String(FEEDBACK_DAILY_LIMIT - count),
   })
 }
