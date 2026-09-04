@@ -63,7 +63,7 @@ function commandJson(command, args) {
 }
 
 function d1Query(sql) {
-  const output = commandJson(wrangler, ['d1', 'execute', 'DB', '--remote', '--json', '--command', sql])
+  const output = commandJson(wrangler, ['d1', 'execute', 'DB', '--remote', '--json', '--command', sql, '--config', 'wrangler.local.toml'])
   const statement = output[0]
   if (!statement?.success)
     throw new Error('D1 query did not succeed')
@@ -87,7 +87,7 @@ const git = probe(() => {
 })
 
 const deploy = probe(() => {
-  const deployments = commandJson(wrangler, ['deployments', 'list', '--json'])
+  const deployments = commandJson(wrangler, ['deployments', 'list', '--json', '--config', 'wrangler.local.toml'])
   const latest = [...deployments].sort((a, b) => String(b.created_on).localeCompare(String(a.created_on)))[0] ?? null
   return {
     latest: latest && {
@@ -207,7 +207,7 @@ function cloudflareToken() {
   const environmentToken = process.env.CLOUDFLARE_API_TOKEN || process.env.CF_API_TOKEN
   if (environmentToken)
     return environmentToken
-  const auth = commandJson(wrangler, ['auth', 'token', '--json'])
+  const auth = commandJson(wrangler, ['auth', 'token', '--json', '--config', 'wrangler.local.toml'])
   if (!auth.token)
     throw new Error('Cloudflare token unavailable')
   return auth.token
