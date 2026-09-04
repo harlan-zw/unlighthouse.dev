@@ -5,7 +5,7 @@ import test from 'node:test'
 import { decideReport } from '@harlan-zw/nuxt-sentry/server'
 import { describeCruxFailure } from '../shared/crux-request.ts'
 import { describePsiFailure } from '../shared/psi-request.ts'
-import { EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE, STACKLESS_FETCH_FAILURE_MESSAGE_RE } from '../shared/sentry.ts'
+import { CARBONADS_SCRIPT_ELEMENT_RE, EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE, STACKLESS_FETCH_FAILURE_MESSAGE_RE } from '../shared/sentry.ts'
 
 const upstreamErrors = [
   Object.assign(new Error('rate limited'), { response: { status: 429 } }),
@@ -34,7 +34,11 @@ const clientPolicy: ReportPolicy = {
   dataCollection: 'scrubbed',
   dropStatus: [],
   dropTransient: false,
-  ignoreErrors: [],
+  ignoreErrors: [{
+    _tag: 'pattern',
+    source: CARBONADS_SCRIPT_ELEMENT_RE.source,
+    flags: CARBONADS_SCRIPT_ELEMENT_RE.flags,
+  }],
   dropStacklessErrors: [{
     _tag: 'pattern',
     source: STACKLESS_FETCH_FAILURE_MESSAGE_RE.source,
@@ -65,6 +69,39 @@ test('drops the app manifest fetch failure that carries no stack', () => {
 
 test('keeps the same failure when a stack names site code', () => {
   const report = fetchFailureReport([{ filename: 'https://unlighthouse.dev/_nuxt/entry.js' }])
+
+  assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'send' })
+})
+
+/** The client report the Carbon Ads vendor script raises when an ad blocker removed its tag. */
+function carbonAdsFailureReport(): ErrorReport {
+  return {
+    exception: {
+      values: [{
+        type: 'TypeError',
+        value: 'null is not an object (evaluating \'document.getElementById("_carbonads_js").src\')',
+        stacktrace: { frames: [] },
+      }],
+    },
+  }
+}
+
+test('drops the carbon ads element failure an ad blocker raises', () => {
+  const decision = decideReport(carbonAdsFailureReport(), undefined, clientPolicy)
+
+  assert.deepEqual(decision, { _tag: 'drop', rule: 'ignore-message' })
+})
+
+test('keeps a site defect whose null element read never names the carbon ad', () => {
+  const report: ErrorReport = {
+    exception: {
+      values: [{
+        type: 'TypeError',
+        value: 'Cannot read properties of null (reading \'src\')',
+        stacktrace: { frames: [{ filename: 'https://unlighthouse.dev/_nuxt/entry.js' }] },
+      }],
+    },
+  }
 
   assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'send' })
 })
