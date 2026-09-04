@@ -45,12 +45,14 @@ const clientPolicy: ReportPolicy = {
   secretKeys: [],
 }
 
-function fetchFailureReport(frames: Array<{ filename: string }>): ErrorReport {
+function fetchFailureReport(
+  frames: Array<{ filename: string }>,
+  exception: { type: string, value: string } = { type: 'TypeError', value: 'Failed to fetch' },
+): ErrorReport {
   return {
     exception: {
       values: [{
-        type: 'TypeError',
-        value: 'Failed to fetch',
+        ...exception,
         stacktrace: { frames },
       }],
     },
@@ -65,6 +67,21 @@ test('drops the app manifest fetch failure that carries no stack', () => {
 
 test('keeps the same failure when a stack names site code', () => {
   const report = fetchFailureReport([{ filename: 'https://unlighthouse.dev/_nuxt/entry.js' }])
+
+  assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'send' })
+})
+
+test('drops the NetworkError rejection that carries no stack', () => {
+  const report = fetchFailureReport([], { type: 'Error', value: 'NetworkError: A network error occurred.' })
+
+  assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'drop', rule: 'stackless-message' })
+})
+
+test('keeps the NetworkError rejection when a stack names site code', () => {
+  const report = fetchFailureReport(
+    [{ filename: 'https://unlighthouse.dev/_nuxt/entry.js' }],
+    { type: 'Error', value: 'NetworkError: A network error occurred.' },
+  )
 
   assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'send' })
 })
