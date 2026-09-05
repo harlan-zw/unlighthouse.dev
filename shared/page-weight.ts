@@ -197,6 +197,181 @@ export function extractResourceRefs(html: string, baseUrl: string): ResourceRef[
   return refs
 }
 
+/** Nothing is fetched past this, so one enormous page cannot hold a Worker open. */
+export const RESOURCE_LIMIT = 120
+
+/** The most of one body this tool will ever hold in memory. */
+export const MAX_BODY_BYTES = 5 * 1024 * 1024
+
+export type BodyRead
+  = | { _tag: 'ok', bytes: Uint8Array }
+    | { _tag: 'over-cap' }
+
+function concatChunks(chunks: Uint8Array[], total: number): Uint8Array {
+  const bytes = new Uint8Array(total)
+  let offset = 0
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset)
+    offset += chunk.byteLength
+  }
+  return bytes
+}
+
+/**
+ * Reads a response body under a hard byte cap.
+ *
+ * The cap is what bounds memory. The reader stops and cancels the stream the
+ * moment the body passes it, so a fast endless stream cannot fill the Worker's
+ * isolate. `over-cap` says the resource is bigger than anything this tool
+ * would report.
+ */
+export async function readBodyCapped(response: Response, cap: number): Promise<BodyRead> {
+  const body = response.body
+  if (!body)
+    return { _tag: 'ok', bytes: new Uint8Array(0) }
+
+  const reader = body.getReader()
+  const chunks: Uint8Array[] = []
+  let total = 0
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done)
+      return { _tag: 'ok', bytes: concatChunks(chunks, total) }
+
+    total += value.byteLength
+    if (total > cap) {
+      await reader.cancel().catch(() => {
+        // A cancel on a stream that already failed can reject. That changes
+        // nothing: the outcome is already decided.
+      })
+      return { _tag: 'over-cap' }
+    }
+    chunks.push(value)
+  }
+}
+
+export type MeasureOutcome
+  = | { _tag: 'measured', size: number, contentType: string | null }
+    | { _tag: 'absent' }
+    | { _tag: 'unmeasured' }
+
+export interface MeasureResourceOptions {
+  /** Absolute time after which the whole run stops. */
+  deadline: number
+  /** The longest a single resource may take. */
+  timeoutMs: number
+  /** The most of one body to hold in memory. */
+  maxBodyBytes: number
+  userAgent: string
+  /** The fetch to use. Production passes the platform fetch; tests pass a stub. */
+  fetchLike?: typeof fetch
+}
+
+/** True for a rejection the clock caused, where waiting longer could still succeed. */
+function isTimedOut(error: unknown): boolean {
+  return error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError')
+}
+
+/**
+ * Reads a size out of response headers without downloading anything.
+ *
+ * `Content-Range` carries the full length even on a one-byte request, and
+ * `Content-Length` answers on a HEAD that bothers to send it. A compressed
+ * chunked response sends neither, which is why a download is still the last
+ * resort.
+ */
+function sizeFromHeaders(response: Response | null): { size: number, contentType: string | null } | null {
+  if (!response)
+    return null
+
+  const contentRange = response.headers.get('content-range')
+  const total = contentRange ? Number(contentRange.split('/')[1]) : Number.NaN
+  if (Number.isFinite(total) && total > 0)
+    return { size: total, contentType: response.headers.get('content-type') }
+
+  if (!response.ok)
+    return null
+
+  const declared = Number(response.headers.get('content-length'))
+  // A one-byte length is the range response itself, not the resource.
+  if (Number.isFinite(declared) && declared > 1)
+    return { size: declared, contentType: response.headers.get('content-type') }
+
+  return null
+}
+
+/**
+ * Measures one resource, spending as little as the server allows.
+ *
+ * Servers disagree about which cheap probe they answer. Cloudflare in front of
+ * this site answers HEAD with a length; nuxt.com answers HEAD with no length
+ * at all but serves ranges. Trying HEAD, then a one-byte range, then a
+ * download turns most resources into one small round trip.
+ *
+ * The outcome says which of three things happened:
+ * - `measured`: a size is known.
+ * - `absent`: the resource is definitively not there. It answered with an
+ *   error status after every probe, or the connection failed in a way more
+ *   time would not fix. This is a fact about the page, so it does not make a
+ *   measurement incomplete.
+ * - `unmeasured`: the run could not read it. The clock or the byte cap
+ *   stopped it. This is what makes a measurement incomplete.
+ *
+ * Every path reports the identity length, so these are uncompressed bytes.
+ */
+export async function measureResource(url: string, options: MeasureResourceOptions): Promise<MeasureOutcome> {
+  const doFetch = options.fetchLike ?? globalThis.fetch
+  const budget = () => Math.min(options.timeoutMs, options.deadline - Date.now())
+
+  const attempt = (init: RequestInit): Promise<Response | MeasureOutcome> => {
+    if (budget() <= 0)
+      return Promise.resolve({ _tag: 'unmeasured' })
+    return doFetch(url, {
+      ...init,
+      headers: { 'user-agent': options.userAgent, ...(init.headers as Record<string, string> | undefined) },
+      redirect: 'follow',
+      signal: AbortSignal.timeout(budget()),
+    }).then(
+      response => response,
+      (error: unknown): MeasureOutcome => isTimedOut(error) ? { _tag: 'unmeasured' } : { _tag: 'absent' },
+    )
+  }
+
+  const probes: RequestInit[] = [
+    { method: 'HEAD' },
+    { headers: { range: 'bytes=0-0' } },
+  ]
+
+  for (const probe of probes) {
+    const probed = await attempt(probe)
+    if ('_tag' in probed)
+      return probed
+
+    const sized = sizeFromHeaders(probed)
+    if (sized)
+      return { _tag: 'measured', size: sized.size, contentType: sized.contentType }
+  }
+
+  const response = await attempt({})
+  if ('_tag' in response)
+    return response
+
+  if (!response.ok)
+    return { _tag: 'absent' }
+
+  const body = await readBodyCapped(response, options.maxBodyBytes).catch(() => {
+    // A body that stops mid-stream leaves no length to report, so the
+    // resource is counted as unmeasured rather than guessed at.
+    return null
+  })
+
+  if (!body || body._tag === 'over-cap')
+    return { _tag: 'unmeasured' }
+
+  return { _tag: 'measured', size: body.bytes.byteLength, contentType: response.headers.get('content-type') }
+}
+
 export interface WeightEntry {
   url: string
   type: ResourceType
@@ -238,5 +413,38 @@ export function summarizeWeight(entries: readonly WeightEntry[]): WeightSummary 
       .sort((a, b) => b.size - a.size)
       .slice(0, LARGEST_RESOURCE_COUNT)
       .map(({ url, size, type }) => ({ url, size, type })),
+  }
+}
+
+export interface WeightCompleteness {
+  complete: boolean
+  /** Resources discovered but never attempted, because the limit stopped the run. */
+  skipped: number
+}
+
+/**
+ * Decides whether a run measured the whole page.
+ *
+ * A resource that is gone is part of the truth: a 404 or a refused connection
+ * contributes no bytes and the total still stands. Only a run that stopped
+ * early leaves the total short. That happens when the clock or the byte cap
+ * cut resources unread, or when more resources were discovered than the limit
+ * allows.
+ *
+ * - `discovered`: every resource the HTML asks for.
+ * - `attempted`: the ones the run tried to measure.
+ * - `measured`: the ones that produced a size.
+ * - `budgetExhausted`: true when the run stopped before reading everything it
+ *   attempted.
+ */
+export function assessCompleteness(
+  discovered: number,
+  attempted: number,
+  measured: number,
+  budgetExhausted: boolean,
+): WeightCompleteness {
+  return {
+    complete: discovered <= RESOURCE_LIMIT && (!budgetExhausted || measured >= attempted),
+    skipped: Math.max(0, discovered - attempted),
   }
 }

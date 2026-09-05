@@ -1,8 +1,13 @@
 import type { WeightEntry } from '~~/shared/page-weight'
 import {
+  assessCompleteness,
   classifyResource,
   extractResourceRefs,
+  MAX_BODY_BYTES,
+  measureResource,
   parsePublicHttpUrl,
+  readBodyCapped,
+  RESOURCE_LIMIT,
   summarizeWeight,
 } from '~~/shared/page-weight'
 
@@ -20,8 +25,6 @@ import {
  * it, because a number presented as the whole truth would be wrong.
  */
 
-/** Nothing is fetched past this, so one enormous page cannot hold a Worker open. */
-const RESOURCE_LIMIT = 120
 /** Requests in flight at once. High enough to stay fast, low enough to not look like an attack. */
 const CONCURRENCY = 16
 const DOCUMENT_TIMEOUT_MS = 10_000
@@ -37,98 +40,10 @@ const TOTAL_BUDGET_MS = 8_000
 /** A browser identifies itself, and plenty of servers vary their response when a client does not. */
 const USER_AGENT = 'Mozilla/5.0 (compatible; UnlighthouseBot/1.0; +https://unlighthouse.dev/tools/page-size)'
 
-/**
- * Reads a size out of response headers without downloading anything.
- *
- * `Content-Range` carries the full length even on a one-byte request, and
- * `Content-Length` answers on a HEAD that bothers to send it. A compressed
- * chunked response sends neither, which is why a download is still the last
- * resort.
- */
-function sizeFromHeaders(response: Response | null): { size: number, contentType: string | null } | null {
-  if (!response)
-    return null
-
-  const contentRange = response.headers.get('content-range')
-  const total = contentRange ? Number(contentRange.split('/')[1]) : Number.NaN
-  if (Number.isFinite(total) && total > 0)
-    return { size: total, contentType: response.headers.get('content-type') }
-
-  if (!response.ok)
-    return null
-
-  const declared = Number(response.headers.get('content-length'))
-  // A one-byte length is the range response itself, not the resource.
-  if (Number.isFinite(declared) && declared > 1)
-    return { size: declared, contentType: response.headers.get('content-type') }
-
-  return null
-}
-
-/**
- * Measures one resource, spending as little as the server allows.
- *
- * Servers disagree about which cheap probe they answer. Cloudflare in front of
- * this site answers HEAD with a length; nuxt.com answers HEAD with no length at
- * all but serves ranges. Trying both before downloading turns most resources
- * into one small round trip instead of a full transfer.
- *
- * Every path reports the identity length, so these are uncompressed bytes. The
- * response labels them that way, because the transfer figure Lighthouse reports
- * is a different, smaller number.
- */
-async function measure(url: string, deadline: number): Promise<{ size: number, contentType: string | null } | null> {
-  const budget = () => Math.min(RESOURCE_TIMEOUT_MS, deadline - Date.now())
-
-  const probes: RequestInit[] = [
-    { method: 'HEAD' },
-    { headers: { range: 'bytes=0-0' } },
-  ]
-
-  for (const probe of probes) {
-    if (budget() <= 0)
-      return null
-
-    const response = await fetch(url, {
-      ...probe,
-      headers: { 'user-agent': USER_AGENT, ...(probe.headers as Record<string, string> | undefined) },
-      redirect: 'follow',
-      signal: AbortSignal.timeout(budget()),
-    }).catch(() => {
-      // A subresource that refuses, times out, or blocks this fetch is a normal
-      // result for a page on the open web, not a fault in this tool. It is
-      // reported as unmeasured through `complete` rather than failing the run.
-      return null
-    })
-
-    const sized = sizeFromHeaders(response)
-    if (sized)
-      return sized
-  }
-
-  if (budget() <= 0)
-    return null
-
-  const response = await fetch(url, {
-    headers: { 'user-agent': USER_AGENT },
-    redirect: 'follow',
-    signal: AbortSignal.timeout(budget()),
-  }).catch(() => {
-    // Same as above: an unreachable resource is counted as unmeasured.
-    return null
-  })
-
-  if (!response || !response.ok)
-    return null
-
-  const body = await response.arrayBuffer().catch(() => {
-    // A body that stops mid-stream leaves no length to report, so the resource
-    // is counted as unmeasured rather than guessed at.
-    return null
-  })
-
-  return body ? { size: body.byteLength, contentType: response.headers.get('content-type') } : null
-}
+type SubresourceOutcome
+  = | { _tag: 'measured', entry: WeightEntry }
+    | { _tag: 'absent' }
+    | { _tag: 'unmeasured' }
 
 /** Runs `work` over `items`, never more than `limit` at a time. */
 async function mapWithLimit<T, R>(items: readonly T[], limit: number, work: (item: T) => Promise<R>): Promise<R[]> {
@@ -173,32 +88,56 @@ export default defineCachedEventHandler(async (event) => {
       throw createError({ statusCode: 502, message: 'Could not load the page' })
 
     const finalUrl = document.url || pageUrl
-    const html = await document.text()
+    const body = await readBodyCapped(document, MAX_BODY_BYTES)
+    if (body._tag === 'over-cap')
+      throw createError({ statusCode: 413, message: 'This page is too large for the fast measurement' })
+    const html = new TextDecoder().decode(body.bytes)
     const documentEntry: WeightEntry = {
       url: finalUrl,
       type: 'document',
-      size: new TextEncoder().encode(html).byteLength,
+      size: body.bytes.byteLength,
     }
 
     const refs = extractResourceRefs(html, finalUrl)
-    const measured = refs.slice(0, RESOURCE_LIMIT)
+    const attempted = refs.slice(0, RESOURCE_LIMIT)
 
     const deadline = Date.now() + TOTAL_BUDGET_MS
-    const entries = await mapWithLimit(measured, CONCURRENCY, async (ref): Promise<WeightEntry | null> => {
-      const result = await measure(ref.url, deadline)
-      if (!result)
-        return null
+    const outcomes = await mapWithLimit(attempted, CONCURRENCY, async (ref): Promise<SubresourceOutcome> => {
+      const result = await measureResource(ref.url, {
+        deadline,
+        timeoutMs: RESOURCE_TIMEOUT_MS,
+        maxBodyBytes: MAX_BODY_BYTES,
+        userAgent: USER_AGENT,
+      })
+      if (result._tag !== 'measured')
+        return result
       return {
-        url: ref.url,
-        // The server's own answer beats the guess made from the tag.
-        type: classifyResource(ref.url, result.contentType) === 'other' ? ref.type : classifyResource(ref.url, result.contentType),
-        size: result.size,
+        _tag: 'measured',
+        entry: {
+          url: ref.url,
+          // The server's own answer beats the guess made from the tag.
+          type: classifyResource(ref.url, result.contentType) === 'other' ? ref.type : classifyResource(ref.url, result.contentType),
+          size: result.size,
+        },
       }
     })
 
-    const found = entries.filter((entry): entry is WeightEntry => entry !== null)
+    const found: WeightEntry[] = []
+    let absent = 0
+    let unmeasured = 0
+    for (const outcome of outcomes) {
+      if (outcome._tag === 'measured')
+        found.push(outcome.entry)
+      else if (outcome._tag === 'absent')
+        absent++
+      else
+        unmeasured++
+    }
+
+    // Any unmeasured resource means the run stopped early, whether the clock
+    // or the byte cap stopped it. An absent resource means no such thing.
+    const assessment = assessCompleteness(refs.length, attempted.length, found.length, unmeasured > 0)
     const { totalSize, totalRequests, groups, largestResources } = summarizeWeight([documentEntry, ...found])
-    const complete = refs.length <= RESOURCE_LIMIT && found.length === measured.length
 
     return {
       url: pageUrl,
@@ -217,21 +156,29 @@ export default defineCachedEventHandler(async (event) => {
       groups,
       largestResources,
       /**
-       * False when a resource went unmeasured, so nothing downstream presents a
-       * partial total as the page weight. A page that is slow or hostile to
-       * range requests can exhaust the budget with most of itself unread, and a
-       * total that is short by half is worse than no total at all.
+       * False when the run stopped early, so nothing downstream presents a
+       * partial total as the page weight. A resource that answered 404 is not
+       * a stop: it is counted in `absent` and the total stands. A page that is
+       * slow, hostile to range requests, or past the resource limit leaves
+       * part of itself unread, and a total that is short by half is worse
+       * than no total at all.
        */
-      complete,
+      complete: assessment.complete,
       discovered: refs.length,
       measured: found.length,
-      skipped: Math.max(0, refs.length - measured.length),
+      /**
+       * Resources that answered with an error after every probe (404, 401,
+       * refused). They contribute no bytes. Absent is a fact about the page,
+       * not about this run.
+       */
+      absent,
+      skipped: assessment.skipped,
     }
   })
 }, {
   base: 'psi',
   swr: true,
-  getKey: event => `page-weight:v1:${getQuery(event).url}`,
+  getKey: event => `page-weight:v2:${getQuery(event).url}`,
   maxAge: 60 * 60,
   staleMaxAge: 24 * 60 * 60,
 })

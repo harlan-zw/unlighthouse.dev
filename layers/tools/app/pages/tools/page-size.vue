@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ComponentPublicInstance } from 'vue'
+import { createRunGate } from '~~/shared/run-gate'
 
 definePageMeta({
   breadcrumb: {
@@ -83,6 +84,7 @@ interface PageWeightResult {
   complete: boolean
   discovered: number
   measured: number
+  absent: number
 }
 
 /**
@@ -94,6 +96,12 @@ interface PageWeightResult {
  * over these panels the moment it lands.
  */
 const fastResult = ref<PageWeightResult | null>(null)
+/**
+ * One generation per analyze run. A fast pass that started for URL A must not
+ * land after the visitor has already submitted URL B, or A's breakdown would
+ * render as B's preview.
+ */
+const fastPassGate = createRunGate()
 
 const { showFloatingLoader } = useToolFloatingLoader(loading, loadingContainerRef)
 const { syncParam } = useToolUrlSync(urlInput, {
@@ -107,11 +115,13 @@ function analyze() {
     return
 
   fastResult.value = null
+  const run = fastPassGate.begin()
   $fetch<PageWeightResult>('/api/tools/page-weight', { query: { url: urlInput.value } })
     .then((weight) => {
       // A Lighthouse result that already arrived is the better answer, so a
-      // slow fast pass never replaces it.
-      if (!result.value)
+      // slow fast pass never replaces it. A run the visitor superseded is not
+      // this run, so its resolution is dropped too.
+      if (!result.value && fastPassGate.isCurrent(run))
         fastResult.value = weight
     })
     .catch((error) => {
@@ -320,7 +330,7 @@ const visualResources = computed(() => {
         </div>
 
         <p v-if="!fastResult.complete" class="text-xs text-orange-500">
-          Measured {{ fastResult.measured }} of {{ fastResult.discovered }} resources before the time budget ran out, so no total is shown yet. Lighthouse will report the full weight.
+          Measured {{ fastResult.measured }} of {{ fastResult.discovered }} resources. The rest could not be read this run, so no total is shown. Lighthouse will report the full weight.
         </p>
 
         <div v-if="fastResult.groups.length" class="space-y-2">

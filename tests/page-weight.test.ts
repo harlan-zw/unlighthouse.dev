@@ -2,8 +2,11 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
+  assessCompleteness,
   classifyResource,
   extractResourceRefs,
+  MAX_BODY_BYTES,
+  measureResource,
   parsePublicHttpUrl,
   summarizeWeight,
 } from '../shared/page-weight.ts'
@@ -134,4 +137,112 @@ test('ranks the largest resources and caps the list at ten', () => {
   assert.equal(summary.largestResources.length, 10)
   assert.equal(summary.largestResources[0]?.size, 1400)
   assert.equal(summary.largestResources.at(-1)?.size, 500)
+})
+
+test('a terminally absent subresource does not make the measurement incomplete', () => {
+  // Five resources discovered and attempted, one answered 404. The four that
+  // answered are the whole truth, so the total is shown.
+  const assessment = assessCompleteness(5, 5, 4, false)
+
+  assert.equal(assessment.complete, true)
+})
+
+test('budget exhaustion that leaves resources unmeasured makes it incomplete', () => {
+  const assessment = assessCompleteness(5, 5, 3, true)
+
+  assert.equal(assessment.complete, false)
+})
+
+test('resources past the limit keep the measurement incomplete', () => {
+  const assessment = assessCompleteness(130, 120, 120, false)
+
+  assert.equal(assessment.complete, false)
+  assert.equal(assessment.skipped, 10)
+})
+
+function measureWith(fetchLike: typeof fetch) {
+  return measureResource('https://example.com/resource', {
+    deadline: Date.now() + 10_000,
+    timeoutMs: 10_000,
+    maxBodyBytes: MAX_BODY_BYTES,
+    userAgent: 'test',
+    fetchLike,
+  })
+}
+
+test('counts a resource that answers 404 to every probe as absent', async () => {
+  const outcome = await measureWith(async () => new Response(null, { status: 404 }))
+
+  assert.equal(outcome._tag, 'absent')
+})
+
+test('counts a resource the deadline cut short as unmeasured', async () => {
+  const outcome = await measureResource('https://example.com/slow', {
+    deadline: Date.now() - 1,
+    timeoutMs: 10_000,
+    maxBodyBytes: MAX_BODY_BYTES,
+    userAgent: 'test',
+    fetchLike: async () => {
+      throw new Error('must not fetch once the deadline has passed')
+    },
+  })
+
+  assert.equal(outcome._tag, 'unmeasured')
+})
+
+test('reads a size from the range probe without downloading the body', async () => {
+  const outcome = await measureWith(async (_url, init) => init?.method === 'HEAD'
+    ? new Response(null, { status: 200 })
+    : new Response(null, { status: 206, headers: { 'content-range': 'bytes 0-0/12345' } }))
+
+  assert.ok(outcome._tag === 'measured')
+  assert.equal(outcome.size, 12345)
+})
+
+test('stops reading once a body passes the byte cap and reports it unmeasured', async () => {
+  const chunk = new Uint8Array(1024 * 1024).fill(0x61)
+  let chunksSent = 0
+  let cancelled = false
+  const stream = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      if (chunksSent >= 20) {
+        controller.close()
+        return
+      }
+      chunksSent++
+      controller.enqueue(chunk)
+    },
+    cancel() {
+      cancelled = true
+    },
+  })
+
+  const outcome = await measureWith(async () => new Response(stream, { headers: { 'content-type': 'application/octet-stream' } }))
+
+  assert.equal(outcome._tag, 'unmeasured')
+  // Six one-megabyte chunks pass the five-megabyte cap, and the stream holds
+  // twenty. Stopping well before the end is what keeps memory bounded.
+  assert.ok(chunksSent < 20, `read ${chunksSent} of 20 chunks`)
+  assert.ok(cancelled, 'expected the stream to be cancelled, not drained')
+})
+
+test('measures a body that stays under the byte cap', async () => {
+  const half = new Uint8Array(512 * 1024).fill(0x62)
+  let chunksSent = 0
+  const stream = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      if (chunksSent >= 6) {
+        controller.close()
+        return
+      }
+      chunksSent++
+      controller.enqueue(half)
+    },
+  })
+
+  const outcome = await measureWith(async () => new Response(stream, { headers: { 'content-type': 'text/plain' } }))
+
+  assert.ok(outcome._tag === 'measured')
+  assert.equal(outcome.size, 3 * 1024 * 1024)
+  assert.equal(outcome.contentType, 'text/plain')
 })
