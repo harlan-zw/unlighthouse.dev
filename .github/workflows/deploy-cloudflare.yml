@@ -71,6 +71,17 @@ jobs:
           # then blamed live errors on code that was never deployed.
           SENTRY_RELEASE: ${{ github.event.workflow_run.head_sha || github.sha }}
 
+      # Schema first, so the Worker version that needs a table never activates
+      # before it exists. #59 shipped its throttle inert for this reason: the
+      # code went live and the table had to be created by hand afterwards.
+      # Migrations here are expand only, so applying them before the deploy
+      # leaves the running version working against the wider schema.
+      - name: Apply D1 migrations
+        run: pnpm exec wrangler d1 migrations apply DB --remote --config wrangler.local.toml
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
       - run: pnpm deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
