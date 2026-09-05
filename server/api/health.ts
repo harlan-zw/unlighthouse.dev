@@ -1,9 +1,9 @@
 import type { D1Database } from '@cloudflare/workers-types'
 import type { SentryRuntimeConfig } from '@harlan-zw/nuxt-sentry/server'
 import type { H3Event } from 'h3'
-import type { HealthMetrics, HealthSummary, Probe, ToolBreakdown } from '../utils/health'
+import type { HealthMetrics, HealthSummary, Probe } from '../utils/health'
 import { getD1 } from '../utils/db'
-import { summarizeHealth } from '../utils/health'
+import { parseFeedbackMetrics, parseToolBreakdown, parseToolWindow, summarizeHealth } from '../utils/health'
 
 /**
  * Operational health for the daily check-in and for uptime probes.
@@ -27,34 +27,6 @@ interface HealthResponse extends HealthSummary {
   release: string | null
   window: { from: string, to: string }
   metrics: HealthMetrics | null
-}
-
-function count(value: unknown): number {
-  return typeof value === 'number' && Number.isFinite(value) ? Math.round(value) : 0
-}
-
-function optional(value: unknown): number | null {
-  return typeof value === 'number' && Number.isFinite(value) ? Math.round(value) : null
-}
-
-function feedbackWindow(row: Record<string, unknown>, suffix: string) {
-  return {
-    total: count(row[`total${suffix}`]),
-    up: count(row[`up${suffix}`]),
-    down: count(row[`down${suffix}`]),
-    comments: count(row[`comments${suffix}`]),
-  }
-}
-
-function toolWindow(row: Record<string, unknown> | undefined) {
-  return {
-    lookups: count(row?.lookups),
-    statused: count(row?.statused),
-    errors: count(row?.errors),
-    slow: count(row?.slow),
-    avgDurationMs: optional(row?.avg_ms),
-    maxDurationMs: optional(row?.max_ms),
-  }
 }
 
 async function readMetrics(db: D1Database, nowSeconds: number): Promise<Probe<HealthMetrics>> {
@@ -88,7 +60,9 @@ async function readMetrics(db: D1Database, nowSeconds: number): Promise<Probe<He
         COUNT(*) AS lookups,
         COALESCE(SUM(status IS NOT NULL), 0) AS statused,
         COALESCE(SUM(status = 'error'), 0) AS errors,
-        COUNT(DISTINCT CASE WHEN status = 'error' THEN query END) AS error_queries
+        COUNT(DISTINCT CASE WHEN status = 'error' THEN query END) AS error_queries,
+        AVG(duration_ms) AS avg_ms,
+        MAX(duration_ms) AS max_ms
       FROM tool_lookups WHERE created_at >= ? GROUP BY tool ORDER BY errors DESC, lookups DESC LIMIT ?`).bind(dayAgo, TOP_TOOLS),
   ]).then(results => ({ _tag: 'ok' as const, results })).catch((error: unknown) => ({
     _tag: 'error' as const,
@@ -104,21 +78,11 @@ async function readMetrics(db: D1Database, nowSeconds: number): Promise<Probe<He
   return {
     _tag: 'ok',
     value: {
-      feedback: {
-        last24h: feedbackWindow(feedbackRow, '24h'),
-        last7d: feedbackWindow(feedbackRow, '7d'),
-        lastAt: optional(feedbackRow.last_at),
-      },
+      feedback: parseFeedbackMetrics(feedbackRow),
       tools: {
-        last24h: toolWindow(dayResult?.results?.[0]),
-        prior6d: toolWindow(baselineResult?.results?.[0]),
-        byTool: (byToolResult?.results ?? []).map((row): ToolBreakdown => ({
-          tool: String(row.tool ?? 'unknown'),
-          lookups: count(row.lookups),
-          statused: count(row.statused),
-          errors: count(row.errors),
-          errorQueries: count(row.error_queries),
-        })),
+        last24h: parseToolWindow(dayResult?.results?.[0]),
+        prior6d: parseToolWindow(baselineResult?.results?.[0]),
+        byTool: (byToolResult?.results ?? []).map(parseToolBreakdown),
       },
     },
   }
