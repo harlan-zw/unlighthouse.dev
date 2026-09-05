@@ -2,10 +2,14 @@
 import type { HealthMetrics, ToolBreakdown, ToolWindow } from '../server/utils/health.ts'
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { summarizeHealth } from '../server/utils/health.ts'
+import { parseToolBreakdown, parseToolWindow, summarizeHealth } from '../server/utils/health.ts'
 
 function toolWindow(overrides: Partial<ToolWindow> = {}): ToolWindow {
   return { lookups: 0, statused: 0, errors: 0, slow: 0, avgDurationMs: null, maxDurationMs: null, ...overrides }
+}
+
+function toolBreakdown(tool: string, overrides: Partial<ToolBreakdown> = {}): ToolBreakdown {
+  return { tool, lookups: 0, statused: 0, errors: 0, errorQueries: 0, avgDurationMs: null, maxDurationMs: null, ...overrides }
 }
 
 function metrics(overrides: {
@@ -76,8 +80,8 @@ describe('summarizeHealth', () => {
     const summary = summarize(metrics({
       last24h: { lookups: 30, statused: 25, errors: 5 },
       byTool: [
-        { tool: 'pagespeed-insights', lookups: 20, statused: 20, errors: 0, errorQueries: 0 },
-        { tool: 'cwv-history', lookups: 6, statused: 5, errors: 5, errorQueries: 4 },
+        toolBreakdown('pagespeed-insights', { lookups: 20, statused: 20 }),
+        toolBreakdown('cwv-history', { lookups: 6, statused: 5, errors: 5, errorQueries: 4 }),
       ],
     }))
     assert.equal(summary.status, 'RED')
@@ -88,8 +92,8 @@ describe('summarizeHealth', () => {
     const summary = summarize(metrics({
       last24h: { lookups: 26, statused: 26, errors: 4 },
       byTool: [
-        { tool: 'cwv-check', lookups: 6, statused: 6, errors: 4, errorQueries: 3 },
-        { tool: 'pagespeed-insights', lookups: 6, statused: 6, errors: 0, errorQueries: 0 },
+        toolBreakdown('cwv-check', { lookups: 6, statused: 6, errors: 4, errorQueries: 3 }),
+        toolBreakdown('pagespeed-insights', { lookups: 6, statused: 6 }),
       ],
     }))
     assert.equal(summary.status, 'RED')
@@ -99,7 +103,7 @@ describe('summarizeHealth', () => {
   it('turns amber on a tool erroring above a quarter of its runs', () => {
     const summary = summarize(metrics({
       last24h: { lookups: 40, statused: 40, errors: 3 },
-      byTool: [{ tool: 'lcp', lookups: 8, statused: 8, errors: 3, errorQueries: 2 }],
+      byTool: [toolBreakdown('lcp', { lookups: 8, statused: 8, errors: 3, errorQueries: 2 })],
     }))
     assert.equal(summary.status, 'AMBER')
     assert.deepEqual(summary.reasons, ['Tool lcp errored on 3 of 8 recorded runs (38%) across 2 targets'])
@@ -108,7 +112,7 @@ describe('summarizeHealth', () => {
   it('keeps errors concentrated on one target out of the verdict', () => {
     const summary = summarize(metrics({
       last24h: { lookups: 26, statused: 26, errors: 4 },
-      byTool: [{ tool: 'cwv-check', lookups: 6, statused: 6, errors: 4, errorQueries: 1 }],
+      byTool: [toolBreakdown('cwv-check', { lookups: 6, statused: 6, errors: 4, errorQueries: 1 })],
     }))
     assert.equal(summary.status, 'GREEN')
     assert.deepEqual(summary.warnings, ['Tool cwv-check errored on 4 of 6 recorded runs (67%), all for one target'])
@@ -117,7 +121,7 @@ describe('summarizeHealth', () => {
   it('leaves a low-sample tool failure alone', () => {
     const summary = summarize(metrics({
       last24h: { lookups: 8, statused: 4, errors: 4 },
-      byTool: [{ tool: 'cwv-history', lookups: 4, statused: 4, errors: 4, errorQueries: 4 }],
+      byTool: [toolBreakdown('cwv-history', { lookups: 4, statused: 4, errors: 4, errorQueries: 4 })],
     }))
     assert.equal(summary.status, 'GREEN')
   })
@@ -137,7 +141,7 @@ describe('summarizeHealth', () => {
     const summary = summarize(metrics({
       feedback: { last24h: { total: 1, up: 0, down: 1, comments: 0 } },
       last24h: { lookups: 20, statused: 20, errors: 20 },
-      byTool: [{ tool: 'lcp', lookups: 20, statused: 20, errors: 20, errorQueries: 9 }],
+      byTool: [toolBreakdown('lcp', { lookups: 20, statused: 20, errors: 20, errorQueries: 9 })],
     }))
     assert.equal(summary.status, 'RED')
     assert.equal(summary.reasons[0], 'Tool error rate is 100% over 20 recorded runs')
@@ -155,5 +159,46 @@ describe('summarizeHealth', () => {
       feedback: { last7d: { total: 6, up: 2, down: 4, comments: 0 } },
     }))
     assert.deepEqual(summary.warnings, ['7-day feedback is 67% negative across 6 votes'])
+  })
+})
+
+describe('health row parsers', () => {
+  it('carries per-tool durations so slow lookups name a tool', () => {
+    assert.deepEqual(parseToolBreakdown({
+      tool: 'pagespeed-insights',
+      lookups: 6,
+      statused: 6,
+      errors: 0,
+      error_queries: 0,
+      avg_ms: 25761.8,
+      max_ms: 76201,
+    }), {
+      tool: 'pagespeed-insights',
+      lookups: 6,
+      statused: 6,
+      errors: 0,
+      errorQueries: 0,
+      avgDurationMs: 25762,
+      maxDurationMs: 76201,
+    })
+  })
+
+  it('reads an absent duration as null so a fast tool never reads as 0ms', () => {
+    assert.deepEqual(parseToolBreakdown({ tool: 'lcp' }), {
+      tool: 'lcp',
+      lookups: 0,
+      statused: 0,
+      errors: 0,
+      errorQueries: 0,
+      avgDurationMs: null,
+      maxDurationMs: null,
+    })
+  })
+
+  it('parses the site-wide window row with its durations', () => {
+    assert.deepEqual(
+      parseToolWindow({ lookups: 26, statused: 26, errors: 4, slow: 20, avg_ms: 19999.6, max_ms: 76201 }),
+      { lookups: 26, statused: 26, errors: 4, slow: 20, avgDurationMs: 20000, maxDurationMs: 76201 },
+    )
   })
 })
