@@ -10,6 +10,10 @@ export function formatMs(ms: number): string {
   return ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${Math.round(ms)}ms`
 }
 
+export function humanDate(date: string): string {
+  return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' })
+}
+
 export function downloadFile(content: string, filename: string, type: string) {
   const blob = new Blob([content], { type })
   const url = URL.createObjectURL(blob)

@@ -36,6 +36,9 @@ export interface ToolBreakdown {
   errors: number
   /** Distinct targets behind those errors. One target is a bad URL, not an outage. */
   errorQueries: number
+  /** Per-tool durations, so a slow window can be pinned on a named tool. */
+  avgDurationMs: number | null
+  maxDurationMs: number | null
 }
 
 export interface HealthMetrics {
@@ -60,6 +63,59 @@ export interface HealthSummary {
   status: HealthStatus
   reasons: string[]
   warnings: string[]
+}
+
+function count(value: unknown): number {
+  return typeof value === 'number' && Number.isFinite(value) ? Math.round(value) : 0
+}
+
+function optional(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? Math.round(value) : null
+}
+
+/**
+ * Boundary parsers turn one aggregate D1 row into a precise payload type, so
+ * the SQL column names live in exactly one tested place.
+ */
+
+function parseFeedbackWindow(row: Record<string, unknown>, suffix: string): FeedbackWindow {
+  return {
+    total: count(row[`total${suffix}`]),
+    up: count(row[`up${suffix}`]),
+    down: count(row[`down${suffix}`]),
+    comments: count(row[`comments${suffix}`]),
+  }
+}
+
+export function parseFeedbackMetrics(row: Record<string, unknown>): HealthMetrics['feedback'] {
+  return {
+    last24h: parseFeedbackWindow(row, '24h'),
+    last7d: parseFeedbackWindow(row, '7d'),
+    lastAt: optional(row.last_at),
+  }
+}
+
+export function parseToolWindow(row: Record<string, unknown> | undefined): ToolWindow {
+  return {
+    lookups: count(row?.lookups),
+    statused: count(row?.statused),
+    errors: count(row?.errors),
+    slow: count(row?.slow),
+    avgDurationMs: optional(row?.avg_ms),
+    maxDurationMs: optional(row?.max_ms),
+  }
+}
+
+export function parseToolBreakdown(row: Record<string, unknown> | undefined): ToolBreakdown {
+  return {
+    tool: String(row?.tool ?? 'unknown'),
+    lookups: count(row?.lookups),
+    statused: count(row?.statused),
+    errors: count(row?.errors),
+    errorQueries: count(row?.error_queries),
+    avgDurationMs: optional(row?.avg_ms),
+    maxDurationMs: optional(row?.max_ms),
+  }
 }
 
 interface Finding {

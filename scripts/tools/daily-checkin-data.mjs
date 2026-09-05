@@ -32,6 +32,9 @@ const sinceIso = since.toISOString()
 const sinceSec = Math.floor(since.getTime() / 1000)
 const nowSec = Math.floor(now.getTime() / 1000)
 const wrangler = join(root, 'node_modules/.bin/wrangler')
+// Wrangler does not auto-discover this file, and it resolves a relative --config
+// against the process cwd, so every invocation passes the absolute path.
+const wranglerConfig = join(root, 'wrangler.local.toml')
 const workerName = 'unlighthouse-dev'
 const accountId = '5904138d55ca25d5670dca6adf99894e'
 const siteOrigin = 'https://unlighthouse.dev'
@@ -63,7 +66,7 @@ function commandJson(command, args) {
 }
 
 function d1Query(sql) {
-  const output = commandJson(wrangler, ['d1', 'execute', 'DB', '--remote', '--json', '--command', sql])
+  const output = commandJson(wrangler, ['d1', 'execute', 'DB', '--remote', '--json', '--command', sql, '--config', wranglerConfig])
   const statement = output[0]
   if (!statement?.success)
     throw new Error('D1 query did not succeed')
@@ -87,7 +90,7 @@ const git = probe(() => {
 })
 
 const deploy = probe(() => {
-  const deployments = commandJson(wrangler, ['deployments', 'list', '--json'])
+  const deployments = commandJson(wrangler, ['deployments', 'list', '--json', '--config', wranglerConfig])
   const latest = [...deployments].sort((a, b) => String(b.created_on).localeCompare(String(a.created_on)))[0] ?? null
   return {
     latest: latest && {
@@ -110,13 +113,14 @@ const ci = probe(() => {
     .filter(Boolean)
     .sort()
   // A low-cadence workflow falls outside a flat recent-runs page, and an absent
-  // row reads as `missing`, so each workflow is paged on its own name.
+  // row reads as `missing`, so each workflow is paged on its own name. That
+  // paging is also why no flat recent-runs listing runs beside it: an optional
+  // call inside this probe must not be able to fail the data it runs next to.
   const perWorkflowRows = definedWorkflows.flatMap(name =>
     commandJson('gh', ['run', 'list', '--workflow', name, '--limit', '10', '--json', runFields]),
   )
   return {
     workflows: summarizeWorkflowRuns(perWorkflowRows, definedWorkflows),
-    recent: commandJson('gh', ['run', 'list', '--limit', '10', '--json', runFields]),
   }
 })
 
@@ -207,7 +211,7 @@ function cloudflareToken() {
   const environmentToken = process.env.CLOUDFLARE_API_TOKEN || process.env.CF_API_TOKEN
   if (environmentToken)
     return environmentToken
-  const auth = commandJson(wrangler, ['auth', 'token', '--json'])
+  const auth = commandJson(wrangler, ['auth', 'token', '--json', '--config', wranglerConfig])
   if (!auth.token)
     throw new Error('Cloudflare token unavailable')
   return auth.token
