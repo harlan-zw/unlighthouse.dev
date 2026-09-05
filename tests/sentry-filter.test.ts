@@ -5,7 +5,13 @@ import test from 'node:test'
 import { decideReport } from '@harlan-zw/nuxt-sentry/server'
 import { describeCruxFailure } from '../shared/crux-request.ts'
 import { describePsiFailure } from '../shared/psi-request.ts'
-import { CARBONADS_SCRIPT_ELEMENT_RE, CARBONADS_VENDOR_ORIGIN_RE, EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE, STACKLESS_FETCH_FAILURE_MESSAGE_RE } from '../shared/sentry.ts'
+import {
+  CARBONADS_SCRIPT_ELEMENT_RE,
+  CARBONADS_VENDOR_ORIGIN_RE,
+  EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE,
+  STACKLESS_FETCH_FAILURE_MESSAGE_RE,
+  STACKLESS_NON_ERROR_REJECTION_DROP_RULE,
+} from '../shared/sentry.ts'
 
 const upstreamErrors = [
   Object.assign(new Error('rate limited'), { response: { status: 429 } }),
@@ -43,6 +49,10 @@ const clientPolicy: ReportPolicy = {
     _tag: 'pattern',
     source: STACKLESS_FETCH_FAILURE_MESSAGE_RE.source,
     flags: STACKLESS_FETCH_FAILURE_MESSAGE_RE.flags,
+  }, {
+    _tag: 'pattern',
+    source: STACKLESS_NON_ERROR_REJECTION_DROP_RULE.source,
+    flags: STACKLESS_NON_ERROR_REJECTION_DROP_RULE.flags,
   }],
   dropBreadcrumbMessages: [],
   denyUrls: [{
@@ -77,6 +87,15 @@ test('keeps the same failure when a stack names site code', () => {
   assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'send' })
 })
 
+/** A rejection whose captured value is not an `Error`, the way Sentry serializes it. */
+function nonErrorRejectionReport(type: string, value: string, frames: Array<{ filename: string }> = []): ErrorReport {
+  return {
+    exception: {
+      values: [{ type, value, stacktrace: { frames } }],
+    },
+  }
+}
+
 /** The client report the Carbon Ads vendor script raises when an ad blocker removed its tag. */
 function carbonAdsFailureReport(): ErrorReport {
   return {
@@ -89,6 +108,30 @@ function carbonAdsFailureReport(): ErrorReport {
     },
   }
 }
+
+test('drops the Carbon Ads non-Error rejections that carry no stack', () => {
+  const customEvent = nonErrorRejectionReport(
+    'CustomEvent',
+    'Event `CustomEvent` (type=unhandledrejection) captured as promise rejection',
+  )
+  const plainObject = nonErrorRejectionReport(
+    'UnhandledRejection',
+    'Object captured as promise rejection with keys: [object has no keys]',
+  )
+
+  for (const report of [customEvent, plainObject])
+    assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'drop', rule: 'stackless-message' })
+})
+
+test('keeps the same rejection when a stack names site code', () => {
+  const report = nonErrorRejectionReport(
+    'UnhandledRejection',
+    'Object captured as promise rejection with keys: [object has no keys]',
+    [{ filename: 'https://unlighthouse.dev/_nuxt/entry.js' }],
+  )
+
+  assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'send' })
+})
 
 test('drops the carbon ads element failure an ad blocker raises', () => {
   const decision = decideReport(carbonAdsFailureReport(), undefined, clientPolicy)
