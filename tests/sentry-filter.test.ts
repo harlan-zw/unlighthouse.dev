@@ -87,3 +87,17 @@ test('keeps the same network error when a stack names site code', () => {
 
   assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'send' })
 })
+
+// UNLIGHTHOUSE-D is a DOMException with code 19, which Sentry labels `Error`, so the
+// message it matches carries an extra `Error: ` prefix over the sighting above.
+test('drops the DOMException network error that carries no stack', () => {
+  const decision = decideReport(errorReport('Error', 'NetworkError: A network error occurred.', []), undefined, clientPolicy)
+
+  assert.deepEqual(decision, { _tag: 'drop', rule: 'stackless-message' })
+})
+
+test('keeps the DOMException network error when a stack names site code', () => {
+  const report = errorReport('Error', 'NetworkError: A network error occurred.', [{ filename: 'https://unlighthouse.dev/_nuxt/entry.js' }])
+
+  assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'send' })
+})
