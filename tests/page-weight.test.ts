@@ -122,6 +122,36 @@ test('does not mistake data-src for the src it shadows', () => {
   assert.ok(!refs.some(ref => ref.url === 'https://example.com/lazy.png'))
 })
 
+test('decodes character references in an attribute value', () => {
+  const refs = extractResourceRefs(
+    '<img src="/px?a=1&amp;b=2">',
+    'https://example.com/',
+  )
+
+  assert.equal(refs.length, 1)
+  assert.equal(refs[0]?.url, 'https://example.com/px?a=1&b=2')
+})
+
+test('decodes numeric character references in an attribute value', () => {
+  const refs = extractResourceRefs(
+    '<img src="/px?a=1&#38;b=2">',
+    'https://example.com/',
+  )
+
+  assert.equal(refs.length, 1)
+  assert.equal(refs[0]?.url, 'https://example.com/px?a=1&b=2')
+})
+
+test('dedupes an encoded spelling against its decoded spelling', () => {
+  const refs = extractResourceRefs(
+    '<img src="/px?a=1&amp;b=2"><img src="/px?a=1&b=2">',
+    'https://example.com/',
+  )
+
+  assert.equal(refs.length, 1)
+  assert.equal(refs[0]?.url, 'https://example.com/px?a=1&b=2')
+})
+
 test('drops a subresource pointing back inside a network', () => {
   const refs = extractResourceRefs(PAGE, 'https://example.com/')
 

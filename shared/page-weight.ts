@@ -200,16 +200,62 @@ export function classifyResource(url: string, contentType?: string | null): Reso
 }
 
 /**
+ * The named character references markup can carry in an attribute value.
+ *
+ * HTML decodes these before a browser fetches, so this reads the value the way
+ * the browser would. Numeric references (`&#38;`, `&#x26;`) cover the rest.
+ */
+const NAMED_CHARACTER_REFERENCES: Record<string, string> = {
+  amp: '&',
+  AMP: '&',
+  lt: '<',
+  LT: '<',
+  gt: '>',
+  GT: '>',
+  quot: '"',
+  QUOT: '"',
+  apos: '\'',
+  nbsp: '\u00A0',
+  NBSP: '\u00A0',
+}
+
+/** The character HTML substitutes for a reference that names nothing valid. */
+const INVALID_CHARACTER_REFERENCE = '\uFFFD'
+
+function codePointToCharacter(code: number): string {
+  // HTML maps NUL, surrogates, and anything past the Unicode range to U+FFFD.
+  if (code <= 0 || code > 0x10FFFF || (code >= 0xD800 && code <= 0xDFFF))
+    return INVALID_CHARACTER_REFERENCE
+  return String.fromCodePoint(code)
+}
+
+function decodeCharacterReferences(value: string): string {
+  return value.replace(
+    /&(?:#(\d+)|#x([0-9a-f]+)|([a-z][a-z0-9]*));/gi,
+    (whole, decimal: string | undefined, hexadecimal: string | undefined, name: string | undefined) => {
+      if (decimal !== undefined)
+        return codePointToCharacter(Number(decimal))
+      if (hexadecimal !== undefined)
+        return codePointToCharacter(Number.parseInt(hexadecimal, 16))
+      return NAMED_CHARACTER_REFERENCES[name!] ?? whole
+    },
+  )
+}
+
+/**
  * Pulls one attribute out of a tag's attribute text.
  *
  * The name is anchored on the left, since `\b` holds between `-` and a letter
- * and would read `data-src` as `src`.
+ * and would read `data-src` as `src`. The captured value is decoded, because
+ * the browser fetches `/px?a=1&b=2` when the markup says `&amp;`, and the
+ * encoded spelling would otherwise dodge the seen-dedupe.
  */
 function attribute(tag: string, name: string): string | null {
   const match = tag.match(new RegExp(`(?<![\\w-])${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s"'>]+))`, 'i'))
   if (!match)
     return null
-  return match[1] ?? match[2] ?? match[3] ?? null
+  const value = match[1] ?? match[2] ?? match[3]
+  return value === undefined ? null : decodeCharacterReferences(value)
 }
 
 /** The first candidate in a `srcset`, which is the one a plain reader would take. */
