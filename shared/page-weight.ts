@@ -114,12 +114,17 @@ function ipv6Groups(raw: string): number[] | null {
  * canonical form is the embedded dotted quad. Everything else passes through.
  */
 function canonicalGuardHost(hostname: string): string {
-  if (!hostname.includes(':'))
-    return hostname
+  // One trailing dot is the fully qualified spelling of the same name: DNS
+  // resolves `localhost.` exactly as it resolves `localhost`, and the URL
+  // parser hands the dot through. The guard matches the name without it.
+  const host = hostname.endsWith('.') ? hostname.slice(0, -1) : hostname
 
-  const groups = ipv6Groups(hostname)
+  if (!host.includes(':'))
+    return host
+
+  const groups = ipv6Groups(host)
   if (!groups)
-    return hostname
+    return host
 
   const firstFiveZero = groups.slice(0, 5).every(group => group === 0)
   const embeddedIPv4 = firstFiveZero && (groups[5] === 0xFFFF || groups[5] === 0)
@@ -543,6 +548,43 @@ export async function readBodyCapped(response: Response, cap: number): Promise<B
   }
 }
 
+type BodyCount
+  = | { _tag: 'ok', bytes: number }
+    | { _tag: 'over-cap' }
+
+/**
+ * Counts a response body under a hard byte cap without keeping any of it.
+ *
+ * The subresource download only needs a length, and sixteen downloads run at
+ * once: retaining every chunk and copying them into one buffer would let a
+ * hostile page meet the Worker's memory cap. One chunk is live at a time
+ * here, and `over-cap` still says the resource is bigger than anything this
+ * tool would report.
+ */
+async function countBodyCapped(response: Response, cap: number): Promise<BodyCount> {
+  const body = response.body
+  if (!body)
+    return { _tag: 'ok', bytes: 0 }
+
+  const reader = body.getReader()
+  let total = 0
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done)
+      return { _tag: 'ok', bytes: total }
+
+    total += value.byteLength
+    if (total > cap) {
+      await reader.cancel().catch(() => {
+        // A cancel on a stream that already failed can reject. That changes
+        // nothing: the outcome is already decided.
+      })
+      return { _tag: 'over-cap' }
+    }
+  }
+}
+
 export type MeasureOutcome
   = | { _tag: 'measured', size: number, contentType: string | null }
     | { _tag: 'absent' }
@@ -725,16 +767,16 @@ export async function measureResource(url: string, options: MeasureResourceOptio
   if (!response.ok)
     return { _tag: isResourceGone(response.status) ? 'absent' : 'unmeasured' }
 
-  const body = await readBodyCapped(response, options.maxBodyBytes).catch(() => {
+  const counted = await countBodyCapped(response, options.maxBodyBytes).catch(() => {
     // A body that stops mid-stream leaves no length to report, so the
     // resource is counted as unmeasured rather than guessed at.
     return null
   })
 
-  if (!body || body._tag === 'over-cap')
+  if (!counted || counted._tag === 'over-cap')
     return { _tag: 'unmeasured' }
 
-  return { _tag: 'measured', size: body.bytes.byteLength, contentType: response.headers.get('content-type') }
+  return { _tag: 'measured', size: counted.bytes, contentType: response.headers.get('content-type') }
 }
 
 export interface WeightEntry {

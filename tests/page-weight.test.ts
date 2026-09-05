@@ -43,6 +43,17 @@ test('refuses an IPv6 host that embeds a blocked IPv4 address', () => {
   assert.equal(parsePublicHttpUrl('http://[::ffff:8.8.8.8]/')._tag, 'ok')
 })
 
+test('refuses a loopback host written with a trailing dot', () => {
+  // `localhost.` resolves to loopback exactly like `localhost`, and the URL
+  // parser hands the dot through, so the guard has to drop it before matching.
+  assert.equal(parsePublicHttpUrl('http://localhost./')._tag, 'err')
+
+  // The same rule drops a ref that a public page's HTML names.
+  const refs = extractResourceRefs('<img src="http://localhost./x">', 'https://example.com/')
+
+  assert.deepEqual(refs, [])
+})
+
 test('refuses a scheme that is not http', () => {
   for (const raw of ['file:///etc/passwd', 'data:text/html,hi', 'javascript:alert(1)'])
     assert.equal(parsePublicHttpUrl(raw)._tag, 'err', raw)
@@ -332,6 +343,49 @@ test('measures a body that stays under the byte cap', async () => {
   assert.ok(outcome._tag === 'measured')
   assert.equal(outcome.size, 3 * 1024 * 1024)
   assert.equal(outcome.contentType, 'text/plain')
+})
+
+test('counts a chunked download without holding a copy of the body', async () => {
+  const bodyBytes = 3 * 1024 * 1024
+  const chunk = new Uint8Array(1024 * 1024).fill(0x63)
+  let sent = 0
+  const stream = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      if (sent >= 3) {
+        controller.close()
+        return
+      }
+      sent++
+      controller.enqueue(chunk)
+    },
+  })
+
+  // The download only needs a length, and sixteen downloads run at once, so
+  // materializing the body, let alone copying it, holds a hostile page's bytes
+  // against the Worker's memory cap. The only allocation of exactly the body's
+  // size in this flow is that second copy.
+  const realUint8Array = globalThis.Uint8Array
+  const copies: number[] = []
+  class CountingUint8Array extends realUint8Array {
+    constructor(length: number) {
+      super(length)
+      if (length === bodyBytes)
+        copies.push(length)
+    }
+  }
+  globalThis.Uint8Array = CountingUint8Array as unknown as typeof Uint8Array
+
+  try {
+    const outcome = await measureWith(async () => new Response(stream, { headers: { 'content-type': 'text/plain' } }))
+
+    if (outcome._tag !== 'measured')
+      assert.fail('expected the chunked download to be measured')
+    assert.equal(outcome.size, bodyBytes)
+    assert.deepEqual(copies, [])
+  }
+  finally {
+    globalThis.Uint8Array = realUint8Array
+  }
 })
 
 /**
