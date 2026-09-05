@@ -4,7 +4,14 @@ import { defineNuxtConfig } from 'nuxt/config'
 import { resolve } from 'pathe'
 import { gray, logger } from './logger'
 import { CLOUDFLARE_REQUIRED_SECRETS } from './shared/cloudflare'
-import { EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE, STACKLESS_FETCH_FAILURE_MESSAGE_RE, STACKLESS_NETWORK_ERROR_MESSAGE_RE } from './shared/sentry'
+import {
+  CARBONADS_SCRIPT_ELEMENT_RE,
+  CARBONADS_VENDOR_ORIGIN_RE,
+  EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE,
+  STACKLESS_FETCH_FAILURE_MESSAGE_RE,
+  STACKLESS_NETWORK_ERROR_MESSAGE_RE,
+  STACKLESS_NON_ERROR_REJECTION_DROP_RULE,
+} from './shared/sentry'
 
 // workerd installs its Node-compatible `console` as soon as anything in the
 // bundle imports `node:console` (undici, via node-fetch-native, does). That
@@ -35,12 +42,27 @@ export default defineNuxtConfig({
       // purpose. A Google outage is not a defect here, and it used to fill the
       // issue feed. The module reads no marker from `data`, so the Drop Rule
       // matches the message instead.
-      ignoreErrors: [EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE],
+      ignoreErrors: [
+        EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE,
+        // The Carbon Ads vendor script reads its own tag after an ad blocker
+        // removed the node. The failure happens inside the vendor script and no
+        // site code can fix it, so the report is noise here.
+        CARBONADS_SCRIPT_ELEMENT_RE,
+      ],
       // Browser failures that arrive with no stack: the app manifest poll when the
-      // network drops, and a plain-http page load the browser rejects as a network
-      // error. Matching the message alone would also drop the same failure raised
+      // network drops, a plain-http page load the browser rejects as a network error,
+      // and the non-Error rejections Safari raises when the Carbon Ads script's fetch
+      // fails. Matching the message alone would also drop the same failures raised
       // from site code, so these rules need the empty frame list as well.
-      dropStacklessErrors: [STACKLESS_FETCH_FAILURE_MESSAGE_RE, STACKLESS_NETWORK_ERROR_MESSAGE_RE],
+      dropStacklessErrors: [
+        STACKLESS_FETCH_FAILURE_MESSAGE_RE,
+        STACKLESS_NETWORK_ERROR_MESSAGE_RE,
+        STACKLESS_NON_ERROR_REJECTION_DROP_RULE,
+      ],
+      // The vendor origin that serves the Carbon Ads script. Message wording differs per
+      // engine and V8 omits the evaluated expression, so the origin is the stable marker.
+      // A report drops only when every frame matches, so site defects still report.
+      denyUrls: [CARBONADS_VENDOR_ORIGIN_RE],
     },
   },
 
