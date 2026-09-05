@@ -67,12 +67,16 @@ async function mapWithLimit<T, R>(items: readonly T[], limit: number, work: (ite
 export default defineCachedEventHandler(async (event) => {
   await checkFreeToolRateLimit(event)
   const query = getQuery(event)
-  const validated = await validateUrl(query.url as string)
 
-  const parsed = parsePublicHttpUrl(validated)
+  // The guard runs before anything fetches. `validateUrl` probes the URL to
+  // check it is reachable, so calling it first would have this Worker request
+  // the address before the guard ever saw it, which is the request the guard
+  // exists to prevent.
+  const parsed = parsePublicHttpUrl(normalizeUrl(String(query.url ?? '')))
   if (parsed._tag === 'err')
     throw createError({ statusCode: 422, message: `Cannot measure this URL: ${parsed.reason}` })
-  const pageUrl = parsed.url.toString()
+
+  const pageUrl = (await validateUrl(parsed.url.toString())).toString()
 
   return trackToolRequest(event, { tool: 'page-size', url: pageUrl }, async () => {
     /**

@@ -299,7 +299,8 @@ const visualResources = computed(() => {
       <div v-if="fastResult && !result" class="p-4 sm:p-6 space-y-4">
         <div class="flex items-center gap-2 text-xs text-gray-500">
           <UIcon name="i-heroicons-bolt" class="w-4 h-4 text-green-500" />
-          <span>Read directly from the page. The full Lighthouse audit is still running.</span>
+          <span v-if="error">Read directly from the page. The full Lighthouse audit failed, so the panels it fills are unavailable.</span>
+          <span v-else>Read directly from the page. The full Lighthouse audit is still running.</span>
         </div>
 
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">

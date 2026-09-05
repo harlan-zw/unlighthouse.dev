@@ -268,7 +268,7 @@ function firstSrcsetCandidate(srcset: string): string | null {
 const RAW_TEXT_ELEMENTS = new Set(['script', 'style', 'textarea', 'title'])
 
 /** The elements that can name a subresource. */
-const RESOURCE_ELEMENTS = new Set(['script', 'link', 'img', 'source', 'video', 'audio'])
+const RESOURCE_ELEMENTS = new Set(['script', 'link', 'img', 'source', 'video', 'audio', 'iframe', 'embed', 'object', 'track'])
 
 interface ScannedTag {
   name: string
@@ -388,9 +388,37 @@ export function extractResourceRefs(html: string, baseUrl: string): ResourceRef[
       raw = (srcset ? firstSrcsetCandidate(srcset) : null) || attribute(attrs, 'src')
       hinted = tag === 'img' ? 'image' : null
     }
+    else if (tag === 'object') {
+      // `object` names its resource with `data`, not `src`.
+      raw = attribute(attrs, 'data')
+      hinted = null
+    }
+    else if (tag === 'iframe' || tag === 'embed') {
+      raw = attribute(attrs, 'src')
+      hinted = null
+    }
+    else if (tag === 'track') {
+      raw = attribute(attrs, 'src')
+      hinted = 'other'
+    }
     else {
       raw = attribute(attrs, 'src')
       hinted = 'media'
+    }
+
+    // A poster loads with the media element, so it counts as its own resource.
+    if (tag === 'video' || tag === 'audio') {
+      const poster = attribute(attrs, 'poster')
+      if (poster) {
+        const parsedPoster = parsePublicHttpUrl(poster.trim(), baseUrl)
+        if (parsedPoster._tag === 'ok') {
+          const posterHref = parsedPoster.url.toString()
+          if (!seen.has(posterHref)) {
+            seen.add(posterHref)
+            refs.push({ url: posterHref, type: 'image' })
+          }
+        }
+      }
     }
 
     if (!raw)

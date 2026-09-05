@@ -441,3 +441,41 @@ test('an unmeasured resource makes the run incomplete, an absent one does not', 
   // The same counts, but the third answered 404. That is a fact about the page.
   assert.equal(assessCompleteness(3, 3, 2, false).complete, true)
 })
+
+/**
+ * A total labelled complete has to account for everything the served HTML
+ * asks for, not only the tags the first pass happened to cover.
+ */
+
+test('reads the resources named by embedded content elements', () => {
+  const html = `
+    <iframe src="/frame.html"></iframe>
+    <embed src="/plugin.swf">
+    <object data="/thing.pdf"></object>
+    <video src="/clip.mp4" poster="/poster.jpg"><track src="/subs.vtt"></video>
+  `
+
+  const urls = extractResourceRefs(html, 'https://example.com/').map(ref => ref.url)
+
+  for (const path of ['/frame.html', '/plugin.swf', '/thing.pdf', '/clip.mp4', '/poster.jpg', '/subs.vtt'])
+    assert.ok(urls.includes(`https://example.com${path}`), `missing ${path}`)
+})
+
+test('reads a video poster as its own image resource', () => {
+  const refs = extractResourceRefs('<video src="/a.mp4" poster="/p.jpg"></video>', 'https://example.com/')
+
+  assert.equal(refs.find(ref => ref.url.endsWith('/p.jpg'))?.type, 'image')
+})
+
+test('reads an object through data rather than src', () => {
+  const refs = extractResourceRefs('<object data="/thing.pdf" src="/ignored.js"></object>', 'https://example.com/')
+
+  assert.deepEqual(refs.map(ref => ref.url), ['https://example.com/thing.pdf'])
+})
+
+test('refuses a private host before any request is attempted', () => {
+  // The endpoint parses the submitted URL through this guard before it calls
+  // validateUrl, whose reachability probe would otherwise make the request.
+  for (const raw of ['http://127.0.0.1/', 'http://169.254.169.254/', 'http://10.0.0.1/'])
+    assert.equal(parsePublicHttpUrl(raw)._tag, 'err', raw)
+})
