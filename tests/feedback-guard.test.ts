@@ -30,6 +30,11 @@ function sqliteDatabase(): RateLimitDatabase & { close: () => void } {
           const row = db.prepare(sql).get(...values as never[]) as Record<string, unknown> | undefined
           return (row?.[column] as T) ?? null
         },
+        run: async () => {
+          await Promise.resolve()
+          const { changes } = db.prepare(sql).run(...values as never[]) as { changes: number }
+          return { meta: { changes } }
+        },
       }),
     }),
     close: () => db.close(),

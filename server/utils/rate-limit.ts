@@ -28,6 +28,7 @@ export interface RateLimitDatabase {
   prepare: (sql: string) => {
     bind: (...values: unknown[]) => {
       first: <T>(column: string) => Promise<T | null>
+      run: () => Promise<{ meta: { changes: number } }>
     }
   }
 }
@@ -56,6 +57,29 @@ export function createRateLimitStore(
       return count
     },
   }
+}
+
+/**
+ * Deletes every counter whose window has passed and returns how many rows went.
+ *
+ * The upsert reuses one row per subject, but a subject that stops calling
+ * leaves its row behind, and D1 keeps every row forever where KV expired them
+ * through TTL. The scheduled task calls this on each cron tick so the table
+ * cannot grow without bound, and `expires_at` is indexed for exactly this
+ * scan.
+ *
+ * `expires_at <= now` matches the upsert's restart rule, so a row is gone by
+ * the time the next increment would have reset it.
+ */
+export async function deleteExpiredRateLimits(
+  db: RateLimitDatabase,
+  now: () => number = () => Math.floor(Date.now() / 1000),
+): Promise<number> {
+  const { meta } = await db
+    .prepare('DELETE FROM rate_limits WHERE expires_at <= ?1')
+    .bind(now())
+    .run()
+  return meta.changes
 }
 
 function getEndOfDayTimestamp(): number {
