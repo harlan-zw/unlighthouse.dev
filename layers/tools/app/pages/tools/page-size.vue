@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ComponentPublicInstance } from 'vue'
+import { createRunGate } from '~~/shared/run-gate'
 
 definePageMeta({
   breadcrumb: {
@@ -74,6 +75,34 @@ interface PageSizeResult {
   screenshot: { data: string, width: number, height: number } | null
 }
 
+interface PageWeightResult {
+  fetchedUrl: string
+  totalUncompressedSize: number
+  totalRequests: number
+  groups: Array<{ type: string, count: number, size: number }>
+  largestResources: Array<{ url: string, size: number, type: string }>
+  complete: boolean
+  discovered: number
+  measured: number
+  absent: number
+}
+
+/**
+ * The fast pass, read straight off the wire while Lighthouse runs.
+ *
+ * It answers in a second or two where the audit takes around 25, so the
+ * breakdown is on screen almost immediately. Lighthouse still owns the
+ * transfer figure, the score and everything derived from the audit, and takes
+ * over these panels the moment it lands.
+ */
+const fastResult = ref<PageWeightResult | null>(null)
+/**
+ * One generation per analyze run. A fast pass that started for URL A must not
+ * land after the visitor has already submitted URL B, or A's breakdown would
+ * render as B's preview.
+ */
+const fastPassGate = createRunGate()
+
 const { showFloatingLoader } = useToolFloatingLoader(loading, loadingContainerRef)
 const { syncParam } = useToolUrlSync(urlInput, {
   extraParams: { strategy: strategy as Ref<string> },
@@ -84,6 +113,22 @@ syncParam('strategy', strategy as Ref<string>, 'mobile')
 function analyze() {
   if (!urlInput.value.trim() || loading.value)
     return
+
+  fastResult.value = null
+  const run = fastPassGate.begin()
+  $fetch<PageWeightResult>('/api/tools/page-weight', { query: { url: urlInput.value } })
+    .then((weight) => {
+      // A Lighthouse result that already arrived is the better answer, so a
+      // slow fast pass never replaces it. A run the visitor superseded is not
+      // this run, so its resolution is dropped too.
+      if (!result.value && fastPassGate.isCurrent(run))
+        fastResult.value = weight
+    })
+    .catch((error) => {
+      // This pass only buys time. The Lighthouse run below still answers, so a
+      // failure here costs the visitor nothing but the early preview.
+      console.warn('[page-size] The fast weight pass failed; waiting on Lighthouse', error)
+    })
 
   runBg(
     () => $fetch<PageSizeResult>('/api/tools/page-size', {
@@ -242,6 +287,72 @@ const visualResources = computed(() => {
       <ToolEmptyState v-if="!result && !loading && !error" icon="i-heroicons-scale" message="Enter a URL to check page size" />
 
       <!-- Results -->
+      <!--
+        The fast pass, shown only until Lighthouse lands.
+
+        It reports uncompressed bytes, which is a different and larger number
+        than the transfer size the audit reports, so it is labelled rather than
+        presented as the same figure. A run that could not read every resource
+        shows the breakdown without a total, because a total short by half is
+        worse than waiting for the real one.
+      -->
+      <div v-if="fastResult && !result" class="p-4 sm:p-6 space-y-4">
+        <div class="flex items-center gap-2 text-xs text-gray-500">
+          <UIcon name="i-heroicons-bolt" class="w-4 h-4 text-green-500" />
+          <span v-if="error">Read directly from the page. The full Lighthouse audit failed, so the panels it fills are unavailable.</span>
+          <span v-else>Read directly from the page. The full Lighthouse audit is still running.</span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div v-if="fastResult.complete" class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
+            <p class="text-lg font-bold" :class="getWeightColor(fastResult.totalUncompressedSize)">
+              {{ formatBytes(fastResult.totalUncompressedSize) }}
+            </p>
+            <p class="text-xs text-gray-500">
+              Uncompressed weight
+            </p>
+          </div>
+          <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
+            <p class="text-lg font-bold text-gray-900 dark:text-white">
+              {{ fastResult.totalRequests }}
+            </p>
+            <p class="text-xs text-gray-500">
+              Requests
+            </p>
+          </div>
+          <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 text-center">
+            <p class="text-lg font-bold text-gray-900 dark:text-white">
+              {{ fastResult.groups.length }}
+            </p>
+            <p class="text-xs text-gray-500">
+              Resource types
+            </p>
+          </div>
+        </div>
+
+        <p v-if="!fastResult.complete" class="text-xs text-orange-500">
+          Measured {{ fastResult.measured }} of {{ fastResult.discovered }} resources. The rest could not be read this run, so no total is shown. Lighthouse will report the full weight.
+        </p>
+
+        <div v-if="fastResult.groups.length" class="space-y-2">
+          <div v-for="group in fastResult.groups" :key="group.type" class="flex items-center gap-3">
+            <span class="w-24 text-xs text-gray-500 capitalize">{{ group.type }}</span>
+            <div class="flex-1 h-2 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
+              <div
+                class="h-full rounded-full bg-green-500"
+                :style="{ width: `${Math.max(2, (group.size / Math.max(fastResult.groups[0]!.size, 1)) * 100)}%` }"
+              />
+            </div>
+            <span class="w-20 text-right text-xs text-gray-500">{{ formatBytes(group.size) }}</span>
+            <span class="w-10 text-right text-xs text-gray-400">{{ group.count }}</span>
+          </div>
+        </div>
+
+        <p class="text-xs text-gray-400">
+          No JavaScript runs in this pass, so anything a script loads later is not counted here.
+        </p>
+      </div>
+
       <div v-if="result" class="p-4 sm:p-6 space-y-6">
         <!-- URL info -->
         <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 flex items-center gap-2 min-w-0">
