@@ -26,6 +26,22 @@ test('refuses a URL that points back inside a network', () => {
     assert.equal(parsePublicHttpUrl(raw)._tag, 'err', raw)
 })
 
+test('refuses an IPv6 host that embeds a blocked IPv4 address', () => {
+  const blocked = [
+    'http://[::ffff:127.0.0.1]/',
+    'http://[::ffff:10.0.0.1]/',
+    'http://[::ffff:192.168.1.1]/',
+    'http://[::7f00:1]/',
+    'http://[0:0:0:0:0:0:a00:1]/',
+  ]
+
+  for (const raw of blocked)
+    assert.equal(parsePublicHttpUrl(raw)._tag, 'err', raw)
+
+  // A mapped form of a public address is still public.
+  assert.equal(parsePublicHttpUrl('http://[::ffff:8.8.8.8]/')._tag, 'ok')
+})
+
 test('refuses a scheme that is not http', () => {
   for (const raw of ['file:///etc/passwd', 'data:text/html,hi', 'javascript:alert(1)'])
     assert.equal(parsePublicHttpUrl(raw)._tag, 'err', raw)
@@ -94,6 +110,16 @@ test('skips a link rel that fetches nothing for this page', () => {
   const refs = extractResourceRefs(PAGE, 'https://example.com/')
 
   assert.ok(!refs.some(ref => ref.url === 'https://example.com/canonical'))
+})
+
+test('does not mistake data-src for the src it shadows', () => {
+  const refs = extractResourceRefs(
+    '<html><body><img data-src="/lazy.png" src="/real.png"></body></html>',
+    'https://example.com/',
+  )
+
+  assert.ok(refs.some(ref => ref.url === 'https://example.com/real.png'))
+  assert.ok(!refs.some(ref => ref.url === 'https://example.com/lazy.png'))
 })
 
 test('drops a subresource pointing back inside a network', () => {
@@ -169,6 +195,36 @@ function measureWith(fetchLike: typeof fetch) {
     fetchLike,
   })
 }
+
+test('stops at a redirect hop that points inside a network instead of fetching it', async () => {
+  let calls = 0
+  const outcome = await measureWith(async () => {
+    calls++
+    return new Response(null, { status: 302, headers: { location: 'http://127.0.0.1/x' } })
+  })
+
+  assert.equal(calls, 1)
+  assert.equal(outcome._tag, 'absent')
+})
+
+test('follows a redirect to a public host and measures there', async () => {
+  const urls: string[] = []
+  let headCalls = 0
+  const outcome = await measureWith(async (url, init) => {
+    urls.push(String(url))
+    if (init?.method === 'HEAD') {
+      headCalls++
+      return headCalls === 1
+        ? new Response(null, { status: 302, headers: { location: 'https://example.org/real' } })
+        : new Response(null, { status: 200 })
+    }
+    return new Response(null, { status: 206, headers: { 'content-range': 'bytes 0-0/4321' } })
+  })
+
+  assert.equal(urls[1], 'https://example.org/real')
+  assert.ok(outcome._tag === 'measured')
+  assert.equal(outcome.size, 4321)
+})
 
 test('counts a resource that answers 404 to every probe as absent', async () => {
   const outcome = await measureWith(async () => new Response(null, { status: 404 }))

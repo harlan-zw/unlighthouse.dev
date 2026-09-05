@@ -4,9 +4,11 @@ import {
   classifyResource,
   extractResourceRefs,
   MAX_BODY_BYTES,
+  MAX_REDIRECT_HOPS,
   measureResource,
   parsePublicHttpUrl,
   readBodyCapped,
+  redirectHop,
   RESOURCE_LIMIT,
   summarizeWeight,
 } from '~~/shared/page-weight'
@@ -73,22 +75,43 @@ export default defineCachedEventHandler(async (event) => {
   const pageUrl = parsed.url.toString()
 
   return trackToolRequest(event, { tool: 'page-size', url: pageUrl }, async () => {
-    const document = await fetch(pageUrl, {
-      headers: { 'user-agent': USER_AGENT },
-      redirect: 'follow',
-      signal: AbortSignal.timeout(DOCUMENT_TIMEOUT_MS),
-    }).catch(() => {
-      // The reason the page did not load is upstream detail, and forwarding it
-      // would put the visitor's URL into this site's error text. The 502 below
-      // is the whole answer.
-      return null
-    })
+    /**
+     * Redirects are followed by hand so every hop passes the same guard as the
+     * submitted URL. The platform's `follow` mode would bounce this site's
+     * fetch at an internal address a hostile page named, no questions asked.
+     */
+    let landed: { response: Response, url: string } | null = null
+    let target = pageUrl
+    for (let hop = 0; hop <= MAX_REDIRECT_HOPS; hop++) {
+      const response = await fetch(target, {
+        headers: { 'user-agent': USER_AGENT },
+        redirect: 'manual',
+        signal: AbortSignal.timeout(DOCUMENT_TIMEOUT_MS),
+      }).catch(() => {
+        // The reason the page did not load is upstream detail, and forwarding it
+        // would put the visitor's URL into this site's error text. The 502 below
+        // is the whole answer.
+        return null
+      })
+      if (!response)
+        break
 
-    if (!document || !document.ok)
+      const next = redirectHop(response, target)
+      if (next._tag === 'not-redirect') {
+        landed = { response, url: target }
+        break
+      }
+      // A hop the guard refuses is a page this tool will not read.
+      if (next._tag === 'blocked')
+        break
+      target = next.url
+    }
+
+    if (!landed || !landed.response.ok)
       throw createError({ statusCode: 502, message: 'Could not load the page' })
 
-    const finalUrl = document.url || pageUrl
-    const body = await readBodyCapped(document, MAX_BODY_BYTES)
+    const finalUrl = landed.url
+    const body = await readBodyCapped(landed.response, MAX_BODY_BYTES)
     if (body._tag === 'over-cap')
       throw createError({ statusCode: 413, message: 'This page is too large for the fast measurement' })
     const html = new TextDecoder().decode(body.bytes)

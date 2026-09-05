@@ -47,10 +47,96 @@ const BLOCKED_HOST_PATTERNS: RegExp[] = [
 ]
 
 /**
+ * Reads an IPv6 address as its eight 16-bit groups, or says the text is not
+ * one.
+ *
+ * The URL parser hands the hostname over in its normalized bracketed form
+ * (`[::ffff:7f00:1]`, all groups present or one `::`), but the embedded
+ * dotted-quad spelling is accepted too so this stays right even for text that
+ * skipped that parser.
+ */
+function ipv6Groups(raw: string): number[] | null {
+  let text = raw
+  if (text.startsWith('[') && text.endsWith(']'))
+    text = text.slice(1, -1)
+  if (!text)
+    return null
+
+  let head = text
+  let tailGroups: number[] = []
+  if (text.includes('.')) {
+    const lastColon = text.lastIndexOf(':')
+    if (lastColon === -1)
+      return null
+    const quad = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(text.slice(lastColon + 1))
+    if (!quad)
+      return null
+    const bytes = [quad[1], quad[2], quad[3], quad[4]].map(Number)
+    if (bytes.some(byte => byte > 255))
+      return null
+    tailGroups = [(bytes[0]! << 8) | bytes[1]!, (bytes[2]! << 8) | bytes[3]!]
+    head = text.slice(0, lastColon)
+  }
+
+  const halves = head.split('::')
+  if (halves.length > 2)
+    return null
+  const left = halves[0] === '' ? [] : halves[0]!.split(':')
+  const right = halves.length === 2 ? (halves[1] === '' ? [] : halves[1]!.split(':')) : []
+  for (const group of [...left, ...right]) {
+    if (!/^[0-9a-f]{1,4}$/i.test(group))
+      return null
+  }
+
+  const fill = 8 - left.length - right.length - tailGroups.length
+  if (fill < 0 || (halves.length === 1 && fill !== 0))
+    return null
+
+  const parse = (group: string) => Number.parseInt(group, 16)
+  const groups: number[] = []
+  for (const group of left)
+    groups.push(parse(group))
+  for (let index = 0; index < fill; index++)
+    groups.push(0)
+  for (const group of right)
+    groups.push(parse(group))
+  groups.push(...tailGroups)
+  return groups
+}
+
+/**
+ * The host a guard pattern can reason about.
+ *
+ * An IPv6 address whose last 32 bits carry an IPv4 address, mapped
+ * (`::ffff:0:0/96`) or compatible (`::/96`), is that IPv4 address to the
+ * machine that connects. The URL parser keeps such a host in hex form
+ * (`[::ffff:7f00:1]`), which the IPv4 patterns would never match, so the
+ * canonical form is the embedded dotted quad. Everything else passes through.
+ */
+function canonicalGuardHost(hostname: string): string {
+  if (!hostname.includes(':'))
+    return hostname
+
+  const groups = ipv6Groups(hostname)
+  if (!groups)
+    return hostname
+
+  const firstFiveZero = groups.slice(0, 5).every(group => group === 0)
+  const embeddedIPv4 = firstFiveZero && (groups[5] === 0xFFFF || groups[5] === 0)
+  if (!embeddedIPv4)
+    return hostname
+
+  const bytes = [groups[6]! >> 8, groups[6]! & 0xFF, groups[7]! >> 8, groups[7]! & 0xFF]
+  return bytes.join('.')
+}
+
+/**
  * Parses one URL into something safe to fetch, or says why it is not.
  *
- * Every URL the measurement touches passes through here once, including the
- * ones read out of the fetched HTML, which the page author controls.
+ * Every URL the measurement touches passes through here once: the submitted
+ * page URL, every ref read out of the fetched HTML, and every redirect hop a
+ * response names. The last two are page-author controlled, which is why the
+ * guard runs on each of them.
  */
 export function parsePublicHttpUrl(raw: string, base?: string): UrlParse {
   let url: URL
@@ -67,7 +153,7 @@ export function parsePublicHttpUrl(raw: string, base?: string): UrlParse {
   if (!url.hostname)
     return { _tag: 'err', reason: 'no host' }
 
-  if (BLOCKED_HOST_PATTERNS.some(pattern => pattern.test(url.hostname)))
+  if (BLOCKED_HOST_PATTERNS.some(pattern => pattern.test(canonicalGuardHost(url.hostname))))
     return { _tag: 'err', reason: 'host is not public' }
 
   return { _tag: 'ok', url }
@@ -113,9 +199,14 @@ export function classifyResource(url: string, contentType?: string | null): Reso
   return 'other'
 }
 
-/** Pulls one attribute out of a tag's attribute text. */
+/**
+ * Pulls one attribute out of a tag's attribute text.
+ *
+ * The name is anchored on the left, since `\b` holds between `-` and a letter
+ * and would read `data-src` as `src`.
+ */
 function attribute(tag: string, name: string): string | null {
-  const match = tag.match(new RegExp(`\\b${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s"'>]+))`, 'i'))
+  const match = tag.match(new RegExp(`(?<![\\w-])${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s"'>]+))`, 'i'))
   if (!match)
     return null
   return match[1] ?? match[2] ?? match[3] ?? null
@@ -256,6 +347,39 @@ export type MeasureOutcome
     | { _tag: 'absent' }
     | { _tag: 'unmeasured' }
 
+/** The redirect statuses the fetch spec follows. */
+const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308])
+
+/** The most hops one request may chase before it gives up, as a browser would. */
+export const MAX_REDIRECT_HOPS = 5
+
+export type RedirectHop
+  = | { _tag: 'follow', url: string }
+    | { _tag: 'blocked' }
+    | { _tag: 'not-redirect' }
+
+/**
+ * Reads where a redirect response says to go next.
+ *
+ * - `follow`: the Location resolved and passed the public-host guard; chase it.
+ * - `blocked`: the hop is missing or points somewhere this tool never fetches.
+ * - `not-redirect`: the response is the answer, not a signpost.
+ *
+ * Redirects are followed by hand for exactly this check: the platform's
+ * `follow` mode would hop to an internal address the guard never saw.
+ */
+export function redirectHop(response: Response, baseUrl: string): RedirectHop {
+  if (!REDIRECT_STATUSES.has(response.status))
+    return { _tag: 'not-redirect' }
+
+  const location = response.headers.get('location')
+  if (!location)
+    return { _tag: 'blocked' }
+
+  const parsed = parsePublicHttpUrl(location, baseUrl)
+  return parsed._tag === 'ok' ? { _tag: 'follow', url: parsed.url.toString() } : { _tag: 'blocked' }
+}
+
 export interface MeasureResourceOptions {
   /** Absolute time after which the whole run stops. */
   deadline: number
@@ -324,13 +448,13 @@ export async function measureResource(url: string, options: MeasureResourceOptio
   const doFetch = options.fetchLike ?? globalThis.fetch
   const budget = () => Math.min(options.timeoutMs, options.deadline - Date.now())
 
-  const attempt = (init: RequestInit): Promise<Response | MeasureOutcome> => {
+  const attempt = (target: string, init: RequestInit): Promise<Response | MeasureOutcome> => {
     if (budget() <= 0)
       return Promise.resolve({ _tag: 'unmeasured' })
-    return doFetch(url, {
+    return doFetch(target, {
       ...init,
       headers: { 'user-agent': options.userAgent, ...(init.headers as Record<string, string> | undefined) },
-      redirect: 'follow',
+      redirect: 'manual',
       signal: AbortSignal.timeout(budget()),
     }).then(
       response => response,
@@ -338,13 +462,36 @@ export async function measureResource(url: string, options: MeasureResourceOptio
     )
   }
 
+  /**
+   * Runs one probe, following only redirect hops the guard calls public.
+   *
+   * A hop the guard refuses, or a chase that never settles, means the resource
+   * answers with nowhere public to measure: `absent`, a fact about the page.
+   */
+  const probe = async (init: RequestInit): Promise<Response | MeasureOutcome> => {
+    let target = url
+    for (let hop = 0; hop <= MAX_REDIRECT_HOPS; hop++) {
+      const response = await attempt(target, init)
+      if ('_tag' in response)
+        return response
+
+      const next = redirectHop(response, target)
+      if (next._tag === 'not-redirect')
+        return response
+      if (next._tag === 'blocked')
+        return { _tag: 'absent' }
+      target = next.url
+    }
+    return { _tag: 'absent' }
+  }
+
   const probes: RequestInit[] = [
     { method: 'HEAD' },
     { headers: { range: 'bytes=0-0' } },
   ]
 
-  for (const probe of probes) {
-    const probed = await attempt(probe)
+  for (const probeInit of probes) {
+    const probed = await probe(probeInit)
     if ('_tag' in probed)
       return probed
 
@@ -353,7 +500,7 @@ export async function measureResource(url: string, options: MeasureResourceOptio
       return { _tag: 'measured', size: sized.size, contentType: sized.contentType }
   }
 
-  const response = await attempt({})
+  const response = await probe({})
   if ('_tag' in response)
     return response
 
