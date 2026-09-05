@@ -236,6 +236,11 @@ export default defineNuxtConfig({
     plugins: [
       resolve('./server/plugins/escape-inline-payload.ts'),
     ],
+    // The rate limit cleanup rides the same 5 minute cron the ai-ready
+    // runtime sync uses; nuxt-ai-ready appends its task to this array.
+    scheduledTasks: {
+      '*/5 * * * *': ['rate-limits:cleanup'],
+    },
     externals: {
       external: ['agents/mcp', 'drizzle-orm'],
     },
@@ -246,6 +251,12 @@ export default defineNuxtConfig({
       wrangler: {
         name: 'unlighthouse-dev',
         account_id: '5904138d55ca25d5670dca6adf99894e',
+        // Scheduled tasks need an explicit trigger; Nitro does not derive
+        // crons from `scheduledTasks`. nuxt-ai-ready appends the same entry
+        // when its own cron is on, and skips duplicates.
+        triggers: {
+          crons: ['*/5 * * * *'],
+        },
         // workerd only exposes `node:console` (which Nitro emits as an external
         // import) from a much later date than this was pinned at. Matches the
         // value nuxtseo.com deploys on.

@@ -5,8 +5,10 @@ import { parseURL } from 'ufo'
 import { ThumbsFeedbackSchema } from '~~/types/schemas'
 import { feedback } from '../database/schema'
 import { getDB } from '../utils/db'
+import { checkFeedbackRateLimit } from '../utils/rate-limit'
 
 export default defineEventHandler<Promise<ThumbsFeedbackResponse>>(async (event) => {
+  await checkFeedbackRateLimit(event)
   const { thumbs, path: explicitPath, toolId, context } = await readValidatedBody(event, ThumbsFeedbackSchema.parse)
   const referrer = parseURL(getHeader(event, 'Referer')).pathname
   const path = toolId || explicitPath || referrer || '/'

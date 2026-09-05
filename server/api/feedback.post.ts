@@ -4,8 +4,10 @@ import { parseURL } from 'ufo'
 import { CommentFeedbackSchema } from '~~/types/schemas'
 import { feedback } from '../database/schema'
 import { getDB } from '../utils/db'
+import { checkFeedbackRateLimit } from '../utils/rate-limit'
 
 export default defineEventHandler<Promise<CommentFeedbackResponse>>(async (event) => {
+  await checkFeedbackRateLimit(event)
   const { comment, path: explicitPath, toolId, thumbFeedbackId, context } = await readValidatedBody(event, CommentFeedbackSchema.parse)
   const referrer = parseURL(getHeader(event, 'Referer')).pathname
   const path = toolId || explicitPath || referrer || '/'
