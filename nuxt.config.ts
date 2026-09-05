@@ -9,6 +9,7 @@ import {
   CARBONADS_VENDOR_ORIGIN_RE,
   EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE,
   STACKLESS_FETCH_FAILURE_MESSAGE_RE,
+  STACKLESS_NETWORK_ERROR_MESSAGE_RE,
   STACKLESS_NON_ERROR_REJECTION_DROP_RULE,
 } from './shared/sentry'
 
@@ -48,11 +49,16 @@ export default defineNuxtConfig({
         // site code can fix it, so the report is noise here.
         CARBONADS_SCRIPT_ELEMENT_RE,
       ],
-      // The app manifest poll that fails with no stack, and the non-Error
-      // rejections Safari raises when the Carbon Ads script's fetch fails.
-      // Matching the message alone would also drop the same failures raised
+      // Browser failures that arrive with no stack: the app manifest poll when the
+      // network drops, a plain-http page load the browser rejects as a network error,
+      // and the non-Error rejections Safari raises when the Carbon Ads script's fetch
+      // fails. Matching the message alone would also drop the same failures raised
       // from site code, so these rules need the empty frame list as well.
-      dropStacklessErrors: [STACKLESS_FETCH_FAILURE_MESSAGE_RE, STACKLESS_NON_ERROR_REJECTION_DROP_RULE],
+      dropStacklessErrors: [
+        STACKLESS_FETCH_FAILURE_MESSAGE_RE,
+        STACKLESS_NETWORK_ERROR_MESSAGE_RE,
+        STACKLESS_NON_ERROR_REJECTION_DROP_RULE,
+      ],
       // The vendor origin that serves the Carbon Ads script. Message wording differs per
       // engine and V8 omits the evaluated expression, so the origin is the stable marker.
       // A report drops only when every frame matches, so site defects still report.

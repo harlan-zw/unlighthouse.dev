@@ -10,6 +10,7 @@ import {
   CARBONADS_VENDOR_ORIGIN_RE,
   EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE,
   STACKLESS_FETCH_FAILURE_MESSAGE_RE,
+  STACKLESS_NETWORK_ERROR_MESSAGE_RE,
   STACKLESS_NON_ERROR_REJECTION_DROP_RULE,
 } from '../shared/sentry.ts'
 
@@ -45,15 +46,23 @@ const clientPolicy: ReportPolicy = {
     source: CARBONADS_SCRIPT_ELEMENT_RE.source,
     flags: CARBONADS_SCRIPT_ELEMENT_RE.flags,
   }],
-  dropStacklessErrors: [{
-    _tag: 'pattern',
-    source: STACKLESS_FETCH_FAILURE_MESSAGE_RE.source,
-    flags: STACKLESS_FETCH_FAILURE_MESSAGE_RE.flags,
-  }, {
-    _tag: 'pattern',
-    source: STACKLESS_NON_ERROR_REJECTION_DROP_RULE.source,
-    flags: STACKLESS_NON_ERROR_REJECTION_DROP_RULE.flags,
-  }],
+  dropStacklessErrors: [
+    {
+      _tag: 'pattern',
+      source: STACKLESS_FETCH_FAILURE_MESSAGE_RE.source,
+      flags: STACKLESS_FETCH_FAILURE_MESSAGE_RE.flags,
+    },
+    {
+      _tag: 'pattern',
+      source: STACKLESS_NETWORK_ERROR_MESSAGE_RE.source,
+      flags: STACKLESS_NETWORK_ERROR_MESSAGE_RE.flags,
+    },
+    {
+      _tag: 'pattern',
+      source: STACKLESS_NON_ERROR_REJECTION_DROP_RULE.source,
+      flags: STACKLESS_NON_ERROR_REJECTION_DROP_RULE.flags,
+    },
+  ],
   dropBreadcrumbMessages: [],
   denyUrls: [{
     _tag: 'pattern',
@@ -63,12 +72,12 @@ const clientPolicy: ReportPolicy = {
   secretKeys: [],
 }
 
-function fetchFailureReport(frames: Array<{ filename: string }>): ErrorReport {
+function errorReport(type: string, value: string, frames: Array<{ filename: string }>): ErrorReport {
   return {
     exception: {
       values: [{
-        type: 'TypeError',
-        value: 'Failed to fetch',
+        type,
+        value,
         stacktrace: { frames },
       }],
     },
@@ -76,13 +85,39 @@ function fetchFailureReport(frames: Array<{ filename: string }>): ErrorReport {
 }
 
 test('drops the app manifest fetch failure that carries no stack', () => {
-  const decision = decideReport(fetchFailureReport([]), undefined, clientPolicy)
+  const decision = decideReport(errorReport('TypeError', 'Failed to fetch', []), undefined, clientPolicy)
 
   assert.deepEqual(decision, { _tag: 'drop', rule: 'stackless-message' })
 })
 
 test('keeps the same failure when a stack names site code', () => {
-  const report = fetchFailureReport([{ filename: 'https://unlighthouse.dev/_nuxt/entry.js' }])
+  const report = errorReport('TypeError', 'Failed to fetch', [{ filename: 'https://unlighthouse.dev/_nuxt/entry.js' }])
+
+  assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'send' })
+})
+
+test('drops the plain-http network error that carries no stack', () => {
+  const decision = decideReport(errorReport('NetworkError', 'A network error occurred.', []), undefined, clientPolicy)
+
+  assert.deepEqual(decision, { _tag: 'drop', rule: 'stackless-message' })
+})
+
+test('keeps the same network error when a stack names site code', () => {
+  const report = errorReport('NetworkError', 'A network error occurred.', [{ filename: 'https://unlighthouse.dev/_nuxt/entry.js' }])
+
+  assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'send' })
+})
+
+// UNLIGHTHOUSE-D is a DOMException with code 19, which Sentry labels `Error`, so the
+// message it matches carries an extra `Error: ` prefix over the sighting above.
+test('drops the DOMException network error that carries no stack', () => {
+  const decision = decideReport(errorReport('Error', 'NetworkError: A network error occurred.', []), undefined, clientPolicy)
+
+  assert.deepEqual(decision, { _tag: 'drop', rule: 'stackless-message' })
+})
+
+test('keeps the DOMException network error when a stack names site code', () => {
+  const report = errorReport('Error', 'NetworkError: A network error occurred.', [{ filename: 'https://unlighthouse.dev/_nuxt/entry.js' }])
 
   assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'send' })
 })

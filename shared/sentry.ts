@@ -40,6 +40,23 @@ export const EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE
 export const STACKLESS_FETCH_FAILURE_MESSAGE_RE = /^TypeError: Failed to fetch$/
 
 /**
+ * The network failure a plain-http page load reports with no stack.
+ *
+ * A page served over plain http rejects a resource load with `NetworkError: A network
+ * error occurred.` on the global handler. No frame names site code, so the report
+ * cannot be acted on.
+ *
+ * Sentry composes the message it matches as `type: value`, and the two sightings do not
+ * agree on the type. UNLIGHTHOUSE-7695975530 carries the bare `NetworkError` type, while
+ * UNLIGHTHOUSE-D is a DOMException with code 19 that Sentry labels `Error`. The optional
+ * `Error: ` prefix covers both, so neither sighting depends on which type Sentry picks.
+ *
+ * `nuxtSentry.policy.dropStacklessErrors` drops this message only when the report carries no
+ * stack frame. The same message with a stack is a defect here and still reports.
+ */
+export const STACKLESS_NETWORK_ERROR_MESSAGE_RE = /^(?:Error: )?NetworkError: A network error occurred\.$/
+
+/**
  * Rejections whose captured value is not an `Error`.
  *
  * When the Carbon Ads script's fetch fails, Safari rejects on the global handler with a
