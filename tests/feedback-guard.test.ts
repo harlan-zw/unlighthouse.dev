@@ -131,3 +131,61 @@ test('allows the submission when the counter fails', async () => {
 test('allows the submission when no database binding is present', async () => {
   await checkFeedbackRateLimit(fakeEvent(), null)
 })
+
+/** A store that fails the first `failures` calls with `error`, then counts normally. */
+function flakyStore(failures: number, error: unknown): RateLimitStore & { calls: () => number } {
+  let calls = 0
+  return {
+    calls: () => calls,
+    incrementItem: async () => {
+      calls++
+      if (calls <= failures)
+        throw error
+      return calls - failures
+    },
+  }
+}
+
+/** The wording D1 uses when a session is reset, which the module classifies as transient. */
+const transientError = new Error('Network connection lost.')
+
+test('retries a transient counter failure instead of skipping the limit', async () => {
+  const store = flakyStore(2, transientError)
+
+  await checkFeedbackRateLimit(fakeEvent(), store)
+
+  assert.equal(store.calls(), 3)
+})
+
+test('still enforces the limit when a retry succeeds past it', async () => {
+  let calls = 0
+  const store: RateLimitStore = {
+    incrementItem: async () => {
+      calls++
+      if (calls === 1)
+        throw transientError
+      return FEEDBACK_DAILY_LIMIT + 1
+    },
+  }
+
+  await assert.rejects(
+    () => checkFeedbackRateLimit(fakeEvent(), store),
+    (error: { statusCode?: number }) => error.statusCode === 429,
+  )
+})
+
+test('does not retry a permanent counter failure', async () => {
+  const store = flakyStore(1, new Error('no such table: rate_limits'))
+
+  await checkFeedbackRateLimit(fakeEvent(), store)
+
+  assert.equal(store.calls(), 1)
+})
+
+test('gives up once a transient failure outlasts the retries', async () => {
+  const store = flakyStore(99, transientError)
+
+  await checkFeedbackRateLimit(fakeEvent(), store)
+
+  assert.equal(store.calls(), 3)
+})
