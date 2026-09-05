@@ -515,11 +515,6 @@ export interface MeasureResourceOptions {
   fetchLike?: typeof fetch
 }
 
-/** True for a rejection the clock caused, where waiting longer could still succeed. */
-function isTimedOut(error: unknown): boolean {
-  return error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError')
-}
-
 /**
  * Reads a size out of response headers without downloading anything.
  *
@@ -558,12 +553,19 @@ function sizeFromHeaders(response: Response | null): { size: number, contentType
  *
  * The outcome says which of three things happened:
  * - `measured`: a size is known.
- * - `absent`: the resource is definitively not there. It answered with an
- *   error status after every probe, or the connection failed in a way more
- *   time would not fix. This is a fact about the page, so it does not make a
+ * - `absent`: the server answered and the answer was definitive. An error
+ *   status after every probe, or a redirect leading somewhere this tool will
+ *   not follow. This is a fact about the page, so it does not make a
  *   measurement incomplete.
- * - `unmeasured`: the run could not read it. The clock or the byte cap
- *   stopped it. This is what makes a measurement incomplete.
+ * - `unmeasured`: the run could not find out. The clock, the byte cap, or a
+ *   connection that never produced an answer. This is what makes a measurement
+ *   incomplete.
+ *
+ * The split is the difference between a page and a network. Only a response
+ * says something about the page. A rejected fetch is a reset, a refused
+ * connection, a DNS failure or a TLS error, and the same request a moment later
+ * may well succeed, so treating one as `absent` would quietly shrink the total
+ * while still calling the run complete.
  *
  * Every path reports the identity length, so these are uncompressed bytes.
  */
@@ -581,7 +583,9 @@ export async function measureResource(url: string, options: MeasureResourceOptio
       signal: AbortSignal.timeout(budget()),
     }).then(
       response => response,
-      (error: unknown): MeasureOutcome => isTimedOut(error) ? { _tag: 'unmeasured' } : { _tag: 'absent' },
+      // No response means no answer about the page, whether the clock ran out
+      // or the connection failed. Either way the size stays unknown.
+      (): MeasureOutcome => ({ _tag: 'unmeasured' }),
     )
   }
 

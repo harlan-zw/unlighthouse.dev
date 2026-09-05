@@ -393,3 +393,51 @@ test('stops cleanly on an unterminated comment', () => {
 
   assert.deepEqual(refs.map(ref => ref.url), ['https://example.com/a.png'])
 })
+
+/**
+ * A response says something about the page. A rejected fetch says something
+ * about the network, and the two must not be confused: counting a connection
+ * reset as a definitive answer shrinks the total while still calling the run
+ * complete.
+ */
+
+const measureOptions = {
+  deadline: Date.now() + 10_000,
+  timeoutMs: 5000,
+  maxBodyBytes: 5_000_000,
+  userAgent: 'test',
+}
+
+test('leaves a resource unmeasured when the connection fails', async () => {
+  const outcome = await measureResource('https://example.com/a.js', {
+    ...measureOptions,
+    fetchLike: () => Promise.reject(Object.assign(new Error('connection reset'), { name: 'TypeError' })),
+  })
+
+  assert.equal(outcome._tag, 'unmeasured')
+})
+
+test('leaves a resource unmeasured when the request times out', async () => {
+  const outcome = await measureResource('https://example.com/a.js', {
+    ...measureOptions,
+    fetchLike: () => Promise.reject(Object.assign(new Error('timed out'), { name: 'TimeoutError' })),
+  })
+
+  assert.equal(outcome._tag, 'unmeasured')
+})
+
+test('calls a resource absent only when the server answers definitively', async () => {
+  const outcome = await measureResource('https://example.com/gone.js', {
+    ...measureOptions,
+    fetchLike: () => Promise.resolve(new Response('', { status: 404 })),
+  })
+
+  assert.equal(outcome._tag, 'absent')
+})
+
+test('an unmeasured resource makes the run incomplete, an absent one does not', () => {
+  // Three found, three tried, two sized: the third was a connection failure.
+  assert.equal(assessCompleteness(3, 3, 2, true).complete, false)
+  // The same counts, but the third answered 404. That is a fact about the page.
+  assert.equal(assessCompleteness(3, 3, 2, false).complete, true)
+})
