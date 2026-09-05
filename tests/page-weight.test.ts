@@ -5,6 +5,7 @@ import {
   assessCompleteness,
   classifyResource,
   extractResourceRefs,
+  isResourceGone,
   MAX_BODY_BYTES,
   measureResource,
   parsePublicHttpUrl,
@@ -478,4 +479,71 @@ test('refuses a private host before any request is attempted', () => {
   // validateUrl, whose reachability probe would otherwise make the request.
   for (const raw of ['http://127.0.0.1/', 'http://169.254.169.254/', 'http://10.0.0.1/'])
     assert.equal(parsePublicHttpUrl(raw)._tag, 'err', raw)
+})
+
+/**
+ * `<base href>` changes what a relative reference means for the whole document.
+ * Ignoring it fetches paths the page never asks for and reports the result as
+ * the page's weight.
+ */
+
+test('resolves relative resources against a base href', () => {
+  const html = '<head><base href="https://cdn.example.com/assets/"></head><script src="app.js"></script>'
+
+  const refs = extractResourceRefs(html, 'https://example.com/page')
+
+  assert.deepEqual(refs.map(ref => ref.url), ['https://cdn.example.com/assets/app.js'])
+})
+
+test('keeps using the document URL when there is no base href', () => {
+  const refs = extractResourceRefs('<script src="app.js"></script>', 'https://example.com/dir/page')
+
+  assert.deepEqual(refs.map(ref => ref.url), ['https://example.com/dir/app.js'])
+})
+
+test('takes only the first base href, the way a browser does', () => {
+  const html = '<base href="https://a.example.com/"><base href="https://b.example.com/"><img src="x.png">'
+
+  const refs = extractResourceRefs(html, 'https://example.com/')
+
+  assert.deepEqual(refs.map(ref => ref.url), ['https://a.example.com/x.png'])
+})
+
+test('ignores a base href pointing somewhere private', () => {
+  const html = '<base href="http://127.0.0.1/"><img src="x.png">'
+
+  const refs = extractResourceRefs(html, 'https://example.com/')
+
+  assert.deepEqual(refs.map(ref => ref.url), ['https://example.com/x.png'])
+})
+
+/**
+ * A status has to say the resource is gone before its absence counts as a fact
+ * about the page. Being refused or throttled says nothing about the bytes.
+ */
+
+test('treats only a gone status as a fact about the page', () => {
+  for (const status of [404, 410])
+    assert.equal(isResourceGone(status), true, String(status))
+
+  for (const status of [401, 403, 429, 500, 502, 503])
+    assert.equal(isResourceGone(status), false, String(status))
+})
+
+test('leaves a refused resource unmeasured rather than absent', async () => {
+  const outcome = await measureResource('https://example.com/a.js', {
+    ...measureOptions,
+    fetchLike: () => Promise.resolve(new Response('', { status: 403 })),
+  })
+
+  assert.equal(outcome._tag, 'unmeasured')
+})
+
+test('leaves a throttled resource unmeasured rather than absent', async () => {
+  const outcome = await measureResource('https://example.com/a.js', {
+    ...measureOptions,
+    fetchLike: () => Promise.resolve(new Response('', { status: 429 })),
+  })
+
+  assert.equal(outcome._tag, 'unmeasured')
 })

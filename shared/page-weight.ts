@@ -270,6 +270,9 @@ const RAW_TEXT_ELEMENTS = new Set(['script', 'style', 'textarea', 'title'])
 /** The elements that can name a subresource. */
 const RESOURCE_ELEMENTS = new Set(['script', 'link', 'img', 'source', 'video', 'audio', 'iframe', 'embed', 'object', 'track'])
 
+/** The single element that can change how relative references resolve. */
+const BASE_ELEMENT = new Set(['base'])
+
 interface ScannedTag {
   name: string
   attrs: string
@@ -284,7 +287,8 @@ interface ScannedTag {
  * has to skip comments and the contents of script and style, or a tag written
  * inside either is counted as a resource the page never requests.
  */
-function* scanTags(html: string): Generator<ScannedTag> {
+function* scanTags(html: string, options: { include?: Set<string> } = {}): Generator<ScannedTag> {
+  const include = options.include ?? RESOURCE_ELEMENTS
   let index = 0
 
   while (index < html.length) {
@@ -330,7 +334,7 @@ function* scanTags(html: string): Generator<ScannedTag> {
     const attrs = html.slice(open + nameMatch[0].length, cursor)
     const selfClosing = attrs.trimEnd().endsWith('/')
 
-    if (RESOURCE_ELEMENTS.has(name))
+    if (include.has(name))
       yield { name, attrs }
 
     index = cursor + 1
@@ -347,15 +351,37 @@ function* scanTags(html: string): Generator<ScannedTag> {
 }
 
 /**
+ * The URL relative references resolve against.
+ *
+ * `<base href>` changes that for the whole document, so reading it is the
+ * difference between fetching a page's real assets and fetching paths that do
+ * not exist. Only the first `base` counts, which is what a browser does, and a
+ * value that is not a public http URL is ignored rather than trusted.
+ */
+export function resolveDocumentBase(html: string, documentUrl: string): string {
+  for (const { name, attrs } of scanTags(html, { include: BASE_ELEMENT })) {
+    if (name !== 'base')
+      continue
+    const href = attribute(attrs, 'href')
+    if (!href)
+      continue
+    const parsed = parsePublicHttpUrl(href.trim(), documentUrl)
+    return parsed._tag === 'ok' ? parsed.url.toString() : documentUrl
+  }
+  return documentUrl
+}
+
+/**
  * Reads every subresource the served HTML asks for.
  *
  * Duplicates collapse, because a browser fetches one URL once however many
  * tags name it. Anything that is not a public http URL is dropped here rather
  * than at fetch time, so one rule decides what this tool will request.
  */
-export function extractResourceRefs(html: string, baseUrl: string): ResourceRef[] {
+export function extractResourceRefs(html: string, documentUrl: string): ResourceRef[] {
   const seen = new Set<string>()
   const refs: ResourceRef[] = []
+  const baseUrl = resolveDocumentBase(html, documentUrl)
 
   for (const { name: tag, attrs } of scanTags(html)) {
     let raw: string | null = null
@@ -544,6 +570,19 @@ export interface MeasureResourceOptions {
 }
 
 /**
+ * True when a status means the resource is not there, rather than not readable.
+ *
+ * Only a definitive answer is a fact about the page. A 401 or 403 is usually
+ * this tool being refused rather than the file being missing, a 429 is the
+ * server asking it to slow down, and a 5xx is the server having a bad moment.
+ * Counting any of those as absent would drop real bytes from a total that
+ * still called itself complete.
+ */
+export function isResourceGone(status: number): boolean {
+  return status === 404 || status === 410
+}
+
+/**
  * Reads a size out of response headers without downloading anything.
  *
  * `Content-Range` carries the full length even on a one-byte request, and
@@ -660,7 +699,7 @@ export async function measureResource(url: string, options: MeasureResourceOptio
     return response
 
   if (!response.ok)
-    return { _tag: 'absent' }
+    return { _tag: isResourceGone(response.status) ? 'absent' : 'unmeasured' }
 
   const body = await readBodyCapped(response, options.maxBodyBytes).catch(() => {
     // A body that stops mid-stream leaves no length to report, so the

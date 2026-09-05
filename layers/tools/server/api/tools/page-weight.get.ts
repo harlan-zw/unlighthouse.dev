@@ -84,13 +84,21 @@ export default defineCachedEventHandler(async (event) => {
      * submitted URL. The platform's `follow` mode would bounce this site's
      * fetch at an internal address a hostile page named, no questions asked.
      */
+    // The deadline covers the document too. It used to start after the page had
+    // loaded, so a slow page plus its redirect hops could run for a minute on an
+    // endpoint whose whole purpose is to answer before Lighthouse does.
+    const deadline = Date.now() + TOTAL_BUDGET_MS
+    const documentBudget = () => Math.min(DOCUMENT_TIMEOUT_MS, deadline - Date.now())
+
     let landed: { response: Response, url: string } | null = null
     let target = pageUrl
     for (let hop = 0; hop <= MAX_REDIRECT_HOPS; hop++) {
+      if (documentBudget() <= 0)
+        break
       const response = await fetch(target, {
         headers: { 'user-agent': USER_AGENT },
         redirect: 'manual',
-        signal: AbortSignal.timeout(DOCUMENT_TIMEOUT_MS),
+        signal: AbortSignal.timeout(documentBudget()),
       }).catch(() => {
         // The reason the page did not load is upstream detail, and forwarding it
         // would put the visitor's URL into this site's error text. The 502 below
@@ -128,7 +136,6 @@ export default defineCachedEventHandler(async (event) => {
     const refs = extractResourceRefs(html, finalUrl)
     const attempted = refs.slice(0, RESOURCE_LIMIT)
 
-    const deadline = Date.now() + TOTAL_BUDGET_MS
     const outcomes = await mapWithLimit(attempted, CONCURRENCY, async (ref): Promise<SubresourceOutcome> => {
       const result = await measureResource(ref.url, {
         deadline,
