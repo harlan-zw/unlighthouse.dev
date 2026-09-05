@@ -264,7 +264,87 @@ function firstSrcsetCandidate(srcset: string): string | null {
   return first || null
 }
 
-const TAG_RE = /<(script|link|img|source|video|audio)\b([^>]*)>/gi
+/** Tags whose content is text, not markup, so anything inside them is not a tag. */
+const RAW_TEXT_ELEMENTS = new Set(['script', 'style', 'textarea', 'title'])
+
+/** The elements that can name a subresource. */
+const RESOURCE_ELEMENTS = new Set(['script', 'link', 'img', 'source', 'video', 'audio'])
+
+interface ScannedTag {
+  name: string
+  attrs: string
+}
+
+/**
+ * Walks the HTML and yields each resource tag with its attribute text.
+ *
+ * A regex cannot do this. `<[^>]*>` ends the tag at the first `>`, and a `>`
+ * inside a quoted attribute value is legal HTML, so `<img alt="a > b" src=…>`
+ * loses its `src` and the resource disappears from the total. The same scan
+ * has to skip comments and the contents of script and style, or a tag written
+ * inside either is counted as a resource the page never requests.
+ */
+function* scanTags(html: string): Generator<ScannedTag> {
+  let index = 0
+
+  while (index < html.length) {
+    const open = html.indexOf('<', index)
+    if (open === -1)
+      return
+
+    if (html.startsWith('<!--', open)) {
+      const close = html.indexOf('-->', open + 4)
+      // An unterminated comment runs to the end of the document.
+      if (close === -1)
+        return
+      index = close + 3
+      continue
+    }
+
+    const nameMatch = /^<([a-z][a-z0-9-]*)/i.exec(html.slice(open, open + 32))
+    if (!nameMatch) {
+      index = open + 1
+      continue
+    }
+
+    const name = nameMatch[1]!.toLowerCase()
+    let cursor = open + nameMatch[0].length
+    let quote: string | null = null
+
+    // Walk to the tag's real end, ignoring a `>` inside a quoted value.
+    while (cursor < html.length) {
+      const char = html[cursor]!
+      if (quote) {
+        if (char === quote)
+          quote = null
+      }
+      else if (char === '"' || char === '\'') {
+        quote = char
+      }
+      else if (char === '>') {
+        break
+      }
+      cursor++
+    }
+
+    const attrs = html.slice(open + nameMatch[0].length, cursor)
+    const selfClosing = attrs.trimEnd().endsWith('/')
+
+    if (RESOURCE_ELEMENTS.has(name))
+      yield { name, attrs }
+
+    index = cursor + 1
+
+    // Everything inside a raw text element is text. Skipping it stops a tag
+    // written in a string or a stylesheet from being read as markup.
+    if (RAW_TEXT_ELEMENTS.has(name) && !selfClosing) {
+      const closing = html.toLowerCase().indexOf(`</${name}`, index)
+      if (closing === -1)
+        return
+      index = closing + name.length + 2
+    }
+  }
+}
 
 /**
  * Reads every subresource the served HTML asks for.
@@ -277,10 +357,7 @@ export function extractResourceRefs(html: string, baseUrl: string): ResourceRef[
   const seen = new Set<string>()
   const refs: ResourceRef[] = []
 
-  for (const match of html.matchAll(TAG_RE)) {
-    const tag = match[1]!.toLowerCase()
-    const attrs = match[2] ?? ''
-
+  for (const { name: tag, attrs } of scanTags(html)) {
     let raw: string | null = null
     let hinted: ResourceType | null = null
 

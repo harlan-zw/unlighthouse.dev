@@ -332,3 +332,64 @@ test('measures a body that stays under the byte cap', async () => {
   assert.equal(outcome.size, 3 * 1024 * 1024)
   assert.equal(outcome.contentType, 'text/plain')
 })
+
+/**
+ * The tag scan used to be `<[^>]*>`, which ends a tag at the first `>`. A `>`
+ * inside a quoted attribute value is legal HTML, so real resources vanished
+ * and tags written inside comments or scripts were counted as real.
+ */
+
+test('keeps a resource whose tag carries a quoted angle bracket', () => {
+  const html = '<img alt="width > height" src="/hero.png"><script src="/app.js"></script>'
+
+  const refs = extractResourceRefs(html, 'https://example.com/')
+
+  assert.ok(refs.some(ref => ref.url === 'https://example.com/hero.png'))
+  assert.ok(refs.some(ref => ref.url === 'https://example.com/app.js'))
+})
+
+test('keeps a resource whose tag carries a single-quoted angle bracket', () => {
+  const html = `<img alt='a > b' src="/hero.png">`
+
+  const refs = extractResourceRefs(html, 'https://example.com/')
+
+  assert.deepEqual(refs.map(ref => ref.url), ['https://example.com/hero.png'])
+})
+
+test('ignores a tag written inside a comment', () => {
+  const html = '<!-- <script src="/ghost.js"></script> --><script src="/real.js"></script>'
+
+  const refs = extractResourceRefs(html, 'https://example.com/')
+
+  assert.deepEqual(refs.map(ref => ref.url), ['https://example.com/real.js'])
+})
+
+test('ignores a tag written inside script content', () => {
+  const html = `<script>const markup = '<img src="/ghost.png">'</script><img src="/real.png">`
+
+  const refs = extractResourceRefs(html, 'https://example.com/')
+
+  assert.deepEqual(refs.map(ref => ref.url), ['https://example.com/real.png'])
+})
+
+test('ignores a tag written inside style content', () => {
+  const html = `<style>/* <img src="/ghost.png"> */</style><img src="/real.png">`
+
+  const refs = extractResourceRefs(html, 'https://example.com/')
+
+  assert.deepEqual(refs.map(ref => ref.url), ['https://example.com/real.png'])
+})
+
+test('still reads a script tag that has its own src before skipping its body', () => {
+  const html = '<script src="/app.js">console.log("<img src=\'/ghost.png\'>")</script>'
+
+  const refs = extractResourceRefs(html, 'https://example.com/')
+
+  assert.deepEqual(refs.map(ref => ref.url), ['https://example.com/app.js'])
+})
+
+test('stops cleanly on an unterminated comment', () => {
+  const refs = extractResourceRefs('<img src="/a.png"><!-- <img src="/b.png">', 'https://example.com/')
+
+  assert.deepEqual(refs.map(ref => ref.url), ['https://example.com/a.png'])
+})
