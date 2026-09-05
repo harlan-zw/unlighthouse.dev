@@ -1,4 +1,5 @@
 import type { H3Event } from 'h3'
+import { isTransientD1Error } from '@harlan-zw/nuxt-cloudflare/d1'
 import { createError, getHeader, getRequestIP, setResponseHeaders } from 'h3'
 
 interface RateLimiter {
@@ -106,6 +107,41 @@ export function getRequestIp(event: H3Event): string {
     || 'unknown'
 }
 
+/** How many times a transient failure is retried before the limit gives up. */
+const COUNT_RETRY_DELAYS_MS = [25, 75]
+
+/**
+ * Increments the counter, retrying only the failures worth retrying.
+ *
+ * A session reset or a transient D1 error is a blip, and giving up on the first
+ * one hands the caller a free request. A permanent error, a missing table for
+ * example, repeats no matter how often it is asked, so it fails fast rather
+ * than spending a round trip per attempt on every request.
+ *
+ * Returns null once the counter is judged unreachable.
+ */
+async function countRequest(store: RateLimitStore, key: string): Promise<number | null> {
+  const expiresAt = getEndOfDayTimestamp()
+
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await store.incrementItem(key, { expiresAt })
+    }
+    catch (error) {
+      if (!isTransientD1Error(error)) {
+        console.warn('[rate-limit] The counter failed and will not recover; allowing the request', error)
+        return null
+      }
+      const delay = COUNT_RETRY_DELAYS_MS[attempt]
+      if (delay === undefined) {
+        console.warn('[rate-limit] The counter kept failing; allowing the request', error)
+        return null
+      }
+      await new Promise(resolve => setTimeout(resolve, delay))
+    }
+  }
+}
+
 /**
  * Counts one request against a daily limit and rejects the caller past it.
  *
@@ -126,11 +162,11 @@ async function enforceDailyLimit(event: H3Event, options: {
     return
   }
 
-  const count = await store.incrementItem(key, { expiresAt: getEndOfDayTimestamp() }).catch((error) => {
-    console.warn('[rate-limit] Failed to count the request; allowing it', error)
-    return null
-  })
+  const count = await countRequest(store, key)
 
+  // A counter that cannot be reached leaves the limit unenforced for this
+  // request. That is the safer failure: a broken counter must not turn into a
+  // 429 for every visitor.
   if (count === null)
     return
 
