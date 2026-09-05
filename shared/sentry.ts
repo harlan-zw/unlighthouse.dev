@@ -53,3 +53,29 @@ export const STACKLESS_FETCH_FAILURE_MESSAGE_RE = /^TypeError: Failed to fetch$/
  */
 export const STACKLESS_NON_ERROR_REJECTION_DROP_RULE
   = /(?:Event `[^`]+` \(type=[^)]+\)|Object) captured as promise rejection/
+
+/**
+ * The failure the Carbon Ads vendor script raises when an ad blocker removed its tag.
+ *
+ * The vendor script reads `.src` off its own tag, which it looks up with
+ * `document.getElementById('_carbonads_js')`. An ad blocker removes that node first, so the
+ * lookup returns null and the read throws. The failure happens inside the vendor script and
+ * no site code can fix it, so the report is noise in the issue feed.
+ *
+ * `nuxtSentry.policy.ignoreErrors` uses this pattern. Browsers word the message differently
+ * and do not all label it a TypeError, so the pattern matches the element id the vendor
+ * script alone uses. This site never references that id, and a report naming it names the
+ * vendor script.
+ */
+export const CARBONADS_SCRIPT_ELEMENT_RE = /_carbonads_js/
+
+/**
+ * The origin that serves the Carbon Ads vendor script.
+ *
+ * Browsers word the null read differently and V8 omits the evaluated expression, so the
+ * Chrome wording of the failure never names the element id `CARBONADS_SCRIPT_ELEMENT_RE`
+ * matches. The origin names the vendor script alone, and `nuxtSentry.policy.denyUrls` drops
+ * a report only when every stack frame matches, so a failure reaching site code still
+ * reports.
+ */
+export const CARBONADS_VENDOR_ORIGIN_RE = /cdn\.carbonads\.com/
