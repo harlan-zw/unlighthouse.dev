@@ -50,3 +50,20 @@ export type ToolLookup = typeof toolLookups.$inferSelect
 export type NewToolLookup = typeof toolLookups.$inferInsert
 export type Feedback = typeof feedback.$inferSelect
 export type NewFeedback = typeof feedback.$inferInsert
+
+/**
+ * The counter behind the feedback throttle.
+ *
+ * This lives in D1 rather than KV because the limit needs an atomic increment.
+ * KV reads are eventually consistent, and a read-modify-write across Worker
+ * isolates lets concurrent submissions share a stale snapshot.
+ *
+ * `expiresAt` owns the window, so one row per subject is reused each day.
+ */
+export const rateLimits = sqliteTable('rate_limits', {
+  key: text('key').primaryKey(),
+  count: integer('count').notNull(),
+  expiresAt: integer('expires_at').notNull(),
+}, t => [
+  index('rate_limits_expires_at_idx').on(t.expiresAt),
+])
