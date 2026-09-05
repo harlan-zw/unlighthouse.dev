@@ -123,7 +123,14 @@ export default defineCachedEventHandler(async (event) => {
       throw createError({ statusCode: 502, message: 'Could not load the page' })
 
     const finalUrl = landed.url
-    const body = await readBodyCapped(landed.response, MAX_BODY_BYTES)
+    const body = await readBodyCapped(landed.response, MAX_BODY_BYTES).catch(() => {
+      // A body that dies mid-stream leaves nothing to decode, and why it died
+      // is upstream detail, the same as a document fetch that never landed.
+      // The 502 below is the whole answer.
+      return null
+    })
+    if (!body)
+      throw createError({ statusCode: 502, message: 'Could not load the page' })
     if (body._tag === 'over-cap')
       throw createError({ statusCode: 413, message: 'This page is too large for the fast measurement' })
     const html = new TextDecoder().decode(body.bytes)

@@ -396,6 +396,44 @@ test('stops cleanly on an unterminated comment', () => {
 })
 
 /**
+ * The raw text skip used to lowercase the entire document once per script,
+ * style, or title element. A page of many inline scripts paid a full extra
+ * document pass per element, and a skip computed on the lowercased copy
+ * pointed back into the original at a shifted offset.
+ */
+
+test('scans a page of many inline scripts well under a second', () => {
+  const block = `<script>var data = "${'x'.repeat(1024)}";</script>`
+  const parts: string[] = []
+  let size = 0
+  while (size < 4 * 1024 * 1024) {
+    parts.push(block)
+    size += block.length
+  }
+  parts.push('<img src="/after.png">')
+  const html = parts.join('')
+
+  const start = performance.now()
+  extractResourceRefs(html, 'https://example.com/')
+  const elapsed = performance.now() - start
+
+  assert.ok(
+    elapsed < 1000,
+    `scanning a ${Math.round(html.length / 1024 / 1024)}MB page took ${Math.round(elapsed)}ms`,
+  )
+})
+
+test('reads tags that follow a script in a document that changes length under lowercasing', () => {
+  // `İ` lowercases to two characters, so a skip computed on a lowercased copy
+  // resumed the original at a shifted offset and dropped the img.
+  const html = 'İİ<script>var x = "<img src=/ghost.png>"</script><img src="/after.png">'
+
+  const refs = extractResourceRefs(html, 'https://example.com/')
+
+  assert.deepEqual(refs.map(ref => ref.url), ['https://example.com/after.png'])
+})
+
+/**
  * A response says something about the page. A rejected fetch says something
  * about the network, and the two must not be confused: counting a connection
  * reset as a definitive answer shrinks the total while still calling the run

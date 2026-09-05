@@ -279,6 +279,28 @@ interface ScannedTag {
 }
 
 /**
+ * Case-insensitive matchers for each raw text element's closing tag, one per
+ * element name, searched forward from an offset in place.
+ *
+ * Searching a lowercased copy of the document instead would pay a full extra
+ * document pass per script, style, or title element, and an offset read off
+ * the copy points into the original at the wrong place whenever lowercasing
+ * changes a character's length. Element names are `[a-z0-9-]`, so the pattern
+ * holds no metacharacters. The scan is synchronous, so sharing one matcher
+ * per name and setting `lastIndex` before each search is safe.
+ */
+const CLOSING_TAG_PATTERNS = new Map<string, RegExp>()
+
+function closingTagPattern(name: string): RegExp {
+  let pattern = CLOSING_TAG_PATTERNS.get(name)
+  if (!pattern) {
+    pattern = new RegExp(`</${name}`, 'gi')
+    CLOSING_TAG_PATTERNS.set(name, pattern)
+  }
+  return pattern
+}
+
+/**
  * Walks the HTML and yields each resource tag with its attribute text.
  *
  * A regex cannot do this. `<[^>]*>` ends the tag at the first `>`, and a `>`
@@ -342,10 +364,12 @@ function* scanTags(html: string, options: { include?: Set<string> } = {}): Gener
     // Everything inside a raw text element is text. Skipping it stops a tag
     // written in a string or a stylesheet from being read as markup.
     if (RAW_TEXT_ELEMENTS.has(name) && !selfClosing) {
-      const closing = html.toLowerCase().indexOf(`</${name}`, index)
-      if (closing === -1)
+      const pattern = closingTagPattern(name)
+      pattern.lastIndex = index
+      const closing = pattern.exec(html)
+      if (!closing)
         return
-      index = closing + name.length + 2
+      index = closing.index + name.length + 2
     }
   }
 }
