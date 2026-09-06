@@ -206,6 +206,7 @@ function buildCruxPayload(url: string, mode: 'origin' | 'url', formFactor: FormF
 async function fetchCrux<RecordType>(event: H3Event, endpoint: CruxEndpoint, apiKey: string, payload: Record<string, unknown>) {
   return $fetch<{ record: RecordType }>(buildCruxRequestUrl(endpoint), {
     method: 'POST',
+    timeout: 120_000, // 2 min - matches the PSI cap so a hang cannot hold the route open
     headers: { 'X-Goog-Api-Key': apiKey },
     body: payload,
   }).catch((error) => {
