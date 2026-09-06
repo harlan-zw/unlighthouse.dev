@@ -95,3 +95,18 @@ jobs:
           NUXT_GOOGLE_API_TOKEN: ${{ secrets.NUXT_GOOGLE_API_TOKEN }}
           NUXT_OAUTH_GITHUB_CLIENT_SECRET: ${{ secrets.NUXT_OAUTH_GITHUB_CLIENT_SECRET }}
           NUXT_SESSION_PASSWORD: ${{ secrets.NUXT_SESSION_PASSWORD }}
+
+      # The build created the release for the sourcemap upload but nothing closed
+      # it, so every release stayed (unreleased) and release health plus
+      # deploy-based issue resolution never applied. #74
+      - name: Finalize Sentry release and record the deploy
+        run: |
+          pnpm exec sentry-cli releases finalize "$SENTRY_RELEASE"
+          pnpm exec sentry-cli releases deploys "$SENTRY_RELEASE" new -e production
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: harlan-zw
+          SENTRY_PROJECT: unlighthouse
+          # Same resolution as the build step: `GITHUB_SHA` names the wrong
+          # commit on a `workflow_run` event.
+          SENTRY_RELEASE: ${{ github.event.workflow_run.head_sha || github.sha }}

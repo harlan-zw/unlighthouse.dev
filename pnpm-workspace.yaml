@@ -62,6 +62,7 @@ catalog:
   '@nuxtjs/sitemap': ^8.3.4
   '@resvg/resvg-js': ^2.6.2
   '@resvg/resvg-wasm': 2.6.2
+  '@sentry/cli': ^3.7.0
   '@sentry/nuxt': ^10.70.0
   '@tiptap/core': 3.30.4
   '@tiptap/pm': 3.30.1
