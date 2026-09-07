@@ -39,8 +39,9 @@ export default defineNuxtConfig({
     project: 'unlighthouse',
     policy: {
       // Every failure upstream of this site that it raises on purpose: a PageSpeed
-      // Insights or Chrome UX Report outage, and a measured site that does not load
-      // in the page weight tool. None is a defect here, and they used to fill the
+      // Insights or Chrome UX Report outage, and either page weight answer for a
+      // measured site that is the condition itself, one that did not load and one
+      // too large to read. None is a defect here, and they used to fill the
       // issue feed. The module reads no marker from `data`, so the Drop Rule
       // matches the message instead.
       ignoreErrors: [

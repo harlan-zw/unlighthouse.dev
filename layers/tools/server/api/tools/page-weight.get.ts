@@ -76,7 +76,20 @@ export default defineCachedEventHandler(async (event) => {
   if (parsed._tag === 'err')
     throw createError({ statusCode: 422, message: `Cannot measure this URL: ${parsed.reason}` })
 
-  const pageUrl = (await validateUrl(parsed.url.toString())).toString()
+  /**
+   * The probe inside `validateUrl` is this handler's first contact with the
+   * measured site, so a site that is fully down fails here, before the guarded
+   * fetch loop below ever runs. The guard above already settled the format, so
+   * the only 400 `validateUrl` can raise for this URL is that probe failing:
+   * an upstream outage, not a bad submission. It gets the same answer the loop
+   * owes a page that never lands, whose wording keeps the outage out of Sentry
+   * and the visitor's URL out of the error text.
+   */
+  const pageUrl = (await validateUrl(parsed.url.toString()).catch((error) => {
+    if ((error as { statusCode?: number } | null)?.statusCode !== 400)
+      throw error
+    throw createError({ statusCode: 502, message: 'The measured site did not load' })
+  })).toString()
 
   return trackToolRequest(event, { tool: 'page-size', url: pageUrl }, async () => {
     /**

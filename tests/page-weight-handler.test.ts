@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { registerHooks } from 'node:module'
 import test from 'node:test'
 import { createError } from 'h3'
+import { MAX_BODY_BYTES } from '../shared/page-weight.ts'
 import { EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE } from '../shared/sentry.ts'
 
 const root = new URL('../', import.meta.url)
@@ -31,15 +32,18 @@ globals.createError = createError
 const { default: handler } = await import('../layers/tools/server/api/tools/page-weight.get.ts')
 
 /**
- * The 502 the handler owes a visitor when the measured site fails: a gateway
- * status whose message `EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE` matches, so the
- * target site's outage never lands in this site's Sentry issue feed.
+ * The answer the handler owes a visitor when the measured site itself is the
+ * condition: a purposeful status whose message `EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE`
+ * matches, so the target site's condition never lands in this site's Sentry
+ * issue feed.
  */
-function isExpectedUpstream502(error: unknown): boolean {
-  const candidate = error as { statusCode?: number, message?: string }
-  return candidate.statusCode === 502
-    && typeof candidate.message === 'string'
-    && EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE.test(candidate.message)
+function isExpectedUpstreamAnswer(statusCode: number): (error: unknown) => boolean {
+  return (error) => {
+    const candidate = error as { statusCode?: number, message?: string }
+    return candidate.statusCode === statusCode
+      && typeof candidate.message === 'string'
+      && EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE.test(candidate.message)
+  }
 }
 
 /**
@@ -69,7 +73,7 @@ test('answers 502 with an ignored message when the document fetch fails', async 
   try {
     await assert.rejects(
       handler({ query: { url: 'https://example.com/' } } as unknown as Parameters<typeof handler>[0]),
-      isExpectedUpstream502,
+      isExpectedUpstreamAnswer(502),
     )
   }
   finally {
@@ -84,7 +88,50 @@ test('answers 502 with an ignored message when the document body aborts mid-stre
   try {
     await assert.rejects(
       handler({ query: { url: 'https://example.com/' } } as unknown as Parameters<typeof handler>[0]),
-      isExpectedUpstream502,
+      isExpectedUpstreamAnswer(502),
+    )
+  }
+  finally {
+    globalThis.fetch = realFetch
+  }
+})
+
+test('answers 502 with an ignored message when the reachability probe finds the site down', async () => {
+  // `validateUrl` probes the site before the fetch loop runs, so a fully dead
+  // site fails there, with the 400 whose text names the visitor's URL. The
+  // handler must answer with the same dropped upstream message the loop owes,
+  // and the loop must never run to fetch the dead address itself.
+  const realValidateUrl = globals.validateUrl
+  const realFetch = globalThis.fetch
+  globals.validateUrl = async () => {
+    throw createError({ statusCode: 400, message: 'URL not reachable: https://example.com/' })
+  }
+  globalThis.fetch = (async () => {
+    throw new Error('the probe failed first; the fetch loop must not run')
+  }) as typeof fetch
+
+  try {
+    await assert.rejects(
+      handler({ query: { url: 'https://example.com/' } } as unknown as Parameters<typeof handler>[0]),
+      isExpectedUpstreamAnswer(502),
+    )
+  }
+  finally {
+    globals.validateUrl = realValidateUrl
+    globalThis.fetch = realFetch
+  }
+})
+
+test('answers 413 with an ignored message when the page is past the byte cap', async () => {
+  const realFetch = globalThis.fetch
+  globalThis.fetch = (async () => {
+    return new Response(new Uint8Array(MAX_BODY_BYTES + 1), { status: 200, headers: { 'content-type': 'text/html' } })
+  }) as typeof fetch
+
+  try {
+    await assert.rejects(
+      handler({ query: { url: 'https://example.com/' } } as unknown as Parameters<typeof handler>[0]),
+      isExpectedUpstreamAnswer(413),
     )
   }
   finally {
