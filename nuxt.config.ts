@@ -38,8 +38,9 @@ export default defineNuxtConfig({
     dsn: 'https://51433a56963f6765e73969dbca31337e@o4510507748163584.ingest.us.sentry.io/4511887362555904',
     project: 'unlighthouse',
     policy: {
-      // Every PageSpeed Insights and Chrome UX Report failure this site raises on
-      // purpose. A Google outage is not a defect here, and it used to fill the
+      // Every failure upstream of this site that it raises on purpose: a PageSpeed
+      // Insights or Chrome UX Report outage, and a measured site that does not load
+      // in the page weight tool. None is a defect here, and they used to fill the
       // issue feed. The module reads no marker from `data`, so the Drop Rule
       // matches the message instead.
       ignoreErrors: [

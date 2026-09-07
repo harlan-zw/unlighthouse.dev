@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { registerHooks } from 'node:module'
 import test from 'node:test'
 import { createError } from 'h3'
+import { EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE } from '../shared/sentry.ts'
 
 const root = new URL('../', import.meta.url)
 
@@ -30,6 +31,18 @@ globals.createError = createError
 const { default: handler } = await import('../layers/tools/server/api/tools/page-weight.get.ts')
 
 /**
+ * The 502 the handler owes a visitor when the measured site fails: a gateway
+ * status whose message `EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE` matches, so the
+ * target site's outage never lands in this site's Sentry issue feed.
+ */
+function isExpectedUpstream502(error: unknown): boolean {
+  const candidate = error as { statusCode?: number, message?: string }
+  return candidate.statusCode === 502
+    && typeof candidate.message === 'string'
+    && EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE.test(candidate.message)
+}
+
+/**
  * A response whose body stream dies after the first chunk: the page loaded,
  * then the connection reset while the body was still streaming. The document
  * timeout governs body streaming too, so this is the shape a slow or reset
@@ -47,16 +60,31 @@ function pageWhoseBodyAborts(): Response {
   return new Response(stream, { status: 200, headers: { 'content-type': 'text/html' } })
 }
 
-test('answers 502 when the document body aborts mid-stream', async () => {
+test('answers 502 with an ignored message when the document fetch fails', async () => {
+  const realFetch = globalThis.fetch
+  globalThis.fetch = (async () => {
+    throw new TypeError('fetch failed')
+  }) as typeof fetch
+
+  try {
+    await assert.rejects(
+      handler({ query: { url: 'https://example.com/' } } as unknown as Parameters<typeof handler>[0]),
+      isExpectedUpstream502,
+    )
+  }
+  finally {
+    globalThis.fetch = realFetch
+  }
+})
+
+test('answers 502 with an ignored message when the document body aborts mid-stream', async () => {
   const realFetch = globalThis.fetch
   globalThis.fetch = (async () => pageWhoseBodyAborts()) as typeof fetch
 
   try {
     await assert.rejects(
       handler({ query: { url: 'https://example.com/' } } as unknown as Parameters<typeof handler>[0]),
-      (error: unknown) =>
-        (error as { statusCode?: number }).statusCode === 502
-        && (error as { message?: string }).message === 'Could not load the page',
+      isExpectedUpstream502,
     )
   }
   finally {

@@ -18,14 +18,16 @@ export interface UpstreamFailureErrorOptions {
 }
 
 /**
- * Matches every message `describePsiFailure` and `describeCruxFailure` produce.
+ * Matches every message this site raises for a failure upstream of it: what
+ * `describePsiFailure` and `describeCruxFailure` produce, and what the page weight
+ * handler answers with when the measured site does not load.
  *
  * `@harlan-zw/nuxt-sentry` reads no marker from `data`, so the Drop Rule matches the message
  * instead. `nuxtSentry.policy.ignoreErrors` uses this pattern. If you add a provider failure
  * message, add it here, or the outage returns as an issue.
  */
 export const EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE
-  = /(?:PageSpeed Insights|Chrome UX Report) (?:is rate limited right now|could not (?:analyse|look up) this URL|did not return a result for this URL)/
+  = /(?:(?:PageSpeed Insights|Chrome UX Report) (?:is rate limited right now|could not (?:analyse|look up) this URL|did not return a result for this URL)|The measured site did not load)/
 
 /**
  * The Nuxt app manifest fetch failure a browser reports with no stack.

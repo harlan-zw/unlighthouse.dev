@@ -120,7 +120,9 @@ export default defineCachedEventHandler(async (event) => {
     }
 
     if (!landed || !landed.response.ok)
-      throw createError({ statusCode: 502, message: 'Could not load the page' })
+      // The wording is load-bearing: `EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE` matches it, so a
+      // target site's outage reports to the visitor and never to this site's Sentry.
+      throw createError({ statusCode: 502, message: 'The measured site did not load' })
 
     const finalUrl = landed.url
     const body = await readBodyCapped(landed.response, MAX_BODY_BYTES).catch(() => {
@@ -130,7 +132,7 @@ export default defineCachedEventHandler(async (event) => {
       return null
     })
     if (!body)
-      throw createError({ statusCode: 502, message: 'Could not load the page' })
+      throw createError({ statusCode: 502, message: 'The measured site did not load' })
     if (body._tag === 'over-cap')
       throw createError({ statusCode: 413, message: 'This page is too large for the fast measurement' })
     const html = new TextDecoder().decode(body.bytes)
