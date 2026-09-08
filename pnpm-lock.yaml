@@ -259,7 +259,7 @@ catalogs:
 overrides:
   esbuild: ^0.28.1
   fast-uri: ^3.1.6
-  nanotar: ^0.3.0
+  nanotar: ^0.2.1
   qs: ^6.16.0
   vite: ^8.2.1
 
@@ -6959,8 +6959,8 @@ packages:
     engines: {node: ^18 || >=20}
     hasBin: true
 
-  nanotar@0.3.0:
-    resolution: {integrity: sha512-Kv2JYYiCzt16Kt5QwAc9BFG89xfPNBx+oQL4GQXD9nLqPkZBiNaqaCWtwnbk/q7UVsTYevvM1b0UF8zmEI4pCg==}
+  nanotar@0.2.1:
+    resolution: {integrity: sha512-MUrzzDUcIOPbv7ubhDV/L4CIfVTATd9XhDE2ixFeCrM5yp9AlzUpn91JrnN0HD6hksdxvz9IW9aKANz0Bta0GA==}
 
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
@@ -16496,7 +16496,7 @@ snapshots:
 
   nanoid@5.1.16: {}
 
-  nanotar@0.3.0: {}
+  nanotar@0.2.1: {}
 
   natural-compare@1.4.0: {}
 
@@ -16757,7 +16757,7 @@ snapshots:
       '@nuxt/kit': 3.21.11(magicast@0.5.4)
       consola: 3.4.2
       globby: 14.1.0
-      nanotar: 0.3.0
+      nanotar: 0.2.1
       nypm: 0.3.12
       ohash: 1.1.6
       pkg-types: 1.3.1
@@ -17052,7 +17052,7 @@ snapshots:
       knitwork: 1.3.0
       magic-string: 1.2.0
       mlly: 1.8.2
-      nanotar: 0.3.0
+      nanotar: 0.2.1
       nostics: 1.2.0
       nypm: 0.6.9
       object-identity: 0.2.3
