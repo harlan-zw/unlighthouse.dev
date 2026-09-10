@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
   await requireAdminAuth(event)
   const db = getDB(event)
 
-  const [entries, thumbStats, pathStats, thumbsByToolRaw, commentStats] = await Promise.all([
+  const [entries, thumbStats, pathStats, thumbsByToolRaw, commentStats, openCommentStats] = await Promise.all([
     db.select().from(feedback).orderBy(desc(feedback.createdAt)).limit(100),
     db.select({
       thumb: feedback.thumb,
@@ -25,6 +25,9 @@ export default defineEventHandler(async (event) => {
     db.select({ count: sql<number>`count(*)`.as('count') })
       .from(feedback)
       .where(sql`${feedback.comment} IS NOT NULL AND trim(${feedback.comment}) != ''`),
+    db.select({ count: sql<number>`count(*)`.as('count') })
+      .from(feedback)
+      .where(sql`${feedback.comment} IS NOT NULL AND trim(${feedback.comment}) != '' AND ${feedback.resolvedAt} IS NULL`),
   ])
 
   const stats = { up: 0, down: 0 }
@@ -34,6 +37,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const commentCount = commentStats[0]?.count ?? 0
+  const openCommentCount = openCommentStats[0]?.count ?? 0
   const byPath = Object.fromEntries(pathStats.map(s => [s.path, s.count])) as Record<string, number>
 
   // Aggregate thumbs by tool into { path, up, down, total }[]
@@ -59,6 +63,7 @@ export default defineEventHandler(async (event) => {
     stats,
     byPath,
     commentCount,
+    openCommentCount,
     total: stats.up + stats.down + commentCount,
     thumbsByTool,
   }

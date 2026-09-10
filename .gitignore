@@ -32,3 +32,6 @@ lighthouse
 
 # Daily check-in archives hold user feedback text; this repo is public
 docs/ops/checkins/
+
+# PR Lens writes its previews here. They are rebuilt on demand.
+.pr-lens/
