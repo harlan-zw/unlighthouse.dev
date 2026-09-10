@@ -72,6 +72,7 @@
     "@nuxtjs/seo": "catalog:",
     "@nuxtjs/sitemap": "catalog:",
     "@resvg/resvg-wasm": "catalog:",
+    "@sentry/cli": "catalog:",
     "@sentry/nuxt": "catalog:",
     "@tiptap/core": "catalog:",
     "@tiptap/pm": "catalog:",
