@@ -71,6 +71,19 @@ jobs:
           # then blamed live errors on code that was never deployed.
           SENTRY_RELEASE: ${{ github.event.workflow_run.head_sha || github.sha }}
 
+      # Nothing else creates the release. `@sentry/nuxt` never registers its
+      # build plugin here (see the upload step below), and `sourcemaps upload
+      # --release` only tags the artifact bundle. The finalize step after the
+      # deploy failed with "Release not found" on its first two runs (#76).
+      # Creating a release that already exists is a no-op.
+      - name: Create Sentry release
+        run: pnpm exec sentry-cli releases new "$SENTRY_RELEASE"
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: harlan-zw
+          SENTRY_PROJECT: unlighthouse
+          SENTRY_RELEASE: ${{ github.event.workflow_run.head_sha || github.sha }}
+
       # `@sentry/nuxt` only registers its source map upload plugin when a
       # `sentry.client.config.*` file exists, and this app configures Sentry
       # through `@harlan-zw/nuxt-sentry` instead. Without this step the hidden
