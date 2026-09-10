@@ -160,7 +160,6 @@ export default defineNuxtConfig({
     runtimeSync: {
       ttl: 60 * 60,
     },
-    indexNow: true,
   },
 
   skewProtection: {
