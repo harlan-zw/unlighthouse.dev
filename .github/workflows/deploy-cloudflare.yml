@@ -71,6 +71,22 @@ jobs:
           # then blamed live errors on code that was never deployed.
           SENTRY_RELEASE: ${{ github.event.workflow_run.head_sha || github.sha }}
 
+      # `@sentry/nuxt` only registers its source map upload plugin when a
+      # `sentry.client.config.*` file exists, and this app configures Sentry
+      # through `@harlan-zw/nuxt-sentry` instead. Without this step the hidden
+      # client maps are never uploaded, and they ship to Cloudflare where
+      # anyone can download them. The prefix is required: sentry-cli names
+      # files after their path inside the given directory, and events report
+      # chunks at `~/_nuxt/...`. The delete mirrors the module's own
+      # `filesToDeleteAfterUpload` setting: maps are for Sentry only.
+      - name: Upload client source maps to Sentry
+        run: |
+          pnpm exec sentry-cli sourcemaps upload --org harlan-zw --project unlighthouse --release "$SENTRY_RELEASE" --url-prefix '~/_nuxt' .output/public/_nuxt
+          find .output/public/_nuxt -name '*.map' -delete
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_RELEASE: ${{ github.event.workflow_run.head_sha || github.sha }}
+
       # Schema first, so the Worker version that needs a table never activates
       # before it exists. #59 shipped its throttle inert for this reason: the
       # code went live and the table had to be created by hand afterwards.
