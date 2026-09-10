@@ -8,7 +8,7 @@ minimumReleaseAgeExclude:
   - '@harlan-zw/nuxt-sentry@0.1.4'
   - '@harlan-zw/nuxt-github-sponsors@0.1.4'
   - '@types/three@0.185.0'
-  - nuxt-ai-ready@2.3.0
+  - nuxt-ai-ready@2.3.1
   - nuxt-skew-protection@1.5.2
   - nuxtseo-shared@5.3.11 || 5.3.12
   - sitemapd@0.2.2
@@ -124,7 +124,7 @@ catalog:
   motion-v: ^2.4.2
   nitro-cloudflare-dev: ^0.2.2
   nuxt: ^4.5.2
-  nuxt-ai-ready: ^2.3.0
+  nuxt-ai-ready: ^2.3.1
   nuxt-auth-utils: ^0.5.30
   nuxt-build-cache: ^0.1.1
   nuxt-lodash: ^2.5.3
