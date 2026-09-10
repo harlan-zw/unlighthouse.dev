@@ -181,7 +181,9 @@ const d1 = probe(() => {
     // Every feedback row since the last run, in full. This is the work list the
     // check-in exists to produce, so it is never summarised away.
     feedbackSinceLastRun: d1Query(`SELECT id, path, thumb, comment, created_at, user_id IS NOT NULL AS has_user, substr(COALESCE(metadata, ''), 1, 400) metadata FROM feedback WHERE created_at >= ${sinceSec} ORDER BY created_at DESC LIMIT 50`),
-    feedbackOpenComments: d1Query(`SELECT id, path, comment, created_at FROM feedback WHERE comment IS NOT NULL AND comment != '' ORDER BY created_at DESC LIMIT 20`),
+    // Resolved in the admin view means an action was taken, so only NULL rows
+    // are still an unanswered user.
+    feedbackOpenComments: d1Query(`SELECT id, path, comment, created_at FROM feedback WHERE comment IS NOT NULL AND comment != '' AND resolved_at IS NULL ORDER BY created_at DESC LIMIT 20`),
     feedbackTotals: d1Query(`SELECT
       COUNT(*) total,
       COALESCE(SUM(created_at >= ${day}), 0) total_24h,

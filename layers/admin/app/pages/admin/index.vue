@@ -225,6 +225,7 @@ interface FeedbackEntry {
   userId: string | null
   sessionId: string | null
   createdAt: number | string | Date
+  resolvedAt: number | string | Date | null
 }
 
 interface FeedbackResponse {
@@ -232,6 +233,7 @@ interface FeedbackResponse {
   stats: { up: number, down: number }
   byPath: Record<string, number>
   commentCount: number
+  openCommentCount: number
   total: number
   thumbsByTool: { path: string, up: number, down: number, total: number }[]
 }
@@ -257,9 +259,33 @@ const filteredFeedback = computed(() => {
   return feedbackData.value.entries.filter(e => e.path === activeFeedbackPath.value)
 })
 
+// Open comments first. Each one still waits for a decision; a resolved one is history.
 const feedbackComments = computed(() =>
-  filteredFeedback.value.filter(e => e.comment),
+  filteredFeedback.value
+    .filter(e => e.comment)
+    .toSorted((a, b) => Number(a.resolvedAt !== null) - Number(b.resolvedAt !== null)),
 )
+
+const openFeedbackComments = computed(() => feedbackComments.value.filter(e => e.resolvedAt === null))
+
+const resolvingFeedbackIds = ref(new Set<string>())
+const toast = useToast()
+
+async function setFeedbackResolution(entry: FeedbackEntry, resolved: boolean) {
+  resolvingFeedbackIds.value.add(entry.id)
+  const result = await $fetch<{ id: string, resolvedAt: number | null }>(`/api/admin/feedback/${entry.id}`, {
+    method: 'PATCH',
+    body: { resolved },
+  }).catch((error: { statusCode?: number, message?: string }) => {
+    toast.add({ title: `Could not ${resolved ? 'resolve' : 'reopen'} the comment`, description: error.message, color: 'error' })
+    return null
+  })
+  resolvingFeedbackIds.value.delete(entry.id)
+  if (!result || !feedbackData.value)
+    return
+  entry.resolvedAt = result.resolvedAt
+  feedbackData.value.openCommentCount += resolved ? -1 : 1
+}
 
 function getFeedbackMetadata(entry: FeedbackEntry) {
   if (!entry.metadata)
@@ -1019,13 +1045,14 @@ function toggleJourney(id: string) {
           <!-- Comments -->
           <div v-if="feedbackComments.length" class="space-y-3 mb-6">
             <h3 class="text-sm font-medium text-muted uppercase tracking-wider">
-              Comments ({{ feedbackComments.length }})
+              Comments ({{ openFeedbackComments.length }} open of {{ feedbackComments.length }})
             </h3>
             <div class="grid gap-3">
               <div
                 v-for="entry in feedbackComments"
                 :key="entry.id"
-                class="p-4 rounded-xl bg-elevated border border-default"
+                class="p-4 rounded-xl bg-elevated border border-default transition-opacity"
+                :class="entry.resolvedAt !== null ? 'opacity-60' : ''"
               >
                 <div class="flex items-start gap-3">
                   <div
@@ -1066,6 +1093,18 @@ function toggleJourney(id: string) {
                       >
                         {{ formatRelativeTime(new Date(typeof entry.createdAt === 'number' ? entry.createdAt * 1000 : entry.createdAt)) }}
                       </time>
+                      <UBadge v-if="entry.resolvedAt !== null" color="success" variant="subtle" size="xs">
+                        Resolved
+                      </UBadge>
+                      <UButton
+                        size="xs"
+                        variant="ghost"
+                        :color="entry.resolvedAt !== null ? 'neutral' : 'success'"
+                        :icon="entry.resolvedAt !== null ? 'i-carbon-renew' : 'i-carbon-checkmark'"
+                        :loading="resolvingFeedbackIds.has(entry.id)"
+                        :label="entry.resolvedAt !== null ? 'Reopen' : 'Resolve'"
+                        @click="setFeedbackResolution(entry, entry.resolvedAt === null)"
+                      />
                     </div>
                   </div>
                 </div>

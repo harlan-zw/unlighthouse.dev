@@ -39,6 +39,8 @@ export const feedback = sqliteTable('feedback', {
   userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
   sessionId: text('session_id'),
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  /** The admin's close decision. NULL means the comment still waits for one. */
+  resolvedAt: integer('resolved_at', { mode: 'timestamp' }),
 }, t => [
   index('feedback_session_id_idx').on(t.sessionId),
 ])
