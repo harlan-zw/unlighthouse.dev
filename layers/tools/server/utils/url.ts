@@ -34,7 +34,10 @@ export async function validateUrl(url?: string) {
   })
 
   if (!reachable)
-    throw createError({ message: `URL not reachable: ${normalized}`, statusCode: 400 })
+    // No URL in the text: callers turn this into their own answer, and an
+    // error report that names the submitted address reports the visitor's
+    // site, not this one.
+    throw createError({ message: 'URL not reachable', statusCode: 400 })
 
   return normalized
 }

@@ -76,7 +76,20 @@ export default defineCachedEventHandler(async (event) => {
   if (parsed._tag === 'err')
     throw createError({ statusCode: 422, message: `Cannot measure this URL: ${parsed.reason}` })
 
-  const pageUrl = (await validateUrl(parsed.url.toString())).toString()
+  /**
+   * The probe inside `validateUrl` is this handler's first contact with the
+   * measured site, so a site that is fully down fails here, before the guarded
+   * fetch loop below ever runs. The guard above already settled the format, so
+   * the only 400 `validateUrl` can raise for this URL is that probe failing:
+   * an upstream outage, not a bad submission. It gets the same answer the loop
+   * owes a page that never lands, whose wording keeps the outage out of Sentry
+   * and the visitor's URL out of the error text.
+   */
+  const pageUrl = (await validateUrl(parsed.url.toString()).catch((error) => {
+    if ((error as { statusCode?: number } | null)?.statusCode !== 400)
+      throw error
+    throw createError({ statusCode: 502, message: 'The measured site did not load' })
+  })).toString()
 
   return trackToolRequest(event, { tool: 'page-size', url: pageUrl }, async () => {
     /**
@@ -120,7 +133,9 @@ export default defineCachedEventHandler(async (event) => {
     }
 
     if (!landed || !landed.response.ok)
-      throw createError({ statusCode: 502, message: 'Could not load the page' })
+      // The wording is load-bearing: `EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE` matches it, so a
+      // target site's outage reports to the visitor and never to this site's Sentry.
+      throw createError({ statusCode: 502, message: 'The measured site did not load' })
 
     const finalUrl = landed.url
     const body = await readBodyCapped(landed.response, MAX_BODY_BYTES).catch(() => {
@@ -130,7 +145,7 @@ export default defineCachedEventHandler(async (event) => {
       return null
     })
     if (!body)
-      throw createError({ statusCode: 502, message: 'Could not load the page' })
+      throw createError({ statusCode: 502, message: 'The measured site did not load' })
     if (body._tag === 'over-cap')
       throw createError({ statusCode: 413, message: 'This page is too large for the fast measurement' })
     const html = new TextDecoder().decode(body.bytes)
