@@ -15,7 +15,10 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import { homedir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { parseSentryIssuesResponse, parseWorkflowName, summarizeWorkflowRuns } from './checkin-observability.mjs'
+import { checkReport, runChecks, unavailable } from '@harlan-zw/nuxt-checkin/server'
+import { defineSentryCheck } from '@harlan-zw/nuxt-sentry/checks'
+import { requiredChecks } from '../../shared/checkin.ts'
+import { parseWorkflowName, summarizeWorkflowRuns } from './checkin-observability.mjs'
 import { runReadOnlyProcess } from './read-only-process.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
@@ -156,14 +159,18 @@ const health = await probeAsync(async () => {
   const response = await fetch(`${siteOrigin}/api/health`, { signal: AbortSignal.timeout(20_000) })
   if (!response.ok)
     throw new Error(`/api/health returned HTTP ${response.status}`)
-  // A body that will not parse is the same finding as a body with no verdict:
-  // production is not serving the health payload this branch defines.
-  const body = await response.json().catch(error => ({ parseError: error instanceof Error ? error.message : String(error) }))
-  if (!body || typeof body.status !== 'string') {
-    const detail = body?.parseError ? ` Body did not parse: ${body.parseError}.` : ''
-    throw new Error(`/api/health returned HTTP ${response.status} without a health payload.${detail} Production may be older than the endpoint in this branch.`)
+  const body = await response.json()
+  const deployment = deploy.latest?.versionId
+  if (!deployment)
+    return { report: body, result: unavailable('Deployed Worker identity is unavailable.') }
+  return {
+    report: body,
+    result: checkReport(body, {
+      identity: { site: 'unlighthouse.dev', environment: 'production', deployment },
+      required: requiredChecks,
+      maxAgeMs: 60_000,
+    }),
   }
-  return body
 })
 
 const d1 = probe(() => {
@@ -270,44 +277,21 @@ function sentryToken() {
   return null
 }
 
-const SENTRY_ISSUE_LIMIT = 25
-
-const sentry = await (async () => {
-  const resolved = sentryToken()
-  if (!resolved) {
-    return {
-      _tag: 'missing_observability',
-      status: null,
-      diagnostic: 'No Sentry token found in SENTRY_AUTH_TOKEN, ~/.sentryclirc, or .env.sentry-build-plugin.',
-    }
-  }
-  const { token, source: tokenSource } = resolved
-  // `lastSeen` catches an issue that fired again on an id already known.
-  // `firstSeen` could only ever report births, which hides a fix that did not hold.
-  const query = encodeURIComponent(`project:unlighthouse is:unresolved lastSeen:>${sinceIso.slice(0, 19)}`)
-  const response = await fetch(`https://sentry.io/api/0/organizations/harlan-zw/issues/?query=${query}&sort=freq&limit=${SENTRY_ISSUE_LIMIT}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  }).catch(error => ({ networkError: error instanceof Error ? error.message : String(error) }))
-  if ('networkError' in response)
-    return { _tag: 'provider_failure', status: null, diagnostic: `Sentry issues request failed: ${response.networkError}` }
-
-  const issues = await response.json().catch(error => ({ parseError: error instanceof Error ? error.message : String(error) }))
-  if (issues?.parseError)
-    return { _tag: 'parse_failure', status: response.status, diagnostic: `Sentry issues response was not JSON: ${issues.parseError}` }
-
-  return parseSentryIssuesResponse(response.status, issues, tokenSource, sinceIso, SENTRY_ISSUE_LIMIT)
-})().catch(error => ({
-  _tag: 'provider_failure',
-  status: null,
-  diagnostic: error instanceof Error ? error.message : String(error),
-}))
+const sentry = await runChecks([
+  defineSentryCheck({ id: 'sentry.site', org: 'harlan-zw', project: 'unlighthouse', region: 'us' }),
+], {
+  now,
+  required: ['sentry.site'],
+  credentials: { sentry: sentryToken()?.token },
+  totalTimeoutMs: 30_000,
+})
 
 const doc = { generatedAt: now.toISOString(), since: sinceIso, git, deploy, ci, http, health, d1, workers, sentry }
 
 console.log(JSON.stringify(doc, null, 2))
 
 const failedProbes = Object.entries({ git, deploy, ci, http, health, d1, workers, sentry })
-  .filter(([name, value]) => value?.error || (name === 'sentry' && value?._tag !== 'available'))
+  .filter(([name, value]) => value?.error || (name === 'sentry' && value?.coverage !== 'complete') || (name === 'health' && value?.result?._tag === 'Unavailable'))
 if (failedProbes.length)
   console.error(`WARN ${failedProbes.length} probes failed: ${failedProbes.map(([name]) => name).join(', ')}. Missing data is not health.`)
 

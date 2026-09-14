@@ -69,6 +69,7 @@ export default defineNuxtConfig({
   },
 
   modules: [
+    '@harlan-zw/nuxt-checkin',
     '@harlan-zw/nuxt-cloudflare',
     '@harlan-zw/nuxt-dx',
     '@harlan-zw/nuxt-github-sponsors',
@@ -250,6 +251,7 @@ export default defineNuxtConfig({
       deployConfig: true,
       nodeCompat: true,
       wrangler: {
+        version_metadata: { binding: 'CF_VERSION_METADATA' },
         name: 'unlighthouse-dev',
         account_id: '5904138d55ca25d5670dca6adf99894e',
         // Scheduled tasks need an explicit trigger; Nitro does not derive
