@@ -21,10 +21,15 @@ Archive home: every `docs/ops/checkins/` path below means `$DAILY_CHECKIN_DIR` w
    - A thumbs-down with no comment is still a signal: name the path and check whether that page also appears in `d1.toolErrorFingerprints` or Sentry.
 4. Then verify these gates:
    - Any stable non-200 in `http` is RED. A single retry flap is a note.
-   - `health.status` is production's own verdict. Report its `reasons` and `warnings` verbatim, and diff them against yesterday's `health.reasons`. A probe error here means the endpoint is broken or production is older than the code that defines it; that is an observability gap, never GREEN.
+   - Read `health.result` first. Unavailable means identity, freshness, coverage, or collection failed; it cannot support GREEN.
+   - Read the `site.health` result in `health.report.results`. Its evidence holds the original status, reasons, warnings, and aggregate metrics.
+   - Preserve Fail as RED and Warn as AMBER. Incomplete coverage remains visible alongside either verdict.
    - Read every `ci.workflows` state. `failure` means the gate is broken. `pending` after a prior failure must be followed until complete. `missing` is an observability gap.
-   - `workers.nonOk` counts Worker exceptions. Compare it with `sentry.newIssues` and `sentry.recurringIssues`: exceptions with no matching Sentry issue mean the error path is unreported, which is its own finding.
-   - Any new or recurring Sentry issue needs an explicit verdict, quoting its archived permalink and culprit.
+   - `workers.nonOk` counts Worker exceptions. Compare them with unresolved IDs in `sentry.results` evidence.
+   - Check Sentry coverage before interpreting an empty issue list. Incomplete evidence cannot establish that reporting works.
+   - Compare issue IDs with prior complete reports. Persistent unresolved issues remain findings.
+   - Fetch issue detail read-only when needed to identify a culprit, recurrence, or permalink. Do not infer recurrence from counts.
+   - Keep the existing Sentry triage standard: give each unresolved issue a disposition, and verify any proposed repair.
    - `deploy.latest.approxDeployedSha` against `git.head` shows unshipped work. Days of drift is a finding.
 5. Detect anomalies as steps, not levels:
    - Tool error rate: `d1.tools24h` against `d1.toolsPrior6d`. A rate that held all week is a known fault; the same rate appearing overnight is the lead.

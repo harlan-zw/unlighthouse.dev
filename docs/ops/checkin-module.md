@@ -18,3 +18,6 @@ Deploy the generated configuration so the health report can identify the current
 Before enabling the daily collector, resolve package versions and deploy the Worker.
 Verify /api/health against the active deployment and check the report coverage.
 There is no system-health email sender in this site.
+
+The existing 08:00 daily routine replaces the separate 07:00 Sentry routine.
+The daily skill retains Sentry triage and reads shared severity and coverage.
