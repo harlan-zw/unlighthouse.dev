@@ -11,22 +11,25 @@ Archive home: every `docs/ops/checkins/` path below means `$DAILY_CHECKIN_DIR` w
 
 ## Workflow
 
-1. Run `node scripts/tools/daily-checkin-data.mjs --save` from the repo root. Keep every probe error as a finding. The command archives raw evidence in `docs/ops/checkins/YYYY-MM-DD.json`; a same-day rerun writes a timestamped sibling and does not move the next baseline. Archives are gitignored because they hold user feedback text.
+1. Run `pnpm checkin` from the repo root. Keep every unavailable result visible.
+   The shared CLI archives timestamped JSON in `docs/ops/checkins/`.
+   Only complete passing reports advance state. Same-day reruns preserve the first successful baseline.
+   Archives are private and gitignored because they hold user feedback text.
 2. Read the newest prior JSON archive and `docs/ops/triage-ledger.md`. Compare fingerprints and rates, not only totals. A missing prior key is a new probe with no baseline.
-3. Feedback comes first. For every row in `d1.feedbackSinceLastRun`:
+3. Feedback comes first. Use the mappings below. For every row in `d1.feedbackSinceLastRun`:
    - Quote the comment, name its `path`, and state what the user was trying to do.
    - Say whether it is a bug, a docs gap, a missing feature, or praise.
    - Propose one action. A comment with no proposed action is an unanswered user.
    - Check `d1.feedbackOpenComments` for older comments that never got an action, and carry them forward.
    - A thumbs-down with no comment is still a signal: name the path and check whether that page also appears in `d1.toolErrorFingerprints` or Sentry.
 4. Then verify these gates:
-   - Any stable non-200 in `http` is RED. A single retry flap is a note.
-   - Read `health.result` first. Unavailable means identity, freshness, coverage, or collection failed; it cannot support GREEN.
+   - A failed public-page check is RED. A recovered request is a note.
+   - Read the `site.report` result first. Unavailable means identity, freshness, coverage, or collection failed; it cannot support GREEN.
    - Read the `site.health` result in `health.report.results`. Its evidence holds the original status, reasons, warnings, and aggregate metrics.
    - Preserve Fail as RED and Warn as AMBER. Incomplete coverage remains visible alongside either verdict.
    - Read every `ci.workflows` state. `failure` means the gate is broken. `pending` after a prior failure must be followed until complete. `missing` is an observability gap.
-   - `workers.nonOk` counts Worker exceptions. Compare them with unresolved IDs in `sentry.results` evidence.
-   - Check Sentry coverage before interpreting an empty issue list. Incomplete evidence cannot establish that reporting works.
+   - `workers.nonOk` counts Worker exceptions. Compare them with unresolved IDs in the `sentry.site` result evidence.
+   - Check report coverage and the Sentry result before interpreting an empty issue list. Incomplete evidence cannot establish that reporting works.
    - Compare issue IDs with prior complete reports. Persistent unresolved issues remain findings.
    - Fetch issue detail read-only when needed to identify a culprit, recurrence, or permalink. Do not infer recurrence from counts.
    - Keep the existing Sentry triage standard: give each unresolved issue a disposition, and verify any proposed repair.
@@ -47,6 +50,24 @@ Archive home: every `docs/ops/checkins/` path below means `$DAILY_CHECKIN_DIR` w
    - Proposed actions: numbered, ordered by user impact, each small enough for one focused work pass.
 7. Update `docs/ops/triage-ledger.md` with genuinely new fingerprints. Use `watch` until investigated. Resolve only with evidence that a fix deployed and the signal stopped. Never paste user feedback text into the ledger; the ledger is committed and this repository is public.
 8. Print only the verdict, the feedback actions, and the report path.
+
+## Report fields
+
+The shared report stores entries in `results`, each with `id` and `result`.
+Read evidence only when the result contains it. Keep unavailable results visible.
+
+| Name used above | Shared evidence |
+| --- | --- |
+| `git` | `repository.git` result evidence |
+| `deploy` | `site.deployment` result evidence |
+| `ci` | `repository.ci` result evidence |
+| `d1` | `site.activity` result evidence |
+| `workers` | `cloudflare.workers` result evidence |
+| `health.report` | `site.report` result evidence `report` |
+| Sentry | `sentry.site` result evidence |
+
+Public-page checks are `site.home`, `site.tools`, `site.docs`, and `site.glossary`.
+Exit 0 means complete passing checks. Exit 1 means warnings or failures. Exit 2 means incomplete coverage.
 
 ## Rules
 

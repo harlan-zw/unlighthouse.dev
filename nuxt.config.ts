@@ -68,6 +68,24 @@ export default defineNuxtConfig({
     },
   },
 
+  checkin: {
+    external: {
+      required: ['repository.git', 'repository.ci', 'site.deployment', 'site.report', 'site.activity', 'cloudflare.workers', 'sentry.site', 'site.home', 'site.tools', 'site.docs', 'site.glossary'],
+      credentials: {
+        sentry: {
+          env: 'SENTRY_AUTH_TOKEN',
+          files: [
+            { path: '~/.sentryclirc', key: 'token' },
+            { path: '.env.sentry-build-plugin', key: 'SENTRY_AUTH_TOKEN' },
+          ],
+        },
+      },
+      timeoutMs: 120_000,
+      totalTimeoutMs: 180_000,
+      save: { dir: 'docs/ops/checkins', dirEnv: 'DAILY_CHECKIN_DIR', baseline: 'daily', stateFile: 'state.json', timestampKey: 'lastRunAt' },
+    },
+  },
+
   modules: [
     '@harlan-zw/nuxt-checkin',
     '@harlan-zw/nuxt-cloudflare',
