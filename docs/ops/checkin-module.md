@@ -1,8 +1,7 @@
 # Shared check-in adoption
 
-This draft targets Nuxt Check-in 0.2.0-alpha.0, Cloudflare 0.4.1, and Sentry 0.1.5.
-The prerelease is published under the npm `next` tag.
-The lockfile pins its exact registry version. Keep this PR draft until the stable release.
+This site uses Nuxt Check-in 0.2.0, Cloudflare 0.4.2, and Sentry 0.1.6.
+The lockfile pins the stable registry versions.
 
 The public health route returns a versioned CheckReport with aggregate evidence.
 The existing health evaluator still controls traffic, tool outcomes, latency, and feedback thresholds.

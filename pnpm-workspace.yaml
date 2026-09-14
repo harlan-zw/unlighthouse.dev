@@ -1,9 +1,8 @@
 minimumReleaseAgeExcludePrune: true
 minimumReleaseAgeExclude:
-  - '@harlan-zw/nuxt-checkin@0.1.0'
-  - '@harlan-zw/nuxt-checkin@0.2.0-alpha.0'
-  - '@harlan-zw/nuxt-cloudflare@0.4.1'
-  - '@harlan-zw/nuxt-sentry@0.1.5'
+  - '@harlan-zw/nuxt-sentry@0.1.6'
+  - '@harlan-zw/nuxt-cloudflare@0.4.2'
+  - '@harlan-zw/nuxt-checkin@0.2.0'
   - '@harlan-zw/nuxt-cloudflare'
   - '@comark/nuxt'
   - '@comark/vue'
@@ -33,7 +32,6 @@ autoInstallPeers: false
 
 peerDependencyRules:
   allowedVersions:
-    '@harlan-zw/nuxt-checkin': 0.2.0-alpha.0
     '@nuxt/kit': '^3.2.0 || ^4.0.0'
 
 shellEmulator: true
@@ -76,11 +74,11 @@ catalog:
   '@cloudflare/workers-types': ^5.20260908.1
   '@comark/nuxt': 0.6.2
   '@harlan-zw/comark-content': 0.1.5
-  '@harlan-zw/nuxt-checkin': 0.2.0-alpha.0
-  '@harlan-zw/nuxt-cloudflare': 0.4.1
+  '@harlan-zw/nuxt-checkin': 0.2.0
+  '@harlan-zw/nuxt-cloudflare': 0.4.2
   '@harlan-zw/nuxt-dx': 0.1.2
   '@harlan-zw/nuxt-github-sponsors': 0.1.4
-  '@harlan-zw/nuxt-sentry': 0.1.5
+  '@harlan-zw/nuxt-sentry': 0.1.6
   '@iconify-json/carbon': ^1.2.26
   '@iconify-json/catppuccin': ^1.2.17
   '@iconify-json/heroicons': ^1.2.3
