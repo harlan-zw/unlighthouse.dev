@@ -16,7 +16,7 @@
     "lint:docs": "markdownlint ./content && case-police 'content/**/*.md' *.md",
     "lint:docs:fix": "markdownlint ./content --fix && case-police 'content/**/*.md' *.md --fix",
     "lint:links": "node check_external_links.mjs",
-    "checkin": "node scripts/tools/daily-checkin-data.mjs --save",
+    "checkin": "nuxt-checkin prepare && nuxt-checkin --save",
     "test": "node --test --experimental-strip-types tests/*.test.ts",
     "typecheck": "nuxt typecheck"
   },
@@ -45,6 +45,7 @@
     "@cloudflare/workers-types": "catalog:",
     "@comark/nuxt": "catalog:",
     "@harlan-zw/comark-content": "catalog:",
+    "@harlan-zw/nuxt-checkin": "catalog:",
     "@harlan-zw/nuxt-cloudflare": "catalog:",
     "@harlan-zw/nuxt-dx": "catalog:",
     "@harlan-zw/nuxt-github-sponsors": "catalog:",

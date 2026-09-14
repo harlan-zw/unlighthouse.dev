@@ -18,9 +18,12 @@ catalogs:
     '@harlan-zw/comark-content':
       specifier: 0.1.5
       version: 0.1.5
+    '@harlan-zw/nuxt-checkin':
+      specifier: 0.2.0
+      version: 0.2.0
     '@harlan-zw/nuxt-cloudflare':
-      specifier: 0.4.0
-      version: 0.4.0
+      specifier: 0.4.2
+      version: 0.4.2
     '@harlan-zw/nuxt-dx':
       specifier: 0.1.2
       version: 0.1.2
@@ -28,8 +31,8 @@ catalogs:
       specifier: 0.1.4
       version: 0.1.4
     '@harlan-zw/nuxt-sentry':
-      specifier: 0.1.4
-      version: 0.1.4
+      specifier: 0.1.6
+      version: 0.1.6
     '@iconify-json/carbon':
       specifier: ^1.2.26
       version: 1.2.26
@@ -337,9 +340,12 @@ importers:
       '@harlan-zw/comark-content':
         specifier: 'catalog:'
         version: 0.1.5(7808729ebba67991497b3acef8ccf8fe)
+      '@harlan-zw/nuxt-checkin':
+        specifier: 'catalog:'
+        version: 0.2.0(e49068ff76d4161b5b57e6021f17ce1f)
       '@harlan-zw/nuxt-cloudflare':
         specifier: 'catalog:'
-        version: 0.4.0(60fc778cab08f8d30289e115a4b95c3a)
+        version: 0.4.2(494360492e5dfa0471bd43cc29fe8b57)
       '@harlan-zw/nuxt-dx':
         specifier: 'catalog:'
         version: 0.1.2(b3b6ef2f254ea7c9bf5490388d2cf62b)
@@ -348,7 +354,7 @@ importers:
         version: 0.1.4(0d73ac8cffd52734458ec6176698ecb2)
       '@harlan-zw/nuxt-sentry':
         specifier: 'catalog:'
-        version: 0.1.4(a05fd9bb02818b9e9d081ee3faffdcd0)
+        version: 0.1.6(4b0191a25ac47894495e84a30da7b3b7)
       '@iconify-json/carbon':
         specifier: 'catalog:'
         version: 1.2.26
@@ -1364,13 +1370,24 @@ packages:
       nuxt: '>=4.5.0 <6.0.0'
       vue: '>=3.5.0 <4.0.0'
 
-  '@harlan-zw/nuxt-cloudflare@0.4.0':
-    resolution: {integrity: sha512-zuLH0mehGIN3VBBWCAoomhL7SG7LtvZDV0HtGSxLbdktyBwb5GE7UH432fgvrIUeYtehooWJHXZ03P5tzw9XrA==}
+  '@harlan-zw/nuxt-checkin@0.2.0':
+    resolution: {integrity: sha512-1c7YBwovlMSN5cxe9jYt5Kfh7crZxlZciWvoyqdn0r/acE/Zb5lYE+byYVFVD2EZ82IOfLpecdQGijnXTSOVBw==}
     engines: {node: '>=22.12.0'}
     hasBin: true
     peerDependencies:
       nuxt: '>=4.5.0 <6.0.0'
+
+  '@harlan-zw/nuxt-cloudflare@0.4.2':
+    resolution: {integrity: sha512-800IClygYpN4U0GiFS1tW3OmF5boa14B6EDbkZkPcrJLF3bq4eN6Zo2UE0y5g+QFLma3o91VNAw74LupV3uy1A==}
+    engines: {node: '>=22.12.0'}
+    hasBin: true
+    peerDependencies:
+      '@harlan-zw/nuxt-checkin': ^0.1.0 || ^0.2.0-0
+      nuxt: '>=4.5.0 <6.0.0'
       wrangler: '>=4.120.0 <5.0.0'
+    peerDependenciesMeta:
+      '@harlan-zw/nuxt-checkin':
+        optional: true
 
   '@harlan-zw/nuxt-dx@0.1.2':
     resolution: {integrity: sha512-Py9m04a2TFwEbUCRtrjeSVp9FcEl6fB4X23zHRUktmdKH/xS58G5MCg0czbrH1lEWXfp8l/0WjUMnc5smc7COQ==}
@@ -1386,14 +1403,17 @@ packages:
     peerDependencies:
       nuxt: '>=4.5.0 <6.0.0'
 
-  '@harlan-zw/nuxt-sentry@0.1.4':
-    resolution: {integrity: sha512-uEBHa8PlXWRGYwJ0reln2h4nbAX2HxsfxFzKN+NUzoQZQ/Btl89Uj1rJGGH0fv0BnMPr8iZjeVHEYpjvSJ6zSg==}
+  '@harlan-zw/nuxt-sentry@0.1.6':
+    resolution: {integrity: sha512-Z0vdTmqzO7kk5KYjhrh7f9sH6PUkq+YTaaGEMlo3CRrpEn3AqlTw0EmFDtgG9Nhc8ScpjHBzDKISo2a/JE1lMw==}
     engines: {node: '>=22.12.0'}
     peerDependencies:
+      '@harlan-zw/nuxt-checkin': ^0.1.0 || ^0.2.0-0
       '@sentry/cloudflare': ^10.70.0
       '@sentry/nuxt': ^10.70.0
       nuxt: '>=4.5.0 <6.0.0'
     peerDependenciesMeta:
+      '@harlan-zw/nuxt-checkin':
+        optional: true
       '@sentry/cloudflare':
         optional: true
 
@@ -8558,6 +8578,11 @@ packages:
   type-level-regexp@0.1.17:
     resolution: {integrity: sha512-wTk4DH3cxwk196uGLK/E9pE45aLfeKJacKmcEgEOA/q5dnPGNxXt0cfYdFxb57L+sEpf1oJH4Dnx/pnRcku9jg==}
 
+  typescript@5.9.3:
+    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
   typescript@6.0.3:
     resolution: {integrity: sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==}
     engines: {node: '>=14.17'}
@@ -10041,7 +10066,21 @@ snapshots:
       - shiki
       - unplugin
 
-  '@harlan-zw/nuxt-cloudflare@0.4.0(60fc778cab08f8d30289e115a4b95c3a)':
+  '@harlan-zw/nuxt-checkin@0.2.0(e49068ff76d4161b5b57e6021f17ce1f)':
+    dependencies:
+      '@nuxt/kit': 4.5.2(magic-string@1.2.3)(magicast@0.5.4)(oxc-parser@0.143.0)(rolldown@1.2.4)(unplugin@3.3.0(esbuild@0.28.2)(rolldown@1.2.4)(rollup@4.62.4)(vite@8.2.1(@types/node@26.5.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.50.0)(yaml@2.9.0)))
+      nuxt: 4.5.2(@babel/plugin-proposal-decorators@8.0.2)(@babel/plugin-syntax-jsx@7.29.7)(@babel/plugin-syntax-typescript@7.29.7)(@oxc-project/types@0.144.0)(@types/node@26.5.0)(@vue/compiler-sfc@3.5.41)(cac@7.0.0)(commander@15.0.0)(db0@0.3.4(drizzle-orm@0.45.2(@cloudflare/workers-types@5.20260908.1)(@opentelemetry/api@1.9.1)))(drizzle-orm@0.45.2(@cloudflare/workers-types@5.20260908.1)(@opentelemetry/api@1.9.1))(esbuild@0.28.2)(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))(ioredis@5.11.1(supports-color@10.2.2))(lightningcss@1.33.0)(magicast@0.5.4)(optionator@0.9.4)(oxc-parser@0.143.0)(rolldown@1.2.4)(rollup-plugin-visualizer@7.1.1(rolldown@1.2.4)(rollup@4.62.4))(rollup@4.62.4)(srvx@1.0.4)(supports-color@10.2.2)(terser@5.50.0)(typescript@6.0.3)(vite@8.2.1(@types/node@26.5.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.50.0)(yaml@2.9.0))(vue-tsc@3.3.11(typescript@6.0.3))(yaml@2.9.0)
+      pathe: 2.0.3
+      rollup: 4.62.4
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - magic-string
+      - magicast
+      - oxc-parser
+      - rolldown
+      - unplugin
+
+  '@harlan-zw/nuxt-cloudflare@0.4.2(494360492e5dfa0471bd43cc29fe8b57)':
     dependencies:
       '@nuxt/kit': 4.5.2(magic-string@1.2.3)(magicast@0.5.4)(oxc-parser@0.143.0)(rolldown@1.2.4)(unplugin@3.3.0(esbuild@0.28.2)(rolldown@1.2.4)(rollup@4.62.4)(vite@8.2.1(@types/node@26.5.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.50.0)(yaml@2.9.0)))
       citty: 0.2.2
@@ -10053,6 +10092,8 @@ snapshots:
       pathe: 2.0.3
       unstorage: 1.17.5(db0@0.3.4(drizzle-orm@0.45.2(@cloudflare/workers-types@5.20260908.1)(@opentelemetry/api@1.9.1)))(ioredis@5.11.1(supports-color@10.2.2))
       wrangler: 4.130.0(@cloudflare/workers-types@5.20260908.1)
+    optionalDependencies:
+      '@harlan-zw/nuxt-checkin': 0.2.0(e49068ff76d4161b5b57e6021f17ce1f)
     transitivePeerDependencies:
       - '@azure/app-configuration'
       - '@azure/cosmos'
@@ -10166,13 +10207,14 @@ snapshots:
       - webpack
       - xml2js
 
-  '@harlan-zw/nuxt-sentry@0.1.4(a05fd9bb02818b9e9d081ee3faffdcd0)':
+  '@harlan-zw/nuxt-sentry@0.1.6(4b0191a25ac47894495e84a30da7b3b7)':
     dependencies:
       '@nuxt/kit': 4.5.2(magic-string@1.2.3)(magicast@0.5.4)(oxc-parser@0.143.0)(rolldown@1.2.4)(unplugin@3.3.0(esbuild@0.28.2)(rolldown@1.2.4)(rollup@4.62.4)(vite@8.2.1(@types/node@26.5.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.50.0)(yaml@2.9.0)))
       '@sentry/nuxt': 10.73.0(509bd6e7b377552cf1faea8241c04280)
       nuxt: 4.5.2(@babel/plugin-proposal-decorators@8.0.2)(@babel/plugin-syntax-jsx@7.29.7)(@babel/plugin-syntax-typescript@7.29.7)(@oxc-project/types@0.144.0)(@types/node@26.5.0)(@vue/compiler-sfc@3.5.41)(cac@7.0.0)(commander@15.0.0)(db0@0.3.4(drizzle-orm@0.45.2(@cloudflare/workers-types@5.20260908.1)(@opentelemetry/api@1.9.1)))(drizzle-orm@0.45.2(@cloudflare/workers-types@5.20260908.1)(@opentelemetry/api@1.9.1))(esbuild@0.28.2)(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))(ioredis@5.11.1(supports-color@10.2.2))(lightningcss@1.33.0)(magicast@0.5.4)(optionator@0.9.4)(oxc-parser@0.143.0)(rolldown@1.2.4)(rollup-plugin-visualizer@7.1.1(rolldown@1.2.4)(rollup@4.62.4))(rollup@4.62.4)(srvx@1.0.4)(supports-color@10.2.2)(terser@5.50.0)(typescript@6.0.3)(vite@8.2.1(@types/node@26.5.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.50.0)(yaml@2.9.0))(vue-tsc@3.3.11(typescript@6.0.3))(yaml@2.9.0)
       pathe: 2.0.3
     optionalDependencies:
+      '@harlan-zw/nuxt-checkin': 0.2.0(e49068ff76d4161b5b57e6021f17ce1f)
       '@sentry/cloudflare': 10.73.0(@cloudflare/workers-types@5.20260908.1)(wrangler@4.130.0(@cloudflare/workers-types@5.20260908.1))
     transitivePeerDependencies:
       - magic-string
@@ -18746,6 +18788,8 @@ snapshots:
       mime-types: 3.0.2
 
   type-level-regexp@0.1.17: {}
+
+  typescript@5.9.3: {}
 
   typescript@6.0.3: {}
 

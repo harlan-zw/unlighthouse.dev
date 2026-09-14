@@ -8,13 +8,6 @@
 # writes the run log and opens nothing.
 version: 1
 routines:
-  - name: sentry-checkin
-    on:
-      schedule:
-        - cron: '0 7 * * *'
-    timezone: Australia/Sydney
-    mode: propose
-    enabled: true
   - name: daily-checkin
     on:
       schedule:
