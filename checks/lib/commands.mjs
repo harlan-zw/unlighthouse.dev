@@ -40,7 +40,7 @@ export function deployment(context) {
       versionId: latest.versions?.find(version => version.percentage === 100)?.version_id ?? null,
       message: latest.annotations?.['workers/message'] ?? null,
       approxDeployedSha: latest.created_on
-        ? await command(context, 'git', ['rev-list', '-1', `--before=${latest.created_on}`, 'HEAD']) || null
+        ? await command(context, 'git', ['rev-list', '-1', `--before=${latest.created_on}`, 'origin/main']) || null
         : null,
     } }
   })
