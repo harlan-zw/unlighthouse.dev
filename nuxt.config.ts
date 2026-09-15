@@ -109,10 +109,6 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
    - Preserve Fail as RED and Warn as AMBER. Incomplete coverage remains visible alongside either verdict.
    - Read every \`ci.workflows\` state. \`failure\` means the gate is broken. \`pending\` after a prior failure must be followed until complete. \`missing\` is an observability gap.
    - \`workers.nonOk\` counts Worker exceptions. Compare them with unresolved IDs in the \`sentry.site\` result evidence.
-   - Check report coverage and the Sentry result before interpreting an empty issue list. Incomplete evidence cannot establish that reporting works.
-   - Compare issue IDs with prior complete reports. Persistent unresolved issues remain findings.
-   - Fetch issue detail read-only when needed to identify a culprit, recurrence, or permalink. Do not infer recurrence from counts.
-   - Keep the existing Sentry triage standard: give each unresolved issue a disposition, and verify any proposed repair.
    - \`deploy.latest.approxDeployedSha\` against \`git.head\` shows unshipped work. Days of drift is a finding.`,
         },
         {
