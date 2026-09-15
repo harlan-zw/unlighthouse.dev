@@ -29,6 +29,8 @@ export async function d1Query(context, sql) {
 }
 
 export async function revListBefore(context, date, ref) {
+  if (!date)
+    return null
   try {
     return await command(context, 'git', ['rev-list', '-1', `--before=${date}`, ref]) || null
   }
