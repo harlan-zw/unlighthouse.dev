@@ -155,11 +155,13 @@ The state `sources needed` is inventory, not authorization to mass rewrite. Unas
 ## Pilot writer handoff, 15 September 2026
 
 Writer branch: `docs/psi-lighthouse-visual-pilot`, based on Git revision `660319a43570ff21ae57452b716971f3c77246c7`.
-Foundation [PR #110](https://github.com/harlan-zw/unlighthouse.dev/pull/110); article PR not opened yet.
+Foundation [PR #110](https://github.com/harlan-zw/unlighthouse.dev/pull/110); article [PR #111](https://github.com/harlan-zw/unlighthouse.dev/pull/111).
 See the [pilot brief](briefs/pagespeed-insights-vs-lighthouse.md#current-factual-handoff-15-september-2026) for the factual file digest, real reports, replay command and image evidence.
 Factual review passed before both humanize passes. Root owns final browser checks. Root accepted the final pilot. Live publication remains unverified.
 
 Final pilot article SHA256 file digest: `1bd179cd1307e74816cfd3ef9060726911a613132aae5467075c18296497a1ce`.
 Full lint, typecheck, 203 existing tests and authenticated production build passed. All three image keyboard links and three internal client links passed root review.
 Local Worker unknown paths return self-redirect 301, so local private 404 checks are not claimed. Generated collections, search and sitemap exclude editorial records.
-Root final media and bounded evidence are recorded in the pilot brief. Remaining work: article PR, remote CI and authorized publication.
+Root final media and bounded evidence are recorded in the pilot brief. Article [PR #111](https://github.com/harlan-zw/unlighthouse.dev/pull/111) is stacked on foundation #110. Remaining work: remote CI and authorized publication.
+
+Reviewed pilot delivery Git revision: `e22b5b8`, carrying the final article file digest recorded above. Later record-only commits do not change that article.

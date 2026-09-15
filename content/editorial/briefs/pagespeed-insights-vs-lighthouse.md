@@ -192,3 +192,5 @@ Root inspected final media: `~/.dev-browser/tmp/unlighthouse-final-desktop-light
 Local Worker unknown routes self-redirect 301; this limits a local 404 exclusion assertion. Built collections/search/sitemap omit editorial records.
 Root separately saw 404 for existing live COPY/editorial paths. That check does not prove this new article revision is deployed.
 Production publication and remote CI remain outside this local acceptance.
+
+Delivery: [article PR #111](https://github.com/harlan-zw/unlighthouse.dev/pull/111), stacked on [foundation PR #110](https://github.com/harlan-zw/unlighthouse.dev/pull/110). Pilot Git revision `e22b5b8` carries the root-accepted final article. Remote CI and publication are not established by the local acceptance.
