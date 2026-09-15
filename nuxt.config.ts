@@ -30,6 +30,12 @@ const workerdConsoleTaskFix = `;(function(){try{var c=globalThis.console;if(c&&t
 export default defineNuxtConfig({
   extends: ['./layers/tools', './layers/admin'],
 
+  image: {
+    providers: {
+      none: { provider: 'none' },
+    },
+  },
+
   nuxtDx: {
     report: true,
   },
@@ -71,6 +77,56 @@ export default defineNuxtConfig({
   checkin: {
     external: {
       required: ['repository.git', 'repository.ci', 'site.deployment', 'site.report', 'site.activity', 'cloudflare.workers', 'sentry.site', 'site.home', 'site.tools', 'site.docs', 'site.glossary'],
+      prompts: [
+        {
+          id: 'site.feedback',
+          prompt: `## Report fields
+
+The shared report stores entries in \`results\`, each with \`id\` and \`result\`.
+Read evidence only when the result contains it. Keep unavailable results visible.
+
+| Name used above | Shared evidence |
+| --- | --- |
+| \`git\` | \`repository.git\` result evidence |
+| \`deploy\` | \`site.deployment\` result evidence |
+| \`ci\` | \`repository.ci\` result evidence |
+| \`d1\` | \`site.activity\` result evidence |
+| \`workers\` | \`cloudflare.workers\` result evidence |
+| \`health.report\` | \`site.report\` result evidence \`report\` |
+| Sentry | \`sentry.site\` result evidence |
+
+Public-page checks are \`site.home\`, \`site.tools\`, \`site.docs\`, and \`site.glossary\`.
+Exit 0 means complete passing checks. Exit 1 means warnings or failures. Exit 2 means incomplete coverage.
+
+Feedback comes first. Use the mappings below. For every row in \`d1.feedbackSinceLastRun\`:
+   - Quote the comment, name its \`path\`, and state what the user was trying to do.
+   - Say whether it is a bug, a docs gap, a missing feature, or praise.
+   - Propose one action. A comment with no proposed action is an unanswered user.
+   - Check \`d1.feedbackOpenComments\` for older comments that never got an action, and carry them forward.
+   - A thumbs-down with no comment is still a signal: name the path and check whether that page also appears in \`d1.toolErrorFingerprints\` or Sentry.
+Include User feedback and Pulse sections with lookups, sessions, error rate, feedback totals, and new users. Keep quotes in private reports only; use anonymous summaries in published issues.`,
+        },
+        {
+          id: 'site.health-analysis',
+          prompt: `Verify these gates:
+   - A failed public-page check is RED. A recovered request is a note.
+   - Read the \`site.report\` result first. Unavailable means identity, freshness, coverage, or collection failed; it cannot support GREEN.
+   - Read the \`site.health\` result in \`health.report.results\`. Its evidence holds the original status, reasons, warnings, and aggregate metrics.
+   - Preserve Fail as RED and Warn as AMBER. Incomplete coverage remains visible alongside either verdict.
+   - Read every \`ci.workflows\` state. \`failure\` means the gate is broken. \`pending\` after a prior failure must be followed until complete. \`missing\` is an observability gap.
+   - \`workers.nonOk\` counts Worker exceptions. Compare them with unresolved IDs in the \`sentry.site\` result evidence.
+   - \`deploy.latest.approxDeployedSha\` against \`git.head\` shows unshipped work. Days of drift is a finding.`,
+        },
+        {
+          id: 'site.anomalies',
+          prompt: `Detect anomalies as steps, not levels:
+   - Tool error rate: \`d1.tools24h\` against \`d1.toolsPrior6d\`. A rate that held all week is a known fault; the same rate appearing overnight is the lead.
+   - Traffic: \`d1.tools24h.lookups\` and \`d1.sessions24h\` against the six-day baseline. A collapse means the tools broke silently.
+   - Per-tool: a tool in \`d1.toolsByTool24h\` erroring on a quarter or more of its recorded runs is broken, whatever the site-wide rate says. Check \`d1.toolErrorFingerprints\` for how many distinct targets those errors cover: many targets is an outage, one target repeated is a visitor stuck on a URL the upstream API rejects, which is a UX finding rather than an incident.
+   - \`status\` is null for lookups written by a page load, so every rate is taken over \`statused\`, never over \`lookups\`.
+   - \`d1.topQueries24h\` shows what people came to do. A query repeated by many sessions with errors is the highest-value fix on the page.`,
+        },
+      ],
       credentials: {
         sentry: {
           env: 'SENTRY_AUTH_TOKEN',
@@ -82,7 +138,7 @@ export default defineNuxtConfig({
       },
       timeoutMs: 120_000,
       totalTimeoutMs: 180_000,
-      save: { dir: 'docs/ops/checkins', dirEnv: 'DAILY_CHECKIN_DIR', baseline: 'daily', stateFile: 'state.json', timestampKey: 'lastRunAt' },
+      save: { dir: 'docs/ops/checkins', baseline: 'daily', stateFile: 'state.json', timestampKey: 'lastRunAt' },
     },
   },
 

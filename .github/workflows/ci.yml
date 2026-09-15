@@ -8,8 +8,26 @@ name: CI
 
 on:
   pull_request:
+    paths:
+      - '**'
+      - '!**/*.md'
+      - '!docs/**'
+      - '!.editorconfig'
+      - '!.gitignore'
+      - '!.idea/**'
+      - '!.vscode/**'
+      - 'content/**/*.md'
   push:
     branches: [main]
+    paths:
+      - '**'
+      - '!**/*.md'
+      - '!docs/**'
+      - '!.editorconfig'
+      - '!.gitignore'
+      - '!.idea/**'
+      - '!.vscode/**'
+      - 'content/**/*.md'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -33,3 +51,28 @@ jobs:
       test-command: pnpm test
       typecheck-node-options: --max-old-space-size=14000
       timeout-minutes: 30
+
+  build:
+    # Main builds in the deploy workflow. Keep the build check on pull requests.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/cache@v6
+        with:
+          path: node_modules/.cache/nuxt-seo
+          key: nuxt-skew-${{ github.sha }}
+          restore-keys: |
+            nuxt-skew-
+      - run: pnpm build
+        env:
+          NODE_OPTIONS: --max-old-space-size=14000
+          NUXT_GITHUB_ACCESS_TOKEN: ${{ secrets.NUXT_GITHUB_ACCESS_TOKEN || github.token }}
+          NUXT_GITHUB_AUTH_TOKEN: ${{ secrets.NUXT_GITHUB_AUTH_TOKEN || github.token }}
