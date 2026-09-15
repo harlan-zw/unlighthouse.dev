@@ -23,10 +23,10 @@ Crop identifiers or flatten opaque redactions. Inspect pixels and metadata befor
 
 ## Integration
 
-Use native figure, img, and figcaption in the learn article renderer, pending its pilot browser verification.
+Use native figure, img, and figcaption in the learn article renderer. Pilot HTTP and root production browser verification confirmed all three elements on 15 September 2026.
 Scope any required styles to `app/pages/learn-lighthouse/[...slug].vue`; leave the unused FigureImage component and imported-doc renderer unchanged.
 Provide actual dimensions, responsive display caps, independent alt text, capture context, and a keyboard-accessible full-size link.
-Center figures and captions. Start captions at 14px with a readable muted theme token; check both themes.
+Center figures and captions. The learn route caps figures at 680 CSS pixels and sets captions to 14px with the muted theme token. Check both themes.
 Verify loading, crispness, callouts, caption contrast, links, and mobile overflow on the final rendered article.
 
 ## Required pilot shots
@@ -36,4 +36,20 @@ Verify loading, crispness, callouts, caption contrast, links, and mobile overflo
 3. Local Lighthouse report for the same public page: show actual results. Keep distinct run settings in the caption and private manifest.
 
 These are explanatory captures, not a controlled before/after experiment or proof one tool is more accurate.
-No captures are accepted yet. The pilot brief owns each image's exact state, caption, dimensions, and review decision.
+Root supplied three real captures on 15 September 2026. The writer inspected the PNGs and independently matched their digests to the capture manifest. sources_reviewer accepted their factual values and callouts. Root accepted final rendering on the production Worker at desktop/mobile widths in both themes. The pilot brief owns exact states, captions, dimensions and review decisions.
+
+## Verified pilot integration
+
+Nuxt UI maps img to ProseImg, which otherwise enables zoom and uses Nuxt Image transforms.
+For preserved screenshots, use `provider="none" :zoom="false"` on each img.
+This depends on the pilot's explicit optional none-provider registration in nuxt.config.ts. The default provider remains unchanged.
+The installed none provider returns the original URL. Fresh pilot HTTP output uses the original PNG for src/srcset and has no modal trigger attributes.
+Use actual PNG dimensions; the shared 680px display cap preserves more than two source pixels per displayed CSS pixel for all three pilot captures.
+
+Put an explicit `<br>` before each caption's full-size link. The renderer can otherwise join adjacent text without whitespace.
+Full-size links are underlined. Set `:external="true"` on each caption asset link so ProseA/ULink uses native same-tab navigation.
+Relative links otherwise use the app router and can show a 404 for a real PNG. Verify keyboard Enter opens the image, then verify browser Back.
+The article's file-local Markdown lint allowlist includes figure, img, figcaption, a and br.
+After changing Markdown, verify a changed sentence in the rendered page. This pilot required a task-server restart to refresh cached content.
+
+Root also verified Tab focus, Enter opening the original PNG, and browser Back for all three full-size links. This acceptance covers the pilot; verify future consumers independently.

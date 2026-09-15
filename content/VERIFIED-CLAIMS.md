@@ -22,7 +22,7 @@ Statuses: Documented, Observed, Unresolved, Withdrawn. Evidence kind remains sep
 
 ## Withdrawn or unresolved pilot assertions
 
-These are instructions for the rewrite; existing published copy has not yet been repaired.
+These treatments are applied in the reviewed pilot; production publication remains unverified.
 
 | ID | Status | Existing assertion | Required treatment |
 | --- | --- | --- | --- |
@@ -40,5 +40,20 @@ PSI's overview still lists TTI among lab metrics. The scoring page labels its ne
 The TBT page has different article and footer update dates. Preserve both; use the specific metric discussion for scope.
 Do not copy stale version or audit labels from a high-priority page without checking the captured report and matching release source.
 
-Pilot captures, exact Lighthouse execution, current scoring configuration, and any Unlighthouse capability remain outstanding.
+Pilot captures and exact Lighthouse execution are recorded below. No additional Unlighthouse capability is established.
 No original performance benchmark, live API entitlement, or search-demand measurement is established by this seed.
+
+## Pilot observations, 15 September 2026
+
+Root captured the reports; product_writer inspected the exports and local report settings.
+Full replay instructions and image SHA256 file digests: [pilot brief](editorial/briefs/pagespeed-insights-vs-lighthouse.md#real-run-evidence).
+
+| ID | Status | Evidence kind | Claim and limit | Evidence |
+| --- | --- | --- | --- | --- |
+| OBS-PSI-01 | Observed | Real PSI report | Mobile origin data for `https://unlighthouse.dev` passed, LCP 1.8s, CLS 0.03, INP N/A, latest 28-day period. No URL-level or good-INP inference. | Root capture 15 September 2026 at 19:26 GMT+10; public/images/learn-lighthouse/psi-field-data-2026-09-15.png |
+| OBS-PSI-02 | Observed | Real PSI report | One mobile Lighthouse 13.4.1 run scored 48: LCP 5.9s, TBT 700ms, CLS 0. Environment: Moto G Power, Slow 4G, HeadlessChromium 151.0.7922.173. | Same capture; public/images/learn-lighthouse/psi-lab-report-2026-09-15.png |
+| OBS-LH-01 | Observed | Local Lighthouse JSON/HTML | Same URL, separate run 2026-09-15T09:28:02.976Z scored 66: LCP 4.5s, TBT 140ms, CLS 0.001. Node.js 24.18.0, Lighthouse 13.4.1, HeadlessChrome 153.0.0.0, mobile simulated throttling. One run cannot establish cause or tool accuracy. | Root scratch local-lighthouse.report.json and local-observation.json; public/images/learn-lighthouse/local-lighthouse-report-2026-09-15.png |
+| LH-04 | Documented | Official source documentation | Lighthouse defaults to simulated throttling, including PSI and DevTools. Request-level throttling is another approximation, not a guarantee of lower scores. | <https://github.com/GoogleChrome/lighthouse/blob/main/docs/throttling.md>, opened 15 September 2026 |
+| LH-05 | Documented | Official documentation | DevTools exposes Clear storage; local browser/device state can influence reports. Do not assert DevTools uses a separate profile. | <https://developer.chrome.com/docs/devtools/lighthouse#advanced-settings>, opened 15 September 2026 |
+
+Root accepted the pilot article and rendered figures on 15 September 2026. The [pilot brief](editorial/briefs/pagespeed-insights-vs-lighthouse.md#final-acceptance-15-september-2026) records exact file digests, browser evidence and limits. Observation status does not imply a controlled benchmark or live publication.

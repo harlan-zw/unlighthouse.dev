@@ -30,6 +30,12 @@ const workerdConsoleTaskFix = `;(function(){try{var c=globalThis.console;if(c&&t
 export default defineNuxtConfig({
   extends: ['./layers/tools', './layers/admin'],
 
+  image: {
+    providers: {
+      none: { provider: 'none' },
+    },
+  },
+
   nuxtDx: {
     report: true,
   },

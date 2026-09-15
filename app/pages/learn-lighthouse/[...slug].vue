@@ -148,3 +148,31 @@ const humanUpdatedDate = computed(() => page.value?.updatedAt ? humanDate(page.v
     </div>
   </div>
 </template>
+
+<style scoped>
+:deep(figure) {
+  margin-inline: auto;
+  max-width: 680px;
+}
+
+:deep(figure > img) {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-inline: auto;
+}
+
+:deep(figure > figcaption) {
+  margin-top: 0.75rem;
+  color: var(--ui-text-muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+:deep(figure > figcaption a) {
+  color: inherit;
+  font-weight: 400;
+  text-decoration: underline;
+}
+</style>
