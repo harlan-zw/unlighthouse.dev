@@ -6,7 +6,7 @@ Original site Git revision: `8a8b40c004f22e27e12c5ec632bd54c58fae568b`. Checked 
 ## Scope and authority
 
 Inventory: 90 local learning articles and 8 public glossary entries. Preserve existing URLs and publication dates.
-Current authorization covers foundations and the PSI versus Lighthouse pilot. Broader topic batches await pilot acceptance and coordinator planning.
+Current authorization covers foundations, the accepted PSI pilot, and batch 01: Core Web Vitals and the LCP overview. Stop after this two-article PR checkpoint. Other articles remain unassigned.
 Imported package documentation, unrelated tools, and site-wide product redesign are outside this rewrite.
 Factual Vue components used by an article are part of that article's review, including their tooltips and hidden labels.
 
@@ -53,7 +53,7 @@ The state `sources needed` is inventory, not authorization to mass rewrite. Unas
 
 | File | Generated route | Reader topic | State |
 | --- | --- | --- | --- |
-| content/learn-lighthouse/1.core-web-vitals.md | /learn-lighthouse/core-web-vitals | Core web vitals guide | sources needed |
+| content/learn-lighthouse/1.core-web-vitals.md | /learn-lighthouse/core-web-vitals | Core web vitals guide | article reviewed |
 | content/learn-lighthouse/2.bulk-lighthouse-testing.md | /learn-lighthouse/bulk-lighthouse-testing | Bulk lighthouse testing & --maxRoutes config | sources needed |
 | content/learn-lighthouse/3.pagespeed-insights-vs-lighthouse.md | /learn-lighthouse/pagespeed-insights-vs-lighthouse | PageSpeed Insights vs Lighthouse: What's the difference? | article reviewed |
 | content/learn-lighthouse/accessibility/0.index.md | /learn-lighthouse/accessibility | Lighthouse Accessibility Audit Guide | sources needed |
@@ -102,7 +102,7 @@ The state `sources needed` is inventory, not authorization to mass rewrite. Unas
 | content/learn-lighthouse/inp/5.third-party-scripts.md | /learn-lighthouse/inp/third-party-scripts | Fix Third-Party Script Impact on INP | sources needed |
 | content/learn-lighthouse/inp/6.event-handler-delays.md | /learn-lighthouse/inp/event-handler-delays | Fix Event Handler Delays for Better INP | sources needed |
 | content/learn-lighthouse/inp/7.hydration-issues.md | /learn-lighthouse/inp/hydration-issues | Fix Hydration Issues for Better INP | sources needed |
-| content/learn-lighthouse/lcp/0.index.md | /learn-lighthouse/lcp | Largest Contentful Paint (LCP): Good Scores, Fixes & Guide | sources needed |
+| content/learn-lighthouse/lcp/0.index.md | /learn-lighthouse/lcp | Largest Contentful Paint (LCP): Good Scores, Fixes & Guide | article reviewed |
 | content/learn-lighthouse/lcp/1.slow-server-response.md | /learn-lighthouse/lcp/slow-server-response | Fix Slow Server Response (TTFB) for Better LCP | sources needed |
 | content/learn-lighthouse/lcp/10.total-byte-weight.md | /learn-lighthouse/lcp/total-byte-weight | Fix Enormous Network Payloads for Better LCP | sources needed |
 | content/learn-lighthouse/lcp/11.unminified-javascript.md | /learn-lighthouse/lcp/unminified-javascript | Fix Unminified JavaScript for Better LCP | sources needed |
@@ -165,3 +165,19 @@ Local Worker unknown paths return self-redirect 301, so local private 404 checks
 Root final media and bounded evidence are recorded in the pilot brief. Article [PR #111](https://github.com/harlan-zw/unlighthouse.dev/pull/111) is stacked on foundation #110. Remaining work: remote CI and authorized publication.
 
 Reviewed pilot delivery Git revision: `e22b5b8`, carrying the final article file digest recorded above. Later record-only commits do not change that article.
+
+## Batch 01 factual handoff, 15 September 2026
+
+Branch `docs/content-batch-01`, based on accepted pilot Git revision `f1c66d74d1a2feeb6bffd516cf4929e1f8702878`. Root and sources_reviewer accepted both briefs. Writer completed both factual drafts and inspected the accepted LCP capture.
+
+See [Core Web Vitals brief](briefs/core-web-vitals.md) and [LCP brief](briefs/lcp.md). Independent factual review, both writing passes, final review and root browser acceptance remain pending. One of 98 local articles is reviewed; these two drafts are not yet counted as reviewed. No publication or deployment claim is made.
+
+Batch 01 update, 15 September 2026: independent factual review accepted both articles after the external LCP fragment correction. Both humanize passes and writer meaning recheck completed. Final independent review and browser acceptance remain pending; reviewed count remains one of 98.
+
+## Current batch 01 acceptance, 15 September 2026
+
+Root accepted both final articles after independent factual review, both humanize passes, independent final meaning review and actual production Worker checks. Three of 98 local articles are reviewed; 95 remain. Earlier batch pending states are dated history.
+
+Final article SHA256 file digests: CWV `c541735e924c3d73bd093c081055c5ecca6458aba885b21c70fe8910e8add938`; LCP `5a526aafc178933316eed0b5658302f6c2795f229855ec7bbc3c455d4a45eb6f`. Full lint, typecheck, 203 tests and final authenticated production build passed. Root verified both themes and desktop/mobile rendering, caption keyboard navigation, internal links, metadata and legacy LCP anchor.
+
+Public filenames, generated search, sitemap and both article HTML outputs exclude the new briefs and claim records. Local unknown-route 301 behavior remains a limitation, not a successful private 404 check. No publication or deployment has been verified. Child PR creation and remote CI are the next delivery steps; no further articles are authorized in this batch.
