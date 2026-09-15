@@ -57,3 +57,27 @@ Full replay instructions and image SHA256 file digests: [pilot brief](editorial/
 | LH-05 | Documented | Official documentation | DevTools exposes Clear storage; local browser/device state can influence reports. Do not assert DevTools uses a separate profile. | <https://developer.chrome.com/docs/devtools/lighthouse#advanced-settings>, opened 15 September 2026 |
 
 Root accepted the pilot article and rendered figures on 15 September 2026. The [pilot brief](editorial/briefs/pagespeed-insights-vs-lighthouse.md#final-acceptance-15-september-2026) records exact file digests, browser evidence and limits. Observation status does not imply a controlled benchmark or live publication.
+
+## Batch 01 documented claims, 15 September 2026
+
+Primary sources reopened by request_content_lead and independently accepted by sources_reviewer and root before drafting. Independent article factual and final meaning reviews passed. Root accepted both rendered articles on 15 September 2026.
+
+| ID | Status / kind | Claim and qualification | Definitive source | Source date |
+| --- | --- | --- | --- | --- |
+| CWV-01 | Documented / official | LCP, INP and CLS cover loading, responsiveness and stability. Field targets use P75, segmented by device. This is not 75% of unique visitors or a Lighthouse score. | <https://web.dev/articles/vitals> | Updated 2024-10-31 |
+| CWV-02 | Documented / official | Good limits: LCP≤2.5s, INP≤200ms, CLS≤0.1. Poor: LCP>4s, INP>500ms, CLS>0.25. Intermediate ranges exclude the good boundary and include the poor cutoff. | <https://developers.google.com/speed/docs/insights/v5/about> | Updated 2024-10-21 |
+| CWV-03 | Documented / official | CLS aggregates the largest session window of unexpected shifts, not a simple lifetime sum. Windows use gaps below one second and last at most five seconds. Individual shift scores use impacted union area and displacement relative to the largest viewport dimension. | <https://web.dev/articles/cls> | Updated 2023-04-12 |
+| CWV-04 | Documented / official | INP assesses click, tap and keyboard responsiveness through the next paint. It excludes asynchronous completion and gestures such as scrolling alone. Real interaction testing can measure INP; an ordinary navigation-only Lighthouse audit cannot establish it. | <https://web.dev/articles/inp> | Updated 2025-09-02 |
+| SEO-01 | Documented / official | Google uses Core Web Vitals in ranking systems. Passing does not guarantee top rankings. Do not infer individual ranking weights, a ranking eligibility threshold or guaranteed conversion gains. | <https://developers.google.com/search/docs/appearance/page-experience> | Updated 2025-12-10 |
+| LCP-01 | Documented / official | LCP times the largest eligible visible image, text block or video from navigation. It does not establish that all main content finished loading. Candidates can change; reporting stops after user interaction. | <https://web.dev/articles/lcp> | Updated 2025-09-04 |
+| LCP-02 | Documented / official | Candidate types include img, SVG image, video poster/first frame, URL background images and text blocks. Browser heuristics exclude some elements. Do not say the hero image is always LCP. | <https://web.dev/articles/lcp> | Updated 2025-09-04 |
+| LCP-03 | Documented / official | LCP breakdown separates TTFB, resource load delay, resource load duration and element render delay. If no resource is needed, resource phases are zero. The insight is informational when LCP is measured, not an audit to pass. | <https://developer.chrome.com/docs/performance/insights/lcp-breakdown> | Published/updated 2025-10-08 |
+| LCP-04 | Documented / official | Phase percentages are diagnostic guidance, not strict budgets. Google explicitly advises against converting them to absolute times. A smaller asset can leave LCP unchanged when rendering remains blocked. | <https://web.dev/articles/optimize-lcp> | Updated 2025-03-31 |
+| LCP-05 | Documented / official | Diagnose discovery/priority, transfer and rendering separately. Avoid lazy-loading the LCP image; prioritize only relevant resources and remeasure. These mechanisms do not establish a guaranteed improvement for the captured page. | <https://web.dev/articles/optimize-lcp> | Updated 2025-03-31 |
+| LIB-01 | Documented / official README | web-vitals attribution requires its attribution entry point. Current main documents target, not element, and an optional URL for image LCP. This moving source is enough to reject the current snippet, not a tested package example. | <https://github.com/GoogleChrome/web-vitals#attribution> | Moving main read 2026-09-15 |
+
+### OBS-LCP-01: paragraph LCP example
+
+Observed local report, 15 September 2026, <https://unlighthouse.dev/>. Lighthouse 13.4.1, HeadlessChrome 153.0.0.0, mobile emulation, throttling method `provided` (no Lighthouse-added throttling). Displayed LCP 1.3 s, TTFB 100 ms and element render delay 1,210 ms. The selected element is a paragraph. The screenshot shows two rows only. This is one local observation, not a benchmark or proof of the delay’s cause.
+
+Final PNG SHA256 file digest: `f326e7d45607634b4d3c82cd1e7a379140a77b272ca59a7e2a920921a13d47ab`, 1600 × 710. See [LCP brief](editorial/briefs/lcp.md) for provenance and replay limits. Root accepted the capture; writer inspected the final PNG. Root accepted both article renderings on 15 September 2026; production publication remains unverified.
