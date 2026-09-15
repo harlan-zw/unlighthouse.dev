@@ -33,7 +33,7 @@ The Worker query filters the site before applying the provider row limit.
 [Cloudflare documents this filter](https://developers.cloudflare.com/analytics/graphql-api/tutorials/querying-workers-metrics/).
 
 `DAILY_CHECKIN_DIR` overrides `docs/ops/checkins`.
-The CLI writes private report files and preserves the first successful daily baseline.
-Only complete passing reports advance `state.json`.
+The CLI writes private report files and preserves the first complete daily baseline.
+Complete reports advance `state.json`, including warnings and failures. Incomplete reports preserve the previous state.
 Use `--since ISO` with the shared command to select an explicit recovery window.
 Legacy scripts and their synchronous process runner are removed.

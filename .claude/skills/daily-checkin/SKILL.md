@@ -13,7 +13,7 @@ Archive home: every `docs/ops/checkins/` path below means `$DAILY_CHECKIN_DIR` w
 
 1. Run `pnpm checkin` from the repo root. Keep every unavailable result visible.
    The shared CLI archives timestamped JSON in `docs/ops/checkins/`.
-   Only complete passing reports advance state. Same-day reruns preserve the first successful baseline.
+   Complete reports advance state, including warnings and failures. Incomplete reports preserve state. Same-day reruns preserve the first complete baseline.
    Archives are private and gitignored because they hold user feedback text.
 2. Read the newest prior JSON archive and `docs/ops/triage-ledger.md`. Compare fingerprints and rates, not only totals. A missing prior key is a new probe with no baseline.
 3. Feedback comes first. Use the mappings below. For every row in `d1.feedbackSinceLastRun`:
