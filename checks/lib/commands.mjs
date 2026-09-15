@@ -28,6 +28,15 @@ export async function d1Query(context, sql) {
   return statement.results ?? []
 }
 
+export async function revListBefore(context, date, ref) {
+  try {
+    return await command(context, 'git', ['rev-list', '-1', `--before=${date}`, ref]) || null
+  }
+  catch {
+    return null
+  }
+}
+
 export function deployment(context) {
   return context.collect(deployment, 'deployment', async () => {
     const deployments = await wrangler(context, ['deployments', 'list', '--json'])
@@ -39,9 +48,7 @@ export function deployment(context) {
       createdOn: latest.created_on,
       versionId: latest.versions?.find(version => version.percentage === 100)?.version_id ?? null,
       message: latest.annotations?.['workers/message'] ?? null,
-      approxDeployedSha: latest.created_on
-        ? await command(context, 'git', ['rev-list', '-1', `--before=${latest.created_on}`, 'origin/main']) || null
-        : null,
+      approxDeployedSha: await revListBefore(context, latest.created_on, 'origin/main'),
     } }
   })
 }

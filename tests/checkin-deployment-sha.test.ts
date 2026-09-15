@@ -20,6 +20,21 @@ function commit(root: string, message: string, date: string) {
   })
 }
 
+function fakeWrangler(root: string) {
+  const binDir = join(root, 'node_modules/.bin')
+  mkdirSync(binDir, { recursive: true })
+  const wrangler = join(binDir, 'wrangler')
+  writeFileSync(wrangler, `#!/usr/bin/env node
+console.log(JSON.stringify([{
+  id: 'deployment-1',
+  created_on: '2026-09-15T08:25:57Z',
+  versions: [{ version_id: 'version-1', percentage: 100 }],
+  annotations: { 'workers/message': 'deploy' },
+}]))
+`)
+  chmodSync(wrangler, 0o755)
+}
+
 it('derives approxDeployedSha from origin/main, not the checked-out branch', async () => {
   const root = mkdtempSync(join(tmpdir(), 'checkin-deploy-'))
   git(root, 'init', '-q', '-b', 'main')
@@ -33,19 +48,7 @@ it('derives approxDeployedSha from origin/main, not the checked-out branch', asy
   const releaseSha = git(root, 'rev-parse', 'refs/heads/main')
   git(root, 'update-ref', 'refs/remotes/origin/main', releaseSha)
   git(root, 'switch', '-q', 'routine')
-
-  const binDir = join(root, 'node_modules/.bin')
-  mkdirSync(binDir, { recursive: true })
-  const wrangler = join(binDir, 'wrangler')
-  writeFileSync(wrangler, `#!/usr/bin/env node
-console.log(JSON.stringify([{
-  id: 'deployment-1',
-  created_on: '2026-09-15T08:25:57Z',
-  versions: [{ version_id: 'version-1', percentage: 100 }],
-  annotations: { 'workers/message': 'deploy' },
-}]))
-`)
-  chmodSync(wrangler, 0o755)
+  fakeWrangler(root)
 
   try {
     const { report } = await runExternalChecks([deployment], { required: ['site.deployment'] }, {
@@ -55,6 +58,28 @@ console.log(JSON.stringify([{
     const result = report.results[0].result
     assert.equal(result._tag, 'Pass')
     assert.equal((result.evidence as { latest: { approxDeployedSha: string } }).latest.approxDeployedSha, releaseSha)
+  }
+  finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})
+
+it('reports a null approxDeployedSha when origin/main is missing', async () => {
+  const root = mkdtempSync(join(tmpdir(), 'checkin-deploy-'))
+  git(root, 'init', '-q', '-b', 'main')
+  git(root, 'config', 'user.name', 'test')
+  git(root, 'config', 'user.email', 'test@example.com')
+  commit(root, 'base', '2026-09-01T00:00:00Z')
+  fakeWrangler(root)
+
+  try {
+    const { report } = await runExternalChecks([deployment], { required: ['site.deployment'] }, {
+      rootDir: root,
+      env: { ...process.env },
+    })
+    const result = report.results[0].result
+    assert.equal(result._tag, 'Pass')
+    assert.equal((result.evidence as { latest: { approxDeployedSha: string | null } }).latest.approxDeployedSha, null)
   }
   finally {
     rmSync(root, { recursive: true, force: true })
