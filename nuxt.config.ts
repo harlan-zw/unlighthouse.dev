@@ -1,9 +1,8 @@
-import { existsSync } from 'node:fs'
-import { readFile, writeFile } from 'node:fs/promises'
 import { defineNuxtConfig } from 'nuxt/config'
 import { resolve } from 'pathe'
 import { gray, logger } from './logger'
 import { CLOUDFLARE_REQUIRED_SECRETS } from './shared/cloudflare'
+import { optimizeCloudflareRoutes } from './shared/routes-exclude'
 import {
   CARBONADS_SCRIPT_ELEMENT_RE,
   CARBONADS_VENDOR_ORIGIN_RE,
@@ -165,30 +164,9 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
     async (_, nuxt) => {
       nuxt.hooks.hook('nitro:init', (nitro) => {
         nitro.hooks.hook('compiled', async (_nitro) => {
-          const routesPath = resolve(nitro.options.output.publicDir, '_routes.json')
-          if (existsSync(routesPath)) {
-            const routes: { version: number, include: string[], exclude: string[] } = await readFile(routesPath)
-              .then(buffer => JSON.parse(buffer.toString()))
-            const preSize = routes.exclude.length
-            routes.exclude = routes.exclude.filter((path) => {
-              if (path.startsWith('/guide') || path.startsWith('/api-doc') || path.startsWith('/integrations')) {
-                return false
-              }
-              return true
-            })
-            if (!routes.exclude.includes('/guide/*')) {
-              routes.exclude.push('/guide/*')
-            }
-            if (!routes.exclude.includes('/api-doc/*')) {
-              routes.exclude.push('/api-doc/*')
-            }
-            if (!routes.exclude.includes('/integrations/*')) {
-              routes.exclude.push('/integrations/*')
-            }
-            if (preSize !== routes.exclude.length) {
-              logger.info(`Optimizing CloudFlare \`_routes.json\` ${gray(`(${100 - Math.round(routes.exclude.length / preSize * 100)}% smaller)`)}`)
-            }
-            await writeFile(routesPath, JSON.stringify(routes, void 0, 2))
+          const sizes = await optimizeCloudflareRoutes(nitro.options.output.publicDir)
+          if (sizes && sizes.before !== sizes.after) {
+            logger.info(`Optimizing CloudFlare \`_routes.json\` ${gray(`(${100 - Math.round(sizes.after / sizes.before * 100)}% smaller)`)}`)
           }
         })
       })
