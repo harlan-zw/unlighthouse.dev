@@ -200,6 +200,14 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
     requiredSecrets: CLOUDFLARE_REQUIRED_SECRETS,
   },
 
+  // Every page that calls defineOgImage is prerendered, so the worker never
+  // needs the runtime renderer. Shipping it anyway kept satori, resvg and the
+  // yoga wasm bootstrap in the bundle, and /_og/d threw there for a crawler
+  // that no page on this site ever links to.
+  ogImage: {
+    zeroRuntime: true,
+  },
+
   sitemap: {
     zeroRuntime: true,
     exclude: [
