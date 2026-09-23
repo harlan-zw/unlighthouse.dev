@@ -115,7 +115,7 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
    - Preserve Fail as RED and Warn as AMBER. Incomplete coverage remains visible alongside either verdict.
    - Read every \`ci.workflows\` state. \`failure\` means the gate is broken. \`pending\` after a prior failure must be followed until complete. \`missing\` is an observability gap.
    - \`workers.nonOk\` counts Worker exceptions. Compare them with unresolved IDs in the \`sentry.site\` result evidence.
-   - \`deploy.latest.approxDeployedSha\` against \`git.head\` shows unshipped work. Days of drift is a finding.`,
+   - \`deploy.latest.approxDeployedSha\` against \`origin/main\` shows unshipped work. Days of drift is a finding.`,
         },
         {
           id: 'site.anomalies',
