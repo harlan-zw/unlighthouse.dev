@@ -10,6 +10,7 @@ import {
   STACKLESS_FETCH_FAILURE_MESSAGE_RE,
   STACKLESS_NETWORK_ERROR_MESSAGE_RE,
   STACKLESS_NON_ERROR_REJECTION_DROP_RULE,
+  SUFFIXED_FETCH_FAILURE_MESSAGE_RE,
 } from './shared/sentry'
 
 // workerd installs its Node-compatible `console` as soon as anything in the
@@ -55,6 +56,11 @@ export default defineNuxtConfig({
         // removed the node. The failure happens inside the vendor script and no
         // site code can fix it, so the report is noise here.
         CARBONADS_SCRIPT_ELEMENT_RE,
+        // A vendor fetch failure can name its host in the message, e.g.
+        // `TypeError: Failed to fetch (selnor.fun)`, and its frames arrive
+        // anonymous. The stackless rule needs an empty frame list, so this
+        // sighting drops on the message alone.
+        SUFFIXED_FETCH_FAILURE_MESSAGE_RE,
       ],
       // Browser failures that arrive with no stack: the app manifest poll when the
       // network drops, a plain-http page load the browser rejects as a network error,

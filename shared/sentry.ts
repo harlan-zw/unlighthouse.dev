@@ -43,6 +43,20 @@ export const EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE
 export const STACKLESS_FETCH_FAILURE_MESSAGE_RE = /^TypeError: Failed to fetch$/
 
 /**
+ * The vendor fetch failure a browser reports with the host in the message.
+ *
+ * UNLIGHTHOUSE-M records `TypeError: Failed to fetch (selnor.fun)`. The suffix names a
+ * host this site never contacts, so the fetch belongs to a vendor script. Its frames
+ * arrive anonymous: they name no file, so the report cannot be acted on.
+ *
+ * `nuxtSentry.policy.ignoreErrors` uses this pattern. `dropStacklessErrors` cannot carry
+ * it, because that drop needs an empty frame list and anonymous frames are present, so
+ * the gate never fires. The bare `STACKLESS_FETCH_FAILURE_MESSAGE_RE` keeps its own rule,
+ * so the unsuffixed message with a stack still reports.
+ */
+export const SUFFIXED_FETCH_FAILURE_MESSAGE_RE = /^TypeError: Failed to fetch \([^)]+\)$/
+
+/**
  * The network failure a plain-http page load reports with no stack.
  *
  * A page served over plain http rejects a resource load with `NetworkError: A network

@@ -12,6 +12,7 @@ import {
   STACKLESS_FETCH_FAILURE_MESSAGE_RE,
   STACKLESS_NETWORK_ERROR_MESSAGE_RE,
   STACKLESS_NON_ERROR_REJECTION_DROP_RULE,
+  SUFFIXED_FETCH_FAILURE_MESSAGE_RE,
 } from '../shared/sentry.ts'
 
 const upstreamErrors = [
@@ -41,11 +42,18 @@ const clientPolicy: ReportPolicy = {
   dataCollection: 'scrubbed',
   dropStatus: [],
   dropTransient: false,
-  ignoreErrors: [{
-    _tag: 'pattern',
-    source: CARBONADS_SCRIPT_ELEMENT_RE.source,
-    flags: CARBONADS_SCRIPT_ELEMENT_RE.flags,
-  }],
+  ignoreErrors: [
+    {
+      _tag: 'pattern',
+      source: CARBONADS_SCRIPT_ELEMENT_RE.source,
+      flags: CARBONADS_SCRIPT_ELEMENT_RE.flags,
+    },
+    {
+      _tag: 'pattern',
+      source: SUFFIXED_FETCH_FAILURE_MESSAGE_RE.source,
+      flags: SUFFIXED_FETCH_FAILURE_MESSAGE_RE.flags,
+    },
+  ],
   dropStacklessErrors: [
     {
       _tag: 'pattern',
@@ -94,6 +102,23 @@ test('keeps the same failure when a stack names site code', () => {
   const report = errorReport('TypeError', 'Failed to fetch', [{ filename: 'https://unlighthouse.dev/_nuxt/entry.js' }])
 
   assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'send' })
+})
+
+// UNLIGHTHOUSE-M is a vendor fetch failure whose message carries the host it tried, and
+// whose frames arrive anonymous. The frame is present but names no file, so the stackless
+// rule's empty frame list never fires.
+test('drops the host suffixed fetch failure whose frames are anonymous', () => {
+  const report: ErrorReport = {
+    exception: {
+      values: [{
+        type: 'TypeError',
+        value: 'Failed to fetch (selnor.fun)',
+        stacktrace: { frames: [{}] },
+      }],
+    },
+  }
+
+  assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'drop', rule: 'ignore-message' })
 })
 
 test('drops the plain-http network error that carries no stack', () => {
