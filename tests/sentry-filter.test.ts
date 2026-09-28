@@ -121,6 +121,24 @@ test('drops the host suffixed fetch failure whose frames are anonymous', () => {
   assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'drop', rule: 'ignore-message' })
 })
 
+// Firefox words a same-origin fetch failure with the full site URL in the message,
+// e.g. `TypeError: Failed to fetch (https://unlighthouse.dev/_api/measure)`. A real
+// site fetch error can carry anonymous frames too, and it is a defect here, so it
+// must still report.
+test('keeps a site origin fetch failure whose frames are anonymous', () => {
+  const report: ErrorReport = {
+    exception: {
+      values: [{
+        type: 'TypeError',
+        value: 'Failed to fetch (https://unlighthouse.dev/_api/measure)',
+        stacktrace: { frames: [{}] },
+      }],
+    },
+  }
+
+  assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'send' })
+})
+
 test('drops the plain-http network error that carries no stack', () => {
   const decision = decideReport(errorReport('NetworkError', 'A network error occurred.', []), undefined, clientPolicy)
 
