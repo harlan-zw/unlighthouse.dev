@@ -5,8 +5,8 @@ import { evaluateWorkers } from '../lib/evidence.mjs'
 export default defineExternalCheck({
   id: 'cloudflare.workers',
   async run(context) {
-    const token = context.env.CLOUDFLARE_API_TOKEN || context.env.CF_API_TOKEN
-      || (await wrangler(context, ['auth', 'token', '--json'])).token
+    const token = context.env.CLOUDFLARE_API_TOKEN ?? context.env.CF_API_TOKEN
+      ?? (await wrangler(context, ['auth', 'token', '--json'])).token
     if (!token)
       return unavailable('Cloudflare read credential is unavailable.')
     const query = `query { viewer { accounts(filter: {accountTag: "5904138d55ca25d5670dca6adf99894e"}) { workersInvocationsAdaptive(limit: 100, filter: {scriptName: "unlighthouse-dev", datetime_geq: "${context.since.toISOString()}", datetime_leq: "${context.now.toISOString()}"}) { dimensions { scriptName status } sum { requests errors } quantiles { cpuTimeP99 } } } } }`
