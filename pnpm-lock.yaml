@@ -193,8 +193,8 @@ catalogs:
       specifier: ^2.5.3
       version: 2.5.3
     nuxt-og-image:
-      specifier: ^6.10.2
-      version: 6.10.2
+      specifier: ^6.10.3
+      version: 6.10.3
     nuxt-schema-org:
       specifier: ^6.3.1
       version: 6.3.1
@@ -492,7 +492,7 @@ importers:
         version: 2.5.3(magicast@0.5.5)
       nuxt-og-image:
         specifier: 'catalog:'
-        version: 6.10.2(de213e966370f55d4fdd99e1892b774a)
+        version: 6.10.3(de213e966370f55d4fdd99e1892b774a)
       nuxt-schema-org:
         specifier: 'catalog:'
         version: 6.3.1(4be1987cf294a99f9441dc18f3b36c01)
@@ -7335,8 +7335,8 @@ packages:
       zod:
         optional: true
 
-  nuxt-og-image@6.10.2:
-    resolution: {integrity: sha512-BbpddY6Qht/iEDEWsvj6dqBIquI4oNGJf7NFx3EiNoB9cY0OgqvHvO1HbNG0JNUxLKw6OukY3ePnc5HR/3saAw==}
+  nuxt-og-image@6.10.3:
+    resolution: {integrity: sha512-XirhtvZZNwydtoB6WnOCYiM8T9GsXgBIlKGA0moRbreectJDqHXejjF3nmEwR82uyX/YevFnhRUsryOw1DzOhQ==}
     engines: {node: '>=18.0.0'}
     hasBin: true
     peerDependencies:
@@ -17418,7 +17418,7 @@ snapshots:
       - vue
       - webpack
 
-  nuxt-og-image@6.10.2(de213e966370f55d4fdd99e1892b774a):
+  nuxt-og-image@6.10.3(de213e966370f55d4fdd99e1892b774a):
     dependencies:
       '@clack/prompts': 1.8.1
       '@nuxt/kit': 4.5.2(magic-string@1.4.2)(magicast@0.5.5)(oxc-parser@0.151.0)(rolldown@1.2.4)(unplugin@3.4.0(esbuild@0.28.2)(rolldown@1.2.4)(rollup@4.62.4)(vite@8.2.1(@types/node@26.5.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.50.0)(yaml@2.9.0)))
