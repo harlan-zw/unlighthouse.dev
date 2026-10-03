@@ -23,10 +23,14 @@ const { data: stats } = await useFetch('/api/stats/summary.json', {
 
 const { data: sponsors } = await useGitHubSponsors()
 
-const { target: demoFrameRoot, isVisible: shouldLoadDemoFrame } = useVisibleWhenNearViewport({
-  rootMargin: '250px 0px',
-  idleTimeout: 8000,
-})
+const shouldLoadDemoFrame = ref(false)
+const demoFrame = ref<HTMLIFrameElement>()
+
+async function loadDemo() {
+  shouldLoadDemoFrame.value = true
+  await nextTick()
+  demoFrame.value?.focus()
+}
 
 const exploreLinks = [
   {
@@ -115,20 +119,30 @@ const exploreLinks = [
                   localhost:5678
                 </div>
               </div>
-              <div class="w-[68px]" />
+              <NuxtLink to="https://unlighthouse-demo.netlify.app/" external target="_blank" class="text-sm text-neutral-700 dark:text-neutral-300 underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-violet-600">
+                Open demo
+              </NuxtLink>
             </div>
 
             <!-- Demo iframe -->
-            <div ref="demoFrameRoot" class="block w-full h-[70vh] min-h-[500px] bg-white">
-              <ClientOnly>
-                <iframe
-                  v-if="shouldLoadDemoFrame"
-                  src="https://unlighthouse-demo.netlify.app/"
-                  loading="lazy"
-                  class="block w-full h-full bg-white"
-                  title="Unlighthouse Demo Report"
-                />
-              </ClientOnly>
+            <div class="block w-full h-[70vh] min-h-[500px] bg-neutral-50 dark:bg-neutral-950">
+              <iframe
+                v-if="shouldLoadDemoFrame"
+                ref="demoFrame"
+                src="https://unlighthouse-demo.netlify.app/"
+                tabindex="0"
+                class="block w-full h-full bg-white"
+                title="Unlighthouse Demo Report"
+              />
+              <div v-else class="flex h-full flex-col items-center justify-center gap-6 px-6 text-center">
+                <UIcon name="i-carbon-dashboard" class="size-12 text-violet-600 dark:text-violet-400" />
+                <h2 class="text-2xl font-bold text-neutral-900 dark:text-white">
+                  Unlighthouse Demo Report
+                </h2>
+                <UButton size="xl" @click="loadDemo">
+                  Load live demo
+                </UButton>
+              </div>
             </div>
           </div>
         </div>
