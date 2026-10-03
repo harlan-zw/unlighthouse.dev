@@ -14,7 +14,7 @@ export default defineExternalCheck({
     const fields = 'databaseId,workflowName,displayTitle,headSha,status,conclusion,createdAt,updatedAt,url'
     const rows = []
     for (const name of names)
-      rows.push(...await commandJson(context, 'gh', ['run', 'list', '--workflow', name, '--limit', '10', '--json', fields]))
+      rows.push(...await commandJson(context, 'gh', ['run', 'list', '--workflow', name, '--branch', 'main', '--limit', '10', '--json', fields]))
     return evaluateWorkflows(summarizeWorkflowRuns(rows, names))
   },
 })

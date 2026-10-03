@@ -1,9 +1,8 @@
-import { existsSync } from 'node:fs'
-import { readFile, writeFile } from 'node:fs/promises'
 import { defineNuxtConfig } from 'nuxt/config'
 import { resolve } from 'pathe'
 import { gray, logger } from './logger'
 import { CLOUDFLARE_REQUIRED_SECRETS } from './shared/cloudflare'
+import { optimizeCloudflareRoutes } from './shared/routes-exclude'
 import {
   CARBONADS_SCRIPT_ELEMENT_RE,
   CARBONADS_VENDOR_ORIGIN_RE,
@@ -11,6 +10,7 @@ import {
   STACKLESS_FETCH_FAILURE_MESSAGE_RE,
   STACKLESS_NETWORK_ERROR_MESSAGE_RE,
   STACKLESS_NON_ERROR_REJECTION_DROP_RULE,
+  SUFFIXED_FETCH_FAILURE_MESSAGE_RE,
 } from './shared/sentry'
 
 // workerd installs its Node-compatible `console` as soon as anything in the
@@ -56,6 +56,11 @@ export default defineNuxtConfig({
         // removed the node. The failure happens inside the vendor script and no
         // site code can fix it, so the report is noise here.
         CARBONADS_SCRIPT_ELEMENT_RE,
+        // A vendor fetch failure can name its host in the message, e.g.
+        // `TypeError: Failed to fetch (selnor.fun)`, and its frames arrive
+        // anonymous. The stackless rule needs an empty frame list, so this
+        // sighting drops on the message alone.
+        SUFFIXED_FETCH_FAILURE_MESSAGE_RE,
       ],
       // Browser failures that arrive with no stack: the app manifest poll when the
       // network drops, a plain-http page load the browser rejects as a network error,
@@ -115,7 +120,7 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
    - Preserve Fail as RED and Warn as AMBER. Incomplete coverage remains visible alongside either verdict.
    - Read every \`ci.workflows\` state. \`failure\` means the gate is broken. \`pending\` after a prior failure must be followed until complete. \`missing\` is an observability gap.
    - \`workers.nonOk\` counts Worker exceptions. Compare them with unresolved IDs in the \`sentry.site\` result evidence.
-   - \`deploy.latest.approxDeployedSha\` against \`git.head\` shows unshipped work. Days of drift is a finding.`,
+   - \`deploy.latest.approxDeployedSha\` against \`origin/main\` shows unshipped work. Days of drift is a finding.`,
         },
         {
           id: 'site.anomalies',
@@ -165,30 +170,9 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
     async (_, nuxt) => {
       nuxt.hooks.hook('nitro:init', (nitro) => {
         nitro.hooks.hook('compiled', async (_nitro) => {
-          const routesPath = resolve(nitro.options.output.publicDir, '_routes.json')
-          if (existsSync(routesPath)) {
-            const routes: { version: number, include: string[], exclude: string[] } = await readFile(routesPath)
-              .then(buffer => JSON.parse(buffer.toString()))
-            const preSize = routes.exclude.length
-            routes.exclude = routes.exclude.filter((path) => {
-              if (path.startsWith('/guide') || path.startsWith('/api-doc') || path.startsWith('/integrations')) {
-                return false
-              }
-              return true
-            })
-            if (!routes.exclude.includes('/guide/*')) {
-              routes.exclude.push('/guide/*')
-            }
-            if (!routes.exclude.includes('/api-doc/*')) {
-              routes.exclude.push('/api-doc/*')
-            }
-            if (!routes.exclude.includes('/integrations/*')) {
-              routes.exclude.push('/integrations/*')
-            }
-            if (preSize !== routes.exclude.length) {
-              logger.info(`Optimizing CloudFlare \`_routes.json\` ${gray(`(${100 - Math.round(routes.exclude.length / preSize * 100)}% smaller)`)}`)
-            }
-            await writeFile(routesPath, JSON.stringify(routes, void 0, 2))
+          const sizes = await optimizeCloudflareRoutes(nitro.options.output.publicDir)
+          if (sizes && sizes.before !== sizes.after) {
+            logger.info(`Optimizing CloudFlare \`_routes.json\` ${gray(`(${100 - Math.round(sizes.after / sizes.before * 100)}% smaller)`)}`)
           }
         })
       })
@@ -401,6 +385,8 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
       },
     },
     prerender: {
+      // Bound queued OG renders independently of the build host's CPU count.
+      concurrency: 4,
       autoSubfolderIndex: false,
       crawlLinks: true,
       routes: ['/', '/404.html'],
