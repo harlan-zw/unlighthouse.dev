@@ -13,11 +13,11 @@ definePageMeta({
 const faqs = [
   {
     question: 'What is Time to First Byte (TTFB)?',
-    answer: 'Time to First Byte (TTFB) measures how long it takes for the browser to receive the first byte of response from the server after making a request. It includes DNS lookup, TCP connection, TLS handshake, and server processing time. A good TTFB is under 800ms.',
+    answer: 'Time to First Byte (TTFB) measures navigation start to the first response byte. It includes redirects, applicable service worker startup, connection setup, and server work. Field guidance uses 800ms or less as good at the 75th percentile. This checker\'s lab server-response measurement excludes DNS and redirects, so it covers only part of navigation TTFB.',
   },
   {
     question: 'Why is TTFB important for performance?',
-    answer: 'TTFB directly impacts all subsequent metrics like LCP and FCP. A slow server response delays everything—the browser can\'t start parsing HTML, downloading resources, or rendering content until TTFB completes. Improving TTFB creates a faster foundation for your entire page load.',
+    answer: 'A slow document response can delay FCP and LCP. TTFB is a diagnostic metric, not a Core Web Vital or a direct component of the Lighthouse Performance score. Early Hints and streamed HTML can deliver response bytes before the full document. Measure the LCP breakdown after a change; TTFB and LCP improvements can differ.',
   },
   {
     question: 'What causes slow TTFB?',

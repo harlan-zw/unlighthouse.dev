@@ -4,6 +4,8 @@
 
 These primary pages support the glossary correction and its index classification.
 The correction separates navigation TTFB, server response latency, and the Lighthouse Performance score.
+The same sources support the slow-server-response guide and the TTFB Checker's definition and performance FAQs.
+The guide does not promise matching TTFB and LCP improvements.
 
 | Claim | Source | Scope |
 | --- | --- | --- |
