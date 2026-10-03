@@ -1,5 +1,23 @@
 # Verified article claims
 
+## TTFB correction, 4 October 2026
+
+These primary pages support the glossary correction and its index classification.
+The correction separates navigation TTFB, server response latency, and the Lighthouse Performance score.
+
+| Claim | Source | Scope |
+| --- | --- | --- |
+| TTFB runs from navigation start to the first response byte. It includes connection setup and server work. | <https://web.dev/articles/ttfb> | Service worker startup and redirects can contribute. Early Hints can precede the final document response. |
+| Field guidance uses good ≤800ms and poor >1800ms at the 75th percentile. TTFB is not a Core Web Vital. | <https://web.dev/articles/ttfb> | Diagnostic guidance does not decide the Core Web Vitals assessment. |
+| Document request latency checks redirects, compression, and server response above 600ms. | <https://developer.chrome.com/docs/performance/insights/document-latency> | Server response excludes DNS and redirects. It measures part of navigation TTFB. |
+| TTFB does not directly contribute to the Lighthouse Performance score. | <https://developer.chrome.com/docs/lighthouse/performance/performance-scoring> | The documented weighted metrics exclude TTFB. |
+| DevTools Waiting (TTFB) includes a round trip and server processing. | <https://developer.chrome.com/docs/devtools/network/reference/#timing-explanation> | Other connection phases have separate timing rows. |
+| curl time_starttransfer reports seconds until the first byte. | <https://curl.se/docs/manpage.html#-w> | The article command makes one request without following redirects. |
+| Slow server work, caching, redirects, and network distance need separate checks. | <https://web.dev/articles/optimize-ttfb> | Repeat comparable requests. A lab request does not establish field percentiles. |
+
+Writing review removed the original hyphen dash and unsupported universal claims.
+The article leads with measurement scope, then gives a request example and cause-specific checks.
+
 Pilot seed, checked 15 September 2026 by request_content_lead through opened primary pages.
 sources_reviewer independently reopened the pilot sources and accepted this seed on 15 September 2026.
 Status identifies evidence, not publication approval.

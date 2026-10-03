@@ -1,6 +1,6 @@
 ---
 title: "What is time to first byte (TTFB)?"
-description: "TTFB measures server response time. Learn what it is, thresholds, and how to optimize it."
+description: "Learn what time to first byte measures, the 800ms field guideline, and how to find delays in connections, redirects, and server work."
 keywords:
   - what is time to first byte
   - ttfb meaning
@@ -8,6 +8,8 @@ keywords:
 navigation:
   title: "TTFB"
 relatedPages:
+  - path: /tools/ttfb-checker
+    title: TTFB Checker
   - path: /glossary/fcp
     title: First Contentful Paint (FCP)
   - path: /glossary/lcp
@@ -16,52 +18,56 @@ relatedPages:
     title: LCP Guide
 ---
 
-Time to First Byte (TTFB) measures how long until the browser receives the first byte from the server. It's a foundational metric - nothing can render until this completes.
+Time to First Byte (TTFB) measures the delay from navigation start to the first response byte. It includes connection setup and server work. A slow document response can delay [FCP](/glossary/fcp) and [LCP](/glossary/lcp).
+
+TTFB is a diagnostic metric. It is not one of the [Core Web Vitals](/learn-lighthouse/core-web-vitals).
 
 ## Thresholds
 
-| Metric | Good | Needs Improvement | Poor |
-|--------|------|-------------------|------|
-| **Core Web Vitals** | ≤ 800ms | 800ms - 1800ms | > 1800ms |
-| **Lighthouse Audit** | < 600ms | 600ms - 1200ms | > 1200ms |
+| Field TTFB | Rating |
+| --- | --- |
+| ≤ 800ms | Good |
+| > 800ms and ≤ 1800ms | Needs improvement |
+| > 1800ms | Poor |
 
-Aim for a field score of 800 milliseconds or less at the 75th percentile to pass the [Google threshold](https://web.dev/articles/ttfb). However, the Lighthouse audit requires a server response time under **600ms** to pass the lab check.
+Use these [Google guidelines](https://web.dev/articles/ttfb) at the 75th percentile of field measurements. They guide diagnosis, rather than decide the Core Web Vitals assessment.
+
+Lighthouse's [Document request latency insight](https://developer.chrome.com/docs/performance/insights/document-latency) flags server responses above **600ms**. It also checks redirects and compression. That server response measurement excludes DNS and redirects, so it covers only part of navigation TTFB. TTFB does not directly contribute to the [Lighthouse Performance score](https://developer.chrome.com/docs/lighthouse/performance/performance-scoring).
 
 ## What TTFB includes
 
 - Redirect time
+- Service worker startup, when applicable
 - DNS lookup
 - TCP connection
 - TLS negotiation
 - Server processing time
 
-Sites with poor [LCP](/glossary/lcp) have an [average TTFB of 2,270ms](https://almanac.httparchive.org/en/2024/performance) - nearly consuming the entire 2.5s LCP budget.
-
-## Why it matters
-
-TTFB is the starting point for all other metrics. High TTFB delays [FCP](/glossary/fcp), [LCP](/glossary/lcp), and everything else. For SPAs, fast TTFB is especially critical since client-side rendering adds more time.
-
-## Common issues
-
-- Slow server processing / database queries
-- No caching (regenerating cacheable responses)
-- Geographic distance without CDN
-- Too many redirects
-
-## Improve TTFB
-
-- Use a CDN
-- Enable caching at all levels
-- Optimize backend code
-- Use HTTP/2 or HTTP/3
-- Minimize redirects
+TTFB does not include downloading the full response body. With 103 Early Hints, the first response byte can arrive before the final document response.
 
 ## Measure TTFB
 
-- Chrome DevTools Network panel ("Waiting for server response")
-- [PageSpeed Insights](https://pagespeed.web.dev/)
-- WebPageTest waterfall
+Use the [TTFB Checker](/tools/ttfb-checker) to compare available CrUX field data with a lab server-response measurement. The lab measurement excludes connection setup and redirects. Select the URL or origin scope and device. Missing URL data does not establish fast response times.
 
-::note
-TTFB directly impacts [LCP](/glossary/lcp), a Core Web Vital. Slow TTFB makes good LCP nearly impossible.
-::
+For one browser request, open DevTools **Network**, select the document, then open **Timing**. [Waiting (TTFB)](https://developer.chrome.com/docs/devtools/network/reference/#timing-explanation) includes a network round trip and server processing. Inspect DNS, connection setup and redirects separately.
+
+For a repeatable command-line request:
+
+```sh
+curl --silent --show-error --output /dev/null \
+  --write-out 'first byte: %{time_starttransfer}s\ntotal: %{time_total}s\n' \
+  https://example.com/
+```
+
+[`time_starttransfer`](https://curl.se/docs/manpage.html#-w) reports seconds until the first response byte. This command measures one request from your machine. It does not follow redirects or measure a field percentile.
+
+## Improve the slow phase
+
+| If you find | Check next |
+| --- | --- |
+| Redirect delays | Link directly to the final URL |
+| Slow connection setup | DNS, connection reuse, and distance to the server |
+| Long server processing | Database queries, rendering work, and cold starts |
+| Slow uncached responses | Cache eligibility and cache misses |
+
+Google's [TTFB optimization guide](https://web.dev/articles/optimize-ttfb) explains these checks. Compare the same URL and test conditions after a change. If TTFB improves but LCP stays slow, inspect [resource loading and render delay](/learn-lighthouse/lcp).

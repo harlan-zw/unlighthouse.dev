@@ -475,6 +475,7 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
   },
 
   routeRules: {
+    '/guide/config.html': { redirect: { to: '/guide/guides/config', statusCode: 301 } },
     '/api/config': { redirect: { to: '/api-doc/config', statusCode: 301 } },
     '/api/glossary': { redirect: { to: '/api-doc/glossary', statusCode: 301 } },
     '/guide/getting-started/unlighthouse-cli': { redirect: { to: '/guide/getting-started/installation', statusCode: 301 } },
