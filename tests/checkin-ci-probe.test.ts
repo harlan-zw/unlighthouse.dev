@@ -7,6 +7,36 @@ import { it } from 'node:test'
 import { runExternalChecks } from '@harlan-zw/nuxt-checkin/external'
 import ci from '../checks/external/ci.mjs'
 
+it('reads the gate from main runs only, so a red PR run cannot decide the state', async () => {
+  const root = mkdtempSync(join(tmpdir(), 'checkin-ci-'))
+  mkdirSync(join(root, '.github/workflows'), { recursive: true })
+  writeFileSync(join(root, '.github/workflows/deploy.yml'), 'name: Deploy\n')
+  writeFileSync(join(root, 'gh'), `#!/usr/bin/env node
+const args = process.argv.slice(2)
+const branchFlag = args.indexOf('--branch')
+const branch = branchFlag === -1 ? null : args[branchFlag + 1]
+const runs = [
+  { workflowName: 'Deploy', headSha: 'pr-sha', status: 'completed', conclusion: 'failure', headBranch: 'feature' },
+  { workflowName: 'Deploy', headSha: 'main-sha', status: 'completed', conclusion: 'success', headBranch: 'main' },
+]
+console.log(JSON.stringify(branch ? runs.filter(run => run.headBranch === branch) : runs))
+`)
+  chmodSync(join(root, 'gh'), 0o755)
+  try {
+    const { report, exitCode } = await runExternalChecks([ci], { required: ['repository.ci'] }, {
+      rootDir: root,
+      env: { ...process.env, PATH: `${root}:${process.env.PATH}` },
+    })
+    const [workflow] = report.results[0].result.evidence.workflows
+    assert.equal(workflow.latestRun.headSha, 'main-sha')
+    assert.equal(workflow.state._tag, 'success')
+    assert.equal(exitCode, 0)
+  }
+  finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})
+
 it('keeps per-workflow results when the flat run listing is rate limited', async () => {
   const root = mkdtempSync(join(tmpdir(), 'checkin-ci-'))
   mkdirSync(join(root, '.github/workflows'), { recursive: true })

@@ -12,6 +12,7 @@ import {
   STACKLESS_FETCH_FAILURE_MESSAGE_RE,
   STACKLESS_NETWORK_ERROR_MESSAGE_RE,
   STACKLESS_NON_ERROR_REJECTION_DROP_RULE,
+  SUFFIXED_FETCH_FAILURE_MESSAGE_RE,
 } from '../shared/sentry.ts'
 
 const upstreamErrors = [
@@ -41,11 +42,18 @@ const clientPolicy: ReportPolicy = {
   dataCollection: 'scrubbed',
   dropStatus: [],
   dropTransient: false,
-  ignoreErrors: [{
-    _tag: 'pattern',
-    source: CARBONADS_SCRIPT_ELEMENT_RE.source,
-    flags: CARBONADS_SCRIPT_ELEMENT_RE.flags,
-  }],
+  ignoreErrors: [
+    {
+      _tag: 'pattern',
+      source: CARBONADS_SCRIPT_ELEMENT_RE.source,
+      flags: CARBONADS_SCRIPT_ELEMENT_RE.flags,
+    },
+    {
+      _tag: 'pattern',
+      source: SUFFIXED_FETCH_FAILURE_MESSAGE_RE.source,
+      flags: SUFFIXED_FETCH_FAILURE_MESSAGE_RE.flags,
+    },
+  ],
   dropStacklessErrors: [
     {
       _tag: 'pattern',
@@ -92,6 +100,41 @@ test('drops the app manifest fetch failure that carries no stack', () => {
 
 test('keeps the same failure when a stack names site code', () => {
   const report = errorReport('TypeError', 'Failed to fetch', [{ filename: 'https://unlighthouse.dev/_nuxt/entry.js' }])
+
+  assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'send' })
+})
+
+// UNLIGHTHOUSE-M is a vendor fetch failure whose message carries the host it tried, and
+// whose frames arrive anonymous. The frame is present but names no file, so the stackless
+// rule's empty frame list never fires.
+test('drops the host suffixed fetch failure whose frames are anonymous', () => {
+  const report: ErrorReport = {
+    exception: {
+      values: [{
+        type: 'TypeError',
+        value: 'Failed to fetch (selnor.fun)',
+        stacktrace: { frames: [{}] },
+      }],
+    },
+  }
+
+  assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'drop', rule: 'ignore-message' })
+})
+
+// Firefox words a same-origin fetch failure with the full site URL in the message,
+// e.g. `TypeError: Failed to fetch (https://unlighthouse.dev/_api/measure)`. A real
+// site fetch error can carry anonymous frames too, and it is a defect here, so it
+// must still report.
+test('keeps a site origin fetch failure whose frames are anonymous', () => {
+  const report: ErrorReport = {
+    exception: {
+      values: [{
+        type: 'TypeError',
+        value: 'Failed to fetch (https://unlighthouse.dev/_api/measure)',
+        stacktrace: { frames: [{}] },
+      }],
+    },
+  }
 
   assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'send' })
 })

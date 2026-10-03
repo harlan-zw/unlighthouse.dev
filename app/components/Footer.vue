@@ -162,7 +162,7 @@ const copyrightYear = useState('footer-copyright-year', () => new Date().getFull
       <UContainer>
         <div class="py-10">
           <!-- eslint-disable-next-line harlanzw/link-lowercase -->
-          Copyright © 2023-{{ copyrightYear }} Harlan Wilton · <a href="https://github.com/harlan-zw/unlighthouse/blob/main/LICENSE.md">MIT License</a>
+          Copyright © 2023-{{ copyrightYear }} Harlan Wilton · <a href="https://github.com/harlan-zw/unlighthouse/blob/main/LICENSE.md">MIT License</a> · <a href="https://gscdump.com" target="_blank" rel="noopener">gscdump</a>
         </div>
       </UContainer>
     </div>
