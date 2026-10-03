@@ -1,5 +1,6 @@
 import { titleCase } from 'scule'
 import { modifyRelativeDocLinksWithFramework } from '~~/utils/content'
+import { docsBranch, versionedDocPath } from '~~/utils/docs-version'
 import { useAsyncData } from '#imports'
 
 export async function useStats() {
@@ -17,6 +18,8 @@ function getCollectionForPath(path: string) {
     return 'glossary' as const
   if (path.startsWith('/learn-lighthouse'))
     return 'learnLighthouse' as const
+  if (path.startsWith('/v1/'))
+    return 'beta' as const
   return 'root' as const
 }
 
@@ -60,6 +63,7 @@ export async function useCurrentDocPage() {
     const lastCommitData = await $fetch<LastCommit>(`/api/github/last-file-commit`, {
       query: {
         file: `docs/${pageData.stem}`,
+        branch: docsBranch(route.path),
       },
     }).catch((error) => {
       console.warn('[docs] Failed to load optional commit metadata', error)
@@ -81,12 +85,12 @@ export async function useCurrentDocPage() {
   }
 
   const pageData = structuredClone(toRaw(data.value.page))
-  modifyRelativeDocLinksWithFramework(pageData.body.nodes)
+  modifyRelativeDocLinksWithFramework(pageData.body.nodes, collection === 'beta')
 
   if (Array.isArray(pageData.relatedPages)) {
     pageData.relatedPages = pageData.relatedPages.map((page: any) => ({
       ...page,
-      path: page.path?.replace(/\/index$/, '') || page.path,
+      path: collection === 'beta' && /^\/(?:guide|integrations|api-doc|architecture|self-host-cloudflare|integration-deprecations)(?:\/|$)/.test(page.path || '') ? versionedDocPath(page.path.replace(/\/index$/, ''), 'beta') : page.path?.replace(/\/index$/, '') || page.path,
     }))
   }
 

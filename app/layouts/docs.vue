@@ -1,10 +1,23 @@
 <script lang="ts" setup>
 import { usePreferredReducedMotion } from '@vueuse/core'
 import { animate } from 'motion-v'
+import { docsVersion, switchDocsVersion, unversionedDocPath, versionedDocPath } from '~~/utils/docs-version'
 import { useIsHydrating } from '~/composables/data'
 
 const route = useRoute()
 const navOpen = ref(false)
+const version = computed(() => docsVersion(route.path))
+const { data: versionPaths } = await useAsyncData('docs-version-paths', async () => {
+  const [stable, beta] = await Promise.all([queryCollection('root').select('path').all(), queryCollection('beta').select('path').all()])
+  return [...stable, ...beta].map(page => page.path)
+})
+prerenderRoutes(versionPaths.value || [])
+
+function changeVersion(value: unknown) {
+  if (value === 'stable' || value === 'beta')
+    return navigateTo(switchDocsVersion(route.path, value, versionPaths.value || []))
+}
+const versions = [{ label: '0.x stable', value: 'stable' }, { label: 'v1 beta', value: 'beta' }]
 const navigation = inject<Ref<any[]>>('navigation')
 
 watch(() => route.path, () => {
@@ -33,20 +46,20 @@ const subSectionLinks = computed(() => {
   return [
     {
       label: 'User Guide',
-      to: navigation.value.find(m => m.path.endsWith('/guide'))?.children?.[0]?.children?.[0]?.path || '/guide/getting-started/how-it-works',
-      active: route.path.startsWith('/guide'),
+      to: navigation.value.find(m => m.path.endsWith('/guide'))?.children?.[0]?.children?.[0]?.path || versionedDocPath('/guide/getting-started/installation', version.value),
+      active: unversionedDocPath(route.path).startsWith('/guide'),
     },
     {
       label: 'Integrations',
       icon: 'i-carbon-plug',
-      to: navigation.value.find(m => m.path.endsWith('/integrations'))?.children?.[0]?.path || '/integrations/cli',
-      active: route.path.startsWith('/integrations'),
+      to: navigation.value.find(m => m.path.endsWith('/integrations'))?.children?.[0]?.path || versionedDocPath('/integrations/cli', version.value),
+      active: unversionedDocPath(route.path).startsWith('/integrations'),
     },
     {
       label: 'API',
       icon: 'i-heroicons-code-bracket',
-      to: navigation.value.find(m => m.path.endsWith('/api-doc'))?.children?.[0]?.path || '/api-doc',
-      active: route.path.startsWith('/api-doc'),
+      to: navigation.value.find(m => m.path.endsWith('/api-doc'))?.children?.[0]?.path || versionedDocPath('/api-doc', version.value),
+      active: unversionedDocPath(route.path).startsWith('/api-doc'),
     },
   ].filter(i => !!i.to)
 })
@@ -55,11 +68,11 @@ const subSectionLinks = computed(() => {
 <template>
   <div>
     <div class="h-12 border-b border-(--ui-border)">
-      <div class="relative max-w-[1452px] px-6 mx-auto flex h-full justify-between lg:justify-start items-center w-full">
-        <button aria-label="Open Navigation Menu" class="font-semibold font-sm lg:hidden flex items-center gap-2 cursor-pointer" @click="navOpen = true">
-          <UIcon name="i-carbon-menu" class="w-6 h-6" />
+      <div class="relative max-w-[1452px] px-6 mx-auto flex h-full justify-between lg:justify-start items-center gap-3 w-full">
+        <button aria-label="Open Navigation Menu" class="min-h-11 min-w-11 font-semibold font-sm lg:hidden flex items-center gap-2 cursor-pointer" @click="navOpen = true">
+          <UIcon name="i-carbon-menu" class="w-6 h-6 min-h-11" />
         </button>
-        <div class="h-full flex text-sm space-x-6">
+        <div class="hidden sm:flex h-full text-sm gap-4 flex-1">
           <div v-for="item in subSectionLinks" :key="item.to">
             <NuxtLink
               :class="item.active ? 'group relative h-full flex items-center text-gray-800 dark:text-gray-200 font-semibold' : 'group relative h-full flex items-center font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-300'"
@@ -70,6 +83,7 @@ const subSectionLinks = computed(() => {
             </NuxtLink>
           </div>
         </div>
+        <USelect :model-value="version" :items="versions" value-key="value" aria-label="Documentation version" class="w-32 shrink-0" :ui="{ base: 'min-h-11' }" @update:model-value="changeVersion" />
       </div>
     </div>
     <div class="relative mb-20 px-5">
@@ -90,6 +104,7 @@ const subSectionLinks = computed(() => {
     <UDrawer v-model:open="navOpen">
       <template #content>
         <div class="px-5">
+          <USelect :model-value="version" :items="versions" value-key="value" aria-label="Documentation version" class="w-full mt-5" @update:model-value="changeVersion" />
           <div class="space-y-2 mb-3 mt-5 px-5">
             <div class="flex gap-4 justify-center">
               <NuxtLink

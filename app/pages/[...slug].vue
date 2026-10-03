@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { titleCase } from 'scule'
+import { docsBranch } from '~~/utils/docs-version'
 import { buildSurroundLinks } from '~~/utils/surround-links'
 import { getLastPathSegment, getPathSegments } from '~~/utils/urls'
 import { useCurrentDocPage } from '~/composables/data'
@@ -58,7 +59,7 @@ prerenderRoutes(`${route.path}.md`)
 const repoLinks = computed(() => [
   {
     label: 'Edit this page',
-    to: `https://github.com/harlan-zw/unlighthouse/edit/main/docs/${String(page.value?.stem || '')}.md`,
+    to: `https://github.com/harlan-zw/unlighthouse/edit/${docsBranch(route.path)}/docs/${String(page.value?.stem || '')}.md`,
     target: '_blank',
   },
   {
@@ -82,11 +83,10 @@ watchEffect(() => {
   <div class="flex justify-between w-full">
     <div class="max-w-[66ch] ml-auto md:ml-0 md:mr-auto w-full">
       <UPageHeader
-        :title="page?.title" :headline="headline" class="text-balance pt-4" :links="!['overview', 'intro-to-unhead'].includes(route.path.split('/').pop() || '') ? [
-          { label: 'Copy for LLMs', to: repoLinks[1]?.to || '', icon: 'i-catppuccin-markdown', target: '_blank' },
-        ] : []"
+        :title="page?.title" :headline="headline" class="text-balance pt-4"
         :ui="{ title: 'leading-normal' }"
       >
+        <DocsPageActions :edit-url="repoLinks[0]!.to" :markdown-url="repoLinks[1]!.to" />
         <ClientOnly>
           <div v-if="lastCommit?.author" class="mt-3 text-sm">
             <div class="text-dimmed">

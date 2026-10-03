@@ -1,12 +1,9 @@
-import { existsSync } from 'node:fs'
 import { defineCollection, defineContentConfig } from '@harlan-zw/comark-content'
 import { defineRobotsSchema } from '@nuxtjs/robots/content'
 import { defineSitemapSchema } from '@nuxtjs/sitemap/content'
 import { defineOgImageSchema } from 'nuxt-og-image/content'
 import { defineSchemaOrgSchema } from 'nuxt-schema-org/content'
-import { relative, resolve } from 'pathe'
 import { z } from 'zod'
-import { logger } from './logger.ts'
 
 const schema = z.object({
   icon: z.string().optional(),
@@ -27,36 +24,18 @@ const schema = z.object({
   })).optional(),
 })
 
-function resolvableUnlighthouseCollection() {
-  const homeDir = process.env.HOME || process.env.USERPROFILE || process.cwd()
-  const localDirPaths = new Set([
-    resolve(homeDir, 'pkg', 'unlighthouse-alt', 'docs'),
-    resolve(homeDir, 'pkg', 'unlighthouse', 'docs'),
-  ])
-  for (const localDirPath of localDirPaths) {
-    if (existsSync(localDirPath)) {
-      logger.info(`🔗 Docs source using local fs: ${relative(process.cwd(), localDirPath)}`)
-      return defineCollection({
-        schema,
-        type: 'page',
-        source: {
-          include: '**/*.md',
-          exclude: ['glossary/**'],
-          cwd: localDirPath,
-          prefix: `/`,
-        },
-      })
-    }
-  }
-  logger.info(`🔗 Docs source using GitHub`)
+// Branches are explicit. A developer's package checkout must not select the docs version.
+function unlighthouseCollection(branch: '0.x' | 'v1', prefix: string) {
   return defineCollection({
     schema,
     type: 'page',
     source: {
-      repository: `https://github.com/harlan-zw/unlighthouse`,
-      include: 'docs/**/*.md',
-      exclude: ['docs/glossary/**'],
-      prefix: `/`,
+      ...(process.env.NODE_ENV !== 'production' && branch === 'v1' && process.env.UNLIGHTHOUSE_BETA_DOCS_DIR
+        ? { cwd: process.env.UNLIGHTHOUSE_BETA_DOCS_DIR }
+        : { repository: { url: 'https://github.com/harlan-zw/unlighthouse', branch } }),
+      include: process.env.NODE_ENV !== 'production' && branch === 'v1' && process.env.UNLIGHTHOUSE_BETA_DOCS_DIR ? '**/*.md' : 'docs/**/*.md',
+      exclude: branch === 'v1' ? ['**/glossary/**', '**/3.nuxt.md', '**/4.vite.md', '**/webpack.md', '**/0.unlighthouse-cli.md'] : ['**/glossary/**'],
+      prefix,
     },
   })
 }
@@ -84,7 +63,8 @@ const learnLighthouse = defineCollection({
 
 export const content = defineContentConfig({
   collections: {
-    root: resolvableUnlighthouseCollection(),
+    root: unlighthouseCollection('0.x', '/'),
+    beta: unlighthouseCollection('v1', '/v1'),
     glossary,
     learnLighthouse,
     // blog,
