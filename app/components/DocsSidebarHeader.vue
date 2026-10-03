@@ -1,25 +1,39 @@
 <script setup lang="ts">
+import { unversionedDocPath } from '~~/utils/docs-version'
+
 const route = useRoute()
+const filter = ref('')
 const navigation = inject<Ref<any[]>>('navigation')
 
 // Find the active pillar (guide, integrations, api-doc) and return its children
 const bottom = computed(() => {
   const pillars = ['guide', 'integrations', 'api-doc']
-  const activePillar = pillars.find(p => route.path.startsWith(`/${p}`))
+  const activePillar = pillars.find(p => unversionedDocPath(route.path).startsWith(`/${p}`))
 
   if (!activePillar || !navigation?.value?.length)
     return []
 
   const pillarNav = navigation.value.find(l => l.path.endsWith(`/${activePillar}`))
-  return pillarNav?.children || []
+  const groups = pillarNav?.children || []
+  const term = filter.value.trim().toLowerCase()
+  return !term
+    ? groups
+    : groups.map((group: any) => ({
+        ...group,
+        children: group.title.toLowerCase().includes(term) ? group.children : group.children?.filter((link: any) => link.title.toLowerCase().includes(term)),
+      })).filter((group: any) => group.children?.length || group.title.toLowerCase().includes(term))
 })
 </script>
 
 <template>
   <div>
+    <UInput v-model="filter" type="search" aria-label="Filter documentation navigation" placeholder="Filter sidebar" class="w-full mb-4" :ui="{ base: 'min-h-11' }" @keydown.stop />
+    <p v-if="filter && !bottom.length" role="status" class="text-sm text-muted mb-4">
+      No page title matches {{ filter }}.
+    </p>
     <nav aria-label="Documentation" class="flex flex-col gap-5">
       <ContentNavigation
-        as="div" default-open :collapsible="false" :navigation="bottom" highlight
+        as="div" default-open :collapsible="true" :navigation="bottom" highlight
         :ui="{ listWithChildren: 'sm:ml-0 mt-2' }"
       >
         <template #link="{ link }">

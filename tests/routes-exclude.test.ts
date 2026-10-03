@@ -81,3 +81,12 @@ test('keeps the exclude list untouched when the file is missing', async () => {
     assert.equal(sizes, null)
   })
 })
+
+test('serves beta documentation as static assets', async () => {
+  await withRoutesFile({ version: 1, include: ['/*'], exclude: ['/v1/api-doc.html'] }, async (dir) => {
+    await optimizeCloudflareRoutes(dir)
+    const routes = await readRoutes(dir)
+    assert.ok(routes.exclude.includes('/v1/*'))
+    assert.ok(!routes.exclude.includes('/v1/api-doc.html'))
+  })
+})

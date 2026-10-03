@@ -190,6 +190,8 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
   // that no page on this site ever links to.
   ogImage: {
     zeroRuntime: true,
+    // Both docs versions can exceed the default render deadline during prerender.
+    security: { renderTimeout: 60_000 },
   },
 
   sitemap: {
@@ -497,6 +499,10 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
 
     '/': { prerender: true },
     '/guide/**': { prerender: true },
+    '/v1/**': { prerender: true },
+    '/v1': { redirect: { to: '/v1/guide/getting-started/installation', statusCode: 302 } },
+    '/v1/guide/getting-started/unlighthouse-cli': { redirect: { to: '/v1/guide/getting-started/installation', statusCode: 301 } },
+    '/v1/guide': { redirect: { to: '/v1/guide/getting-started/installation', statusCode: 302 } },
     '/integrations/**': { prerender: true },
     '/api-doc': { prerender: true },
     '/api-doc/**': { prerender: true },

@@ -12,11 +12,13 @@ export default defineCachedEventHandler(async (e) => {
   if (!path.endsWith('.md')) {
     path = `${path}.md`
   }
+  const branch = getQuery(e).branch === 'v1' ? 'v1' : '0.x'
   const { data } = await octokit.request('GET /repos/{owner}/{repo}/commits', {
     owner,
     repo,
     path,
     per_page: 1,
+    sha: branch,
   })
 
   if (!data?.[0]) {
@@ -81,5 +83,5 @@ export default defineCachedEventHandler(async (e) => {
 }, {
   name: 'github-last-commit',
   maxAge: 60 * 60 * 24, // 1 day
-  getKey: (e: H3Event) => String(getQuery(e)?.file || ''),
+  getKey: (e: H3Event) => `${getQuery(e).branch === 'v1' ? 'v1' : '0.x'}:${String(getQuery(e)?.file || '')}`,
 })

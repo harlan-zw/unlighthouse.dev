@@ -19,13 +19,14 @@ const toolSearchSections = [
 ]
 
 export default defineCachedEventHandler(async (event) => {
-  const [root, glossary, learnLighthouse] = await Promise.all([
+  const [root, beta, glossary, learnLighthouse] = await Promise.all([
     queryCollectionSearchSections(event, 'root'),
+    queryCollectionSearchSections(event, 'beta'),
     queryCollectionSearchSections(event, 'glossary'),
     queryCollectionSearchSections(event, 'learnLighthouse'),
   ])
 
-  return [...root, ...glossary, ...learnLighthouse, ...toolSearchSections]
+  return [...root, ...beta.map(entry => ({ ...entry, title: `${entry.title} (v1 beta)` })), ...glossary, ...learnLighthouse, ...toolSearchSections]
 }, {
   maxAge: 60 * 60 * 24,
   swr: true,
