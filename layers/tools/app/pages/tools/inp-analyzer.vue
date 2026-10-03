@@ -803,7 +803,9 @@ const insights = computed<ToolInsight[]>(() => {
                 <div class="flex items-center gap-2 mb-2">
                   <UIcon name="i-heroicons-code-bracket" class="w-5 h-5 text-cyan-500" />
                   <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
-                    Long Tasks
+                    <NuxtLink to="/learn-lighthouse/inp/long-running-javascript" class="underline hover:text-cyan-600 dark:hover:text-cyan-400">
+                      Long Tasks
+                    </NuxtLink>
                   </h3>
                 </div>
                 <p class="text-xs text-gray-600 dark:text-gray-400">
@@ -815,7 +817,9 @@ const insights = computed<ToolInsight[]>(() => {
                 <div class="flex items-center gap-2 mb-2">
                   <UIcon name="i-heroicons-cube-transparent" class="w-5 h-5 text-cyan-500" />
                   <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
-                    Third-Party Scripts
+                    <NuxtLink to="/learn-lighthouse/inp/third-party-scripts" class="underline hover:text-cyan-600 dark:hover:text-cyan-400">
+                      Third-Party Scripts
+                    </NuxtLink>
                   </h3>
                 </div>
                 <p class="text-xs text-gray-600 dark:text-gray-400">
@@ -827,7 +831,9 @@ const insights = computed<ToolInsight[]>(() => {
                 <div class="flex items-center gap-2 mb-2">
                   <UIcon name="i-heroicons-arrow-path" class="w-5 h-5 text-cyan-500" />
                   <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
-                    Hydration
+                    <NuxtLink to="/learn-lighthouse/inp/hydration-issues" class="underline hover:text-cyan-600 dark:hover:text-cyan-400">
+                      Hydration
+                    </NuxtLink>
                   </h3>
                 </div>
                 <p class="text-xs text-gray-600 dark:text-gray-400">
@@ -839,7 +845,9 @@ const insights = computed<ToolInsight[]>(() => {
                 <div class="flex items-center gap-2 mb-2">
                   <UIcon name="i-heroicons-squares-2x2" class="w-5 h-5 text-cyan-500" />
                   <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
-                    Large DOM
+                    <NuxtLink to="/learn-lighthouse/inp/dom-size" class="underline hover:text-cyan-600 dark:hover:text-cyan-400">
+                      Large DOM
+                    </NuxtLink>
                   </h3>
                 </div>
                 <p class="text-xs text-gray-600 dark:text-gray-400">
@@ -851,7 +859,9 @@ const insights = computed<ToolInsight[]>(() => {
                 <div class="flex items-center gap-2 mb-2">
                   <UIcon name="i-heroicons-paint-brush" class="w-5 h-5 text-cyan-500" />
                   <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
-                    Layout Thrashing
+                    <NuxtLink to="/learn-lighthouse/inp/heavy-dom-operations" class="underline hover:text-cyan-600 dark:hover:text-cyan-400">
+                      Layout Thrashing
+                    </NuxtLink>
                   </h3>
                 </div>
                 <p class="text-xs text-gray-600 dark:text-gray-400">

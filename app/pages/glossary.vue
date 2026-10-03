@@ -24,7 +24,11 @@ const coreWebVitals = computed(() =>
 )
 
 const lighthouseMetrics = computed(() =>
-  terms.value?.filter(t => ['fcp', 'ttfb', 'tbt', 'speed-index'].includes(t.path?.split('/').pop() || '')) || [],
+  terms.value?.filter(t => ['fcp', 'tbt', 'speed-index'].includes(t.path?.split('/').pop() || '')) || [],
+)
+
+const diagnosticMetrics = computed(() =>
+  terms.value?.filter(t => t.path?.split('/').pop() === 'ttfb') || [],
 )
 
 const otherTerms = computed(() =>
@@ -49,7 +53,7 @@ const otherTerms = computed(() =>
         Core Web Vitals
       </h2>
       <p class="text-gray-600 dark:text-gray-400 mb-6">
-        Google's three key metrics that affect search rankings.
+        LCP, INP, and CLS measure loading, responsiveness, and visual stability in field data.
       </p>
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <NuxtLink
@@ -79,6 +83,31 @@ const otherTerms = computed(() =>
       <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <NuxtLink
           v-for="term in lighthouseMetrics"
+          :key="term.path"
+          :to="term.path"
+          class="group p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-violet-400 dark:hover:border-violet-500 transition-colors"
+        >
+          <h3 class="font-semibold text-lg mb-2 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+            {{ (term.navigation && typeof term.navigation === 'object' && 'title' in term.navigation) ? term.navigation.title : term.title }}
+          </h3>
+          <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+            {{ term.description }}
+          </p>
+        </NuxtLink>
+      </div>
+    </section>
+
+    <!-- TTFB -->
+    <section v-if="diagnosticMetrics.length" class="mb-12">
+      <h2 class="text-sm font-semibold text-violet-600 dark:text-violet-400 uppercase tracking-wide mb-4">
+        TTFB
+      </h2>
+      <p class="text-gray-600 dark:text-gray-400 mb-6">
+        TTFB helps explain loading delays. It does not directly contribute to the Lighthouse Performance score.
+      </p>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <NuxtLink
+          v-for="term in diagnosticMetrics"
           :key="term.path"
           :to="term.path"
           class="group p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-violet-400 dark:hover:border-violet-500 transition-colors"
