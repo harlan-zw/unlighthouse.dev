@@ -379,6 +379,8 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
       },
     },
     prerender: {
+      // Bound queued OG renders independently of the build host's CPU count.
+      concurrency: 4,
       autoSubfolderIndex: false,
       crawlLinks: true,
       routes: ['/', '/404.html'],
