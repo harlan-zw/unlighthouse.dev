@@ -114,12 +114,12 @@ const exploreLinks = [
                 <div class="w-3 h-3 rounded-full bg-amber-400/90" />
                 <div class="w-3 h-3 rounded-full bg-emerald-500/90" />
               </div>
-              <div class="flex-1 max-w-md mx-auto">
-                <div class="bg-neutral-300/50 dark:bg-neutral-700/50 rounded-lg px-4 py-1.5 text-sm text-neutral-600 dark:text-neutral-400 font-mono text-center">
+              <div class="flex-1 min-w-0 max-w-md mx-auto">
+                <div class="bg-neutral-300/50 dark:bg-neutral-700/50 rounded-lg px-4 py-1.5 text-sm text-neutral-600 dark:text-neutral-400 font-mono text-center truncate">
                   localhost:5678
                 </div>
               </div>
-              <NuxtLink to="https://unlighthouse-demo.netlify.app/" external target="_blank" class="text-sm text-neutral-700 dark:text-neutral-300 underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-violet-600">
+              <NuxtLink to="https://unlighthouse-demo.netlify.app/" external target="_blank" class="shrink-0 text-sm text-neutral-700 dark:text-neutral-300 underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-violet-600">
                 Open demo
               </NuxtLink>
             </div>
