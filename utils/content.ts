@@ -1,4 +1,5 @@
 import type { Node } from '@harlan-zw/comark-content'
+import { versionedDocPath } from './docs-version.ts'
 
 type AnchorNode = [tag: 'a', props: Record<string, unknown>, ...children: Node[]]
 
@@ -25,7 +26,7 @@ function isAnchor(node: Node): node is AnchorNode {
  * Marks every off-site link in a parsed document so it opens in a new tab.
  * Returns the anchor nodes it visited.
  */
-export function modifyRelativeDocLinksWithFramework(nodes: readonly Node[]): AnchorNode[] {
+export function modifyRelativeDocLinksWithFramework(nodes: readonly Node[], beta = false): AnchorNode[] {
   const links: AnchorNode[] = []
 
   walkNodes(nodes, (node) => {
@@ -33,6 +34,10 @@ export function modifyRelativeDocLinksWithFramework(nodes: readonly Node[]): Anc
       return
 
     const href = node[1].href as string
+    if (beta && /^\/v1\/(?:glossary|learn-lighthouse|tools)(?:\/|$)/.test(href))
+      node[1].href = href.slice(3)
+    if (beta && /^\/(?:guide|integrations|api-doc|architecture|self-host-cloudflare|integration-deprecations)(?:\/|$)/.test(href))
+      node[1].href = versionedDocPath(href, 'beta')
     if (href.startsWith('http') && !href.includes('/docs/')) {
       node[1].target = '_blank'
       node[1].rel = 'noopener noreferrer'

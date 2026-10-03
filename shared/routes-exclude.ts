@@ -9,7 +9,7 @@ export interface CloudflareRoutes {
 }
 
 /** Prerendered page trees. Nitro lists every prerendered page as an excluded asset; the wildcard covers them all. */
-const prerenderedPrefixes = ['/guide', '/api-doc', '/integrations']
+const prerenderedPrefixes = ['/guide', '/api-doc', '/integrations', '/v1']
 
 /**
  * Routes Cloudflare serves as static assets without invoking the Worker.
@@ -18,7 +18,7 @@ const prerenderedPrefixes = ['/guide', '/api-doc', '/integrations']
  * handler throws "Not supported in zeroRuntime mode." outside dev and
  * prerender. Excluding it turns stale crawler requests into 404s at the edge.
  */
-const workerExcludedRoutes = ['/guide/*', '/api-doc/*', '/integrations/*', '/_og/d/*']
+const workerExcludedRoutes = ['/guide/*', '/api-doc/*', '/integrations/*', '/v1/*', '/_og/d/*']
 
 /**
  * Rewrites `_routes.json` in a built public dir: prerendered page entries

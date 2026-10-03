@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { inlineHighlightedCode } from '~~/shared/rangi'
 import { searchContentEntries } from '~~/utils/content-search'
+import { docsVersion } from '~~/utils/docs-version'
 import { queryCollectionNavigation } from '#imports'
 
 const appConfig = useAppConfig()
@@ -32,22 +33,22 @@ const {
 })
 
 function needsDocsNavigation(path: string) {
-  return /^\/(?:guide|integrations|api-doc|glossary)(?:\/|$)/.test(path)
+  return /^\/(?:v1\/)?(?:guide|integrations|api-doc|glossary)(?:\/|$)/.test(path)
 }
 
 const {
   data: navigation,
   execute: loadNavigation,
-} = await useAsyncData(`navigation`, async () => {
+} = await useAsyncData(() => `navigation:${docsVersion(route.path)}`, async () => {
   const [root, glossary] = await Promise.all([
-    queryCollectionNavigation('root'),
+    queryCollectionNavigation(docsVersion(route.path) === 'beta' ? 'beta' : 'root'),
     queryCollectionNavigation('glossary'),
   ])
   return [...root, ...glossary]
 }, {
   default: () => [],
   async transform(res) {
-    const nav = mapPath(res)
+    const nav = mapPath(res.flatMap((item: any) => item.path === '/v1' ? item.children || [] : [item]))
     return (nav || []).map((m: any) => {
       if (m.children?.length) {
         m.children = m.children.map((c: any) => {
@@ -74,6 +75,7 @@ const {
       return m
     })
   },
+  watch: [() => docsVersion(route.path)],
   immediate: needsDocsNavigation(route.path),
   server: needsDocsNavigation(route.path),
 })

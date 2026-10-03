@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { NavigationMenuContent, NavigationMenuItem, NavigationMenuList, NavigationMenuRoot, NavigationMenuTrigger, NavigationMenuViewport } from 'reka-ui'
+import { docsVersion, versionedDocPath } from '~~/utils/docs-version'
 import { resourcesMenu } from '../composables/nav'
 
 const { data: stats, execute: loadGithubStars } = useFetch('/api/github/stars', {
@@ -50,8 +51,10 @@ function isMegaMenuLoaded(value: string) {
   return loadedMegaMenus.value.has(value)
 }
 
+const route = useRoute()
+
 const megaMenuItems = computed(() => [
-  { value: 'get-started', label: 'Get Started', icon: 'i-ph:book-open-duotone', to: '/guide/getting-started/installation' },
+  { value: 'get-started', label: 'Get Started', icon: 'i-ph:book-open-duotone', to: versionedDocPath('/guide/getting-started/installation', docsVersion(route.path)) },
   { value: 'learn', label: 'Learn', icon: 'i-heroicons-academic-cap', to: '/learn-lighthouse', hasDropdown: true },
   { value: 'tools', label: 'Tools', icon: 'i-heroicons-wrench-screwdriver', to: '/tools', hasDropdown: true },
 ])
