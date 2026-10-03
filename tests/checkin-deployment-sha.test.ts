@@ -64,6 +64,39 @@ it('derives approxDeployedSha from origin/main, not the checked-out branch', asy
   }
 })
 
+it('fetches origin/main so a lagging local ref reports the deployed sha', async () => {
+  const remoteRoot = mkdtempSync(join(tmpdir(), 'checkin-deploy-remote-'))
+  const seedRoot = mkdtempSync(join(tmpdir(), 'checkin-deploy-seed-'))
+  const root = mkdtempSync(join(tmpdir(), 'checkin-deploy-'))
+  git(remoteRoot, 'init', '-q', '--bare', '-b', 'main')
+  git(seedRoot, 'init', '-q', '-b', 'main')
+  git(seedRoot, 'config', 'user.name', 'test')
+  git(seedRoot, 'config', 'user.email', 'test@example.com')
+  commit(seedRoot, 'base', '2026-09-01T00:00:00Z')
+  commit(seedRoot, 'release', '2026-09-14T00:00:00Z')
+  git(seedRoot, 'push', '-q', remoteRoot, 'main')
+  git(root, 'clone', '-q', remoteRoot, '.')
+  commit(seedRoot, 'deployed work', '2026-09-20T00:00:00Z')
+  git(seedRoot, 'push', '-q', remoteRoot, 'main')
+  const deploySha = git(seedRoot, 'rev-parse', 'refs/heads/main')
+  fakeWrangler(root, '2026-09-25T00:00:00Z')
+
+  try {
+    const { report } = await runExternalChecks([deployment], { required: ['site.deployment'] }, {
+      rootDir: root,
+      env: { ...process.env },
+    })
+    const result = report.results[0].result
+    assert.equal(result._tag, 'Pass')
+    assert.equal((result.evidence as { latest: { approxDeployedSha: string } }).latest.approxDeployedSha, deploySha)
+  }
+  finally {
+    rmSync(root, { recursive: true, force: true })
+    rmSync(seedRoot, { recursive: true, force: true })
+    rmSync(remoteRoot, { recursive: true, force: true })
+  }
+})
+
 it('reports a null approxDeployedSha when origin/main is missing', async () => {
   const root = mkdtempSync(join(tmpdir(), 'checkin-deploy-'))
   git(root, 'init', '-q', '-b', 'main')

@@ -32,6 +32,16 @@ export async function revListBefore(context, date, ref) {
   if (!date)
     return null
   try {
+    // Refresh the remote-tracking ref so a lagging checkout cannot report an older sha.
+    // A missing or unreachable remote is ignorable here: the stale local ref stays the fallback.
+    const slash = ref.indexOf('/')
+    if (slash > 0) {
+      const remote = ref.slice(0, slash)
+      const branch = ref.slice(slash + 1)
+      await command(context, 'git', ['fetch', '--quiet', remote, branch]).catch(() => {
+        // Missing or unreachable remote is ignorable: the stale local ref stays the fallback.
+      })
+    }
     return await command(context, 'git', ['rev-list', '-1', `--before=${date}`, ref]) || null
   }
   catch {
