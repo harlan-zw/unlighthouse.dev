@@ -17,9 +17,9 @@ Set an explicit source directory for development:
 UNLIGHTHOUSE_BETA_DOCS_DIR=~/pkg/unlighthouse.fix-v1-cli-api-migration/docs pnpm dev
 ```
 
-Production builds ignore this directory and load both GitHub branches.
+Production builds ignore this directory and load both [GitHub](https://github.com) branches.
 A local package checkout does not change the stable source.
 
-Beta navigation omits the removed Nuxt, Vite, and Webpack integrations.
+Beta navigation omits the removed Nuxt, [Vite](https://vite.dev), and [webpack](https://webpack.js.org) integrations.
 Edit links and commit metadata use the selected branch.
 Search labels beta results with `v1 beta`.
