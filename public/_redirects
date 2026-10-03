@@ -1,4 +1,5 @@
 # Keep these in sync with Nuxt routeRules. Cloudflare applies them before static HTML assets.
+/guide/config.html /guide/guides/config 301
 /api/config /api-doc/config 301
 /api/glossary /api-doc/glossary 301
 /guide/getting-started/unlighthouse-cli /guide/getting-started/installation 301
