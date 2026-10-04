@@ -1,5 +1,18 @@
 # Verified article claims
 
+## Accessibility guide correction, 4 October 2026
+
+These primary pages support the accessibility hub's scoring and search guidance.
+The correction preserves the hub URL and links to its audit guides.
+
+| Claim | Source | Scope |
+| --- | --- | --- |
+| Lighthouse accessibility scoring uses a weighted average based on axe user impact. Each scored audit passes or fails. | <https://developer.chrome.com/docs/lighthouse/accessibility/scoring> | Manual checks and low-impact or best-practices checks outside the scoring table do not affect the score. Checked 4 October 2026. |
+| Tools alone cannot determine accessibility conformance. Human evaluation is required. | <https://www.w3.org/WAI/test-evaluate/> | A perfect Lighthouse score does not establish WCAG conformance. |
+| Descriptive anchor text helps people and Google understand destinations. Crawlable links generally use anchors with an href. | <https://developers.google.com/search/docs/crawling-indexing/links-crawlable> | Accessible naming and crawlable URLs are separate checks. No ranking gain is promised. |
+| Google uses alt text and surrounding content to understand images. | <https://developers.google.com/search/docs/appearance/google-images#use-descriptive-alt-text> | Write useful alt text for informative images. |
+| Core Web Vitals contribute to ranking. Other page experience aspects do not directly raise rankings. | <https://developers.google.com/search/docs/appearance/page-experience> | No Lighthouse accessibility score ranking signal is established by this guidance. |
+
 ## TTFB correction, 4 October 2026
 
 These primary pages support the glossary correction and its index classification.
