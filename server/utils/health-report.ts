@@ -23,6 +23,14 @@ interface HealthResponse extends HealthSummary {
 async function readMetrics(db: D1Database, nowSeconds: number): Promise<Probe<HealthMetrics>> {
   const dayAgo = nowSeconds - DAY_SECONDS
   const weekAgo = nowSeconds - 7 * DAY_SECONDS
+  // Like-for-like traffic baseline: the same 24h window one and two weeks
+  // back, so a quiet Sunday is measured against quiet Sundays. A rolling
+  // six-day window mixed weekends into the weekday average and flagged every
+  // quiet Sunday as a collapse.
+  const weekdayOneStart = nowSeconds - 8 * DAY_SECONDS
+  const weekdayOneEnd = weekAgo
+  const weekdayTwoStart = nowSeconds - 15 * DAY_SECONDS
+  const weekdayTwoEnd = nowSeconds - 14 * DAY_SECONDS
 
   const toolWindowSql = `SELECT
       COUNT(*) AS lookups,
@@ -46,7 +54,8 @@ async function readMetrics(db: D1Database, nowSeconds: number): Promise<Probe<He
         MAX(created_at) AS last_at
       FROM feedback`).bind(dayAgo, weekAgo),
     db.prepare(toolWindowSql).bind(SLOW_MS, dayAgo),
-    db.prepare(`${toolWindowSql} AND created_at < ?`).bind(SLOW_MS, weekAgo, dayAgo),
+    db.prepare(`${toolWindowSql} AND created_at < ?`).bind(SLOW_MS, weekdayOneStart, weekdayOneEnd),
+    db.prepare(`${toolWindowSql} AND created_at < ?`).bind(SLOW_MS, weekdayTwoStart, weekdayTwoEnd),
     db.prepare(`SELECT tool,
         COUNT(*) AS lookups,
         COALESCE(SUM(status IS NOT NULL), 0) AS statused,
@@ -63,7 +72,7 @@ async function readMetrics(db: D1Database, nowSeconds: number): Promise<Probe<He
   if (batch._tag === 'error')
     return batch
 
-  const [feedbackResult, dayResult, baselineResult, byToolResult] = batch.results
+  const [feedbackResult, dayResult, weekdayOneResult, weekdayTwoResult, byToolResult] = batch.results
   const feedbackRow = feedbackResult?.results?.[0] ?? {}
 
   return {
@@ -72,7 +81,7 @@ async function readMetrics(db: D1Database, nowSeconds: number): Promise<Probe<He
       feedback: parseFeedbackMetrics(feedbackRow),
       tools: {
         last24h: parseToolWindow(dayResult?.results?.[0]),
-        prior6d: parseToolWindow(baselineResult?.results?.[0]),
+        priorSameWeekdays: [weekdayOneResult, weekdayTwoResult].map(window => parseToolWindow(window?.results?.[0])),
         byTool: (byToolResult?.results ?? []).map(parseToolBreakdown),
       },
     },
