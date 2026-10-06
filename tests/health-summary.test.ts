@@ -15,7 +15,7 @@ function toolBreakdown(tool: string, overrides: Partial<ToolBreakdown> = {}): To
 function metrics(overrides: {
   feedback?: Partial<HealthMetrics['feedback']>
   last24h?: Partial<ToolWindow>
-  prior6d?: Partial<ToolWindow>
+  priorSameWeekdays?: ToolWindow[]
   byTool?: ToolBreakdown[]
 } = {}): HealthMetrics {
   return {
@@ -27,7 +27,7 @@ function metrics(overrides: {
     },
     tools: {
       last24h: toolWindow(overrides.last24h),
-      prior6d: toolWindow(overrides.prior6d),
+      priorSameWeekdays: overrides.priorSameWeekdays ?? [],
       byTool: overrides.byTool ?? [],
     },
   }
@@ -39,7 +39,10 @@ function summarize(value: HealthMetrics) {
 
 describe('summarizeHealth', () => {
   it('is green with no feedback and no tool errors', () => {
-    const summary = summarize(metrics({ last24h: { lookups: 40, statused: 30 }, prior6d: { lookups: 240 } }))
+    const summary = summarize(metrics({
+      last24h: { lookups: 40, statused: 30 },
+      priorSameWeekdays: [toolWindow({ lookups: 120 }), toolWindow({ lookups: 120 })],
+    }))
     assert.equal(summary.status, 'GREEN')
     assert.deepEqual(summary.reasons, [])
   })
@@ -126,14 +129,32 @@ describe('summarizeHealth', () => {
     assert.equal(summary.status, 'GREEN')
   })
 
-  it('flags a traffic collapse against the six-day baseline', () => {
-    const summary = summarize(metrics({ last24h: { lookups: 4 }, prior6d: { lookups: 600 } }))
+  it('flags a traffic collapse against the same-weekday baseline', () => {
+    const summary = summarize(metrics({
+      last24h: { lookups: 4 },
+      priorSameWeekdays: [toolWindow({ lookups: 300 }), toolWindow({ lookups: 300 })],
+    }))
     assert.equal(summary.status, 'AMBER')
-    assert.deepEqual(summary.reasons, ['Tool traffic fell to 4 lookups against a 100/day baseline'])
+    assert.deepEqual(summary.reasons, ['Tool traffic fell to 4 lookups against a 300/day baseline'])
+  })
+
+  it('keeps a quiet Sunday green against a mixed baseline of weekdays', () => {
+    // 2026-09-27 and 2026-10-04 both fired this way: five ~150-lookup weekdays
+    // put the mixed six-day baseline near 150/day, a 30-lookup Sunday read as
+    // a collapse, and like-for-like the prior Sundays ran just as quiet.
+    const summary = summarize(metrics({
+      last24h: { lookups: 30 },
+      priorSameWeekdays: [toolWindow({ lookups: 34 }), toolWindow({ lookups: 40 })],
+    }))
+    assert.equal(summary.status, 'GREEN')
+    assert.deepEqual(summary.reasons, [])
   })
 
   it('does not call a quiet day an outage without a baseline', () => {
-    const summary = summarize(metrics({ last24h: { lookups: 0 }, prior6d: { lookups: 60 } }))
+    const summary = summarize(metrics({
+      last24h: { lookups: 0 },
+      priorSameWeekdays: [toolWindow({ lookups: 10 }), toolWindow({ lookups: 10 })],
+    }))
     assert.equal(summary.status, 'GREEN')
   })
 

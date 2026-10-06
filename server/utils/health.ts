@@ -49,8 +49,8 @@ export interface HealthMetrics {
   }
   tools: {
     last24h: ToolWindow
-    /** The six days before the current window, used as the traffic baseline. */
-    prior6d: ToolWindow
+    /** The same 24h window one and two weeks back, the like-for-like traffic baseline. */
+    priorSameWeekdays: ToolWindow[]
     byTool: ToolBreakdown[]
   }
 }
@@ -173,7 +173,7 @@ function feedbackFindings(feedback: HealthMetrics['feedback']): { findings: Find
 function toolFindings(tools: HealthMetrics['tools']): { findings: Finding[], warnings: string[] } {
   const findings: Finding[] = []
   const warnings: string[] = []
-  const { last24h, prior6d, byTool } = tools
+  const { last24h, priorSameWeekdays, byTool } = tools
 
   if (last24h.statused >= HEALTH_THRESHOLDS.minStatusedForRate) {
     const rate = last24h.errors / last24h.statused
@@ -209,8 +209,14 @@ function toolFindings(tools: HealthMetrics['tools']): { findings: Finding[], war
   }
 
   // A dead window is only meaningful against a baseline that proves traffic
-  // exists, otherwise every quiet night reads as an outage.
-  const baselineDaily = prior6d.lookups / 6
+  // exists, otherwise every quiet night reads as an outage. The baseline is
+  // like-for-like: the same 24h window one and two weeks back. Averaging a
+  // mixed six-day window weighed Sundays against weekdays and flagged every
+  // quiet Sunday as a collapse (2026-09-27 and 2026-10-04).
+  const baselineDays = priorSameWeekdays.length
+  const baselineDaily = baselineDays === 0
+    ? 0
+    : priorSameWeekdays.reduce((sum, window) => sum + window.lookups, 0) / baselineDays
   if (baselineDaily >= HEALTH_THRESHOLDS.minBaselineDailyLookups
     && last24h.lookups < baselineDaily * HEALTH_THRESHOLDS.trafficDropRatio) {
     findings.push({ status: 'AMBER', message: `Tool traffic fell to ${last24h.lookups} lookups against a ${Math.round(baselineDaily)}/day baseline` })
