@@ -7,6 +7,7 @@ import {
   CARBONADS_SCRIPT_ELEMENT_RE,
   CARBONADS_VENDOR_ORIGIN_RE,
   EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE,
+  OG_IMAGE_404_MESSAGE_RE,
   STACKLESS_FETCH_FAILURE_MESSAGE_RE,
   STACKLESS_NETWORK_ERROR_MESSAGE_RE,
   STACKLESS_NON_ERROR_REJECTION_DROP_RULE,
@@ -61,6 +62,10 @@ export default defineNuxtConfig({
         // anonymous. The stackless rule needs an empty frame list, so this
         // sighting drops on the message alone.
         SUFFIXED_FETCH_FAILURE_MESSAGE_RE,
+        // A visitor probe of a path that does not exist makes the og-image
+        // resolve route fetch it, then raise Nitro's 404 as its own message.
+        // The report describes the probe, so no site code can act on it.
+        OG_IMAGE_404_MESSAGE_RE,
       ],
       // Browser failures that arrive with no stack: the app manifest poll when the
       // network drops, a plain-http page load the browser rejects as a network error,
