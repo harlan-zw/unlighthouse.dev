@@ -76,3 +76,6 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=14000
           NUXT_GITHUB_ACCESS_TOKEN: ${{ secrets.NUXT_GITHUB_ACCESS_TOKEN || github.token }}
           NUXT_GITHUB_AUTH_TOKEN: ${{ secrets.NUXT_GITHUB_AUTH_TOKEN || github.token }}
+          # Fork pull requests cannot read secrets. The PR build artifact is never
+          # deployed, so a placeholder password is enough to prerender clean.
+          NUXT_SESSION_PASSWORD: ${{ secrets.NUXT_SESSION_PASSWORD || 'pr-build-session-password-placeholder' }}
