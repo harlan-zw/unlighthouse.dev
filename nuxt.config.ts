@@ -161,8 +161,6 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
     'nitro-cloudflare-dev',
     '@nuxt/scripts',
     '@nuxt/image',
-    'nuxt-skew-protection',
-    'nuxt-ai-ready',
     '@sentry/nuxt/module',
     '@harlan-zw/nuxt-sentry',
     // '@nuxtjs/mcp-toolkit',
