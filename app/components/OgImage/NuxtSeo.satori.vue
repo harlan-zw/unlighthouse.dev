@@ -20,7 +20,7 @@ defineProps({
       <h1 class="text-[80px] font-bold m-0 leading-tight max-w-[1000px]">
         {{ title }}
       </h1>
-      <p v-if="description" class="text-[32px] opacity-70 max-w-[900px] leading-relaxed">
+      <p v-if="description" class="text-[32px] opacity-70 max-w-[900px] leading-relaxed my-4">
         {{ description }}
       </p>
     </div>

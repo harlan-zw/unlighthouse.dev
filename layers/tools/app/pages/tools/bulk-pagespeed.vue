@@ -891,7 +891,7 @@ https://example.com/pricing"
 
             <div class="flex flex-col sm:flex-row gap-3">
               <UButton
-                to="/guide/getting-started"
+                to="/guide/getting-started/installation"
                 size="lg"
                 class="bg-amber-600 hover:bg-amber-500 text-white w-full sm:w-auto justify-center"
                 trailing-icon="i-heroicons-arrow-right"
