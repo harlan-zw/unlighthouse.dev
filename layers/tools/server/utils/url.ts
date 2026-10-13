@@ -1,4 +1,5 @@
 import { parseURL, withHttps } from 'ufo'
+import { publicFetch } from '../../../../server/utils/public-fetch'
 import { parsePublicHttpUrl } from '../../../../shared/page-weight'
 
 const VALID_URL_RE = /^(?:https?:\/\/)?[a-zA-Z0-9][-a-zA-Z0-9]*(?:\.[a-zA-Z0-9][-a-zA-Z0-9]*)+(?:\/\S*)?$/
@@ -26,9 +27,9 @@ export async function validateUrl(url?: string) {
 
   // Probe only the submitted public URL. The page-weight fetch checks redirect
   // destinations before following them; this earlier probe must not bypass it.
-  const reachable = await $fetch.raw(normalized, {
+  const reachable = await publicFetch(normalized, {
     method: 'HEAD',
-    timeout: 5_000,
+    signal: AbortSignal.timeout(5_000),
     redirect: 'manual',
   }).catch((error) => {
     console.warn(`[url-validation] URL is unreachable: ${normalized}`, error)
