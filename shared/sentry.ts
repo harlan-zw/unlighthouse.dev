@@ -62,6 +62,26 @@ export const STACKLESS_FETCH_FAILURE_MESSAGE_RE = /^TypeError: Failed to fetch$/
 export const SUFFIXED_FETCH_FAILURE_MESSAGE_RE = /^TypeError: Failed to fetch \(selnor\.fun[^)]*\)$/
 
 /**
+ * The secondhand fetch failure the nuxt-og-image resolve route raises for a visitor's probe.
+ *
+ * UNLIGHTHOUSE-N records `[Nuxt OG Image] Failed to fetch /test: unknown error`. A visitor
+ * requested the og:image of a path that does not exist. The resolve route fetched that path,
+ * Nitro answered 404, and the route raised that answer as its own statusMessage. The report
+ * describes the visitor's probe, so no site code can act on it.
+ *
+ * The tail of the message words the reason differently per fetch path, and the route's own
+ * fallback reads `unknown error`, so the pattern matches the module prefix and the leading
+ * slash of the probed path. It stays unanchored: `@harlan-zw/nuxt-sentry` composes the text
+ * it matches as `type: value`, so the message arrives behind the error type. The route also
+ * raises a 404 when a page loads without the og:image meta. That message names the meta,
+ * never matches, and that defect still reports.
+ *
+ * `nuxtSentry.policy.ignoreErrors` uses this pattern. The server policy drops status 404 by
+ * default, yet this sighting reached the issue feed, so the message carries the drop.
+ */
+export const OG_IMAGE_404_MESSAGE_RE = /\[Nuxt OG Image\] Failed to fetch \//
+
+/**
  * The network failure a plain-http page load reports with no stack.
  *
  * A page served over plain http rejects a resource load with `NetworkError: A network
