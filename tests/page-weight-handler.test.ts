@@ -14,7 +14,22 @@ registerHooks({
   resolve(specifier, context, nextResolve) {
     if (specifier.startsWith('~~/'))
       return nextResolve(`${new URL(specifier.slice(3), root).href}.ts`, context)
+    if (specifier.endsWith('/public-fetch') || specifier.endsWith('/public-transport'))
+      return nextResolve(`${specifier}.ts`, context)
     return nextResolve(specifier, context)
+  },
+  load(url, context, nextLoad) {
+    if (url.endsWith('/server/utils/public-transport.ts')) {
+      return {
+        format: 'module',
+        shortCircuit: true,
+        source: `
+          export async function resolvePublicHostname(host) { return globalThis.fixtureDns?.[host] ?? ['93.184.216.34'] }
+          export async function fetchPublicDestination(url, init) { return globalThis.fetch(url, init) }
+        `,
+      }
+    }
+    return nextLoad(url, context)
   },
 })
 
@@ -135,6 +150,43 @@ test('answers 413 with an ignored message when the page is past the byte cap', a
     )
   }
   finally {
+    globalThis.fetch = realFetch
+  }
+})
+
+test('refuses document contact when DNS includes a private address', async () => {
+  const realFetch = globalThis.fetch
+  let contacted = false
+  globals.fixtureDns = { 'dummy.example': ['93.184.216.34', '127.0.0.1'] }
+  globalThis.fetch = async () => {
+    contacted = true
+    return new Response('dummy document')
+  }
+  try {
+    await assert.rejects(handler({ query: { url: 'https://dummy.example/' } } as unknown as Parameters<typeof handler>[0]), isExpectedUpstreamAnswer(502))
+    assert.equal(contacted, false)
+  }
+  finally {
+    delete globals.fixtureDns
+    globalThis.fetch = realFetch
+  }
+})
+
+test('keeps a private DNS resource unmeasured without contacting it', async () => {
+  const realFetch = globalThis.fetch
+  const contacted: string[] = []
+  globals.fixtureDns = { 'resource.example': ['10.0.0.1'] }
+  globalThis.fetch = async (input) => {
+    contacted.push(String(input))
+    return new Response('<html><script src="https://resource.example/app.js"></script></html>')
+  }
+  try {
+    const result = await handler({ query: { url: 'https://dummy.example/' } } as unknown as Parameters<typeof handler>[0])
+    assert.equal(result.complete, false)
+    assert.deepEqual(contacted, ['https://dummy.example/'])
+  }
+  finally {
+    delete globals.fixtureDns
     globalThis.fetch = realFetch
   }
 })

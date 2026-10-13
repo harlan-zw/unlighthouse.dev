@@ -341,6 +341,7 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
         // import) from a much later date than this was pinned at. Matches the
         // value nuxtseo.com deploys on.
         compatibility_date: '2026-08-11',
+        compatibility_flags: ['global_fetch_strictly_public'],
         limits: {
           cpu_ms: 120_000, // 2 min for slow PSI calls
         },

@@ -25,7 +25,7 @@ async function main(): Promise<void> {
     secrets: resolvedSecrets.secrets,
     use: secretsPath => runCommand(
       resolve(process.cwd(), 'node_modules/.bin/wrangler'),
-      ['deploy', '--secrets-file', secretsPath],
+      ['deploy', '--secrets-file', secretsPath, '--tag', 'public-egress-v1'],
     ),
   })
 }
