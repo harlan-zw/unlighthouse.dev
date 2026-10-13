@@ -178,7 +178,7 @@ catalog:
   h3: ^1.15.11
   lint-staged: ^17.5.0
   markdownlint-cli: ^0.49.1
-  motion-v: ^2.4.2
+  motion-v: ^2.6.0
   nitro-cloudflare-dev: ^0.2.2
   nuxt: ^4.6.1
   nuxt-auth-utils: ^0.5.30
