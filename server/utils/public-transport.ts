@@ -36,7 +36,7 @@ export async function fetchPublicDestination(url: URL, init: RequestInit, destin
     const { env } = await import('cloudflare:workers')
     // Miniflare supplies an empty version tag. Never trust its unrestricted
     // internet service just because it also exposes Workers globals.
-    if (env.CF_VERSION_METADATA?.tag !== 'public-egress-v1')
+    if (!/^public-egress-v1-[a-f0-9]{40}$/.test(env.CF_VERSION_METADATA?.tag ?? ''))
       throw new Error('Public egress requires a tagged Cloudflare production deployment')
     return fetch(url.toString(), { ...init, redirect: 'manual' })
   }
