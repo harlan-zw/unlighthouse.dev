@@ -277,7 +277,6 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
     login: 'harlan-zw',
     route: '/api/github/sponsors.json',
     overrides: {
-      'Kintell-labs': { name: 'Kintell', websiteUrl: 'https://kintell.com' },
       'Massive Monster': { websiteUrl: 'https://massivemonster.co' },
     },
   },
