@@ -1,0 +1,7 @@
+{
+  "package": "unlighthouse",
+  "version": "0.19.1",
+  "path": "skills/unlighthouse/SKILL.md",
+  "syncedAt": "2026-10-13",
+  "note": "Vendored from packages/unlighthouse/skills/unlighthouse at https://github.com/harlan-zw/unlighthouse/tree/c3d5c5f6357a13b345f1daa0fb15c6dd20a81d61/packages/unlighthouse/skills/unlighthouse. The body matches the unlighthouse 0.19.1 package; this commit adds the license and compatibility frontmatter."
+}
