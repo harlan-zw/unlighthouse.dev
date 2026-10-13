@@ -181,8 +181,11 @@ function formatUrl(url: string) {
 
 function pasteFromClipboard() {
   if (import.meta.client) {
-    navigator.clipboard.readText().then((text) => {
-      urlInput.value = text
+    readClipboardText().then((result) => {
+      if (result._tag === 'Ok')
+        urlInput.value = result.text
+      else
+        error.value = result.message
     })
   }
 }
