@@ -76,3 +76,5 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=14000
           NUXT_GITHUB_ACCESS_TOKEN: ${{ secrets.NUXT_GITHUB_ACCESS_TOKEN || github.token }}
           NUXT_GITHUB_AUTH_TOKEN: ${{ secrets.NUXT_GITHUB_AUTH_TOKEN || github.token }}
+          # No github.token fallback: it cannot read sponsors, so fork builds skip the prerender.
+          NUXT_GITHUB_SPONSORS_TOKEN: ${{ secrets.NUXT_GITHUB_AUTH_TOKEN }}
