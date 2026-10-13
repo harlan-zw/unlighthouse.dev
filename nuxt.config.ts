@@ -514,21 +514,20 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
 
     // auth endpoints must not be cached or prerendered
     '/auth/**': { prerender: false, cache: false, headers: { 'cache-control': 'no-store' } },
+    // Nuxt Robots owns the robots rule. A raw `x-robots-tag` header here is
+    // overwritten by its middleware, so the header said `index, follow` while
+    // the page meta said noindex. `robots: false` sets both to noindex, nofollow.
     '/admin': {
       prerender: false,
       cache: false,
-      headers: {
-        'cache-control': 'no-store',
-        'x-robots-tag': 'noindex, nofollow',
-      },
+      robots: false,
+      headers: { 'cache-control': 'no-store' },
     },
     '/admin/**': {
       prerender: false,
       cache: false,
-      headers: {
-        'cache-control': 'no-store',
-        'x-robots-tag': 'noindex, nofollow',
-      },
+      robots: false,
+      headers: { 'cache-control': 'no-store' },
     },
     '/api/debug/**': { prerender: false },
   },
