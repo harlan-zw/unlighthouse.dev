@@ -1,4 +1,5 @@
 import { parseURL, withHttps } from 'ufo'
+import { parsePublicHttpUrl } from '../../../../shared/page-weight'
 
 const VALID_URL_RE = /^(?:https?:\/\/)?[a-zA-Z0-9][-a-zA-Z0-9]*(?:\.[a-zA-Z0-9][-a-zA-Z0-9]*)+(?:\/\S*)?$/
 
@@ -16,18 +17,19 @@ export async function validateUrl(url?: string) {
 
   const normalized = normalizeUrl(url)
 
-  if (!isValidUrl(normalized))
+  if (!isValidUrl(normalized) || parsePublicHttpUrl(normalized)._tag === 'err')
     throw createError({ message: 'Invalid URL format', statusCode: 422 })
 
   const parsed = parseURL(normalized)
   if (!parsed.host)
     throw createError({ message: 'Invalid URL: no host found', statusCode: 422 })
 
-  // Check URL is reachable before expensive PSI call
+  // Probe only the submitted public URL. The page-weight fetch checks redirect
+  // destinations before following them; this earlier probe must not bypass it.
   const reachable = await $fetch.raw(normalized, {
     method: 'HEAD',
     timeout: 5_000,
-    redirect: 'follow',
+    redirect: 'manual',
   }).catch((error) => {
     console.warn(`[url-validation] URL is unreachable: ${normalized}`, error)
     return null
