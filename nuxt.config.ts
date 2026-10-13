@@ -1,8 +1,8 @@
 import { defineNuxtConfig } from 'nuxt/config'
 import { resolve } from 'pathe'
-import { gray, logger } from './logger'
-import { CLOUDFLARE_REQUIRED_SECRETS } from './shared/cloudflare'
-import { optimizeCloudflareRoutes } from './shared/routes-exclude'
+import { gray, logger } from './logger.ts'
+import { CLOUDFLARE_REQUIRED_SECRETS } from './shared/cloudflare.ts'
+import { optimizeCloudflareRoutes } from './shared/routes-exclude.ts'
 import {
   CARBONADS_SCRIPT_ELEMENT_RE,
   CARBONADS_VENDOR_ORIGIN_RE,
@@ -11,7 +11,7 @@ import {
   STACKLESS_NETWORK_ERROR_MESSAGE_RE,
   STACKLESS_NON_ERROR_REJECTION_DROP_RULE,
   SUFFIXED_FETCH_FAILURE_MESSAGE_RE,
-} from './shared/sentry'
+} from './shared/sentry.ts'
 
 // workerd installs its Node-compatible `console` as soon as anything in the
 // bundle imports `node:console` (undici, via node-fetch-native, does). That
