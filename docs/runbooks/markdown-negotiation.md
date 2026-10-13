@@ -1,14 +1,18 @@
 # Markdown negotiation
 
-Agents that send `Accept: text/markdown` get a page's Markdown from two [Cloudflare](https://cloudflare.com) zone rules, not from the Worker.
+Agents that send an unambiguous Markdown preference get a page's Markdown through two [Cloudflare](https://cloudflare.com) zone rules.
 The prerender writes a static `.md` asset beside each page, and the rules serve it.
 
 | Rule | Ruleset | Phase | Effect |
 | --- | --- | --- | --- |
-| Rewrite | `683cf06a48c342d0af1e9b580717f6f0` | `http_request_transform` | If the request accepts `text/markdown`, rewrite the page path to its `.md` asset. |
+| Rewrite | `683cf06a48c342d0af1e9b580717f6f0` | `http_request_transform` | If the request unambiguously prefers Markdown, rewrite the page path to its `.md` asset. |
 | Vary (`markdown-vary`) | `f87333442e6b40da8870dcf98a51ee3c` | `http_response_headers_transform` | Set `Vary: Accept` on the same pages, for HTML and Markdown. |
 
 The rewrite phase runs before the cache.
+The condition ignores media type case and accepts a sole `text/markdown`, including explicit quality `1`.
+It also accepts an unweighted list that starts with `text/markdown`.
+Weighted lists and rejected Markdown retain the normal HTML route.
+The edge rule does not parse general quality preferences.
 The Vary rule sets the header, so each response sends one `Vary: Accept`.
 A `_headers` rule per page does not fit: Cloudflare allows 100 `_headers` rules, and the site prerenders more pages than that.
 
