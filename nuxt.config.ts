@@ -233,6 +233,7 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
       ttl: 60 * 60,
     },
     contentSignal: { search: true, aiInput: true, aiTrain: true },
+    llmsTxt: { directive: { html: true } },
     // Publishes `skills/unlighthouse/SKILL.md`: the discovery index with a
     // digest, `/skills/unlighthouse/SKILL.md`, `/SKILL.md`, and an llms.txt
     // section. Vendored from the unlighthouse package; see its source.json.
