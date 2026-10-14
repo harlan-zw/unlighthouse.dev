@@ -1,3 +1,4 @@
+import type { FieldSource } from '~~/shared/field-assessment'
 import type { MetricKey } from '../../../app/utils/crux'
 import type { FormFactor, NormalizedCrUXCurrentResult } from '../../utils/crux'
 import { fetchCrUXCurrent, normalizeCruxCurrent } from '../../utils/crux'
@@ -9,6 +10,7 @@ export interface CruxMetricRequest {
 }
 
 export interface CruxMetricResponse {
+  source: FieldSource
   p75: number
   displayValue: string
   rating: 'good' | 'needs-improvement' | 'poor'
@@ -69,6 +71,13 @@ export default defineEventHandler(async (event): Promise<CruxMetricResponse> => 
     throw createError({ statusCode: 404, message: `No ${metric.toUpperCase()} data available` })
 
   return {
+    source: {
+      provider: 'CrUX',
+      scope: result.record.key.url ? 'url' : 'origin',
+      url: result.record.key.url || result.record.key.origin || normalized,
+      device: formFactor === 'DESKTOP' ? 'desktop' : formFactor === 'TABLET' ? 'tablet' : formFactor === 'ALL_FORM_FACTORS' ? 'all' : 'mobile',
+      collectionPeriod: { _tag: 'Dates', start: cruxData.collectionStart, end: cruxData.collectionEnd },
+    },
     p75: metricData.p75,
     displayValue: formatValue(metric, metricData.p75),
     rating: getRating(metric, metricData.p75),

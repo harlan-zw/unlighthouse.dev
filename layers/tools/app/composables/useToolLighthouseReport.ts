@@ -69,8 +69,13 @@ export function useToolLighthouseReport() {
       { id: 'accessibility', label: 'Accessibility', category: report.value.categories.accessibility },
       { id: 'best-practices', label: 'Best Practices', category: report.value.categories.bestPractices },
       { id: 'seo', label: 'SEO', category: report.value.categories.seo },
+      { id: 'agentic-browsing', label: 'Agentic Browsing', category: report.value.categories.agenticBrowsing },
       { id: 'pwa', label: 'PWA', category: report.value.categories.pwa },
-    ].filter(c => c.category !== null)
+    ].filter(c => c.category !== null).map(c => ({
+      ...c,
+      label: c.category?.title || c.label,
+      display: report.value!.categoryScores[c.id]!,
+    }))
   })
 
   return {

@@ -1,4 +1,5 @@
 import type {
+  CategoryScoreDisplay,
   LighthouseAudit,
   LighthouseCategory,
   LighthouseResult,
@@ -35,7 +36,6 @@ const PERF_METRIC_IDS = [
 const CORE_WEB_VITALS = [
   'largest-contentful-paint',
   'cumulative-layout-shift',
-  'total-blocking-time', // Proxy for INP in lab
 ]
 
 const METRIC_SHORT_NAMES: Record<string, string> = {
@@ -81,29 +81,53 @@ function extractPerformanceMetrics(audits: Record<string, LighthouseAudit>): Per
   return metrics
 }
 
-function getAuditsByType(audits: Record<string, LighthouseAudit>, category: LighthouseCategory | undefined) {
+function getAuditsByType(audits: Record<string, LighthouseAudit>, categories: Record<string, any>) {
   const opportunities: LighthouseAudit[] = []
   const diagnostics: LighthouseAudit[] = []
-  const passed: LighthouseAudit[] = []
-
-  const refs = Array.isArray(category?.auditRefs) ? category.auditRefs : []
+  const insights: LighthouseAudit[] = []
+  const passedAudits: LighthouseAudit[] = []
+  const notApplicableAudits: LighthouseAudit[] = []
+  const manualAudits: LighthouseAudit[] = []
+  const informativeAudits: LighthouseAudit[] = []
+  const errorAudits: LighthouseAudit[] = []
+  const refs = Object.values(categories).flatMap(category => Array.isArray(category?.auditRefs) ? category.auditRefs : [])
+  const seen = new Set<string>()
 
   for (const ref of refs) {
     const audit = audits[ref?.id]
-    if (!audit)
+    if (!audit || seen.has(ref.id))
       continue
+    seen.add(ref.id)
 
     // Metrics render in their own panel, so they never join the audit lists.
-    if (ref.group === 'metrics')
+    if (ref.group === 'metrics' || ref.group === 'hidden')
       continue
 
-    if (audit.score === 1 || audit.scoreDisplayMode === 'notApplicable') {
-      passed.push(audit)
+    if (audit.scoreDisplayMode === 'error' || audit.errorMessage) {
+      errorAudits.push(audit)
+    }
+    else if (audit.scoreDisplayMode === 'manual') {
+      manualAudits.push(audit)
+    }
+    else if (audit.scoreDisplayMode === 'notApplicable') {
+      notApplicableAudits.push(audit)
+    }
+    else if (audit.scoreDisplayMode === 'informative') {
+      informativeAudits.push(audit)
+    }
+    else if (audit.scoreDisplayMode && !['numeric', 'binary', 'metricSavings'].includes(audit.scoreDisplayMode)) {
+      informativeAudits.push(audit)
+    }
+    else if (audit.score !== null && audit.score >= 0.9) {
+      passedAudits.push(audit)
+    }
+    else if (ref.group === 'insights' || audit.scoreDisplayMode === 'metricSavings' || audit.id?.endsWith('-insight')) {
+      insights.push(audit)
     }
     else if (audit.details?.type === 'opportunity') {
       opportunities.push(audit)
     }
-    else if (ref.group === 'diagnostics' || audit.scoreDisplayMode === 'informative') {
+    else if (ref.group === 'diagnostics') {
       diagnostics.push(audit)
     }
     else if (audit.score !== null && audit.score < 1) {
@@ -117,12 +141,31 @@ function getAuditsByType(audits: Record<string, LighthouseAudit>, category: Ligh
     return bSavings - aSavings
   })
 
-  return { opportunities, diagnostics, passed }
+  return { opportunities, diagnostics, insights, passedAudits, notApplicableAudits, manualAudits, informativeAudits, errorAudits }
 }
 
 function readCategory(categories: Record<string, any>, id: string): LighthouseCategory | null {
   const category = categories[id]
   return isRecord(category) ? category as LighthouseCategory : null
+}
+
+export function getCategoryScoreDisplay(category: LighthouseCategory, audits: Record<string, LighthouseAudit>, gatherMode?: string): CategoryScoreDisplay {
+  if (category.categoryScoreDisplayMode !== 'fraction' && gatherMode !== 'snapshot' && gatherMode !== 'timespan')
+    return { _tag: 'Score', score: category.score ?? null }
+  let numPassed = 0
+  let numPassableAudits = 0
+  let totalWeight = 0
+  for (const ref of Array.isArray(category.auditRefs) ? category.auditRefs : []) {
+    const audit = audits[ref?.id]
+    if (!audit || ref.group === 'hidden' || ['manual', 'notApplicable', 'informative'].includes(audit.scoreDisplayMode))
+      continue
+    numPassableAudits++
+    totalWeight += ref.weight || 0
+    const supportedMode = !audit.scoreDisplayMode || ['numeric', 'binary', 'metricSavings'].includes(audit.scoreDisplayMode)
+    if (supportedMode && !audit.errorMessage && audit.score !== null && audit.score >= 0.9)
+      numPassed++
+  }
+  return { _tag: 'Fraction', numPassed, numPassableAudits, score: totalWeight > 0 && numPassableAudits > 0 ? numPassed / numPassableAudits : null }
 }
 
 /**
@@ -154,7 +197,7 @@ export function parseLighthouseReport(input: string | object): ParseLighthouseRe
   const categories = raw.categories as Record<string, any>
   const audits = isRecord(raw.audits) ? raw.audits as Record<string, LighthouseAudit> : {}
   const performance = readCategory(categories, 'performance')
-  const { opportunities, diagnostics, passed } = getAuditsByType(audits, performance ?? undefined)
+  const groups = getAuditsByType(audits, categories)
 
   const parsedFetchTime = typeof raw.fetchTime === 'string' ? new Date(raw.fetchTime) : null
   const fetchTime = parsedFetchTime && !Number.isNaN(parsedFetchTime.getTime()) ? parsedFetchTime : null
@@ -175,13 +218,38 @@ export function parseLighthouseReport(input: string | object): ParseLighthouseRe
         accessibility: readCategory(categories, 'accessibility'),
         bestPractices: readCategory(categories, 'best-practices'),
         seo: readCategory(categories, 'seo'),
+        agenticBrowsing: readCategory(categories, 'agentic-browsing'),
         pwa: readCategory(categories, 'pwa'),
       },
+      categoryScores: Object.fromEntries(Object.entries(categories)
+        .filter(([, category]) => isRecord(category))
+        .map(([id, category]) => [id, getCategoryScoreDisplay(category, audits, result.configSettings?.gatherMode)])),
       performanceMetrics: extractPerformanceMetrics(audits),
-      opportunities,
-      diagnostics,
-      passedAudits: passed,
+      ...groups,
       screenshot,
     },
   }
+}
+
+export interface AuditSaving {
+  metric: string
+  value: number
+  unit: 'ms' | 'unitless' | 'bytes'
+}
+
+/** Provider estimates retain the metric's units; historical opportunity estimates retain their original units. */
+export function getAuditSavings(audit: LighthouseAudit): AuditSaving[] {
+  if (audit.metricSavings) {
+    return Object.entries(audit.metricSavings)
+      .filter(([, value]) => Number.isFinite(value) && value > 0)
+      .map(([metric, value]) => ({ metric, value, unit: metric === 'CLS' ? 'unitless' : 'ms' }))
+  }
+  if (audit.details?.type !== 'opportunity')
+    return []
+  const savings: AuditSaving[] = []
+  if (audit.details.overallSavingsMs)
+    savings.push({ metric: 'Time', value: audit.details.overallSavingsMs, unit: 'ms' })
+  if (audit.details.overallSavingsBytes)
+    savings.push({ metric: 'Transfer size', value: audit.details.overallSavingsBytes, unit: 'bytes' })
+  return savings
 }

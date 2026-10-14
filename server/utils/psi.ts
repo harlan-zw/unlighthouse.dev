@@ -76,6 +76,8 @@ export function extractOpportunities(audits: PSIResult['lighthouseResult']['audi
 }
 
 export interface PSIResult {
+  loadingExperience?: Record<string, unknown>
+  originLoadingExperience?: Record<string, unknown>
   lighthouseResult: {
     finalDisplayedUrl?: string
     fullPageScreenshot?: {

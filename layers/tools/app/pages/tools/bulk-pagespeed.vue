@@ -9,7 +9,7 @@ definePageMeta({
 const faqs = [
   {
     question: 'What is bulk PageSpeed testing?',
-    answer: 'Bulk PageSpeed testing lets you analyze multiple URLs simultaneously using the PageSpeed Insights API. Instead of testing pages one at a time, you can submit up to 10 URLs and get Lighthouse performance scores, Core Web Vitals, and audit results for all pages at once.',
+    answer: 'Bulk PageSpeed testing lets you analyze multiple URLs simultaneously using the PageSpeed Insights API. Instead of testing pages one at a time, you can submit up to 10 URLs and get Lighthouse Performance scores and lab metrics for all pages at once.',
   },
   {
     question: 'How do I use the PageSpeed Insights API for bulk testing?',
@@ -21,7 +21,7 @@ const faqs = [
   },
   {
     question: 'What metrics does bulk PageSpeed testing show?',
-    answer: 'Each URL gets a full Lighthouse audit including: Performance score (0-100), Core Web Vitals (LCP, CLS, TBT/INP), First Contentful Paint, Speed Index, and a pass/fail summary. Results help identify which pages need optimization.',
+    answer: 'Each URL gets a full Lighthouse audit including: Performance score (0-100), LCP, CLS, TBT, First Contentful Paint, Speed Index, and score-band counts. Results help identify which pages need optimization.',
   },
   {
     question: 'When should I use bulk testing vs full site scanning?',
@@ -30,8 +30,8 @@ const faqs = [
 ]
 
 useToolSeo({
-  title: 'Bulk PageSpeed & Core Web Vitals Test - Free Multi-URL Tool',
-  description: 'Free bulk Core Web Vitals and PageSpeed test. Check LCP, CLS, INP for up to 10 URLs at once. Get Lighthouse scores and CWV pass/fail for multiple pages.',
+  title: 'Bulk PageSpeed Test - Lighthouse Performance Scores',
+  description: 'Check Lighthouse Performance scores and lab metrics for up to 10 URLs. Compare page results and export measurements.',
   faqs,
 })
 
@@ -554,7 +554,7 @@ https://example.com/pricing"
               {{ summary.needsWorkCount }}
             </div>
             <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Needs Work (50-89)
+              Needs improvement (50-89)
             </div>
           </div>
           <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-center">

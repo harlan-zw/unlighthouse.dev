@@ -30,7 +30,7 @@ relatedPages:
   - path: /glossary/lcp
     title: Largest Contentful Paint (LCP)
   - path: /tools/lighthouse-score-calculator
-    title: Lighthouse Score Calculator
+    title: Lighthouse Performance Score Calculator
   - path: /learn-lighthouse/lcp/render-blocking-resources
     title: Fix Render-Blocking Resources
 ---
@@ -41,7 +41,7 @@ Speed Index measures how quickly visible content appears in the viewport during 
 
 ### Mobile
 
-| Score | Rating |
+| Speed Index | Rating |
 |-------|--------|
 | ≤ 3.4s | Good |
 | 3.4s - 5.8s | Needs Improvement |
@@ -49,7 +49,7 @@ Speed Index measures how quickly visible content appears in the viewport during 
 
 ### Desktop
 
-| Score | Rating |
+| Speed Index | Rating |
 |-------|--------|
 | ≤ 1.3s | Good |
 | 1.3s - 2.3s | Needs Improvement |
@@ -104,5 +104,5 @@ It is a synthetic metric for the initial viewport, not a Core Web Vital and not 
 - [Unlighthouse Bulk PageSpeed Test](/tools/bulk-pagespeed) for comparing routes across a site
 
 ::note
-Use the [Lighthouse Score Calculator](/tools/lighthouse-score-calculator) to see how the 10% Speed Index weight affects the Performance score. Optimize the page, not the calculator: a lower Speed Index should come from content appearing sooner for users.
+Use the [Lighthouse Performance Score Calculator](/tools/lighthouse-score-calculator) to see how the 10% Speed Index weight affects the Performance score. Optimize the page, not the calculator: a lower Speed Index should come from content appearing sooner for users.
 ::

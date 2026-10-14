@@ -1,3 +1,6 @@
+import type { FieldSource } from '../../../../shared/field-assessment.ts'
+import { assessFieldCoreWebVitalRatings } from '../../../../shared/field-assessment.ts'
+
 /**
  * Web Vitals thresholds and the CrUX field data PageSpeed Insights returns
  * alongside every lab run.
@@ -13,8 +16,8 @@ export type MetricRating = 'good' | 'needs-improvement' | 'poor'
 export interface FieldMetric {
   value: number
   displayValue: string
-  rating: MetricRating
-  percentiles: { good: number, needsImprovement: number, poor: number }
+  rating: MetricRating | 'unknown'
+  histogram: { good: number, needsImprovement: number, poor: number }
 }
 
 export interface FieldData {
@@ -23,6 +26,28 @@ export interface FieldData {
   inp: FieldMetric | null
   fcp: FieldMetric | null
   ttfb: FieldMetric | null
+}
+
+export type PsiFieldData = FieldData & { source: FieldSource }
+
+/** PSI includes a URL record and a separate origin record. Never mix their measurements. */
+export function parsePsiFieldData(result: { loadingExperience?: Record<string, unknown>, originLoadingExperience?: Record<string, unknown> }, url: string, device: 'mobile' | 'desktop'): PsiFieldData | null {
+  for (const [scope, experience] of [['url', result.loadingExperience], ['origin', result.originLoadingExperience]] as const) {
+    const field = parseFieldData(experience)
+    if (!field)
+      continue
+    const resolvedScope = experience?.origin_fallback === true ? 'origin' : scope
+    const sourceUrl = typeof experience?.id === 'string' ? experience.id : resolvedScope === 'origin' ? new URL(url).origin : url
+    return {
+      ...field,
+      source: { provider: 'CrUX', scope: resolvedScope, url: sourceUrl, device, collectionPeriod: { _tag: 'Rolling', days: 28 } },
+    }
+  }
+  return null
+}
+
+export function assessPsiFieldData(field: FieldData | null) {
+  return assessFieldCoreWebVitalRatings({ lcp: field?.lcp?.rating, cls: field?.cls?.rating, inp: field?.inp?.rating })
 }
 
 // Thresholds from web.dev.
@@ -96,15 +121,15 @@ export function parseFieldData(loadingExperience: Record<string, unknown> | unde
 
   const parseMetric = (key: string, metric: WebVitalMetric): FieldMetric | null => {
     const raw = metrics[key]
-    if (!raw || typeof raw.percentile !== 'number')
+    if (!raw || !Number.isFinite(raw.percentile) || typeof raw.percentile !== 'number' || raw.percentile < 0)
       return null
 
     const distributions = raw.distributions || []
     return {
       value: raw.percentile,
       displayValue: formatMetricValue(raw.percentile, metric),
-      rating: CRUX_CATEGORIES[raw.category ?? ''] ?? getRating(raw.percentile, metric),
-      percentiles: {
+      rating: CRUX_CATEGORIES[raw.category ?? ''] ?? 'unknown',
+      histogram: {
         good: Math.round((distributions[0]?.proportion || 0) * 100),
         needsImprovement: Math.round((distributions[1]?.proportion || 0) * 100),
         poor: Math.round((distributions[2]?.proportion || 0) * 100),

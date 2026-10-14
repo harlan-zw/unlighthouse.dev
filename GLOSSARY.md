@@ -1,6 +1,6 @@
 # Glossary
 
-Reviewed recovered vocabulary for the article refresh. This preserves existing names and does not rename product interfaces.
+Reviewed vocabulary for articles and product result surfaces.
 The eight public glossary articles remain reader content, not approval of every definition they currently contain.
 
 ## Map
@@ -12,7 +12,15 @@ The eight public glossary articles remain reader content, not approval of every 
 | PageSpeed Insights | Google service; `/learn-lighthouse/pagespeed-insights-vs-lighthouse` | Presents Lighthouse diagnostics and available CrUX data | PageSpeed Insights (PSI) |
 | Chrome UX Report | Google CrUX documentation | Aggregates eligible real-user experiences | Chrome UX Report (CrUX) |
 | lab data | Learn articles; Lighthouse report | One configured test or recorded flow | lab data |
+| Performance metrics | Lighthouse reports and tools | Measurements with source, scope, and units | Performance metrics |
 | field data | CrUX; public Web Vitals definitions | Aggregated real-user measurements | field data |
+| Passed audits | Lighthouse report | Checks satisfying the native pass predicate | Passed audits |
+| Not applicable | Lighthouse report | Checks that do not apply to the page | Not applicable |
+| Manual checks | Lighthouse report | Checks requiring human review | Additional items to manually check |
+| Good Core Web Vitals metrics | Field comparison | Counts good measured metrics, separate from the assessment | Good Core Web Vitals metrics |
+| Field histogram | CrUX field-data tools | Rating-bucket percentages, separate from p75 | field histogram |
+| metric value | Report displays and threshold tables | Measured value, with units | metric value |
+| metric score | Lighthouse scoring | Normalized score derived from a metric value | metric score |
 | Lighthouse Performance score | Lighthouse report category | Weighted metric scores, separate from field assessment | Lighthouse Performance score |
 | Core Web Vitals | Google Web Vitals definitions | LCP, INP, and CLS; distinct from the lab score | Core Web Vitals |
 | URL and origin | PSI/CrUX selector | A specific page versus an origin aggregation | URL; origin |
@@ -36,6 +44,13 @@ A URL result and an origin result do not describe the same population.
 **Never:** interchangeable names for the entire report.
 **Casing:** Lighthouse; PageSpeed Insights; PSI.
 
+Use Lighthouse's native audit titles, categories, metrics, and report groups.
+Use Insights for modern insight audits. Historical Opportunities and Diagnostics groups remain valid for older reports.
+Agentic Browsing and flow reports can display passed checks as a native fraction.
+Exclude manual, not applicable, informative, and hidden checks from that fraction's denominator.
+Unknown explicit audit modes and audit errors never establish a passed check.
+Keep scan for Unlighthouse site-wide runs and scan history for saved runs.
+
 ### Chrome UX Report
 
 **Is:** Google's dataset of eligible real-user experiences.
@@ -57,12 +72,53 @@ A URL result and an origin result do not describe the same population.
 **Never:** Core Web Vitals score as a synonym for Lighthouse Performance score.
 **Casing:** Lighthouse Performance score; Core Web Vitals; LCP; INP; CLS.
 
+Performance metrics are measurements shown with source, device, scope, units, and coverage.
+Use Core Web Vitals for LCP, INP, and CLS. Total Blocking Time remains a separate Lighthouse metric.
+Use Core Web Vitals assessment only for eligible field measurements.
+LCP and CLS are required. Missing INP does not prevent assessment when those measurements are sufficient.
+If required field measurements are missing, the assessment is unavailable. Lab results never supply the field verdict.
+
+Use Lighthouse Performance Score Calculator for the existing Performance category calculator.
+Needs improvement is the documented middle score band. Keep upstream Average where it belongs.
+
+### Native audit states
+
+**Is:** Lighthouse's result modes, kept separate from scores and category groups.
+**Use for:** Passed audits, Not applicable, Additional items to manually check, Informative audits, and Audit errors.
+**Never:** passed for an error, manual check, informative result, or not applicable result.
+**Casing:** use the listed public labels; preserve native mode identifiers.
+
+### Good Core Web Vitals metrics
+
+**Is:** the count of available field LCP, CLS, and INP metrics rated good.
+**Use for:** comparisons showing good and measured counts, with missing metrics identified.
+**Never:** CWV Score or pass rate for this count.
+**Casing:** Good Core Web Vitals metrics.
+
+### Field histogram
+
+**Is:** percentages of eligible field measurements in good, needs improvement, and poor rating buckets.
+**Use for:** field distribution bars and the local histogram response field.
+**Never:** percentiles for bucket percentages. Keep provider percentile and p75 identifiers.
+**Casing:** field histogram; histogram in identifiers.
+
+### Metric value and metric score
+
+**Is:** a measured value with units, and its normalized Lighthouse score, respectively.
+**Use for:** measurement tables and score displays.
+**Never:** score for a measured duration in seconds or milliseconds.
+**Casing:** metric value; metric score. CLS score remains valid domain language.
+
 ### URL and origin
 
 **Is:** a page identifier and its scheme/host/port scope, respectively.
 **Use for:** the selected PSI/CrUX aggregation.
 **Never:** tested page when the report is showing origin data.
 **Casing:** URL; origin.
+
+URL field data measures eligible real-user experiences for the selected URL and period.
+Origin field data aggregates eligible real-user experiences across the selected origin and period.
+Display scope, source identity, device, and collection period beside each field result.
 
 ## Banned
 

@@ -61,7 +61,7 @@ const toolCategories: ToolCategory[] = [
     description: 'Scores & reports',
     color: 'amber',
     tools: [
-      { label: 'Score Calculator', icon: 'i-heroicons-calculator', to: '/tools/lighthouse-score-calculator' },
+      { label: 'Performance Score Calculator', icon: 'i-heroicons-calculator', to: '/tools/lighthouse-score-calculator' },
       { label: 'Report Viewer', icon: 'i-heroicons-document-chart-bar', to: '/tools/lighthouse-report-viewer' },
       { label: 'Bulk PageSpeed', icon: 'i-heroicons-squares-2x2', to: '/tools/bulk-pagespeed' },
       { label: 'PSI Performance', icon: 'i-heroicons-chart-bar', to: '/tools/pagespeed-insights-performance' },

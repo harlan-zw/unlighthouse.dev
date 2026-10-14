@@ -139,7 +139,7 @@ watch(() => props.formFactor, () => {
       </div>
       <div class="flex-1 min-w-0">
         <div class="text-sm font-semibold text-gray-900 dark:text-white">
-          Real User Data
+          {{ data?.source.scope === 'origin' ? 'Origin field data' : 'URL field data' }}
         </div>
         <div class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide">
           Chrome UX Report
@@ -164,7 +164,7 @@ watch(() => props.formFactor, () => {
       <div v-else-if="error || (!data && hasAttempted)" class="py-4 text-center">
         <UIcon name="i-heroicons-chart-bar" class="w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
         <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">
-          No field data for this URL
+          Field data unavailable
         </p>
         <NuxtLink
           :to="`/tools/cwv-history?url=${encodeURIComponent(url)}`"
@@ -177,6 +177,7 @@ watch(() => props.formFactor, () => {
 
       <!-- Data display -->
       <div v-else-if="data" class="space-y-4">
+        <ToolFieldSource :source="data.source" />
         <!-- Main value -->
         <div class="flex items-start justify-between gap-4">
           <div>
@@ -236,7 +237,7 @@ watch(() => props.formFactor, () => {
           </div>
           <div class="flex justify-between text-[10px] text-gray-500 dark:text-gray-400 tabular-nums">
             <span>{{ data.histogram.good }}% good</span>
-            <span>{{ data.histogram.needsImprovement }}% needs work</span>
+            <span>{{ data.histogram.needsImprovement }}% needs improvement</span>
             <span>{{ data.histogram.poor }}% poor</span>
           </div>
         </div>

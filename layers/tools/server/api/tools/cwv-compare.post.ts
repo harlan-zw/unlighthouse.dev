@@ -1,4 +1,6 @@
+import type { FieldAssessment, FieldSource } from '~~/shared/field-assessment'
 import type { FormFactor, NormalizedCrUXCurrentResult, NormalizedCrUXHistoryResult } from '../../utils/crux'
+import { assessFieldCoreWebVitals } from '~~/shared/field-assessment'
 import { fetchCrUXCurrent, fetchCrUXHistory, normaliseCruxHistory, normalizeCruxCurrent } from '../../utils/crux'
 
 export interface CWVCompareRequest {
@@ -21,7 +23,8 @@ export interface SiteComparison {
   hasData: boolean
   current: NormalizedCrUXCurrentResult | null
   history: NormalizedCrUXHistoryResult[] | null
-  passesAllCWV: boolean
+  assessment: FieldAssessment
+  source: FieldSource | null
   cwvScore: number // 0-3, number of CWV metrics passed
 }
 
@@ -39,18 +42,6 @@ export interface CWVCompareResponse {
     [key: string]: string | null
   }
   collectionPeriod: { start: string, end: string } | null
-}
-
-const thresholds = {
-  lcp: { good: 2500, poor: 4000 },
-  cls: { good: 0.1, poor: 0.25 },
-  inp: { good: 200, poor: 500 },
-  fcp: { good: 1800, poor: 3000 },
-  ttfb: { good: 800, poor: 1800 },
-}
-
-function passesMetric(metric: keyof typeof thresholds, value: number | undefined): boolean {
-  return value !== undefined && value <= thresholds[metric].good
 }
 
 export default defineEventHandler(async (event): Promise<CWVCompareResponse> => {
@@ -87,16 +78,17 @@ export default defineEventHandler(async (event): Promise<CWVCompareResponse> => 
     const current = currentResult?.record ? normalizeCruxCurrent(currentResult.record) : null
     const history = historyResult?.record ? normaliseCruxHistory(historyResult.record) : null
 
-    // Calculate CWV pass score
-    let cwvScore = 0
-    if (current?.lcp && passesMetric('lcp', current.lcp.p75))
-      cwvScore++
-    if (current?.cls && passesMetric('cls', current.cls.p75))
-      cwvScore++
-    if (current?.inp && passesMetric('inp', current.inp.p75))
-      cwvScore++
-
-    const passesAllCWV = cwvScore === 3
+    const assessment = assessFieldCoreWebVitals({ lcp: current?.lcp?.p75, cls: current?.cls?.p75, inp: current?.inp?.p75 })
+    const cwvScore = assessment.goodMetricCount
+    const source: FieldSource | null = current && currentResult?.record
+      ? {
+          provider: 'CrUX',
+          scope: 'origin',
+          url: currentResult.record.key.origin || new URL(normalized).origin,
+          device: formFactor === 'PHONE' ? 'mobile' : formFactor === 'TABLET' ? 'tablet' : formFactor === 'ALL_FORM_FACTORS' ? 'all' : 'desktop',
+          collectionPeriod: { _tag: 'Dates', start: current.collectionStart, end: current.collectionEnd },
+        }
+      : null
 
     return {
       url: original,
@@ -104,7 +96,8 @@ export default defineEventHandler(async (event): Promise<CWVCompareResponse> => 
       hasData: !!current,
       current,
       history,
-      passesAllCWV,
+      assessment,
+      source,
       cwvScore,
     } satisfies SiteComparison
   })

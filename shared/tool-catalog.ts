@@ -6,12 +6,12 @@ export const toolCatalog = [
     icon: 'i-heroicons-squares-2x2',
     to: '/tools/bulk-pagespeed',
     color: 'amber',
-    metrics: ['Batch Testing', 'Performance', 'Core Web Vitals'],
+    metrics: ['Batch Testing', 'Performance', 'Lab Metrics'],
   },
   {
     id: 'cwv-check',
     title: 'Core Web Vitals Checker',
-    description: 'Check if your page passes Google\'s Core Web Vitals. Test LCP, CLS, and INP with lab and real user data.',
+    description: 'Check available field Core Web Vitals and inspect Lighthouse lab results.',
     icon: 'i-heroicons-check-badge',
     to: '/tools/cwv-checker',
     color: 'emerald',
@@ -55,7 +55,7 @@ export const toolCatalog = [
   },
   {
     id: 'lighthouse-score-calculator',
-    title: 'Lighthouse Score Calculator',
+    title: 'Lighthouse Performance Score Calculator',
     description: 'Calculate your performance score interactively. Adjust metrics to see how they impact your overall Lighthouse score.',
     icon: 'i-heroicons-calculator',
     to: '/tools/lighthouse-score-calculator',

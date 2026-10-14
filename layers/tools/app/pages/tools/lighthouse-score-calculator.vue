@@ -6,14 +6,14 @@ import { useToolLighthouseCalculator } from '../../composables/useToolLighthouse
 definePageMeta({
   breadcrumb: {
     icon: 'i-heroicons-calculator',
-    ariaLabel: 'Lighthouse Score Calculator',
+    ariaLabel: 'Lighthouse Performance Score Calculator',
   },
 })
 
 const faqs = [
   {
     question: 'How does Lighthouse calculate the performance score?',
-    answer: 'Lighthouse calculates performance score as a weighted average of six metrics: First Contentful Paint (10%), Speed Index (10%), Largest Contentful Paint (25%), Total Blocking Time (30%), and Cumulative Layout Shift (25%). Each metric is scored 0-100 using log-normal curves based on real-world data from HTTPArchive.',
+    answer: 'Lighthouse calculates the Performance score from five metrics: First Contentful Paint (10%), Speed Index (10%), Largest Contentful Paint (25%), Total Blocking Time (30%), and Cumulative Layout Shift (25%). Each metric value maps to a normalized score before weighting.',
   },
   {
     question: 'Why do my Lighthouse scores vary between runs?',
@@ -34,7 +34,7 @@ const faqs = [
 ]
 
 useToolSeo({
-  title: 'Lighthouse Scoring Calculator - Calculate Performance Scores',
+  title: 'Lighthouse Performance Score Calculator - Calculate Performance Scores',
   description: 'Free interactive Lighthouse scoring calculator. See how FCP, LCP, TBT, CLS, and Speed Index weights and thresholds determine your Lighthouse performance score. Enter your metrics to calculate your score.',
   faqs,
 })
@@ -157,7 +157,7 @@ function fetchFromUrl() {
   <div class="min-h-screen">
     <ToolFloatingLoader :show="fetchLoading && showFloatingLoader" :message="loadingMessage" :started-at="fetchStartedAt" color="violet" />
 
-    <ToolPageHero title="Lighthouse Score" accent="Calculator" description="See exactly how each metric contributes to your performance score." color="violet" />
+    <ToolPageHero title="Lighthouse Performance Score" accent="Calculator" description="See exactly how each metric contributes to your performance score." color="violet" />
 
     <!-- Calculator -->
     <section class="px-3 sm:px-6 lg:px-8 pb-12">

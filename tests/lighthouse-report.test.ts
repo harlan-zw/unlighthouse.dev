@@ -1,7 +1,7 @@
 /* eslint-disable test/no-import-node-test */
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { parseLighthouseReport } from '../layers/tools/app/utils/lighthouse.ts'
+import { getAuditSavings, parseLighthouseReport } from '../layers/tools/app/utils/lighthouse.ts'
 
 function lighthouseReport(overrides: Record<string, unknown> = {}) {
   return {
@@ -129,4 +129,113 @@ test('reads a report whose category auditRefs are missing', () => {
 
   assert.equal(result._tag, 'Ok')
   assert.equal(result._tag === 'Ok' && result.report.opportunities.length, 0)
+})
+
+test('keeps native audit states out of passed checks and separates modern insights', () => {
+  const modes = [
+    ['passed', 'numeric', 0.95, 'diagnostics'],
+    ['insight', 'metricSavings', 0, 'insights'],
+    ['irrelevant', 'notApplicable', null, 'diagnostics'],
+    ['human', 'manual', null, 'diagnostics'],
+    ['information', 'informative', null, 'diagnostics'],
+    ['broken', 'error', null, 'insights'],
+  ] as const
+  const result = parseLighthouseReport(lighthouseReport({
+    lighthouseVersion: '13.5.0',
+    categories: { performance: { auditRefs: modes.map(([id, , , group]) => ({ id, group })) } },
+    audits: Object.fromEntries(modes.map(([id, scoreDisplayMode, score]) => [id, {
+      id,
+      title: id,
+      scoreDisplayMode,
+      score,
+    }])),
+  }))
+  assert.equal(result._tag, 'Ok')
+  if (result._tag !== 'Ok')
+    return
+  assert.deepEqual(result.report.passedAudits.map(audit => audit.id), ['passed'])
+  assert.deepEqual(result.report.insights.map(audit => audit.id), ['insight'])
+  assert.deepEqual(result.report.notApplicableAudits.map(audit => audit.id), ['irrelevant'])
+  assert.deepEqual(result.report.manualAudits.map(audit => audit.id), ['human'])
+  assert.deepEqual(result.report.informativeAudits.map(audit => audit.id), ['information'])
+  assert.deepEqual(result.report.errorAudits.map(audit => audit.id), ['broken'])
+})
+
+test('does not mark Total Blocking Time as a Core Web Vital', () => {
+  const result = parseLighthouseReport(lighthouseReport({ audits: {
+    'total-blocking-time': { id: 'total-blocking-time', title: 'Total Blocking Time', numericValue: 100, score: 0.95 },
+  } }))
+  assert.equal(result._tag, 'Ok')
+  if (result._tag !== 'Ok')
+    return
+  assert.equal(result.report.performanceMetrics[0]?.isCoreWebVital, false)
+})
+
+test('includes non-performance category checks when a report has no Performance category', () => {
+  const result = parseLighthouseReport(lighthouseReport({
+    categories: { accessibility: { auditRefs: [{ id: 'contrast' }] } },
+    audits: { contrast: { id: 'contrast', title: 'Color contrast', score: 0, scoreDisplayMode: 'binary' } },
+  }))
+  assert.equal(result._tag, 'Ok')
+  if (result._tag !== 'Ok')
+    return
+  assert.deepEqual(result.report.diagnostics.map(audit => audit.id), ['contrast'])
+})
+
+test('keeps CLS savings unitless and time savings in milliseconds', () => {
+  assert.deepEqual(getAuditSavings({
+    id: 'layout-shift-insight',
+    title: 'Layout shifts',
+    score: 0,
+    scoreDisplayMode: 'metricSavings',
+    metricSavings: { CLS: 0.03, LCP: 350, FCP: 0 },
+  }), [
+    { metric: 'CLS', value: 0.03, unit: 'unitless' },
+    { metric: 'LCP', value: 350, unit: 'ms' },
+  ])
+})
+
+test('retains Agentic Browsing and its native fraction excluding manual, irrelevant, informative and hidden audits', () => {
+  const modes = [
+    ['passed', 'binary', 1, undefined],
+    ['failed', 'binary', 0, undefined],
+    ['human', 'manual', null, undefined],
+    ['irrelevant', 'notApplicable', null, undefined],
+    ['information', 'informative', null, undefined],
+    ['hidden', 'binary', 1, 'hidden'],
+  ] as const
+  const result = parseLighthouseReport(lighthouseReport({
+    categories: {
+      'agentic-browsing': {
+        id: 'agentic-browsing',
+        title: 'Agentic Browsing',
+        score: 0.5,
+        categoryScoreDisplayMode: 'fraction',
+        auditRefs: modes.map(([id, , , group]) => ({ id, group, weight: 1 })),
+      },
+    },
+    audits: Object.fromEntries(modes.map(([id, scoreDisplayMode, score]) => [id, { id, title: id, scoreDisplayMode, score }])),
+  }))
+  assert.equal(result._tag, 'Ok')
+  if (result._tag !== 'Ok')
+    return
+  assert.equal(result.report.categories.agenticBrowsing?.title, 'Agentic Browsing')
+  assert.deepEqual(result.report.categoryScores['agentic-browsing'], { _tag: 'Fraction', numPassed: 1, numPassableAudits: 2, score: 0.5 })
+})
+
+test('does not call a future explicit mode or a missing-mode error passed', () => {
+  const result = parseLighthouseReport(lighthouseReport({
+    categories: { performance: { auditRefs: [{ id: 'future' }, { id: 'error' }, { id: 'historical' }] } },
+    audits: {
+      future: { id: 'future', title: 'Future result', score: 1, scoreDisplayMode: 'future' },
+      error: { id: 'error', title: 'Audit error', score: 1, errorMessage: 'Audit could not run' },
+      historical: { id: 'historical', title: 'Historical scored check', score: 1 },
+    },
+  }))
+  assert.equal(result._tag, 'Ok')
+  if (result._tag !== 'Ok')
+    return
+  assert.deepEqual(result.report.passedAudits.map(audit => audit.id), ['historical'])
+  assert.deepEqual(result.report.informativeAudits.map(audit => audit.id), ['future'])
+  assert.equal(result.report.errorAudits[0]?.errorMessage, 'Audit could not run')
 })

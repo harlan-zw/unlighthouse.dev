@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { ComponentPublicInstance } from 'vue'
+import type { FieldAssessment } from '~~/shared/field-assessment'
+import type { PsiFieldData } from '../../../server/utils/web-vitals'
 
 definePageMeta({
   breadcrumb: {
@@ -15,7 +17,7 @@ const faqs = [
   },
   {
     question: 'What is a good Core Web Vitals score?',
-    answer: 'Good scores are: LCP under 2.5 seconds, CLS under 0.1, and INP under 200 milliseconds. To pass Core Web Vitals, at least 75% of page loads must meet the "good" threshold for all three metrics.',
+    answer: 'Good field values are LCP at most 2.5 seconds, CLS at most 0.1, and INP at most 200 milliseconds. The assessment uses eligible field p75 measurements. LCP and CLS are required. If INP is unavailable, those two metrics can still establish the assessment.',
   },
   {
     question: 'What\'s the difference between Lab and Field data?',
@@ -29,7 +31,7 @@ const faqs = [
 
 useToolSeo({
   title: 'Core Web Vitals Test - Free CWV Checker',
-  description: 'Check if your page passes Google\'s Core Web Vitals. Test LCP, CLS, and INP with lab and real user data. Free tool with actionable recommendations.',
+  description: 'Check available field Core Web Vitals and inspect Lighthouse lab results. View measurement sources and recommendations.',
   faqs,
 })
 
@@ -40,13 +42,6 @@ interface MetricResult {
   displayValue: string
   rating: 'good' | 'needs-improvement' | 'poor'
   score: number
-}
-
-interface FieldMetric {
-  value: number
-  displayValue: string
-  rating: 'good' | 'needs-improvement' | 'poor'
-  percentiles: { good: number, needsImprovement: number, poor: number }
 }
 
 interface Recommendation {
@@ -62,7 +57,7 @@ interface CWVResult {
   fetchedUrl: string
   timestamp: number
   strategy: 'mobile' | 'desktop'
-  passesCWV: boolean
+  assessment: FieldAssessment
   performanceScore: number
   lab: {
     lcp: MetricResult | null
@@ -72,14 +67,7 @@ interface CWVResult {
     si: MetricResult | null
     ttfb: MetricResult | null
   }
-  field: {
-    lcp: FieldMetric | null
-    cls: FieldMetric | null
-    inp: FieldMetric | null
-    fcp: FieldMetric | null
-    ttfb: FieldMetric | null
-    originFallback: boolean
-  } | null
+  field: PsiFieldData | null
   recommendations: Recommendation[]
   filmstrip: Array<{ timing: number, data: string }>
   screenshot: { data: string, width: number, height: number } | null
@@ -94,7 +82,7 @@ const { loading, error, result, startedAt, run: runBg } = useToolBackgroundReque
 const loadingContainerRef = ref<HTMLElement | ComponentPublicInstance | null>(null)
 
 const { showFloatingLoader } = useToolFloatingLoader(loading, loadingContainerRef)
-const loadingMessage = 'Checking field and lab Core Web Vitals...'
+const loadingMessage = 'Checking field Core Web Vitals and Lighthouse lab results...'
 
 const { syncParam } = useToolUrlSync(urlInput, {
   extraParams: { strategy: strategy as Ref<string> },
@@ -134,7 +122,7 @@ const cwvMetrics = computed(() => {
       value: lcpField?.displayValue || lcpLab?.displayValue || '',
       rating: lcpField?.rating || lcpLab?.rating || 'poor',
       source: lcpField ? 'field' : 'lab',
-      percentiles: lcpField?.percentiles,
+      histogram: lcpField?.histogram,
     })
   }
 
@@ -146,28 +134,30 @@ const cwvMetrics = computed(() => {
       key: 'cls',
       label: 'CLS',
       fullLabel: 'Cumulative Layout Shift',
-      description: 'Visual Stability',
+      description: clsField ? 'Raw PSI CLS value' : 'Visual Stability',
       value: clsField?.displayValue || clsLab?.displayValue || '',
       rating: clsField?.rating || clsLab?.rating || 'poor',
       source: clsField ? 'field' : 'lab',
-      percentiles: clsField?.percentiles,
+      histogram: clsField?.histogram,
     })
   }
 
   // INP - field only (lab uses TBT as proxy)
   const inpField = result.value.field?.inp
   const tbtLab = result.value.lab.tbt
-  metrics.push({
-    key: 'inp',
-    label: inpField ? 'INP' : 'TBT',
-    fullLabel: inpField ? 'Interaction to Next Paint' : 'Total Blocking Time',
-    description: 'Interactivity',
-    value: inpField?.displayValue || tbtLab?.displayValue || 'N/A',
-    rating: inpField?.rating || tbtLab?.rating || 'poor',
-    source: inpField ? 'field' : 'lab',
-    percentiles: inpField?.percentiles,
-    isProxy: !inpField,
-  })
+  if (inpField || tbtLab) {
+    metrics.push({
+      key: 'inp',
+      label: inpField ? 'INP' : 'TBT',
+      fullLabel: inpField ? 'Interaction to Next Paint' : 'Total Blocking Time',
+      description: 'Interactivity',
+      value: inpField?.displayValue || tbtLab?.displayValue || 'N/A',
+      rating: inpField?.rating || tbtLab?.rating || 'poor',
+      source: inpField ? 'field' : 'lab',
+      histogram: inpField?.histogram,
+      isProxy: !inpField,
+    })
+  }
 
   return metrics
 })
@@ -180,7 +170,7 @@ const cwvMetrics = computed(() => {
     <ToolPageHero
       title="Core Web Vitals"
       accent="Test"
-      description="Check if your page passes Google's Core Web Vitals with lab and real user data."
+      description="Check available field Core Web Vitals and inspect Lighthouse lab results."
       color="emerald"
     />
 
@@ -218,49 +208,15 @@ const cwvMetrics = computed(() => {
 
       <!-- Results -->
       <div v-if="result" class="p-4 sm:p-6 space-y-8">
-        <!-- Pass/Fail Banner -->
-        <div
-          class="p-4 sm:p-6 rounded-xl text-center"
-          :class="result.passesCWV
-            ? 'bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 border border-emerald-200 dark:border-emerald-800'
-            : 'bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 border border-red-200 dark:border-red-800'"
-        >
-          <div class="flex items-center justify-center gap-3 mb-2">
-            <UIcon
-              :name="result.passesCWV ? 'i-heroicons-check-badge-solid' : 'i-heroicons-x-circle-solid'"
-              class="w-8 h-8"
-              :class="result.passesCWV ? 'text-emerald-500' : 'text-red-500'"
-            />
-            <span
-              class="text-xl sm:text-2xl font-bold"
-              :class="result.passesCWV ? 'text-emerald-700 dark:text-emerald-300' : 'text-red-700 dark:text-red-300'"
-            >
-              {{ result.passesCWV ? 'Passes Core Web Vitals' : 'Fails Core Web Vitals' }}
-            </span>
-          </div>
-          <p class="text-sm text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-            {{ result.passesCWV
-              ? 'This page meets Google\'s Core Web Vitals thresholds for a good user experience.'
-              : 'This page does not meet all Core Web Vitals thresholds. See recommendations below.' }}
-          </p>
-          <p class="text-xs text-gray-500 mt-2 truncate max-w-md mx-auto">
-            {{ result.fetchedUrl }}
-          </p>
-        </div>
+        <ToolFieldAssessment :assessment="result.assessment" :source="result.field?.source" />
 
         <!-- CWV Metric Cards -->
         <div>
           <div class="flex items-center gap-2 mb-4">
             <UIcon name="i-heroicons-bolt" class="w-5 h-5 text-emerald-500" />
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-              Core Web Vitals
+              Performance metrics
             </h3>
-            <span
-              v-if="result.field"
-              class="px-2 py-0.5 text-[10px] font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded"
-            >
-              {{ result.field.originFallback ? 'Origin Data' : 'Real Users' }}
-            </span>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -303,19 +259,19 @@ const cwvMetrics = computed(() => {
                 {{ metric.description }}
               </div>
 
-              <!-- Percentile bar for field data -->
-              <div v-if="metric.percentiles" class="mt-3 h-2 rounded-full overflow-hidden flex">
+              <!-- Histogram shares for field data -->
+              <div v-if="metric.histogram" class="mt-3 h-2 rounded-full overflow-hidden flex">
                 <div
                   class="bg-green-400"
-                  :style="{ width: `${metric.percentiles.good}%` }"
+                  :style="{ width: `${metric.histogram.good}%` }"
                 />
                 <div
                   class="bg-orange-400"
-                  :style="{ width: `${metric.percentiles.needsImprovement}%` }"
+                  :style="{ width: `${metric.histogram.needsImprovement}%` }"
                 />
                 <div
                   class="bg-red-400"
-                  :style="{ width: `${metric.percentiles.poor}%` }"
+                  :style="{ width: `${metric.histogram.poor}%` }"
                 />
               </div>
             </div>
@@ -359,7 +315,7 @@ const cwvMetrics = computed(() => {
           <div class="flex items-center gap-2 mb-4">
             <UIcon name="i-heroicons-beaker" class="w-5 h-5 text-violet-500" />
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-              Lab Metrics
+              Lighthouse lab results
             </h3>
             <span class="text-xs text-gray-500">(Lighthouse)</span>
           </div>

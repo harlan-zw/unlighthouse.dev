@@ -90,9 +90,9 @@ export function normaliseCruxHistory(data: CrUXHistoryResult): NormalizedCrUXHis
   })
 
   function normaliseP75(segment: number | string | null, i: number) {
-    const value = typeof segment === 'string' ? Number.parseFloat(segment) : (segment || 0)
+    const value = typeof segment === 'string' ? Number.parseFloat(segment) : segment
     return {
-      value: Number.isNaN(value) ? 0 : value,
+      value: typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : undefined,
       date: dates[i],
     }
   }
@@ -112,7 +112,7 @@ export function normaliseCruxHistory(data: CrUXHistoryResult): NormalizedCrUXHis
     const needsImprovement = histogramTimeseries[1]?.densities || []
     const poor = histogramTimeseries[2]?.densities || []
 
-    const clean = (v: number | string) => v === 'NaN' || Number.isNaN(v) ? undefined : Number(v)
+    const clean = (v: number | string) => Number.isFinite(Number(v)) ? Number(v) : undefined
 
     return {
       good: good.map(clean),
@@ -128,11 +128,11 @@ export function normaliseCruxHistory(data: CrUXHistoryResult): NormalizedCrUXHis
   const inpHistogram = extractHistogram(interaction_to_next_paint?.histogramTimeseries)
 
   // Find valid data range
-  const clsStart = cls.findIndex(v => v.value >= 0)
-  const lcpStart = lcp.findIndex(v => v.value > 0)
-  const inpStart = inp.findIndex(v => v.value > 0)
-  const fcpStart = fcp.findIndex(v => v.value > 0)
-  const ttfbStart = ttfb.findIndex(v => v.value > 0)
+  const clsStart = cls.findIndex(v => v.value !== undefined)
+  const lcpStart = lcp.findIndex(v => v.value !== undefined)
+  const inpStart = inp.findIndex(v => v.value !== undefined)
+  const fcpStart = fcp.findIndex(v => v.value !== undefined)
+  const ttfbStart = ttfb.findIndex(v => v.value !== undefined)
   const indexes = [clsStart, lcpStart, inpStart, fcpStart, ttfbStart].filter(i => i > -1)
 
   if (!indexes.length)
@@ -140,11 +140,11 @@ export function normaliseCruxHistory(data: CrUXHistoryResult): NormalizedCrUXHis
 
   const start = Math.min(...indexes)
   const end = Math.max(
-    cls.findLastIndex(v => v.value >= 0),
-    lcp.findLastIndex(v => v.value > 0),
-    inp.findLastIndex(v => v.value > 0),
-    fcp.findLastIndex(v => v.value > 0),
-    ttfb.findLastIndex(v => v.value > 0),
+    cls.findLastIndex(v => v.value !== undefined),
+    lcp.findLastIndex(v => v.value !== undefined),
+    inp.findLastIndex(v => v.value !== undefined),
+    fcp.findLastIndex(v => v.value !== undefined),
+    ttfb.findLastIndex(v => v.value !== undefined),
   )
 
   return dates.slice(start, end + 1).map((date, idx) => {
@@ -269,6 +269,8 @@ function normalizeMetric(metric: CrUXMetric | undefined): { p75: number, good: n
   if (!metric)
     return undefined
   const p75 = typeof metric.percentiles.p75 === 'string' ? Number.parseFloat(metric.percentiles.p75) : metric.percentiles.p75
+  if (!Number.isFinite(p75) || p75 < 0)
+    return undefined
   const histogram = metric.histogram || []
   const good = typeof histogram[0]?.density === 'string' ? Number.parseFloat(histogram[0].density) : (histogram[0]?.density || 0)
   const needsImprovement = typeof histogram[1]?.density === 'string' ? Number.parseFloat(histogram[1].density) : (histogram[1]?.density || 0)
