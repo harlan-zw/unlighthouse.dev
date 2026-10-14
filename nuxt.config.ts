@@ -465,7 +465,7 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
     identity: {
       type: 'Organization',
       name: 'Unlighthouse',
-      logo: '/logo.svg',
+      logo: '/logo.png',
     },
   },
 

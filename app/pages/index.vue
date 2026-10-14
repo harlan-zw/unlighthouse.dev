@@ -6,14 +6,16 @@ definePageMeta({
   },
 })
 
+const homepageDescription = 'Unlighthouse finds your pages and runs Lighthouse audits across your site. Review the results in one dashboard. Free and open source.'
+
 useSeoMeta({
   title: 'Unlighthouse: Site-Wide Google Lighthouse Audits',
-  description: 'Scan every page of your site with Google Lighthouse. Unlighthouse discovers URLs, runs audits in parallel, and combines results in one report.',
+  description: homepageDescription,
 })
 
 defineOgImage('NuxtSeoSatori', {
   title: 'Unlighthouse',
-  description: 'Like Google Lighthouse, but it scans every single page.',
+  description: homepageDescription,
   theme: '#a855f7',
 })
 
@@ -47,9 +49,9 @@ const exploreLinks = [
   },
   {
     title: 'Integrations',
-    description: 'Run Unlighthouse from the CLI, CI, Nuxt, Vite, or Webpack.',
+    description: 'Run the v1 beta from the CLI, CI, or an AI agent.',
     icon: 'i-carbon-connection-signal',
-    to: '/integrations/cli',
+    to: '/v1/integrations/cli',
   },
   {
     title: 'Web Performance Glossary',
@@ -65,26 +67,35 @@ const exploreLinks = [
     <!-- Hero -->
     <section class="relative pt-16 pb-8 lg:pt-24 lg:pb-12">
       <div class="max-w-4xl mx-auto px-6 text-center">
+        <NuxtLink
+          to="/v1/guide/guides/migrating-to-v1"
+          class="mb-5 inline-flex min-h-11 items-center gap-2 rounded-full bg-default py-1 pl-1 pr-3 text-sm font-medium ring-1 ring-default hover:ring-accented focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+        >
+          <span class="rounded-full bg-elevated px-2 py-1 text-sm font-bold">NEW</span>
+          <img src="/favicon-32x32.png" width="20" height="20" alt="" class="size-5 rounded-sm">
+          <span>Unlighthouse v1 beta</span>
+          <UIcon name="i-carbon-arrow-right" class="size-4 text-muted" aria-hidden="true" />
+        </NuxtLink>
         <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] text-neutral-900 dark:text-white mb-6">
           Lighthouse for your
           <span class="text-violet-600 dark:text-violet-400"> entire site</span>
         </h1>
         <p class="text-lg lg:text-xl text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto mb-8">
-          Unlighthouse is a free, open-source CLI that runs Google Lighthouse on every page of your site in parallel. Auto-discovers URLs, crawls in parallel, and delivers one unified performance report.
+          {{ homepageDescription }}
         </p>
 
         <!-- Terminal + CTAs inline -->
         <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
-          <div class="inline-flex items-center gap-2 bg-neutral-100 dark:bg-neutral-900 rounded-lg px-4 py-3 font-mono text-sm border border-neutral-200 dark:border-neutral-800">
+          <div class="inline-flex max-w-full overflow-x-auto whitespace-nowrap items-center gap-2 bg-neutral-100 dark:bg-neutral-900 rounded-lg px-4 py-3 font-mono text-sm border border-neutral-200 dark:border-neutral-800">
             <span class="text-neutral-500 dark:text-neutral-400">$</span>
             <span class="text-emerald-600 dark:text-emerald-400">npx</span>
-            <span class="text-neutral-900 dark:text-white">unlighthouse</span>
+            <span class="text-neutral-900 dark:text-white">unlighthouse@beta</span>
             <span class="text-amber-600 dark:text-amber-400">--site</span>
-            <span class="text-neutral-500 dark:text-neutral-400">example.com</span>
+            <span class="text-neutral-500 dark:text-neutral-400">https://example.com</span>
           </div>
           <div class="flex items-center gap-3">
-            <UButton size="lg" to="/guide/getting-started/installation">
-              Get Started
+            <UButton size="lg" to="/v1/guide/getting-started/installation">
+              Try v1 beta
             </UButton>
             <UButton size="lg" variant="ghost" color="neutral" to="https://github.com/harlan-zw/unlighthouse" target="_blank">
               <UIcon name="i-carbon-logo-github" class="w-5 h-5" />
@@ -93,7 +104,7 @@ const exploreLinks = [
           </div>
         </div>
         <p class="text-xs text-neutral-500 dark:text-neutral-400">
-          Node 22+ · MIT licensed · Zero config
+          Node.js 24.13.1+ · MIT licensed
         </p>
       </div>
     </section>
@@ -116,7 +127,7 @@ const exploreLinks = [
               </div>
               <div class="flex-1 min-w-0 max-w-md mx-auto">
                 <div class="bg-neutral-300/50 dark:bg-neutral-700/50 rounded-lg px-4 py-1.5 text-sm text-neutral-600 dark:text-neutral-400 font-mono text-center truncate">
-                  localhost:5678
+                  Unlighthouse v1 beta
                 </div>
               </div>
               <NuxtLink to="https://unlighthouse-demo.netlify.app/" external target="_blank" class="shrink-0 text-sm text-neutral-700 dark:text-neutral-300 underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-violet-600">
@@ -132,15 +143,18 @@ const exploreLinks = [
                 src="https://unlighthouse-demo.netlify.app/"
                 tabindex="0"
                 class="block w-full h-full bg-white"
-                title="Unlighthouse Demo Report"
+                title="Unlighthouse v1 beta demo"
               />
               <div v-else class="flex h-full flex-col items-center justify-center gap-6 px-6 text-center">
                 <UIcon name="i-carbon-dashboard" class="size-12 text-violet-600 dark:text-violet-400" />
                 <h2 class="text-2xl font-bold text-neutral-900 dark:text-white">
-                  Unlighthouse Demo Report
+                  Unlighthouse v1 beta demo
                 </h2>
+                <p class="text-neutral-600 dark:text-neutral-400">
+                  Explore a real scan of unlighthouse.dev. This demo is read-only.
+                </p>
                 <UButton size="xl" @click="loadDemo">
-                  Load live demo
+                  Load v1 demo
                 </UButton>
               </div>
             </div>
@@ -159,66 +173,66 @@ const exploreLinks = [
             <div class="flex items-center gap-3 mb-2">
               <Icon name="noto:high-voltage" class="w-6 h-6" />
               <h3 class="font-semibold">
-                Parallel Scans
+                Lighthouse audits
               </h3>
             </div>
             <p class="text-sm text-neutral-600 dark:text-neutral-400">
-              Threaded workers with opportunistic throttling for fast audits.
+              Run performance audits one at a time or in parallel.
             </p>
           </div>
           <div class="p-5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
             <div class="flex items-center gap-3 mb-2">
               <Icon name="noto:lady-beetle" class="w-6 h-6" />
               <h3 class="font-semibold">
-                Auto Crawling
+                URL discovery
               </h3>
             </div>
             <p class="text-sm text-neutral-600 dark:text-neutral-400">
-              Discovers URLs via robots.txt, sitemap.xml, and internal links.
+              Crawl server-rendered links, use sitemaps, or supply explicit URLs.
             </p>
           </div>
           <div class="p-5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
             <div class="flex items-center gap-3 mb-2">
               <Icon name="noto:sushi" class="w-6 h-6" />
               <h3 class="font-semibold">
-                Smart Sampling
+                Mobile and desktop
               </h3>
             </div>
             <p class="text-sm text-neutral-600 dark:text-neutral-400">
-              Auto-samples dynamic routes to reduce scan time.
+              Run mobile and desktop audits in one scan, with separate results for each.
             </p>
           </div>
           <div class="p-5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
             <div class="flex items-center gap-3 mb-2">
               <Icon name="noto:rainbow" class="w-6 h-6" />
               <h3 class="font-semibold">
-                Modern UI
+                Scan history
               </h3>
             </div>
             <p class="text-sm text-neutral-600 dark:text-neutral-400">
-              Search, sort, and re-scan pages in the Vite-powered client.
+              Reopen scans saved on your machine without starting another scan.
             </p>
           </div>
           <div class="p-5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
             <div class="flex items-center gap-3 mb-2">
               <Icon name="noto:candy" class="w-6 h-6" />
               <h3 class="font-semibold">
-                SEO Insights
+                CI reports
               </h3>
             </div>
             <p class="text-sm text-neutral-600 dark:text-neutral-400">
-              Titles, meta descriptions, share images, link analysis.
+              Export JSON or CSV reports and check performance budgets in CI.
             </p>
           </div>
           <div class="p-5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
             <div class="flex items-center gap-3 mb-2">
               <Icon name="noto:check-mark-button" class="w-6 h-6" />
               <h3 class="font-semibold">
-                A11y Summary
+                MCP for AI agents
               </h3>
             </div>
             <p class="text-sm text-neutral-600 dark:text-neutral-400">
-              Accessibility audit with contrast issue visualization.
+              Connect your AI agent through MCP to run scans and read results.
             </p>
           </div>
         </div>

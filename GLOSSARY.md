@@ -50,6 +50,7 @@ Agentic Browsing and flow reports can display passed checks as a native fraction
 Exclude manual, not applicable, informative, and hidden checks from that fraction's denominator.
 Unknown explicit audit modes and audit errors never establish a passed check.
 Keep scan for Unlighthouse site-wide runs and scan history for saved runs.
+Unlighthouse CI exports and its MCP integration keep their own names.
 
 ### Chrome UX Report
 
