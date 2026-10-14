@@ -25,13 +25,13 @@ Interaction to Next Paint (INP) measures how quickly your page responds to user 
 
 ## Thresholds
 
-| Score | Rating |
+| INP | Rating |
 |-------|--------|
 | ≤ 200ms | Good |
 | 200ms - 500ms | Needs Improvement |
 | > 500ms | Poor |
 
-Aim for a score of 200 milliseconds or less at the 75th percentile of page loads to pass the [Google threshold](https://web.dev/articles/inp).
+Aim for an INP of 200 milliseconds or less at the 75th percentile of page loads to pass the [Google threshold](https://web.dev/articles/inp).
 
 ## INP vs FID
 

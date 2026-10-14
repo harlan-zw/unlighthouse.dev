@@ -1261,7 +1261,7 @@ const insights = computed<LcpInsight[]>(() => {
                     2.5-4s
                   </div>
                   <div class="text-[9px] sm:text-[10px] font-medium text-orange-700 dark:text-orange-300">
-                    Needs Work
+                    Needs improvement
                   </div>
                 </div>
                 <div class="p-2 sm:p-2.5 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-center">

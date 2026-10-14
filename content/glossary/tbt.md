@@ -21,7 +21,7 @@ Total Blocking Time (TBT) is a Lighthouse lab metric. It adds up the blocking po
 
 ## Thresholds
 
-| Score | Rating |
+| TBT | Rating |
 |-------|--------|
 | ≤ 200ms | Good |
 | 200ms - 600ms | Needs Improvement |

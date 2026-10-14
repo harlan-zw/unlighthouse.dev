@@ -13,7 +13,7 @@ withDefaults(defineProps<{
 </script>
 
 <template>
-  <section class="px-3 sm:px-6 lg:px-8 pb-12">
+  <section class="overflow-x-clip px-3 sm:px-6 lg:px-8 pb-12">
     <div class="mx-auto" :class="[maxWidth]">
       <div class="relative">
         <div

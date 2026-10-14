@@ -133,15 +133,6 @@ export function getCruxRatingIcon(rating: CruxRating): string {
   }
 }
 
-export function getPassesAllCWV(metrics: { lcp?: number, cls?: number, inp?: number }): boolean {
-  const { lcp, cls, inp } = metrics
-  if (lcp === undefined || cls === undefined || inp === undefined)
-    return false
-  return getMetricRating('lcp', lcp) === 'good'
-    && getMetricRating('cls', cls) === 'good'
-    && getMetricRating('inp', inp) === 'good'
-}
-
 export function calculateTrendPercentage(current: number | undefined, previous: number | undefined): number | null {
   if (!previous || previous === 0 || !current)
     return null
@@ -150,6 +141,12 @@ export function calculateTrendPercentage(current: number | undefined, previous: 
 
 // Lighthouse-style rating color maps (bg, border, text, badge) for tool pages
 export const ratingColors = {
+  'unknown': {
+    bg: 'bg-gray-50 dark:bg-gray-800/50',
+    border: 'border-gray-200 dark:border-gray-700',
+    text: 'text-gray-500 dark:text-gray-400',
+    badge: 'bg-gray-400',
+  },
   'good': {
     bg: 'bg-green-50 dark:bg-green-900/20',
     border: 'border-green-200 dark:border-green-800',
@@ -175,6 +172,8 @@ export function getRatingIcon(rating: string) {
     return 'i-heroicons-check-circle-solid'
   if (rating === 'needs-improvement')
     return 'i-heroicons-exclamation-circle-solid'
+  if (rating === 'unknown')
+    return 'i-heroicons-question-mark-circle'
   return 'i-heroicons-x-circle-solid'
 }
 

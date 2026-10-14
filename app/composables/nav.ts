@@ -103,8 +103,8 @@ export const resourcesMenu = computed(() => [
         to: '/tools/cwv-history',
       },
       {
-        label: 'Score Calculator',
-        title: 'Score Calculator',
+        label: 'Performance Score Calculator',
+        title: 'Performance Score Calculator',
         icon: 'i-heroicons-calculator',
         to: '/tools/lighthouse-score-calculator',
       },

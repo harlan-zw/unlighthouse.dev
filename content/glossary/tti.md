@@ -42,7 +42,7 @@ Time to Interactive measured when a page became fully interactive - displaying u
 
 ## Historical thresholds
 
-| Score | Rating |
+| TTI | Rating |
 |-------|--------|
 | ≤ 3.8s | Good |
 | 3.8s - 7.3s | Needs Improvement |

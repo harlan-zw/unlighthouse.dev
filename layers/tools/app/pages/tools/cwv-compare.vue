@@ -20,7 +20,7 @@ const faqs = [
   },
   {
     question: 'How is the winner determined?',
-    answer: 'For each metric, the site with the lowest (fastest/best) P75 value wins. Overall winner prioritizes Core Web Vitals pass rate, then combined metric performance.',
+    answer: 'For each metric, the site with the lowest (fastest/best) P75 value wins. Overall winner prioritizes the number of good Core Web Vitals metrics, then combined metric performance.',
   },
   {
     question: 'Can I share this comparison?',
@@ -448,7 +448,7 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
                   <div class="flex items-center gap-2">
                     <template v-for="comp in result.comparisons.filter(c => c.url === result!.winners.overall)" :key="comp.url">
                       <div class="px-4 py-2 rounded-xl bg-white/20 backdrop-blur-sm text-white text-sm font-bold">
-                        {{ comp.cwvScore }}/3 CWV Passed
+                        Good Core Web Vitals metrics: {{ comp.cwvScore }} of {{ comp.assessment.measuredMetricCount }}
                       </div>
                     </template>
                   </div>
@@ -768,23 +768,30 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
 
                   <div v-if="comp.hasData" class="space-y-2">
                     <div class="flex items-center justify-between">
-                      <span class="text-xs text-gray-500">CWV Score</span>
+                      <span class="text-xs text-gray-500">Good Core Web Vitals metrics</span>
                       <div class="flex gap-1">
                         <div
-                          v-for="i in 3"
+                          v-for="i in comp.assessment.measuredMetricCount"
                           :key="i"
                           class="w-4 h-4 rounded-full"
                           :class="i <= comp.cwvScore ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-gray-700'"
                         />
                       </div>
                     </div>
+                    <p class="text-xs text-gray-500">
+                      {{ comp.cwvScore }} of {{ comp.assessment.measuredMetricCount }} measured
+                    </p>
+                    <p v-if="comp.assessment.missingMetrics.length" class="text-xs text-gray-500">
+                      Missing: {{ comp.assessment.missingMetrics.map(metric => metric.toUpperCase()).join(', ') }}
+                    </p>
+                    <ToolFieldSource v-if="comp.source" :source="comp.source" />
                     <div
                       class="text-center py-2 rounded-lg text-sm font-bold"
-                      :class="comp.passesAllCWV
+                      :class="comp.assessment._tag === 'Unavailable' ? 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400' : comp.assessment._tag === 'Passed'
                         ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
                         : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'"
                     >
-                      {{ comp.passesAllCWV ? '✓ Passes CWV' : '✗ Fails CWV' }}
+                      {{ comp.assessment._tag === 'Unavailable' ? 'Core Web Vitals assessment unavailable' : comp.assessment._tag === 'Passed' ? 'Core Web Vitals assessment: Passed' : 'Core Web Vitals assessment: Failed' }}
                     </div>
                   </div>
                   <div v-else class="text-center py-4 text-sm text-gray-500">
@@ -801,7 +808,7 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
                 <p class="text-sm text-gray-600 dark:text-gray-400">
                   This comparison uses real Chrome user data (CrUX) showing the 75th percentile (P75) of each metric.
                   Winners are determined by the lowest (best) P75 value for each metric. Overall winner considers
-                  Core Web Vitals pass rate and combined metric performance.
+                  the number of good Core Web Vitals metrics and combined metric performance.
                 </p>
               </div>
 

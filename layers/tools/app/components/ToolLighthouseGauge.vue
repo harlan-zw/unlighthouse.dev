@@ -55,7 +55,7 @@ const metricArcs = computed(() => {
 const ratingLabel = computed(() => {
   switch (rating.value) {
     case 'pass': return 'Good'
-    case 'average': return 'Needs Work'
+    case 'average': return 'Needs improvement'
     case 'fail': return 'Poor'
     default: return 'Unknown'
   }

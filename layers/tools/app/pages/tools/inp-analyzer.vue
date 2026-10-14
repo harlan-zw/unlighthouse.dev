@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { PsiFieldData } from '../../../server/utils/web-vitals'
+
 definePageMeta({
   breadcrumb: {
     icon: 'i-heroicons-cursor-arrow-rays',
@@ -81,26 +83,13 @@ interface ScriptItem {
   scriptParseCompile: number
 }
 
-interface FieldMetric {
-  value: number
-  displayValue: string
-  rating: 'good' | 'needs-improvement' | 'poor'
-  percentiles: { good: number, needsImprovement: number, poor: number }
-}
-
 interface InpResult {
   url: string
   fetchedUrl: string
   timestamp: number
   framework: 'nuxt' | 'next' | 'vite' | null
   /** Real user data from CrUX. Null when the URL has too little traffic to report. */
-  field: {
-    lcp: FieldMetric | null
-    cls: FieldMetric | null
-    inp: FieldMetric | null
-    fcp: FieldMetric | null
-    ttfb: FieldMetric | null
-  } | null
+  field: PsiFieldData | null
   performanceScore: number
   tbt: {
     value: number
@@ -348,19 +337,20 @@ const insights = computed<ToolInsight[]>(() => {
               }"
             >{{ result.field.inp.displayValue }}</span>
             <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Real INP, 75th percentile</span>
-            <span class="text-xs text-gray-500">Chrome UX Report, last 28 days</span>
+            <span class="text-xs text-gray-500">Chrome UX Report</span>
           </div>
+          <ToolFieldSource :source="result.field.source" class="mt-3" />
           <div class="mt-3 flex h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
-            <div class="bg-green-500" :style="{ width: `${result.field.inp.percentiles.good}%` }" />
-            <div class="bg-orange-400" :style="{ width: `${result.field.inp.percentiles.needsImprovement}%` }" />
-            <div class="bg-red-500" :style="{ width: `${result.field.inp.percentiles.poor}%` }" />
+            <div class="bg-green-500" :style="{ width: `${result.field.inp.histogram.good}%` }" />
+            <div class="bg-orange-400" :style="{ width: `${result.field.inp.histogram.needsImprovement}%` }" />
+            <div class="bg-red-500" :style="{ width: `${result.field.inp.histogram.poor}%` }" />
           </div>
           <div class="mt-2 text-xs text-gray-600 dark:text-gray-400">
-            {{ result.field.inp.percentiles.good }}% of visits are good, {{ result.field.inp.percentiles.needsImprovement }}% need improvement, {{ result.field.inp.percentiles.poor }}% are poor.
+            {{ result.field.inp.histogram.good }}% of visits are good, {{ result.field.inp.histogram.needsImprovement }}% need improvement, {{ result.field.inp.histogram.poor }}% are poor.
           </div>
         </div>
         <div v-else class="mb-6 p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-600 dark:text-gray-400">
-          No real user INP exists for this URL. Chrome only reports it once a page gets enough traffic, so everything below is lab data, with Total Blocking Time standing in for INP.
+          No field INP is available for this URL or origin. Chrome only reports it once a page gets enough traffic, so everything below is lab data, with Total Blocking Time standing in for INP.
         </div>
 
         <!-- Hero: Score + TBT Info -->
@@ -899,7 +889,7 @@ const insights = computed<ToolInsight[]>(() => {
             </UButton>
             <UButton to="/tools/lighthouse-score-calculator" variant="ghost" size="sm">
               <UIcon name="i-heroicons-calculator" class="w-4 h-4 mr-1" />
-              Score Calculator
+              Performance Score Calculator
             </UButton>
             <UButton to="/learn-lighthouse/inp" variant="ghost" size="sm">
               <UIcon name="i-heroicons-academic-cap" class="w-4 h-4 mr-1" />

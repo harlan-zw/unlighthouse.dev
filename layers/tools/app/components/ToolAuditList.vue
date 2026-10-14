@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { LighthouseAudit } from '../types/lighthouse'
+import { getAuditSavings } from '../utils/lighthouse'
 
 const props = defineProps<{
   audits: LighthouseAudit[]
@@ -29,19 +30,27 @@ function toggleAudit(id: string) {
 }
 
 function getSavings(audit: LighthouseAudit): string | null {
-  if (audit.details?.type === 'opportunity') {
-    const parts: string[] = []
-    if (audit.details.overallSavingsMs)
-      parts.push(formatMs(audit.details.overallSavingsMs))
-    if (audit.details.overallSavingsBytes)
-      parts.push(formatBytes(audit.details.overallSavingsBytes))
-    return parts.length ? parts.join(' · ') : null
-  }
-  return null
+  const parts = getAuditSavings(audit).map(({ metric, value, unit }) => {
+    const formatted = unit === 'bytes' ? formatBytes(value) : unit === 'ms' ? `${value} ms` : `${value}`
+    return `${metric}: ${formatted}`
+  })
+  return parts.length ? parts.join(' · ') : null
 }
 
-function getScoreIcon(score: number | null): string {
-  const rating = getScoreRating(score)
+function getAuditColor(audit: LighthouseAudit): string {
+  if (audit.scoreDisplayMode === 'error' || audit.errorMessage)
+    return 'bg-red-500'
+  if (audit.scoreDisplayMode && !['numeric', 'binary', 'metricSavings'].includes(audit.scoreDisplayMode))
+    return 'bg-gray-400'
+  return getScoreBgClass(audit.score)
+}
+
+function getScoreIcon(audit: LighthouseAudit): string {
+  if (audit.scoreDisplayMode === 'error' || audit.errorMessage)
+    return 'i-heroicons-exclamation-triangle'
+  if (audit.scoreDisplayMode && !['numeric', 'binary', 'metricSavings'].includes(audit.scoreDisplayMode))
+    return 'i-heroicons-information-circle'
+  const rating = getScoreRating(audit.score)
   switch (rating) {
     case 'pass':
       return 'i-heroicons-check-circle'
@@ -87,10 +96,10 @@ function getScoreIcon(score: number | null): string {
             <!-- Score indicator -->
             <div
               class="shrink-0 w-6 h-6 rounded-full flex items-center justify-center"
-              :class="getScoreBgClass(audit.score)"
+              :class="getAuditColor(audit)"
             >
               <UIcon
-                :name="getScoreIcon(audit.score)"
+                :name="getScoreIcon(audit)"
                 class="w-4 h-4 text-white"
               />
             </div>
@@ -105,7 +114,7 @@ function getScoreIcon(score: number | null): string {
                   {{ audit.displayValue }}
                 </span>
                 <span v-if="getSavings(audit)" class="text-xs text-orange-600 dark:text-orange-400 font-medium">
-                  Save {{ getSavings(audit) }}
+                  Estimated savings by metric: {{ getSavings(audit) }}
                 </span>
               </div>
             </div>
@@ -128,6 +137,12 @@ function getScoreIcon(score: number | null): string {
             <!-- Description -->
             <p v-if="audit.description" class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
               {{ audit.description.split('[Learn more]')[0] }}
+            </p>
+            <p v-if="audit.errorMessage" class="text-xs text-red-600 dark:text-red-400">
+              {{ audit.errorMessage }}
+            </p>
+            <p v-if="audit.explanation" class="text-xs text-gray-600 dark:text-gray-400">
+              {{ audit.explanation }}
             </p>
 
             <!-- Table details -->
