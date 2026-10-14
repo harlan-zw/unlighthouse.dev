@@ -60,39 +60,6 @@ const exploreLinks = [
     to: '/glossary',
   },
 ] as const
-
-const betaFeatures = [
-  {
-    title: 'Lighthouse audits',
-    description: 'Run performance audits one at a time or in parallel.',
-    to: '/v1/guide/guides/config',
-  },
-  {
-    title: 'URL discovery',
-    description: 'Crawl server-rendered links, use sitemaps, or supply explicit URLs.',
-    to: '/v1/guide/guides/url-discovery',
-  },
-  {
-    title: 'Mobile and desktop',
-    description: 'Run mobile and desktop audits in one scan, with separate results for each.',
-    to: '/v1/guide/guides/device',
-  },
-  {
-    title: 'Scan history',
-    description: 'Reopen scans saved on your machine without starting another scan.',
-    to: '/v1/guide/getting-started/installation#ci-and-history',
-  },
-  {
-    title: 'CI reports',
-    description: 'Export JSON or CSV reports and check performance budgets in CI.',
-    to: '/v1/integrations/ci',
-  },
-  {
-    title: 'MCP for AI agents',
-    description: 'Connect your AI agent through MCP to run scans and read results.',
-    to: '/v1/integrations/mcp',
-  },
-] as const
 </script>
 
 <template>
@@ -100,6 +67,15 @@ const betaFeatures = [
     <!-- Hero -->
     <section class="relative pt-16 pb-8 lg:pt-24 lg:pb-12">
       <div class="max-w-4xl mx-auto px-6 text-center">
+        <NuxtLink
+          to="/v1/guide/guides/migrating-to-v1"
+          class="mb-5 inline-flex min-h-11 items-center gap-2 rounded-full bg-default py-1 pl-1 pr-3 text-sm font-medium ring-1 ring-default hover:ring-accented focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+        >
+          <span class="rounded-full bg-elevated px-2 py-1 text-sm font-bold">NEW</span>
+          <img src="/favicon-32x32.png" width="20" height="20" alt="" class="size-5 rounded-sm">
+          <span>Unlighthouse v1 beta</span>
+          <UIcon name="i-carbon-arrow-right" class="size-4 text-muted" aria-hidden="true" />
+        </NuxtLink>
         <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] text-neutral-900 dark:text-white mb-6">
           Lighthouse for your
           <span class="text-violet-600 dark:text-violet-400"> entire site</span>
@@ -110,25 +86,25 @@ const betaFeatures = [
 
         <!-- Terminal + CTAs inline -->
         <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
-          <div class="max-w-full rounded-lg bg-muted px-4 py-3 font-mono text-sm border border-default text-highlighted">
-            <code class="break-words">pnpm dlx unlighthouse@beta --site https://example.com</code>
+          <div class="inline-flex max-w-full overflow-x-auto whitespace-nowrap items-center gap-2 bg-neutral-100 dark:bg-neutral-900 rounded-lg px-4 py-3 font-mono text-sm border border-neutral-200 dark:border-neutral-800">
+            <span class="text-neutral-500 dark:text-neutral-400">$</span>
+            <span class="text-emerald-600 dark:text-emerald-400">npx</span>
+            <span class="text-neutral-900 dark:text-white">unlighthouse@beta</span>
+            <span class="text-amber-600 dark:text-amber-400">--site</span>
+            <span class="text-neutral-500 dark:text-neutral-400">https://example.com</span>
           </div>
-          <div class="flex flex-wrap items-center justify-center gap-3 shrink-0">
-            <UButton size="lg" class="min-h-11" to="/v1/guide/getting-started/installation">
+          <div class="flex items-center gap-3">
+            <UButton size="lg" to="/v1/guide/getting-started/installation">
               Try v1 beta
             </UButton>
-            <UButton size="lg" class="min-h-11" variant="outline" color="neutral" to="/guide/getting-started/installation">
-              Use 0.x stable
+            <UButton size="lg" variant="ghost" color="neutral" to="https://github.com/harlan-zw/unlighthouse" target="_blank">
+              <UIcon name="i-carbon-logo-github" class="w-5 h-5" />
+              GitHub
             </UButton>
           </div>
         </div>
-        <p class="text-sm text-muted">
-          v1 beta requires Node.js 24.13.1+. MIT licensed.
-        </p>
-        <p class="mt-2 text-sm text-muted">
-          If you use 0.x, <NuxtLink to="/v1/guide/guides/migrating-to-v1" class="underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
-            read the migration guide
-          </NuxtLink> before upgrading.
+        <p class="text-xs text-neutral-500 dark:text-neutral-400">
+          Node.js 24.13.1+ · MIT licensed
         </p>
       </div>
     </section>
@@ -151,11 +127,11 @@ const betaFeatures = [
               </div>
               <div class="flex-1 min-w-0 max-w-md mx-auto">
                 <div class="bg-neutral-300/50 dark:bg-neutral-700/50 rounded-lg px-4 py-1.5 text-sm text-neutral-600 dark:text-neutral-400 font-mono text-center truncate">
-                  localhost:5678
+                  Unlighthouse v1 beta
                 </div>
               </div>
               <NuxtLink to="https://unlighthouse-demo.netlify.app/" external target="_blank" class="shrink-0 text-sm text-neutral-700 dark:text-neutral-300 underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-violet-600">
-                Open 0.x demo
+                Open demo
               </NuxtLink>
             </div>
 
@@ -167,15 +143,18 @@ const betaFeatures = [
                 src="https://unlighthouse-demo.netlify.app/"
                 tabindex="0"
                 class="block w-full h-full bg-white"
-                title="Unlighthouse 0.x demo report"
+                title="Unlighthouse v1 beta demo"
               />
               <div v-else class="flex h-full flex-col items-center justify-center gap-6 px-6 text-center">
                 <UIcon name="i-carbon-dashboard" class="size-12 text-violet-600 dark:text-violet-400" />
                 <h2 class="text-2xl font-bold text-neutral-900 dark:text-white">
-                  Unlighthouse 0.x demo report
+                  Unlighthouse v1 beta demo
                 </h2>
+                <p class="text-neutral-600 dark:text-neutral-400">
+                  Explore a real scan of unlighthouse.dev. This demo is read-only.
+                </p>
                 <UButton size="xl" @click="loadDemo">
-                  Load 0.x demo
+                  Load v1 demo
                 </UButton>
               </div>
             </div>
@@ -187,30 +166,75 @@ const betaFeatures = [
     <section class="px-5 py-16 lg:py-20 bg-neutral-50/50 dark:bg-neutral-900/30">
       <div class="max-w-6xl mx-auto">
         <h2 class="text-2xl font-bold mb-8 text-center">
-          Explore v1 beta
+          Why Unlighthouse
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <NuxtLink
-            v-for="feature in betaFeatures"
-            :key="feature.to"
-            :to="feature.to"
-            class="group p-5 rounded-xl bg-default border border-default hover:border-primary transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
-          >
-            <h3 class="font-semibold mb-2 text-highlighted group-hover:text-primary">
-              {{ feature.title }}
-            </h3>
-            <p class="text-muted">
-              {{ feature.description }}
+          <div class="p-5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
+            <div class="flex items-center gap-3 mb-2">
+              <Icon name="noto:high-voltage" class="w-6 h-6" />
+              <h3 class="font-semibold">
+                Lighthouse audits
+              </h3>
+            </div>
+            <p class="text-sm text-neutral-600 dark:text-neutral-400">
+              Run performance audits one at a time or in parallel.
             </p>
-          </NuxtLink>
-        </div>
-        <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <UButton to="/v1/guide/guides/migrating-to-v1" variant="outline" color="neutral" class="min-h-11">
-            Migrate from 0.x
-          </UButton>
-          <UButton to="https://github.com/harlan-zw/unlighthouse/issues/new/choose" target="_blank" variant="ghost" color="neutral" class="min-h-11">
-            Report a beta issue
-          </UButton>
+          </div>
+          <div class="p-5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
+            <div class="flex items-center gap-3 mb-2">
+              <Icon name="noto:lady-beetle" class="w-6 h-6" />
+              <h3 class="font-semibold">
+                URL discovery
+              </h3>
+            </div>
+            <p class="text-sm text-neutral-600 dark:text-neutral-400">
+              Crawl server-rendered links, use sitemaps, or supply explicit URLs.
+            </p>
+          </div>
+          <div class="p-5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
+            <div class="flex items-center gap-3 mb-2">
+              <Icon name="noto:sushi" class="w-6 h-6" />
+              <h3 class="font-semibold">
+                Mobile and desktop
+              </h3>
+            </div>
+            <p class="text-sm text-neutral-600 dark:text-neutral-400">
+              Run mobile and desktop audits in one scan, with separate results for each.
+            </p>
+          </div>
+          <div class="p-5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
+            <div class="flex items-center gap-3 mb-2">
+              <Icon name="noto:rainbow" class="w-6 h-6" />
+              <h3 class="font-semibold">
+                Scan history
+              </h3>
+            </div>
+            <p class="text-sm text-neutral-600 dark:text-neutral-400">
+              Reopen scans saved on your machine without starting another scan.
+            </p>
+          </div>
+          <div class="p-5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
+            <div class="flex items-center gap-3 mb-2">
+              <Icon name="noto:candy" class="w-6 h-6" />
+              <h3 class="font-semibold">
+                CI reports
+              </h3>
+            </div>
+            <p class="text-sm text-neutral-600 dark:text-neutral-400">
+              Export JSON or CSV reports and check performance budgets in CI.
+            </p>
+          </div>
+          <div class="p-5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
+            <div class="flex items-center gap-3 mb-2">
+              <Icon name="noto:check-mark-button" class="w-6 h-6" />
+              <h3 class="font-semibold">
+                MCP for AI agents
+              </h3>
+            </div>
+            <p class="text-sm text-neutral-600 dark:text-neutral-400">
+              Connect your AI agent through MCP to run scans and read results.
+            </p>
+          </div>
         </div>
       </div>
     </section>

@@ -88,6 +88,7 @@ components:
 - **Collection**: Carbon for interface controls, named brand collections for product logos
 - **Why**: Carbon matches the geometric display type and existing application shell.
 - **Color rule**: Interface icons inherit text color. Color is reserved for status meaning and branded logos.
+- **Product logo**: Use the v1 beta mark at `/logo.png` or its 32px favicon variant. Keep Lighthouse's own logo for Lighthouse.
 
 ## Component Rules
 

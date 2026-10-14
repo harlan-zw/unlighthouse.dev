@@ -89,18 +89,6 @@ const mobileDocsGroups = computed(() => {
       <Logo />
     </template>
 
-    <template #bottom>
-      <nav aria-label="Unlighthouse v1 beta" class="mx-auto mt-2 max-w-[1452px] rounded-lg border border-default bg-muted px-4 py-2 flex flex-wrap items-center justify-center gap-x-4 text-sm">
-        <span class="font-semibold text-highlighted">Unlighthouse v1 beta</span>
-        <NuxtLink to="/v1/guide/getting-started/installation" class="inline-flex min-h-11 items-center font-semibold text-primary underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
-          Try v1 beta
-        </NuxtLink>
-        <NuxtLink to="/v1/guide/guides/migrating-to-v1" class="inline-flex min-h-11 items-center text-default underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
-          Migration guide
-        </NuxtLink>
-      </nav>
-    </template>
-
     <template #default>
       <NavigationMenuRoot v-model="activeMegaMenu" aria-label="Primary" class="hidden lg:flex justify-center relative py-2">
         <NavigationMenuList class="flex items-center gap-0.5">
