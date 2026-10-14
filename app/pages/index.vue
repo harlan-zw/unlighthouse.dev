@@ -6,14 +6,16 @@ definePageMeta({
   },
 })
 
+const homepageDescription = 'Unlighthouse finds your pages and runs Google Lighthouse across your site. Review the results in one dashboard. Free and open source.'
+
 useSeoMeta({
   title: 'Unlighthouse: Site-Wide Google Lighthouse Audits',
-  description: 'Scan every page of your site with Google Lighthouse. Unlighthouse discovers URLs, runs audits in parallel, and combines results in one report.',
+  description: homepageDescription,
 })
 
 defineOgImage('NuxtSeoSatori', {
   title: 'Unlighthouse',
-  description: 'Like Google Lighthouse, but it scans every single page.',
+  description: homepageDescription,
   theme: '#a855f7',
 })
 
@@ -103,7 +105,7 @@ const betaFeatures = [
           <span class="text-violet-600 dark:text-violet-400"> entire site</span>
         </h1>
         <p class="text-lg lg:text-xl text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto mb-8">
-          Unlighthouse finds your pages and runs Google Lighthouse across your site. Review the results in one dashboard. Free and open source.
+          {{ homepageDescription }}
         </p>
 
         <!-- Terminal + CTAs inline -->
