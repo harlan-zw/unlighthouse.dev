@@ -36,6 +36,10 @@ A URL result and an origin result do not describe the same population.
 **Never:** interchangeable names for the entire report.
 **Casing:** Lighthouse; PageSpeed Insights; PSI.
 
+Use Lighthouse's names for its audits, categories, metrics, and reports.
+Keep scan for Unlighthouse's site-wide runs and scan history for saved runs.
+Unlighthouse CI exports and its MCP integration keep their own names.
+
 ### Chrome UX Report
 
 **Is:** Google's dataset of eligible real-user experiences.

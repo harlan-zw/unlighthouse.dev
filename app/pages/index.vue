@@ -6,7 +6,7 @@ definePageMeta({
   },
 })
 
-const homepageDescription = 'Unlighthouse finds your pages and runs Google Lighthouse across your site. Review the results in one dashboard. Free and open source.'
+const homepageDescription = 'Unlighthouse finds your pages and runs Lighthouse audits across your site. Review the results in one dashboard. Free and open source.'
 
 useSeoMeta({
   title: 'Unlighthouse: Site-Wide Google Lighthouse Audits',
@@ -63,7 +63,7 @@ const exploreLinks = [
 
 const betaFeatures = [
   {
-    title: 'Parallel audits',
+    title: 'Lighthouse audits',
     description: 'Run performance audits one at a time or in parallel.',
     to: '/v1/guide/guides/config',
   },
@@ -74,7 +74,7 @@ const betaFeatures = [
   },
   {
     title: 'Mobile and desktop',
-    description: 'Scan mobile and desktop in one run, with separate results for each.',
+    description: 'Run mobile and desktop audits in one scan, with separate results for each.',
     to: '/v1/guide/guides/device',
   },
   {
