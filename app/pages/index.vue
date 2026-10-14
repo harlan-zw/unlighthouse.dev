@@ -62,7 +62,7 @@ const exploreLinks = [
 const betaFeatures = [
   {
     title: 'Parallel audits',
-    description: 'Choose serial or parallel performance audits to match your machine.',
+    description: 'Run performance audits one at a time or in parallel.',
     to: '/v1/guide/guides/config',
   },
   {
@@ -72,12 +72,12 @@ const betaFeatures = [
   },
   {
     title: 'Mobile and desktop',
-    description: 'Audit both device profiles in one scan, with separate results for each.',
+    description: 'Scan mobile and desktop in one run, with separate results for each.',
     to: '/v1/guide/guides/device',
   },
   {
     title: 'Scan history',
-    description: 'Store scans locally and reopen the dashboard without starting another scan.',
+    description: 'Reopen scans saved on your machine without starting another scan.',
     to: '/v1/guide/getting-started/installation#ci-and-history',
   },
   {
@@ -86,8 +86,8 @@ const betaFeatures = [
     to: '/v1/integrations/ci',
   },
   {
-    title: 'AI agent tools',
-    description: 'Connect an MCP client to scan your site and inspect results.',
+    title: 'MCP for AI agents',
+    description: 'Connect your AI agent through MCP to run scans and read results.',
     to: '/v1/integrations/mcp',
   },
 ] as const
@@ -103,7 +103,7 @@ const betaFeatures = [
           <span class="text-violet-600 dark:text-violet-400"> entire site</span>
         </h1>
         <p class="text-lg lg:text-xl text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto mb-8">
-          Unlighthouse is a free, open-source CLI for site-wide Google Lighthouse audits. Discover URLs, run audits, and inspect results in one dashboard.
+          Unlighthouse finds your pages and runs Google Lighthouse across your site. Review the results in one dashboard. Free and open source.
         </p>
 
         <!-- Terminal + CTAs inline -->
