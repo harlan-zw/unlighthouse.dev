@@ -78,6 +78,6 @@ jobs:
           NUXT_GITHUB_AUTH_TOKEN: ${{ secrets.NUXT_GITHUB_AUTH_TOKEN || github.token }}
           # Fork pull requests cannot read secrets. The PR build artifact is never
           # deployed, so a placeholder password is enough to prerender clean.
-          NUXT_SESSION_PASSWORD: ${{ secrets.NUXT_SESSION_PASSWORD || 'pr-build-session-password-placeholder' }}
+          NUXT_SESSION_PASSWORD: pr-build-session-password-placeholder
           # No github.token fallback: it cannot read sponsors, so fork builds skip the prerender.
           NUXT_GITHUB_SPONSORS_TOKEN: ${{ secrets.NUXT_GITHUB_AUTH_TOKEN }}
