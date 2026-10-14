@@ -9,6 +9,7 @@ import {
   CARBONADS_SCRIPT_ELEMENT_RE,
   CARBONADS_VENDOR_ORIGIN_RE,
   EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE,
+  OG_IMAGE_404_MESSAGE_RE,
   STACKLESS_FETCH_FAILURE_MESSAGE_RE,
   STACKLESS_NETWORK_ERROR_MESSAGE_RE,
   STACKLESS_NON_ERROR_REJECTION_DROP_RULE,
@@ -52,6 +53,11 @@ const clientPolicy: ReportPolicy = {
       _tag: 'pattern',
       source: SUFFIXED_FETCH_FAILURE_MESSAGE_RE.source,
       flags: SUFFIXED_FETCH_FAILURE_MESSAGE_RE.flags,
+    },
+    {
+      _tag: 'pattern',
+      source: OG_IMAGE_404_MESSAGE_RE.source,
+      flags: OG_IMAGE_404_MESSAGE_RE.flags,
     },
   ],
   dropStacklessErrors: [
@@ -132,6 +138,47 @@ test('keeps a site origin fetch failure whose frames are anonymous', () => {
         type: 'TypeError',
         value: 'Failed to fetch (https://unlighthouse.dev/_api/measure)',
         stacktrace: { frames: [{}] },
+      }],
+    },
+  }
+
+  assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'send' })
+})
+
+// UNLIGHTHOUSE-N is the og-image resolve route answering a visitor's probe of the
+// `/test` path. The route fetched the path, Nitro answered 404, and the route raised
+// that answer as its own message. A stack is present, so the message rule alone drops
+// it. The tail words the reason differently per fetch path, so both wordings must drop.
+test('drops the og-image fetch failure a visitor probe raises', () => {
+  const probes = [
+    '[Nuxt OG Image] Failed to fetch /test: unknown error',
+    '[Nuxt OG Image] Failed to fetch /guide/social.png: Cannot find any path matching "/guide/social.png".',
+  ]
+
+  for (const value of probes) {
+    const report: ErrorReport = {
+      exception: {
+        values: [{
+          type: 'Error',
+          value,
+          stacktrace: { frames: [{ filename: 'https://unlighthouse.dev/_nuxt/server/chunks/resolve.js' }] },
+        }],
+      },
+    }
+
+    assert.deepEqual(decideReport(report, undefined, clientPolicy), { _tag: 'drop', rule: 'ignore-message' })
+  }
+})
+
+// The resolve route words a page that loaded without the og:image meta as its own 404
+// too. That failure names missing site metadata, so this pattern must not drop it.
+test('keeps the og-image meta miss a real page raises', () => {
+  const report: ErrorReport = {
+    exception: {
+      values: [{
+        type: 'Error',
+        value: '[Nuxt OG Image] No <meta property="og:image"> found on /guide.',
+        stacktrace: { frames: [{ filename: 'https://unlighthouse.dev/_nuxt/server/chunks/resolve.js' }] },
       }],
     },
   }

@@ -75,8 +75,14 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const stateCookie = getCookie(event, 'nuxt-auth-state')
 
+  // Require browser state before the provider exchanges a callback code.
+  if (query.code !== undefined && (typeof query.state !== 'string' || !query.state || !stateCookie || query.state !== stateCookie)) {
+    deleteCookie(event, 'nuxt-auth-state', { path: '/' })
+    return sendRedirect(event, '/admin?error=auth_failed')
+  }
+
   // Clear stale state cookie if starting fresh OAuth flow
-  if (!query.state && stateCookie) {
+  if (query.code === undefined && !query.error && !query.state && stateCookie) {
     deleteCookie(event, 'nuxt-auth-state')
     return sendRedirect(event, event.path)
   }

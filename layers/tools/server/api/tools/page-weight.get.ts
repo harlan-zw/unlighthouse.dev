@@ -12,6 +12,7 @@ import {
   RESOURCE_LIMIT,
   summarizeWeight,
 } from '~~/shared/page-weight'
+import { publicFetch } from '../../../../../server/utils/public-fetch'
 
 /**
  * The fast half of the page size tool.
@@ -108,7 +109,7 @@ export default defineCachedEventHandler(async (event) => {
     for (let hop = 0; hop <= MAX_REDIRECT_HOPS; hop++) {
       if (documentBudget() <= 0)
         break
-      const response = await fetch(target, {
+      const response = await publicFetch(target, {
         headers: { 'user-agent': USER_AGENT },
         redirect: 'manual',
         signal: AbortSignal.timeout(documentBudget()),
@@ -164,6 +165,7 @@ export default defineCachedEventHandler(async (event) => {
         timeoutMs: RESOURCE_TIMEOUT_MS,
         maxBodyBytes: MAX_BODY_BYTES,
         userAgent: USER_AGENT,
+        fetchLike: (input, init) => publicFetch(String(input), init),
       })
       if (result._tag !== 'measured')
         return result

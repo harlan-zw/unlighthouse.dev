@@ -181,8 +181,11 @@ function formatUrl(url: string) {
 
 function pasteFromClipboard() {
   if (import.meta.client) {
-    navigator.clipboard.readText().then((text) => {
-      urlInput.value = text
+    readClipboardText().then((result) => {
+      if (result._tag === 'Ok')
+        urlInput.value = result.text
+      else
+        error.value = result.message
     })
   }
 }
@@ -891,7 +894,7 @@ https://example.com/pricing"
 
             <div class="flex flex-col sm:flex-row gap-3">
               <UButton
-                to="/guide/getting-started"
+                to="/guide/getting-started/installation"
                 size="lg"
                 class="bg-amber-600 hover:bg-amber-500 text-white w-full sm:w-auto justify-center"
                 trailing-icon="i-heroicons-arrow-right"

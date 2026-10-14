@@ -1,8 +1,5 @@
 import { defineCollection, defineContentConfig } from '@harlan-zw/comark-content'
-import { defineRobotsSchema } from '@nuxtjs/robots/content'
-import { defineSitemapSchema } from '@nuxtjs/sitemap/content'
-import { defineOgImageSchema } from 'nuxt-og-image/content'
-import { defineSchemaOrgSchema } from 'nuxt-schema-org/content'
+import { defineOgImageSchema, defineRobotsSchema, defineSchemaOrgSchema, defineSitemapSchema } from '@nuxtjs/seo/content'
 import { z } from 'zod'
 
 const schema = z.object({
@@ -34,7 +31,7 @@ function unlighthouseCollection(branch: '0.x' | 'v1', prefix: string) {
         ? { cwd: process.env.UNLIGHTHOUSE_BETA_DOCS_DIR }
         : { repository: { url: 'https://github.com/harlan-zw/unlighthouse', branch } }),
       include: process.env.NODE_ENV !== 'production' && branch === 'v1' && process.env.UNLIGHTHOUSE_BETA_DOCS_DIR ? '**/*.md' : 'docs/**/*.md',
-      exclude: branch === 'v1' ? ['**/glossary/**', '**/3.nuxt.md', '**/4.vite.md', '**/webpack.md', '**/0.unlighthouse-cli.md'] : ['**/glossary/**'],
+      exclude: branch === 'v1' ? ['**/glossary/**', '**/3.nuxt.md', '**/4.vite.md', '**/webpack.md', '**/0.unlighthouse-cli.md'] : ['**/glossary/**', '**/0.unlighthouse-cli.md'],
       prefix,
     },
   })

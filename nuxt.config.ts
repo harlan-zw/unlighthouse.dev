@@ -1,17 +1,18 @@
 import { defineNuxtConfig } from 'nuxt/config'
 import { resolve } from 'pathe'
-import { gray, logger } from './logger'
-import { CLOUDFLARE_REQUIRED_SECRETS } from './shared/cloudflare'
-import { optimizeCloudflareRoutes } from './shared/routes-exclude'
+import { gray, logger } from './logger.ts'
+import { CLOUDFLARE_REQUIRED_SECRETS } from './shared/cloudflare.ts'
+import { optimizeCloudflareRoutes } from './shared/routes-exclude.ts'
 import {
   CARBONADS_SCRIPT_ELEMENT_RE,
   CARBONADS_VENDOR_ORIGIN_RE,
   EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE,
+  OG_IMAGE_404_MESSAGE_RE,
   STACKLESS_FETCH_FAILURE_MESSAGE_RE,
   STACKLESS_NETWORK_ERROR_MESSAGE_RE,
   STACKLESS_NON_ERROR_REJECTION_DROP_RULE,
   SUFFIXED_FETCH_FAILURE_MESSAGE_RE,
-} from './shared/sentry'
+} from './shared/sentry.ts'
 
 // workerd installs its Node-compatible `console` as soon as anything in the
 // bundle imports `node:console` (undici, via node-fetch-native, does). That
@@ -61,6 +62,10 @@ export default defineNuxtConfig({
         // anonymous. The stackless rule needs an empty frame list, so this
         // sighting drops on the message alone.
         SUFFIXED_FETCH_FAILURE_MESSAGE_RE,
+        // A visitor probe of a path that does not exist makes the og-image
+        // resolve route fetch it, then raise Nitro's 404 as its own message.
+        // The report describes the probe, so no site code can act on it.
+        OG_IMAGE_404_MESSAGE_RE,
       ],
       // Browser failures that arrive with no stack: the app manifest poll when the
       // network drops, a plain-http page load the browser rejects as a network error,
@@ -161,8 +166,6 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
     'nitro-cloudflare-dev',
     '@nuxt/scripts',
     '@nuxt/image',
-    'nuxt-skew-protection',
-    'nuxt-ai-ready',
     '@sentry/nuxt/module',
     '@harlan-zw/nuxt-sentry',
     // '@nuxtjs/mcp-toolkit',
@@ -229,6 +232,14 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
     runtimeSync: {
       ttl: 60 * 60,
     },
+    contentSignal: { search: true, aiInput: true, aiTrain: true },
+    llmsTxt: { directive: { html: true } },
+    // Publishes `skills/unlighthouse/SKILL.md`: the discovery index with a
+    // digest, `/skills/unlighthouse/SKILL.md`, `/SKILL.md`, and an llms.txt
+    // section. Vendored from the unlighthouse package; see its source.json.
+    agentSkills: {
+      dir: 'skills',
+    },
   },
 
   skewProtection: {
@@ -279,7 +290,6 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
     login: 'harlan-zw',
     route: '/api/github/sponsors.json',
     overrides: {
-      'Kintell-labs': { name: 'Kintell', websiteUrl: 'https://kintell.com' },
       'Massive Monster': { websiteUrl: 'https://massivemonster.co' },
     },
   },
@@ -332,6 +342,7 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
         // import) from a much later date than this was pinned at. Matches the
         // value nuxtseo.com deploys on.
         compatibility_date: '2026-08-11',
+        compatibility_flags: ['global_fetch_strictly_public'],
         limits: {
           cpu_ms: 120_000, // 2 min for slow PSI calls
         },
@@ -486,9 +497,6 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
     '/guide/getting-started': { redirect: { to: '/guide/getting-started/installation', statusCode: 301 } },
     '/learn-lighthouse/tbt': { redirect: { to: '/glossary/tbt', statusCode: 301 } },
     '/glossary/index': { redirect: { to: '/glossary', statusCode: 301 } },
-    '/api-doc.md': { redirect: { to: '/api-doc', statusCode: 301 } },
-    '/api-doc/config.md': { redirect: { to: '/api-doc/config', statusCode: 301 } },
-    '/api-doc/glossary.md': { redirect: { to: '/api-doc/glossary', statusCode: 301 } },
     '/api-doc/.md': { redirect: { to: '/api-doc', statusCode: 301 } },
     '/api-doc/index.md': { redirect: { to: '/api-doc', statusCode: 301 } },
     '/learn-lighthouse/accessibility/fix': { redirect: { to: '/learn-lighthouse/accessibility#common-accessibility-issues', statusCode: 301 } },
@@ -516,21 +524,20 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
 
     // auth endpoints must not be cached or prerendered
     '/auth/**': { prerender: false, cache: false, headers: { 'cache-control': 'no-store' } },
+    // Nuxt Robots owns the robots rule. A raw `x-robots-tag` header here is
+    // overwritten by its middleware, so the header said `index, follow` while
+    // the page meta said noindex. `robots: false` sets both to noindex, nofollow.
     '/admin': {
       prerender: false,
       cache: false,
-      headers: {
-        'cache-control': 'no-store',
-        'x-robots-tag': 'noindex, nofollow',
-      },
+      robots: false,
+      headers: { 'cache-control': 'no-store' },
     },
     '/admin/**': {
       prerender: false,
       cache: false,
-      headers: {
-        'cache-control': 'no-store',
-        'x-robots-tag': 'noindex, nofollow',
-      },
+      robots: false,
+      headers: { 'cache-control': 'no-store' },
     },
     '/api/debug/**': { prerender: false },
   },

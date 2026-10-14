@@ -13,7 +13,8 @@ permissions:
   actions: read
 
 concurrency:
-  group: deploy-cloudflare-production
+  group: >-
+    ${{ ((github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_repository.full_name == github.repository && github.event.workflow_run.head_branch == 'main')) && 'deploy-cloudflare-production' || format('deploy-cloudflare-production-isolated-{0}', github.run_id) }}
   # A deploy in flight must finish. Wrangler uploads and activates a Worker
   # version, and cancelling part-way leaves it uploaded but not activated.
   cancel-in-progress: false
@@ -23,9 +24,13 @@ jobs:
     # `github.sha` is the default branch tip for a `workflow_run` event, not the
     # commit the run covered, so it cannot be compared against `head_sha` and
     # cannot be checked out. Use `head_sha` throughout.
+    # Reject fork and pull request runs before checkout, build, or deployment.
     if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.workflow_run.conclusion == 'success' &&
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
       github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-24.04
     timeout-minutes: 45
@@ -58,6 +63,9 @@ jobs:
           NUXT_CLOUDFLARE_ANALYTICS_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           NUXT_GITHUB_AUTH_TOKEN: ${{ secrets.NUXT_GITHUB_AUTH_TOKEN }}
           NUXT_GITHUB_ACCESS_TOKEN: ${{ secrets.NUXT_GITHUB_ACCESS_TOKEN }}
+          # Lets the sponsors module prerender its route. The config keeps the
+          # runtimeConfig token empty, so the build does not bake it in.
+          NUXT_GITHUB_SPONSORS_TOKEN: ${{ secrets.NUXT_GITHUB_AUTH_TOKEN }}
           NUXT_GITHUB_AUTH_CLIENT_SECRET: ${{ secrets.NUXT_GITHUB_AUTH_CLIENT_SECRET }}
           NUXT_EMAIL_OCTOPUS_TOKEN: ${{ secrets.NUXT_EMAIL_OCTOPUS_TOKEN }}
           NUXT_SEO_PRO_KEY: ${{ secrets.NUXT_SEO_PRO_KEY }}
@@ -114,6 +122,8 @@ jobs:
 
       - run: pnpm deploy
         env:
+          NUXT_NUXT_AI_READY_RUNTIME_SYNC_SECRET: ${{ secrets.NUXT_AI_READY_RUNTIME_SYNC_SECRET }}
+          PUBLIC_EGRESS_VERSION_TAG: public-egress-v1-${{ github.event.workflow_run.head_sha || github.sha }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           NUXT_CLOUDFLARE_ANALYTICS_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
