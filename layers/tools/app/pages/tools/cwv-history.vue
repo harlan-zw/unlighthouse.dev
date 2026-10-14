@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import type { ComponentPublicInstance } from 'vue'
+import type { FieldSource } from '~~/shared/field-assessment'
 import type { CWVHistoryResponse } from '../../../server/api/tools/cwv-history.post'
 import type { CruxRating, MetricKey } from '../../utils/crux'
+import { assessFieldCoreWebVitals } from '~~/shared/field-assessment'
 import {
   allMetrics,
   cwvMetrics,
   formatCruxMetricValue,
   getCruxRatingIcon,
   getMetricRating,
-  getPassesAllCWV,
   metricDefinitions,
   ratingColors,
 } from '../../utils/crux'
@@ -129,14 +130,24 @@ const latestData = computed<HistoryItem | null>(() => {
   return (result.value.history.at(-1) as any) || null
 })
 
-const passesCWV = computed(() => {
-  if (!latestData.value)
-    return false
-  return getPassesAllCWV({
-    lcp: (latestData.value as any).lcp75,
-    cls: (latestData.value as any).cls75,
-    inp: (latestData.value as any).inp75,
-  })
+const assessment = computed(() => assessFieldCoreWebVitals({
+  lcp: latestData.value?.lcp75,
+  cls: latestData.value?.cls75,
+  inp: latestData.value?.inp75,
+}))
+const fieldSource = computed<FieldSource | null>(() => {
+  const snapshot = result.value
+  const latest = latestData.value
+  if (!snapshot || !latest)
+    return null
+  const scope = snapshot.key?.url ? 'url' : snapshot.mode
+  return {
+    provider: 'CrUX',
+    scope,
+    url: snapshot.key?.url || snapshot.key?.origin || snapshot.url,
+    device: snapshot.formFactor === 'PHONE' ? 'mobile' : snapshot.formFactor === 'TABLET' ? 'tablet' : snapshot.formFactor === 'ALL_FORM_FACTORS' ? 'all' : 'desktop',
+    collectionPeriod: { _tag: 'Dates', start: latest.collectionStart, end: latest.collectionEnd },
+  }
 })
 
 const currentMetrics = computed(() => {
@@ -393,7 +404,7 @@ function formatChartDate(date: string) {
                 variant="outline"
                 size="sm"
               >
-                Check CWV (Lab)
+                Inspect lab metrics
               </UButton>
               <UButton
                 to="/guide/getting-started/installation"
@@ -409,30 +420,7 @@ function formatChartDate(date: string) {
 
       <!-- Results -->
       <div v-if="result?.hasData && latestData" class="p-4 sm:p-6 space-y-8">
-        <!-- Pass/Fail Banner -->
-        <div
-          class="p-4 sm:p-6 rounded-xl text-center"
-          :class="passesCWV
-            ? 'bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 border border-emerald-200 dark:border-emerald-800'
-            : 'bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 border border-red-200 dark:border-red-800'"
-        >
-          <div class="flex items-center justify-center gap-3 mb-2">
-            <UIcon
-              :name="passesCWV ? 'i-heroicons-check-badge-solid' : 'i-heroicons-x-circle-solid'"
-              class="w-8 h-8"
-              :class="passesCWV ? 'text-emerald-500' : 'text-red-500'"
-            />
-            <span
-              class="text-xl sm:text-2xl font-bold"
-              :class="passesCWV ? 'text-emerald-700 dark:text-emerald-300' : 'text-red-700 dark:text-red-300'"
-            >
-              {{ passesCWV ? 'Passes Core Web Vitals' : 'Fails Core Web Vitals' }}
-            </span>
-          </div>
-          <p class="text-sm text-gray-600 dark:text-gray-400">
-            Based on {{ formFactor === 'PHONE' ? 'mobile' : 'desktop' }} field data • Collection period: {{ formatChartDate(latestData.collectionStart) }} - {{ formatChartDate(latestData.collectionEnd) }}
-          </p>
-        </div>
+        <ToolFieldAssessment :assessment="assessment" :source="fieldSource" />
 
         <!-- CWV Metric Cards -->
         <div>

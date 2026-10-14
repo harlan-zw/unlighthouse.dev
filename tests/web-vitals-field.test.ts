@@ -1,7 +1,7 @@
 /* eslint-disable test/no-import-node-test */
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { formatMetricValue, getRating, parseFieldData } from '../layers/tools/server/utils/web-vitals.ts'
+import { assessPsiFieldData, formatMetricValue, getRating, parseFieldData, parsePsiFieldData } from '../layers/tools/server/utils/web-vitals.ts'
 
 function loadingExperience(metrics: Record<string, unknown>) {
   return { id: 'https://example.com', metrics }
@@ -34,7 +34,7 @@ describe('parseFieldData', () => {
       value: 150,
       displayValue: '150 ms',
       rating: 'good',
-      percentiles: { good: 82, needsImprovement: 14, poor: 4 },
+      histogram: { good: 82, needsImprovement: 14, poor: 4 },
     })
     assert.equal(field?.lcp, null)
   })
@@ -51,11 +51,11 @@ describe('parseFieldData', () => {
     }))?.inp?.rating, 'poor')
   })
 
-  it('falls back to thresholds when CrUX sends a bucket name we do not know', () => {
+  it('keeps an unknown PSI provider rating unavailable instead of guessing numeric units', () => {
     const field = parseFieldData(loadingExperience({
       INTERACTION_TO_NEXT_PAINT: { ...INP_GOOD, percentile: 640, category: 'UNKNOWN' },
     }))
-    assert.equal(field?.inp?.rating, 'poor')
+    assert.equal(field?.inp?.rating, 'unknown')
   })
 
   it('drops a metric with no percentile rather than reporting zero', () => {
@@ -71,8 +71,39 @@ describe('parseFieldData', () => {
     const field = parseFieldData(loadingExperience({
       CUMULATIVE_LAYOUT_SHIFT_SCORE: { percentile: 0.05 },
     }))
-    assert.deepEqual(field?.cls?.percentiles, { good: 0, needsImprovement: 0, poor: 0 })
+    assert.deepEqual(field?.cls?.histogram, { good: 0, needsImprovement: 0, poor: 0 })
     assert.equal(field?.cls?.displayValue, '0.050')
+  })
+})
+
+describe('PSI field source and assessment', () => {
+  it('keeps an origin fallback separate from the tested URL and includes its period and device', () => {
+    const field = parsePsiFieldData({
+      loadingExperience: { metrics: {} },
+      originLoadingExperience: loadingExperience({ INTERACTION_TO_NEXT_PAINT: INP_GOOD }),
+    }, 'https://example.com/article', 'desktop')
+    assert.deepEqual(field?.source, {
+      provider: 'CrUX',
+      scope: 'origin',
+      url: 'https://example.com',
+      device: 'desktop',
+      collectionPeriod: { _tag: 'Rolling', days: 28 },
+    })
+    assert.equal(assessPsiFieldData(field)._tag, 'Unavailable')
+  })
+
+  it('does not fill partial URL field measurements with another origin population', () => {
+    const field = parsePsiFieldData({
+      loadingExperience: loadingExperience({ INTERACTION_TO_NEXT_PAINT: INP_GOOD }),
+      originLoadingExperience: loadingExperience({ LARGEST_CONTENTFUL_PAINT_MS: { percentile: 1000 } }),
+    }, 'https://example.com/article', 'mobile')
+    assert.equal(field?.source.scope, 'url')
+    assert.equal(field?.lcp, null)
+    assert.equal(assessPsiFieldData(field)._tag, 'Unavailable')
+  })
+
+  it('keeps the assessment unavailable when no eligible field measurements exist', () => {
+    assert.equal(assessPsiFieldData(null)._tag, 'Unavailable')
   })
 })
 

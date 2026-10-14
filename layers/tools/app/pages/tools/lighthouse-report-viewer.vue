@@ -19,7 +19,7 @@ const faqs = [
   },
   {
     question: 'What information does a Lighthouse JSON report contain?',
-    answer: 'Lighthouse reports include performance scores (0-100), Core Web Vitals metrics (LCP, CLS, TBT), detailed audit results for performance, accessibility, best practices, SEO, and PWA categories, plus timing data, screenshots, and optimization opportunities.',
+    answer: 'Lighthouse reports include performance scores (0-100), Lighthouse Performance metrics, including LCP, CLS, and TBT, detailed audit results for performance, accessibility, best practices, SEO, and PWA categories, plus timing data, screenshots, and optimization opportunities.',
   },
   {
     question: 'Can I compare multiple Lighthouse reports?',
@@ -35,13 +35,13 @@ const faqs = [
   },
   {
     question: 'How do I view a Lighthouse report online?',
-    answer: 'Use this free Lighthouse report viewer to view reports online. Upload a JSON file, paste JSON content, or load a sample report. The viewer displays all scores, Core Web Vitals metrics, performance opportunities, and audit results in an interactive format—no installation required.',
+    answer: 'Use this free Lighthouse report viewer to view reports online. Upload a JSON file, paste JSON content, or load a sample report. The viewer displays all scores, Performance metrics, Lighthouse insights, and audit results in an interactive format—no installation required.',
   },
 ]
 
 useToolSeo({
   title: 'Lighthouse Report Viewer - Analyze JSON Reports Online Free',
-  description: 'Free Lighthouse JSON viewer and report analyzer. Upload or paste Lighthouse JSON to view scores, Core Web Vitals, and audit details. Works with PageSpeed Insights API output and Chrome DevTools exports.',
+  description: 'Free Lighthouse JSON viewer and report analyzer. Upload or paste Lighthouse JSON to view scores, Performance metrics, and audit details. Works with PageSpeed Insights API output and Chrome DevTools exports.',
   faqs,
 })
 
@@ -109,14 +109,19 @@ const categoryDisplayData = computed(() => {
     { id: 'accessibility', label: 'Accessibility', icon: 'i-heroicons-eye', category: report.value.categories.accessibility },
     { id: 'best-practices', label: 'Best Practices', icon: 'i-heroicons-check-badge', category: report.value.categories.bestPractices },
     { id: 'seo', label: 'SEO', icon: 'i-heroicons-magnifying-glass', category: report.value.categories.seo },
+    { id: 'agentic-browsing', label: 'Agentic Browsing', icon: 'i-heroicons-cpu-chip', category: report.value.categories.agenticBrowsing },
     { id: 'pwa', label: 'PWA', icon: 'i-heroicons-device-phone-mobile', category: report.value.categories.pwa },
-  ].filter(c => c.category !== null)
+  ].filter(c => c.category !== null).map(c => ({
+    ...c,
+    label: c.category?.title || c.label,
+    display: report.value!.categoryScores[c.id]!,
+  }))
 })
 </script>
 
 <template>
   <div class="min-h-screen">
-    <ToolPageHero title="Lighthouse Report" accent="Viewer" description="Upload or paste a Lighthouse JSON report to analyze scores, Core Web Vitals, and audits interactively." color="violet" />
+    <ToolPageHero title="Lighthouse Report" accent="Viewer" description="Upload or paste a Lighthouse JSON report to analyze scores, Performance metrics, and audits interactively." color="violet" />
 
     <ToolCard icon="i-heroicons-document-chart-bar" title="Report Viewer" color="violet" max-width="max-w-5xl">
       <div v-if="report" class="flex items-center justify-end gap-1 sm:gap-2 px-4 sm:px-6 py-2">
@@ -239,7 +244,14 @@ const categoryDisplayData = computed(() => {
           <ToolMetricsPanel :metrics="report.performanceMetrics" />
         </div>
 
-        <!-- Opportunities -->
+        <ToolAuditList
+          v-if="report.insights.length"
+          :audits="report.insights"
+          title="Insights"
+          icon="i-heroicons-light-bulb"
+        />
+
+        <!-- Historical Opportunities -->
         <div v-if="report.opportunities.length">
           <ToolAuditList
             :audits="report.opportunities"
@@ -263,11 +275,16 @@ const categoryDisplayData = computed(() => {
         <div v-if="report.passedAudits.length">
           <ToolAuditList
             :audits="report.passedAudits"
-            title="Passed Audits"
+            title="Passed audits"
             icon="i-heroicons-check-circle"
             empty-message="No passed audits"
           />
         </div>
+
+        <ToolAuditList v-if="report.notApplicableAudits.length" :audits="report.notApplicableAudits" title="Not applicable" icon="i-heroicons-minus-circle" />
+        <ToolAuditList v-if="report.manualAudits.length" :audits="report.manualAudits" title="Additional items to manually check" icon="i-heroicons-eye" />
+        <ToolAuditList v-if="report.informativeAudits.length" :audits="report.informativeAudits" title="Informative audits" icon="i-heroicons-information-circle" />
+        <ToolAuditList v-if="report.errorAudits.length" :audits="report.errorAudits" title="Audit errors" icon="i-heroicons-exclamation-triangle" />
 
         <!-- Screenshot -->
         <div v-if="report.screenshot" class="pt-4 border-t border-gray-200 dark:border-gray-800">
@@ -305,7 +322,7 @@ const categoryDisplayData = computed(() => {
                 CLS Debugger
               </UButton>
               <UButton to="/tools/lighthouse-score-calculator" variant="outline" size="sm">
-                Score Calculator
+                Performance Score Calculator
               </UButton>
             </div>
           </div>
@@ -323,14 +340,15 @@ const categoryDisplayData = computed(() => {
               How to Read a Lighthouse Report
             </h2>
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">
-              Lighthouse audits your page across five categories. Each category receives a score from 0-100, with
+              Lighthouse audits your page across the categories available in your report. Most scored categories use 0-100, with
               <strong class="text-gray-900 dark:text-white">90+</strong> being good,
               <strong class="text-gray-900 dark:text-white">50-89</strong> needing improvement, and
               <strong class="text-gray-900 dark:text-white">below 50</strong> being poor.
+              Agentic Browsing and flow reports can show passed checks as a fraction.
             </p>
             <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
               Focus on <strong class="text-gray-900 dark:text-white">Performance</strong> first—it directly impacts user experience and SEO.
-              Within Performance, prioritize the <strong class="text-gray-900 dark:text-white">Opportunities</strong> section,
+              Within Performance, prioritize the <strong class="text-gray-900 dark:text-white">Insights</strong> section, or Opportunities in older reports,
               which shows specific improvements with estimated savings.
             </p>
           </div>
@@ -492,7 +510,7 @@ const categoryDisplayData = computed(() => {
           <div class="flex flex-wrap justify-center gap-3">
             <UButton to="/tools/lighthouse-score-calculator" variant="outline" size="sm" class="gap-2">
               <UIcon name="i-heroicons-calculator" class="w-4 h-4" />
-              Score Calculator
+              Performance Score Calculator
             </UButton>
             <UButton to="/tools/pagespeed-insights-performance" variant="outline" size="sm" class="gap-2">
               <UIcon name="i-heroicons-chart-bar" class="w-4 h-4" />

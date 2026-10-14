@@ -18,13 +18,13 @@ First Contentful Paint (FCP) measures when the browser renders the first piece o
 
 ## Thresholds
 
-| Score | Rating |
+| FCP | Rating |
 |-------|--------|
 | ≤ 1.8s | Good |
 | 1.8s - 3.0s | Needs Improvement |
 | > 3.0s | Poor |
 
-Aim for a score of 1.8 seconds or less at the 75th percentile of page loads to pass the [Google threshold](https://web.dev/articles/fcp).
+Aim for an FCP of 1.8 seconds or less at the 75th percentile of page loads to pass the [Google threshold](https://web.dev/articles/fcp).
 
 ## FCP vs LCP
 

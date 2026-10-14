@@ -316,7 +316,7 @@ const totalResourceSize = computed(() => {
           <div class="flex items-center gap-2 mb-4">
             <UIcon name="i-heroicons-bolt" class="w-5 h-5 text-blue-500" />
             <h3 class="text-lg font-semibold">
-              Core Web Vitals
+              Performance metrics
             </h3>
           </div>
           <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">

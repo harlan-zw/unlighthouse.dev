@@ -25,13 +25,13 @@ Largest Contentful Paint (LCP) measures how long it takes for the largest visibl
 
 ## Thresholds
 
-| Score | Rating |
+| LCP | Rating |
 |-------|--------|
 | ≤ 2.5s | Good |
 | 2.5s - 4.0s | Needs Improvement |
 | > 4.0s | Poor |
 
-Aim for a score of 2.5 seconds or less at the 75th percentile of page loads to pass the [Google threshold](https://web.dev/articles/lcp).
+Aim for an LCP of 2.5 seconds or less at the 75th percentile of page loads to pass the [Google threshold](https://web.dev/articles/lcp).
 
 ## What triggers LCP
 

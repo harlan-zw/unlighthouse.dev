@@ -9,6 +9,7 @@ export interface LighthouseResult {
   userAgent: string
   configSettings: {
     formFactor: 'mobile' | 'desktop'
+    gatherMode?: 'navigation' | 'snapshot' | 'timespan'
     throttlingMethod: string
     screenEmulation?: { mobile: boolean }
   }
@@ -32,6 +33,7 @@ export interface LighthouseCategory {
   title: string
   description?: string
   score: number | null
+  categoryScoreDisplayMode?: 'fraction'
   auditRefs: Array<{
     id: string
     weight: number
@@ -45,7 +47,7 @@ export interface LighthouseAudit {
   title: string
   description?: string
   score: number | null
-  scoreDisplayMode: 'binary' | 'numeric' | 'informative' | 'notApplicable' | 'manual' | 'error'
+  scoreDisplayMode: 'binary' | 'numeric' | 'metricSavings' | 'informative' | 'notApplicable' | 'manual' | 'error'
   displayValue?: string
   numericValue?: number
   numericUnit?: 'millisecond' | 'unitless' | 'byte' | 'element'
@@ -133,7 +135,11 @@ export interface TreemapDetails {
 }
 
 // Category IDs
-export type CategoryId = 'performance' | 'accessibility' | 'best-practices' | 'seo' | 'pwa'
+export type CategoryId = 'performance' | 'accessibility' | 'best-practices' | 'seo' | 'agentic-browsing' | 'pwa'
+
+export type CategoryScoreDisplay
+  = | { _tag: 'Score', score: number | null }
+    | { _tag: 'Fraction', numPassed: number, numPassableAudits: number, score: number | null }
 
 // Performance metrics
 export interface PerformanceMetric {
@@ -158,11 +164,18 @@ export interface ParsedLighthouseReport {
     accessibility: LighthouseCategory | null
     bestPractices: LighthouseCategory | null
     seo: LighthouseCategory | null
+    agenticBrowsing: LighthouseCategory | null
     pwa: LighthouseCategory | null
   }
+  categoryScores: Record<string, CategoryScoreDisplay>
   performanceMetrics: PerformanceMetric[]
   opportunities: LighthouseAudit[]
   diagnostics: LighthouseAudit[]
+  insights: LighthouseAudit[]
   passedAudits: LighthouseAudit[]
+  notApplicableAudits: LighthouseAudit[]
+  manualAudits: LighthouseAudit[]
+  informativeAudits: LighthouseAudit[]
+  errorAudits: LighthouseAudit[]
   screenshot: { data: string, width: number, height: number } | null
 }

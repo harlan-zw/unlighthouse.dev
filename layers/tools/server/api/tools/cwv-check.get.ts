@@ -1,5 +1,5 @@
 import type { FieldData, WebVitalMetric } from '../../utils/web-vitals'
-import { formatMetricValue, getRating, parseFieldData } from '../../utils/web-vitals'
+import { assessPsiFieldData, formatMetricValue, getRating, parsePsiFieldData } from '../../utils/web-vitals'
 
 interface MetricResult {
   value: number
@@ -20,7 +20,7 @@ function generateRecommendations(lab: Record<string, MetricResult>, field: Field
   const recs: Recommendation[] = []
 
   // LCP
-  if (lab.lcp?.rating !== 'good' || field?.lcp?.rating !== 'good') {
+  if ((lab.lcp && lab.lcp.rating !== 'good') || field?.lcp?.rating === 'needs-improvement' || field?.lcp?.rating === 'poor') {
     recs.push({
       metric: 'lcp',
       title: 'Improve Largest Contentful Paint',
@@ -31,7 +31,7 @@ function generateRecommendations(lab: Record<string, MetricResult>, field: Field
   }
 
   // CLS
-  if (lab.cls?.rating !== 'good' || field?.cls?.rating !== 'good') {
+  if ((lab.cls && lab.cls.rating !== 'good') || field?.cls?.rating === 'needs-improvement' || field?.cls?.rating === 'poor') {
     recs.push({
       metric: 'cls',
       title: 'Reduce Cumulative Layout Shift',
@@ -42,7 +42,7 @@ function generateRecommendations(lab: Record<string, MetricResult>, field: Field
   }
 
   // INP (field only)
-  if (field?.inp?.rating && field.inp.rating !== 'good') {
+  if (field?.inp?.rating === 'needs-improvement' || field?.inp?.rating === 'poor') {
     recs.push({
       metric: 'inp',
       title: 'Improve Interaction to Next Paint',
@@ -53,7 +53,7 @@ function generateRecommendations(lab: Record<string, MetricResult>, field: Field
   }
 
   // TBT (as proxy for INP in lab)
-  if (lab.tbt?.rating !== 'good') {
+  if (lab.tbt && lab.tbt.rating !== 'good') {
     recs.push({
       metric: 'tbt',
       title: 'Reduce Total Blocking Time',
@@ -63,7 +63,7 @@ function generateRecommendations(lab: Record<string, MetricResult>, field: Field
   }
 
   // FCP
-  if (lab.fcp?.rating !== 'good') {
+  if (lab.fcp && lab.fcp.rating !== 'good') {
     recs.push({
       metric: 'fcp',
       title: 'Improve First Contentful Paint',
@@ -102,8 +102,8 @@ export default defineCachedEventHandler(async (event) => {
 
   for (const [key, auditId] of Object.entries(metricMap)) {
     const audit = audits[auditId]
-    if (audit) {
-      const value = audit.numericValue || 0
+    if (audit && typeof audit.numericValue === 'number' && Number.isFinite(audit.numericValue)) {
+      const value = audit.numericValue
       labMetrics[key] = {
         value,
         displayValue: audit.displayValue || formatMetricValue(value, key),
@@ -113,26 +113,12 @@ export default defineCachedEventHandler(async (event) => {
     }
   }
 
-  // Parse field data from loadingExperience
-  const loadingExperience = (results as unknown as { loadingExperience?: Record<string, unknown> }).loadingExperience
-  const fieldData = parseFieldData(loadingExperience)
+  const fieldData = parsePsiFieldData(results, url, strategy)
 
   // Generate recommendations
   const recommendations = generateRecommendations(labMetrics, fieldData)
 
-  // Calculate overall CWV pass status
-  const passesCWV = (() => {
-    // Use field data if available (more accurate)
-    if (fieldData?.lcp && fieldData?.cls && fieldData?.inp) {
-      return fieldData.lcp.rating === 'good'
-        && fieldData.cls.rating === 'good'
-        && fieldData.inp.rating === 'good'
-    }
-    // Fall back to lab data
-    return labMetrics.lcp?.rating === 'good'
-      && labMetrics.cls?.rating === 'good'
-      && labMetrics.tbt?.rating === 'good' // TBT as proxy for INP
-  })()
+  const assessment = assessPsiFieldData(fieldData)
 
   // Screenshot
   const screenshot = results.lighthouseResult.fullPageScreenshot?.screenshot
@@ -149,7 +135,7 @@ export default defineCachedEventHandler(async (event) => {
     fetchedUrl: results.lighthouseResult.finalDisplayedUrl || url,
     timestamp: Date.now(),
     strategy,
-    passesCWV,
+    assessment,
     performanceScore: Math.round((results.lighthouseResult.categories.performance?.score || 0) * 100),
     lab: {
       lcp: labMetrics.lcp || null,
@@ -175,7 +161,7 @@ export default defineCachedEventHandler(async (event) => {
   swr: true,
   getKey: (event) => {
     const q = getQuery(event)
-    return `cwv:v1:${q.strategy || 'mobile'}:${q.url}`
+    return `cwv:v2:${q.strategy || 'mobile'}:${q.url}`
   },
   maxAge: 60 * 60,
   staleMaxAge: 24 * 60 * 60,

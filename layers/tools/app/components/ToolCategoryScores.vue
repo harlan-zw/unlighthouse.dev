@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import type { LighthouseCategory } from '../types/lighthouse'
+import type { CategoryScoreDisplay, LighthouseCategory } from '../types/lighthouse'
 
 interface CategoryDisplay {
   id: string
   label: string
   icon: string
   category: LighthouseCategory | null
+  display: CategoryScoreDisplay
 }
 
 defineProps<{
@@ -17,6 +18,7 @@ const categoryIcons: Record<string, string> = {
   'accessibility': 'i-heroicons-eye',
   'best-practices': 'i-heroicons-check-badge',
   'seo': 'i-heroicons-magnifying-glass',
+  'agentic-browsing': 'i-heroicons-cpu-chip',
   'pwa': 'i-heroicons-device-phone-mobile',
 }
 
@@ -26,7 +28,7 @@ function getRatingLabel(score: number | null): string {
     case 'pass':
       return 'Good'
     case 'average':
-      return 'Needs Work'
+      return 'Needs improvement'
     case 'fail':
       return 'Poor'
     default:
@@ -45,9 +47,9 @@ function getRatingLabel(score: number | null): string {
       <!-- Score Circle -->
       <div
         class="w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-white text-base sm:text-xl font-bold mb-2 shadow-lg"
-        :class="getScoreBgClass(cat.category?.score ?? null)"
+        :class="getScoreBgClass(cat.display.score)"
       >
-        {{ cat.category?.score !== null ? Math.round((cat.category?.score ?? 0) * 100) : '—' }}
+        {{ cat.display._tag === 'Fraction' ? `${cat.display.numPassed}/${cat.display.numPassableAudits}` : cat.display.score !== null ? Math.round(cat.display.score * 100) : '—' }}
       </div>
 
       <!-- Category Name -->
@@ -60,13 +62,13 @@ function getRatingLabel(score: number | null): string {
       <span
         class="text-[10px] font-medium"
         :class="{
-          'text-green-600 dark:text-green-400': getScoreRating(cat.category?.score ?? null) === 'pass',
-          'text-orange-600 dark:text-orange-400': getScoreRating(cat.category?.score ?? null) === 'average',
-          'text-red-600 dark:text-red-400': getScoreRating(cat.category?.score ?? null) === 'fail',
-          'text-gray-500': getScoreRating(cat.category?.score ?? null) === 'unknown',
+          'text-green-600 dark:text-green-400': getScoreRating(cat.display.score) === 'pass',
+          'text-orange-600 dark:text-orange-400': getScoreRating(cat.display.score) === 'average',
+          'text-red-600 dark:text-red-400': getScoreRating(cat.display.score) === 'fail',
+          'text-gray-500': getScoreRating(cat.display.score) === 'unknown',
         }"
       >
-        {{ getRatingLabel(cat.category?.score ?? null) }}
+        {{ getRatingLabel(cat.display.score) }}
       </span>
     </div>
   </div>

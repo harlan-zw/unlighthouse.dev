@@ -1,4 +1,4 @@
-import { parseFieldData } from '../../utils/web-vitals'
+import { parsePsiFieldData } from '../../utils/web-vitals'
 
 export default defineCachedEventHandler(async (event) => {
   await checkFreeToolRateLimit(event)
@@ -17,7 +17,7 @@ export default defineCachedEventHandler(async (event) => {
   // INP is a field-only metric. When CrUX has the origin, the real number is
   // already in this response and the tool should lead with it instead of
   // quietly substituting a lab proxy.
-  const field = parseFieldData((results as unknown as { loadingExperience?: Record<string, unknown> }).loadingExperience)
+  const field = parsePsiFieldData(results, url, strategy)
 
   // TBT is the lab proxy for INP (Total Blocking Time)
   const tbt = audits['total-blocking-time']
@@ -132,7 +132,7 @@ export default defineCachedEventHandler(async (event) => {
   swr: true,
   getKey: (event) => {
     const q = getQuery(event)
-    return `inp:v1:${q.strategy || 'mobile'}:${q.url}`
+    return `inp:v2:${q.strategy || 'mobile'}:${q.url}`
   },
   maxAge: 60 * 60,
   staleMaxAge: 24 * 60 * 60,

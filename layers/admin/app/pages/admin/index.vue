@@ -48,7 +48,7 @@ const toolMetadata: Record<string, { name: string, icon: string, color: string }
   'har-viewer': { name: 'HAR Viewer', icon: 'i-carbon-document', color: 'rose' },
   'json-size': { name: 'JSON Size', icon: 'i-carbon-json', color: 'pink' },
   'lighthouse-report-viewer': { name: 'Report Viewer', icon: 'i-carbon-report', color: 'red' },
-  'lighthouse-score-calculator': { name: 'Score Calculator', icon: 'i-carbon-calculator', color: 'cyan' },
+  'lighthouse-score-calculator': { name: 'Performance Score Calculator', icon: 'i-carbon-calculator', color: 'cyan' },
 }
 
 function getToolMeta(id: string) {
