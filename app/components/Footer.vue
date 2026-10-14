@@ -1,17 +1,28 @@
 <script setup lang="ts">
-const docsLinks = [
+import { docsVersion, versionedDocPath } from '~~/utils/docs-version'
+
+const route = useRoute()
+const version = computed(() => docsVersion(route.path))
+
+const docsLinks = computed(() => [
   { label: 'Getting Started', icon: 'i-carbon-bookmark', to: '/guide/getting-started/how-it-works' },
   { label: 'Installation', icon: 'i-carbon-download', to: '/guide/getting-started/installation' },
   { label: 'Configuration', icon: 'i-carbon-settings', to: '/guide/guides/config' },
-]
+].map(link => ({ ...link, to: versionedDocPath(link.to, version.value) })))
 
-const integrationsLinks = [
-  { label: 'CLI', icon: 'i-carbon-terminal', to: '/integrations/cli' },
-  { label: 'CI/CD', icon: 'i-carbon-flow', to: '/integrations/ci' },
-  { label: 'Nuxt', icon: 'i-logos-nuxt-icon', to: '/integrations/nuxt' },
-  { label: 'Vite', icon: 'i-logos-vitejs', to: '/integrations/vite' },
-  { label: 'Webpack', icon: 'i-logos-webpack', to: '/integrations/webpack' },
-]
+const integrationsLinks = computed(() => (version.value === 'beta'
+  ? [
+      { label: 'CLI', icon: 'i-carbon-terminal', to: '/integrations/cli' },
+      { label: 'CI/CD', icon: 'i-carbon-flow', to: '/integrations/ci' },
+      { label: 'MCP', icon: 'i-carbon-bot', to: '/integrations/mcp' },
+    ]
+  : [
+      { label: 'CLI', icon: 'i-carbon-terminal', to: '/integrations/cli' },
+      { label: 'CI/CD', icon: 'i-carbon-flow', to: '/integrations/ci' },
+      { label: 'Nuxt', icon: 'i-logos-nuxt-icon', to: '/integrations/nuxt' },
+      { label: 'Vite', icon: 'i-logos-vitejs', to: '/integrations/vite' },
+      { label: 'Webpack', icon: 'i-logos-webpack', to: '/integrations/webpack' },
+    ]).map(link => ({ ...link, to: versionedDocPath(link.to, version.value) })))
 
 const learnLinks = [
   { label: 'Core Web Vitals', icon: 'i-heroicons-chart-pie', to: '/learn-lighthouse/core-web-vitals' },
