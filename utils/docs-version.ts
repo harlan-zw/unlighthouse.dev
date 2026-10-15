@@ -1,4 +1,5 @@
 export type DocsVersion = 'stable' | 'beta'
+export type DocsCollection = 'root' | 'beta' | 'glossary' | 'learnLighthouse'
 
 export function docsVersion(path: string): DocsVersion {
   return /^\/v1(?:\/|$)/.test(path) ? 'beta' : 'stable'
@@ -15,6 +16,14 @@ export function versionedDocPath(path: string, version: DocsVersion): string {
 
 export function docsBranch(path: string): '0.x' | 'v1' {
   return docsVersion(path) === 'beta' ? 'v1' : '0.x'
+}
+
+export function commitMetadataBranch(collection: DocsCollection): '0.x' | 'v1' | null {
+  if (collection === 'root')
+    return '0.x'
+  if (collection === 'beta')
+    return 'v1'
+  return null
 }
 
 export function switchDocsVersion(path: string, version: DocsVersion, availablePaths: readonly string[]): string {
