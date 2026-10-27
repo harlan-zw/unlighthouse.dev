@@ -1,0 +1,1192 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<!--
+  ART DIRECTION: "Instrument poster"
+  1. The page is a calibrated instrument. The scan data is the hero; every figure is a reading, never a picture of an app.
+  2. Paper ground, near-black ink, one ultramarine signal for the lamp. Score bands are the only other colours, and only on data.
+  3. Asymmetric Swiss 12 column grid with visible rules, a ruler, figure numbers, flush-left type, no centred stacks.
+  4. Scale contrast: poster-size condensed Hubot numerals against 11px Martian Mono labels and leader lines.
+  5. Motion shows the scan only: one shared queue, 4 workers, uneven route times, ticks settle into their band. Reduced motion shows the finished reading.
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unlighthouse: Site-Wide Google Lighthouse Audits</title>
+<meta name="description" content="Scan every page of your site with Google Lighthouse. Unlighthouse discovers URLs, runs audits in parallel, and combines results in one report.">
+<meta name="theme-color" content="#f1eee6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0c0d10" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20rx%3D%2223%22%20fill%3D%22%231f2fd1%22%2F%3E%3Cg%20transform%3D%22translate(15.86%2017.8)%20scale(0.85356)%22%3E%3Cpath%20d%3D%22M0%200H28V44A12%2012%200%200%200%2052%2044V0H80V84H40A40%2040%200%200%201%200%2044Z%22%20fill%3D%22%23f1eee6%22%2F%3E%3Cpath%20d%3D%22M42.6%2025.77L49.15%20-5.04A44%2044%200%200%201%2079.55%2018.71L51.23%2032.52A12.5%2012.5%200%200%200%2042.6%2025.77Z%22%20fill%3D%22%23f1eee6%22%20stroke%3D%22%231f2fd1%22%20stroke-width%3D%227%22%20paint-order%3D%22stroke%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2240%22%20cy%3D%2238%22%20r%3D%229.5%22%20fill%3D%22%23f1eee6%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/hubot-sans@5.3.0/wdth.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/mona-sans@5.3.0/index.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/martian-mono@5.3.0/wdth.css">
+<script>
+  (() => {
+    const saved = localStorage.getItem('ulh-theme')
+    const dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+  })()
+</script>
+<style>
+:root {
+  --paper: #f1eee6; --paper-2: #e8e4d9; --paper-3: #dfdacd;
+  --ink: #101114; --ink-2: #3b3d43; --ink-3: #5f6167;
+  --rule: rgba(16, 17, 20, .13); --rule-2: rgba(16, 17, 20, .34);
+  --lamp: #1f2fd1; --lamp-ink: #f6f4ee; --lamp-soft: rgba(31, 47, 209, .09);
+  --faint: #c4c0b4;
+  --pass: #0f9e55; --avg: #d98300; --fail: #e0362c;
+  --pass-t: #0a6b38; --avg-t: #8a4f00; --fail-t: #b0201a;
+  --surface: var(--paper);
+  --beam-a: .07;
+  --f-display: 'Hubot Sans Variable', 'Hubot Sans', system-ui, sans-serif;
+  --f-body: 'Mona Sans Variable', 'Mona Sans', system-ui, sans-serif;
+  --f-mono: 'Martian Mono Variable', ui-monospace, 'SFMono-Regular', monospace;
+  --pad: clamp(16px, 2.8vw, 40px);
+  --gap: clamp(12px, 1.7vw, 24px);
+  color-scheme: light;
+}
+[data-theme="dark"] {
+  --paper: #0c0d10; --paper-2: #14161b; --paper-3: #1c1f25;
+  --ink: #ece9e0; --ink-2: #bdbab1; --ink-3: #96948d;
+  --rule: rgba(236, 233, 224, .12); --rule-2: rgba(236, 233, 224, .32);
+  --lamp: #8590ff; --lamp-ink: #0c0d10; --lamp-soft: rgba(133, 144, 255, .12);
+  --faint: #3b3e45;
+  --beam-a: .26;
+  --pass: #2fcf7a; --avg: #ffa51f; --fail: #ff5a4d;
+  --pass-t: #3fd788; --avg-t: #ffb340; --fail-t: #ff7468;
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; overflow-x: clip; }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font: 400 16px/1.55 var(--f-body);
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+a { color: inherit; }
+img, svg { display: block; max-width: 100%; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--lamp); outline-offset: 3px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* brand mark classes from beacon.json */
+.bk-ink { fill: var(--ink); }
+.bk-lamp { fill: var(--lamp); }
+.bk-beam { fill: var(--lamp); stroke: var(--surface); }
+.bk-tile { fill: var(--lamp); }
+
+/* type */
+.lbl {
+  font: 500 11px/1.45 var(--f-mono); font-stretch: 100%;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); margin: 0;
+}
+.mono { font-family: var(--f-mono); font-stretch: 87.5%; font-size: .84em; }
+.num { font-family: var(--f-display); font-stretch: 75%; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.02em; line-height: .8; }
+.t-pass { color: var(--pass-t); } .t-avg { color: var(--avg-t); } .t-fail { color: var(--fail-t); }
+
+/* grid */
+.wrap { max-width: 1440px; margin: 0 auto; padding: 0 var(--pad); }
+.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); }
+
+/* header */
+.top { position: relative; z-index: 5; background: var(--paper); }
+.top-row { display: flex; align-items: center; gap: 28px; height: 68px; }
+.brand { display: block; width: 228px; flex: none; }
+.brand svg { width: 100%; height: auto; overflow: visible; }
+.nav { display: flex; gap: 24px; margin-left: 20px; }
+.nav a, .gh { font: 500 12px/1 var(--f-mono); letter-spacing: .04em; text-decoration: none; color: var(--ink-2); padding: 8px 0; }
+.nav a:hover, .gh:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 5px; }
+.top-actions { margin-left: auto; display: flex; align-items: center; gap: 20px; }
+.ruler {
+  height: 14px; border-bottom: 1px solid var(--rule-2);
+  background-image:
+    repeating-linear-gradient(90deg, var(--rule-2) 0 1px, transparent 1px 10px),
+    repeating-linear-gradient(90deg, var(--ink) 0 1px, transparent 1px 100px);
+  background-size: 100% 5px, 100% 13px; background-repeat: repeat-x; background-position: 0 100%, 0 100%;
+}
+.theme {
+  display: inline-flex; align-items: center; gap: 0; height: 32px; padding: 3px; cursor: pointer;
+  border: 1px solid var(--rule-2); background: transparent; border-radius: 2px;
+  font: 500 10px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase;
+}
+.theme span { padding: 7px 8px; color: var(--ink-3); border-radius: 1px; }
+[data-theme="light"] .theme .tl, [data-theme="dark"] .theme .td { background: var(--ink); color: var(--paper); }
+.btn {
+  display: inline-flex; align-items: center; gap: 10px; height: 44px; padding: 0 18px;
+  font: 600 15px/1 var(--f-display); font-stretch: 100%; letter-spacing: .005em;
+  text-decoration: none; border-radius: 2px; border: 1px solid transparent; cursor: pointer; white-space: nowrap;
+}
+.btn-lamp { background: var(--lamp); color: var(--lamp-ink); }
+.btn-lamp:hover { background: color-mix(in oklab, var(--lamp) 86%, var(--ink)); }
+.btn-ink { border-color: var(--ink); color: var(--ink); background: transparent; }
+.btn-ink:hover { background: var(--ink); color: var(--paper); }
+.btn.sm { height: 34px; font-size: 13px; padding: 0 12px; }
+.arrow { font-family: var(--f-mono); font-weight: 400; }
+
+/* section head: figure number, title, note */
+.sec { padding-bottom: clamp(64px, 8vw, 120px); }
+.sec > .sec-head { border-top: 1px solid var(--rule-2); }
+.sec-head { padding: 14px 0 0; margin-bottom: clamp(36px, 5vw, 72px); align-items: baseline; }
+.sec-head .lbl:nth-child(1) { grid-column: 1 / span 2; color: var(--ink); }
+.sec-head .lbl:nth-child(2) { grid-column: 3 / span 7; }
+.sec-head .lbl:nth-child(3) { grid-column: 10 / span 3; text-align: right; }
+.h2 {
+  font: 800 clamp(40px, 5.4vw, 80px)/.92 var(--f-display); font-stretch: 100%;
+  letter-spacing: -.035em; margin: 0; text-wrap: balance;
+}
+.body-l { font-size: 18px; line-height: 1.5; color: var(--ink-2); max-width: 34em; margin: 20px 0 0; text-wrap: pretty; }
+
+/* hero */
+.hero { padding-top: clamp(28px, 3.5vw, 48px); }
+.hero-grid { align-items: start; }
+.hero-copy { grid-column: 1 / span 5; padding-top: 6px; position: relative; z-index: 1; }
+.kicker { display: flex; gap: 14px; color: var(--ink); }
+.kicker .idx { color: var(--lamp); }
+.display {
+  font: 800 clamp(52px, 6.4vw, 96px)/.88 var(--f-display); font-stretch: 100%;
+  letter-spacing: -.045em; margin: 28px 0 0;
+}
+.display .dot { color: var(--lamp); }
+.lede { font-size: 18px; line-height: 1.5; color: var(--ink-2); margin: 28px 0 0; max-width: 30em; text-wrap: pretty; }
+.cmd {
+  display: flex; align-items: center; margin-top: 32px; border: 1px solid var(--ink); background: var(--paper);
+  height: 52px; max-width: 470px;
+}
+.cmd code { flex: 1; min-width: 0; padding: 0 14px; font: 500 14px/1 var(--f-mono); font-stretch: 87.5%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cmd .ps { color: var(--ink-3); margin-right: 6px; }
+.cmd .fl { color: var(--lamp); }
+.copy {
+  height: 100%; padding: 0 16px; border: 0; border-left: 1px solid var(--ink); background: transparent; cursor: pointer;
+  font: 500 11px/1 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; min-width: 84px;
+}
+.copy:hover { background: var(--ink); color: var(--paper); }
+.cta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; margin-top: 16px; }
+.tlink { font: 600 15px/1 var(--f-display); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 6px; text-decoration-color: var(--rule-2); }
+.tlink:hover { text-decoration-color: var(--ink); }
+.specline { display: flex; margin: 40px 0 0; border-top: 1px solid var(--rule-2); max-width: 470px; }
+.specline div { flex: 1; padding: 10px 0 0; }
+.specline div + div { border-left: 1px solid var(--rule); padding-left: 12px; }
+.specline dt { font: 500 10px/1.4 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.specline dd { margin: 4px 0 0; font: 700 20px/1.1 var(--f-display); font-stretch: 100%; letter-spacing: -.01em; }
+
+.gauge-fig { grid-column: 6 / span 7; margin: -8px 0 0; position: relative; }
+#gauge { width: 100%; height: auto; overflow: visible; }
+#gauge text { font-family: var(--f-mono); fill: var(--ink-3); font-size: 11px; letter-spacing: .05em; }
+#gauge .ink { fill: var(--ink); }
+#gauge .hair { stroke: var(--rule-2); stroke-width: 1; fill: none; }
+#gauge .hair-f { stroke: var(--rule); stroke-width: 1; fill: none; }
+#gauge .dash { stroke: var(--rule-2); stroke-width: 1; fill: none; stroke-dasharray: 2 4; }
+#gauge .scl { stroke: var(--ink-3); stroke-width: 1; }
+#gauge .scl.maj { stroke: var(--ink); }
+#gauge .lead { stroke: var(--ink); stroke-width: 1; fill: none; }
+#gauge .halo { stroke: var(--paper); stroke-width: 5; fill: none; }
+#gauge .pin { fill: var(--paper); stroke: var(--ink); stroke-width: 1.25; }
+#gauge .an-t { fill: var(--ink); font-size: 12px; font-weight: 600; }
+#gauge .an-s { fill: var(--ink-3); font-size: 11px; }
+#gauge .big { font-family: var(--f-display); font-stretch: 75%; font-weight: 800; fill: var(--ink); font-size: 124px; letter-spacing: -2px; font-variant-numeric: tabular-nums; }
+#gauge .stat { fill: var(--ink); font-size: 11px; }
+#gauge .stat-l { fill: var(--lamp); }
+#gauge .beam { transition: opacity .6s ease; pointer-events: none; }
+#gauge .needle { fill: var(--lamp); transition: transform .6s cubic-bezier(.3, .7, .2, 1); }
+#gauge .needle.jump { transition: none; }
+.tk { fill: none; stroke: var(--faint); stroke-width: 4.2; stroke-linecap: butt; stroke-dasharray: 0 100; opacity: 0;
+  transition: stroke-dasharray .8s cubic-bezier(.2, .8, .2, 1), stroke .5s ease, opacity .4s ease; }
+.tk.s1 { opacity: 1; stroke-dasharray: 9 100; }
+.tk.s2 { opacity: 1; stroke: var(--lamp); stroke-dasharray: 100 100; transition-duration: .35s; }
+.tk.s3 { opacity: 1; }
+.tk.s3.pass { stroke: var(--pass); } .tk.s3.avg { stroke: var(--avg); } .tk.s3.fail { stroke: var(--fail); }
+
+/* readout band */
+.readout { margin-top: clamp(24px, 3vw, 40px); border-top: 1px solid var(--ink); border-bottom: 1px solid var(--rule-2); }
+.cell { padding: 14px 0 18px; min-width: 0; }
+.cell + .cell { border-left: 1px solid var(--rule); padding-left: calc(var(--gap) / 2); margin-left: calc(var(--gap) / -2); }
+.c-disc { grid-column: 1 / span 3; }
+.c-work { grid-column: 4 / span 4; }
+.c-chan { grid-column: 8 / span 2; }
+.c-key { grid-column: 10 / span 3; }
+.cell .lbl { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.cell .lbl em { font-style: normal; color: var(--ink-3); text-transform: none; letter-spacing: .02em; }
+.log, .wk { list-style: none; margin: 0; padding: 0; font: 400 12px/1.9 var(--f-mono); font-stretch: 87.5%; }
+.log li { display: flex; gap: 8px; color: var(--ink-3); white-space: nowrap; overflow: hidden; }
+.log li .ck { width: 1.2em; color: var(--ink-3); }
+.log li.on { color: var(--ink); }
+.log li.on .ck { color: var(--lamp); }
+.log li .m { color: var(--ink-3); }
+.wk li { display: grid; grid-template-columns: 2.4em minmax(0, 1fr) 64px 3.8em; gap: 10px; align-items: center; }
+.wk .wid { color: var(--ink-3); }
+.wk .wp { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wk .wb { height: 4px; background: var(--rule); position: relative; }
+.wk .wb i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--lamp); }
+.wk .wt { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.wk li.idle .wp { color: var(--ink-3); }
+.chan { display: flex; flex-direction: column; gap: 4px; }
+.chan label { position: relative; display: flex; align-items: center; gap: 8px; cursor: pointer; font: 500 12px/1.6 var(--f-mono); font-stretch: 87.5%; color: var(--ink-2); }
+.chan input { position: absolute; opacity: 0; }
+.chan label::before { content: ''; width: 10px; height: 10px; border: 1px solid var(--ink-2); border-radius: 50%; flex: none; }
+.chan label:has(input:checked) { color: var(--ink); }
+.chan label:has(input:checked)::before { background: var(--lamp); border-color: var(--lamp); box-shadow: 0 0 0 2px var(--paper) inset; }
+.chan label:has(input:focus-visible) { outline: 2px solid var(--lamp); outline-offset: 2px; }
+.key { list-style: none; margin: 0; padding: 0; font: 400 12px/1.9 var(--f-mono); font-stretch: 87.5%; color: var(--ink-2); }
+.key li { display: flex; align-items: center; gap: 10px; }
+.key i { width: 4px; height: 14px; flex: none; background: var(--faint); }
+.key i.h { height: 6px; align-self: flex-end; margin-bottom: 6px; }
+.key i.l { background: var(--lamp); }
+.key i.p { background: var(--pass); } .key i.a { background: var(--avg); } .key i.f { background: var(--fail); }
+.key .bands { display: flex; gap: 2px; }
+.note { font: 400 11px/1.5 var(--f-mono); font-stretch: 87.5%; color: var(--ink-3); margin: 10px 0 0; }
+
+/* FIG 02 barcode */
+.bc-intro { grid-column: 1 / span 4; }
+.bc-counts { grid-column: 6 / span 7; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--gap); align-self: end; }
+.bc-counts > div { border-top: 1px solid var(--ink); padding-top: 12px; }
+.bc-counts .num { font-size: clamp(88px, 11vw, 168px); display: block; margin-top: 14px; }
+.barcode-wrap { grid-column: 1 / -1; margin-top: clamp(40px, 5vw, 72px); position: relative; }
+.dims { position: relative; height: 40px; }
+.dim { position: absolute; bottom: 8px; height: 10px; border-left: 1px solid var(--ink); border-right: 1px solid var(--ink); transition: left .9s cubic-bezier(.2, .8, .2, 1), width .9s cubic-bezier(.2, .8, .2, 1); }
+.dim::after { content: ''; position: absolute; left: 0; right: 0; top: 50%; border-top: 1px solid var(--ink); }
+.dim span { position: absolute; bottom: 14px; left: 0; white-space: nowrap; font: 500 11px/1 var(--f-mono); letter-spacing: .05em; text-transform: uppercase; }
+.barcode { position: relative; height: clamp(160px, 20vw, 280px); border-bottom: 1px solid var(--ink); }
+.barcode .gl { position: absolute; left: 0; right: 0; border-top: 1px dashed var(--rule-2); z-index: 1; }
+.barcode .gl span { position: absolute; left: 0; top: -16px; font: 500 10px/1 var(--f-mono); color: var(--ink-3); background: var(--paper); padding-right: 6px; }
+.bars { position: absolute; inset: 0; }
+.bar { position: absolute; bottom: 0; left: 0; width: calc(100% / 118); padding: 0 1px; height: 100%; display: flex; align-items: flex-end;
+  transition: transform .9s cubic-bezier(.2, .8, .2, 1); }
+.bar i { display: block; width: 100%; background: var(--faint); transition: height .9s cubic-bezier(.2, .8, .2, 1), background-color .5s; }
+.bar.pass i { background: var(--pass); } .bar.avg i { background: var(--avg); } .bar.fail i { background: var(--fail); }
+.bc-axis { display: flex; justify-content: space-between; margin-top: 8px; }
+
+/* FIG 03 process */
+.steps { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 0; position: relative; }
+.step { min-width: 0; }
+.step > :not(.seg) { padding: 0 var(--gap) 0 16px; }
+.step .num { font-size: clamp(64px, 7vw, 112px); display: block; color: var(--ink); }
+.step h3 { font: 700 26px/1.1 var(--f-display); font-stretch: 100%; letter-spacing: -.02em; margin: 26px 0 0; }
+.step p { margin: 10px 0 0; color: var(--ink-2); max-width: 22em; }
+.step .tr { margin-top: 16px; font: 400 12px/1.7 var(--f-mono); font-stretch: 87.5%; color: var(--ink-2); padding-top: 10px; position: relative; }
+.step .tr::before { content: ''; position: absolute; top: 0; left: 16px; right: var(--gap); border-top: 1px solid var(--rule); }
+.step .tr b { font-weight: 500; color: var(--ink); }
+.seg { position: relative; display: flex; justify-content: space-between; align-items: flex-end; height: 76px; margin-top: 28px; padding: 0 5px 0 16px; border-bottom: 1px solid var(--ink); }
+.seg::before { content: ''; position: absolute; left: 0; top: -10px; bottom: -7px; border-left: 1px solid var(--ink); }
+.step:last-child .seg::after { content: ''; position: absolute; right: -2px; bottom: -6px; border: 5.5px solid transparent; border-left: 9px solid var(--ink); border-right: 0; }
+.seg i { flex: none; width: 3px; height: calc(var(--h) * 100%); background: var(--faint); }
+.seg i.x { visibility: hidden; }
+.seg i.k { background: var(--ink); }
+.seg i.d { opacity: .5; }
+.seg i.l { background: var(--lamp); }
+.seg i.pass { background: var(--pass); } .seg i.avg { background: var(--avg); } .seg i.fail { background: var(--fail); }
+.seg-l { position: absolute; left: 16px; top: -10px; font: 500 10px/1 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); background: var(--paper); padding-right: 6px; }
+
+/* FIG 04 report */
+.rp-notes { grid-column: 1 / span 3; }
+.rp-notes ol { list-style: none; padding: 0; margin: 36px 0 0; counter-reset: n; }
+.rp-notes li { counter-increment: n; display: grid; grid-template-columns: 28px 1fr; gap: 12px; padding: 14px 0; border-top: 1px solid var(--rule); color: var(--ink-2); font-size: 15px; }
+.rp-notes li b { display: block; color: var(--ink); font-weight: 600; }
+.callout { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--ink); color: var(--paper); font: 600 11px/1 var(--f-mono); }
+.rp { grid-column: 4 / span 9; align-self: start; position: relative; border: 1px solid var(--ink); background: var(--paper-2); --surface: var(--paper-2); min-width: 0; }
+.rp .callout.in { position: static; margin: -6px 8px -6px 0; vertical-align: middle; box-shadow: none; }
+.rp .callout:not(.in) { position: absolute; z-index: 3; box-shadow: 0 0 0 3px var(--paper-2); }
+.rp-bar { display: flex; align-items: center; gap: 16px; padding: 12px 16px; border-bottom: 1px solid var(--rule-2); background: var(--paper); --surface: var(--paper); }
+.rp-bar svg { width: 26px; height: 26px; flex: none; }
+.rp-bar .site { font: 600 14px/1 var(--f-mono); font-stretch: 87.5%; }
+.rp-bar .meta { font: 400 12px/1 var(--f-mono); font-stretch: 87.5%; color: var(--ink-3); }
+.rp-bar .btn { margin-left: auto; }
+.rp-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--rule-2); overflow-x: auto; scrollbar-width: none; }
+.rp-tabs button { border: 0; background: none; cursor: pointer; padding: 14px 16px 12px; font: 600 14px/1 var(--f-display); font-stretch: 100%; color: var(--ink-3); border-bottom: 2px solid transparent; white-space: nowrap; margin-bottom: -1px; }
+.rp-tabs button[aria-selected="true"] { color: var(--ink); border-color: var(--lamp); }
+.rp-tabs button:hover { color: var(--ink); }
+.rp-tool { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--rule); }
+.rp-search { flex: 1; max-width: 320px; height: 32px; display: flex; align-items: center; gap: 8px; padding: 0 10px; border: 1px solid var(--rule-2); background: var(--paper); font: 400 12px/1 var(--f-mono); font-stretch: 87.5%; color: var(--ink-3); }
+.rp-tool .meta { margin-left: auto; font: 400 11px/1 var(--f-mono); color: var(--ink-3); }
+.rp-table { width: 100%; border-collapse: collapse; }
+.rp-table th { white-space: nowrap; text-align: left; font: 500 10px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); padding: 12px 16px; border-bottom: 1px solid var(--rule-2); }
+.rp-table th.sorted::after { content: ' \2193'; color: var(--ink); }
+.rp-table td { padding: 10px 16px; border-bottom: 1px solid var(--rule); vertical-align: middle; }
+.rp-table tr:last-child td { border-bottom: 0; }
+.rp-table .pg { font: 500 13px/1.3 var(--f-mono); font-stretch: 87.5%; white-space: nowrap; }
+.rp-table .act { width: 1%; text-align: right; position: relative; }
+.dots[aria-expanded="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.dots { width: 32px; height: 28px; border: 1px solid var(--rule-2); background: var(--paper); cursor: pointer; font: 700 14px/1 var(--f-mono); color: var(--ink-2); border-radius: 2px; }
+.scores { display: flex; gap: 18px; }
+.sc { display: flex; align-items: center; gap: 8px; }
+.sc svg { width: 34px; height: 34px; flex: none; }
+.sc .ring-bg { fill: none; stroke: var(--rule); stroke-width: 3; }
+.sc .ring { fill: none; stroke-width: 3; transform: rotate(-90deg); transform-origin: 17px 17px; }
+.sc.pass .ring { stroke: var(--pass); } .sc.avg .ring { stroke: var(--avg); } .sc.fail .ring { stroke: var(--fail); }
+.sc .v { font: 700 14px/1 var(--f-mono); font-stretch: 87.5%; font-variant-numeric: tabular-nums; }
+.sc .k { font: 500 9px/1 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); display: block; margin-top: 3px; }
+.single { display: flex; align-items: center; gap: 12px; }
+.single .trk { width: 200px; height: 6px; background: var(--rule); }
+.single .trk i { display: block; height: 100%; }
+.menu { position: absolute; right: 56px; top: 6px; z-index: 2; width: 268px; text-align: left; background: var(--paper); border: 1px solid var(--ink); box-shadow: 6px 6px 0 var(--rule); padding: 4px; }
+.menu.up { top: auto; bottom: 6px; }
+.menu div { padding: 9px 10px; }
+.menu div + div { border-top: 1px solid var(--rule); }
+.menu b { display: block; font: 600 13px/1.2 var(--f-display); font-stretch: 100%; }
+.menu span { display: block; margin-top: 3px; font-size: 12px; line-height: 1.35; color: var(--ink-3); }
+.rp-foot { display: flex; justify-content: space-between; gap: 16px; padding: 12px 16px; border-top: 1px solid var(--rule-2); background: var(--paper); }
+.rp-wrap-scroll { overflow-x: auto; }
+.rp-cta { grid-column: 4 / span 9; margin-top: 28px; display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; }
+
+/* FIG 05 integrations */
+.int-list { grid-column: 1 / span 5; border-top: 1px solid var(--ink); }
+.int-list button {
+  display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 16px; width: 100%; text-align: left; cursor: pointer;
+  background: none; border: 0; border-bottom: 1px solid var(--rule-2); padding: 14px 0 12px 20px; position: relative;
+}
+.int-list button::before { content: ''; position: absolute; left: 0; top: 18px; bottom: 16px; width: 4px; background: transparent; }
+.int-list button[aria-selected="true"]::before { background: var(--lamp); }
+.int-list .nm { font: 800 clamp(34px, 3.6vw, 52px)/1 var(--f-display); font-stretch: 100%; letter-spacing: -.035em; color: var(--ink-3); transition: color .2s; }
+.int-list button[aria-selected="true"] .nm, .int-list button:hover .nm { color: var(--ink); }
+.int-list .ds { font: 500 11px/1.4 var(--f-mono); letter-spacing: .05em; text-transform: uppercase; color: var(--ink-3); text-align: right; }
+.int-panel { grid-column: 7 / span 6; min-width: 0; }
+.code { border: 1px solid var(--ink); background: var(--paper-2); }
+.code + .code { margin-top: 16px; }
+.code-h { display: flex; justify-content: space-between; align-items: center; padding: 0 0 0 14px; height: 40px; border-bottom: 1px solid var(--rule-2); }
+.code-h .copy { border-left: 1px solid var(--rule-2); min-width: 76px; }
+.code pre { margin: 0; padding: 16px 0; overflow-x: auto; font: 400 13px/1.75 var(--f-mono); font-stretch: 87.5%; counter-reset: ln; }
+.code pre span.ln { display: block; padding: 0 16px 0 0; }
+.code pre span.ln::before { counter-increment: ln; content: counter(ln, decimal-leading-zero); display: inline-block; width: 44px; padding-right: 14px; text-align: right; color: var(--ink-3); opacity: .7; }
+.c-f { color: var(--lamp); } .c-c { color: var(--ink-3); } .c-k { font-weight: 600; } .c-s { color: var(--ink-2); }
+.exits { display: grid; grid-template-columns: 1fr 1fr; margin-top: 16px; border: 1px solid var(--ink); }
+.exits div { padding: 14px; }
+.exits div + div { border-left: 1px solid var(--ink); }
+.exits .num { font-size: 64px; display: block; }
+.exits p { margin: 10px 0 0; font-size: 14px; color: var(--ink-2); }
+.int-note { margin-top: 16px; color: var(--ink-2); font-size: 15px; max-width: 40em; }
+[hidden] { display: none !important; }
+
+/* FIG 06 spec */
+.spec-intro { grid-column: 1 / span 4; }
+.spec-big { font: 800 clamp(120px, 16vw, 240px)/.8 var(--f-display); font-stretch: 75%; letter-spacing: -.03em; margin: 48px 0 0; }
+.spec-big + .lbl { margin-top: 14px; }
+.spec { grid-column: 6 / span 7; margin: 0; border-top: 1px solid var(--ink); }
+.spec > div { display: grid; grid-template-columns: 52px 200px minmax(0, 1fr); gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--rule-2); align-items: baseline; }
+.spec .no { font: 500 11px/1 var(--f-mono); color: var(--ink-3); }
+.spec dt { font: 700 18px/1.25 var(--f-display); font-stretch: 100%; letter-spacing: -.01em; }
+.spec dd { margin: 0; color: var(--ink-2); }
+
+/* FIG 07 community */
+.fund { align-items: end; }
+.fund-h { grid-column: 1 / span 8; }
+.fund-h .h2 { font-size: clamp(44px, 5.6vw, 88px); }
+.fund-a { grid-column: 10 / span 3; }
+.fund-a p { margin: 0 0 20px; color: var(--ink-2); }
+.explore { grid-column: 1 / -1; margin-top: clamp(56px, 7vw, 96px); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: var(--gap); border-top: 1px solid var(--ink); }
+.explore a { display: block; text-decoration: none; padding: 16px 0 6px; border-right: 1px solid var(--rule); padding-right: var(--gap); }
+.explore a:last-child { border-right: 0; }
+.explore b { display: flex; justify-content: space-between; font: 700 20px/1.2 var(--f-display); font-stretch: 100%; letter-spacing: -.01em; }
+.explore span { display: block; margin-top: 8px; color: var(--ink-2); font-size: 15px; }
+.explore a:hover b { color: var(--lamp); }
+
+/* footer */
+.foot { border-top: 1px solid var(--ink); padding: 0 0 28px; }
+.foot-word { padding: clamp(28px, 4vw, 56px) 0 clamp(20px, 3vw, 36px); }
+.foot-word svg { width: 100%; height: auto; overflow: visible; }
+.foot-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; border-top: 1px solid var(--rule-2); padding-top: 14px; }
+.foot-row nav { display: flex; flex-wrap: wrap; gap: 20px; }
+.foot-row a { text-decoration: none; }
+.foot-row a:hover { text-decoration: underline; }
+
+/* responsive */
+@media (max-width: 1100px) {
+  .nav { display: none; }
+  .hero-copy { grid-column: 1 / -1; }
+  .display { font-size: clamp(52px, 9vw, 96px); }
+  .gauge-fig { grid-column: 1 / -1; margin-top: 32px; }
+  .c-disc { grid-column: 1 / span 6; } .c-work { grid-column: 7 / span 6; }
+  .c-chan { grid-column: 1 / span 6; } .c-key { grid-column: 7 / span 6; }
+  .c-chan { border-left: 0 !important; margin-left: 0 !important; padding-left: 0 !important; border-top: 1px solid var(--rule); }
+  .c-key { border-top: 1px solid var(--rule); }
+  .bc-intro { grid-column: 1 / -1; }
+  .bc-counts { grid-column: 1 / -1; margin-top: 40px; }
+  .steps { grid-template-columns: 1fr; }
+  .step { display: grid; grid-template-columns: 56px minmax(0, 1fr); column-gap: 8px; }
+  .step > :not(.seg) { grid-column: 2; padding: 0; }
+  .step .tr::before { left: 0; right: 0; }
+  .step .tr { margin-bottom: 56px; }
+  .step:last-child .tr { margin-bottom: 0; }
+  .step .num { font-size: 64px; }
+  .step h3 { margin-top: 14px; }
+  .seg { grid-column: 1; grid-row: 1 / span 5; height: auto; margin: 0; padding: 22px 0 6px; flex-direction: column; align-items: flex-start; border-bottom: 0; border-left: 1px solid var(--ink); }
+  .seg::before { left: -7px; top: 0; bottom: auto; width: calc(100% + 7px); border-left: 0; border-top: 1px solid var(--ink); }
+  .step:last-child .seg::after { right: auto; left: -6px; bottom: -8px; border: 5.5px solid transparent; border-top: 9px solid var(--ink); border-bottom: 0; }
+  .seg i { height: 3px; width: calc(var(--h) * 100%); }
+  .seg-l { display: none; }
+  .rp-notes { grid-column: 1 / -1; }
+  .rp-notes ol { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--gap); }
+  .rp { grid-column: 1 / -1; margin-top: 28px; }
+  .rp-cta { grid-column: 1 / -1; }
+  .int-list { grid-column: 1 / -1; }
+  .int-panel { grid-column: 1 / -1; margin-top: 32px; }
+  .spec-intro { grid-column: 1 / -1; }
+  .spec-big { margin-top: 24px; }
+  .spec { grid-column: 1 / -1; margin-top: 40px; }
+  .fund-h { grid-column: 1 / -1; }
+  .fund-a { grid-column: 1 / span 8; margin-top: 28px; }
+  .explore { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .explore a:nth-child(2) { border-right: 0; }
+  .explore a:nth-child(n+3) { border-top: 1px solid var(--rule); }
+}
+@media (max-width: 680px) {
+  .top-row { gap: 12px; height: 60px; }
+  .brand { width: 156px; }
+  .gh, .top-actions .btn { display: none; }
+  .sec-head .lbl:nth-child(1) { grid-column: 1 / span 4; }
+  .sec-head .lbl:nth-child(2) { grid-column: 5 / span 8; }
+  .sec-head .lbl:nth-child(3) { display: none; }
+  .display { font-size: clamp(44px, 13.4vw, 64px); margin-top: 20px; }
+  .lede, .body-l { font-size: 17px; }
+  .cmd code { font-size: 12px; font-stretch: 75%; padding: 0 10px; }
+  #gauge text, #gauge .stat { font-size: 17px; }
+  .rp-table .pg { font-size: 12px; max-width: 128px; overflow: hidden; text-overflow: ellipsis; }
+  .rp-table td, .rp-table th { padding-left: 8px !important; padding-right: 8px !important; }
+  .scores { gap: 4px !important; }
+  .sc .v { font-size: 13px; }
+  #gauge .an-t, #gauge .an-s { font-size: 19px; }
+  .rp .callout, .rp-notes .callout { display: none !important; }
+  .rp-notes li { grid-template-columns: 1fr; }
+  .sc { position: relative; width: 30px; height: 30px; }
+  .sc svg { width: 30px; height: 30px; }
+  .sc > span:last-child { position: absolute; inset: 0; display: grid; place-items: center; }
+  .sc .v { font-size: 10.5px !important; }
+  .single .sc { width: auto; height: auto; }
+  .single .sc > span:last-child { position: static; }
+  .single .trk { width: 80px; }
+  .rp-tabs { flex-wrap: wrap; overflow: visible; }
+  .rp-tabs button { padding: 11px 10px 9px; font-size: 13px; }
+  .code pre { font-size: 11.5px; }
+  .code pre span.ln::before { width: 32px; padding-right: 10px; }
+  .copy { min-width: 64px; padding: 0 10px; }
+  .readout .cell { grid-column: 1 / -1 !important; border-left: 0 !important; margin-left: 0 !important; padding-left: 0 !important; }
+  .readout .cell + .cell { border-top: 1px solid var(--rule); }
+  .bc-counts .num { font-size: 72px; }
+  .bc-counts .lbl { font-size: 10px; letter-spacing: .03em; }
+  .dims span { display: none; }
+  .rp-notes ol { grid-template-columns: 1fr; }
+  .rp-bar .meta, .rp-tool .meta { display: none; }
+  .scores { gap: 10px; }
+  .sc .k { display: none; }
+  .rp-table td, .rp-table th { padding-left: 10px; padding-right: 10px; }
+  .menu { right: 40px; width: 214px; }
+  .int-list .ds { display: none; }
+  .exits .num { font-size: 48px; }
+  .spec > div { grid-template-columns: 36px minmax(0, 1fr); }
+  .spec dd { grid-column: 2; }
+  .fund-a { grid-column: 1 / -1; }
+  .explore { grid-template-columns: 1fr; }
+  .explore a { border-right: 0; }
+  .explore a + a { border-top: 1px solid var(--rule); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-row">
+    <a class="brand" href="https://unlighthouse.dev/" aria-label="Unlighthouse home"><svg viewBox="0 -760 6278 960" role="img" aria-label="Unlighthouse"><g transform="translate(0 -537) scale(6.39286)"><path d="M0 0H28V44A12 12 0 0 0 52 44V0H80V84H40A40 40 0 0 1 0 44Z" class="bk-ink"/><path d="M42.6 25.77L49.15 -5.04A44 44 0 0 1 79.55 18.71L51.23 32.52A12.5 12.5 0 0 0 42.6 25.77Z" class="bk-beam" stroke-width="7" paint-order="stroke" stroke-linejoin="round"/><circle cx="40" cy="38" r="9.5" class="bk-lamp"/></g><path d="M762.43 0L597.43 0L597.43 -537L745.43 -537L762.43 -464L769.43 -464Q799.43 -504 844.93 -525Q890.43 -546 946.43 -546L946.43 -546Q1013.43 -546 1057.93 -521.5Q1102.43 -497 1124.93 -452Q1147.43 -407 1147.43 -343L1147.43 -343L1147.43 0L982.43 0L982.43 -320Q982.43 -353 970.93 -376Q959.43 -399 937.43 -410.5Q915.43 -422 882.43 -422L882.43 -422Q842.43 -422 811.93 -404Q781.43 -386 762.43 -357L762.43 -357L762.43 0ZM1378.43 0L1213.43 0L1213.43 -729L1378.43 -729L1378.43 0ZM1616.43 0L1451.43 0L1451.43 -537L1616.43 -537L1616.43 0ZM1616.43 -605L1451.43 -605L1451.43 -737L1616.43 -737L1616.43 -605ZM1946.43 177L1946.43 177Q1835.43 177 1767.43 133.5Q1699.43 90 1687.43 15L1687.43 15L1847.43 15Q1854.43 42 1880.93 54Q1907.43 66 1947.43 66L1947.43 66Q1986.43 66 2012.43 55Q2038.43 44 2051.43 23Q2064.43 2 2064.43 -27L2064.43 -27L2064.43 -108L2057.43 -108Q2034.43 -69 1989.43 -48.5Q1944.43 -28 1891.43 -28L1891.43 -28Q1826.43 -28 1777.43 -56Q1728.43 -84 1701.43 -135Q1674.43 -186 1674.43 -255L1674.43 -255L1674.43 -320Q1674.43 -388 1701.93 -439Q1729.43 -490 1779.43 -518Q1829.43 -546 1895.43 -546L1895.43 -546Q1949.43 -546 1992.93 -525.5Q2036.43 -505 2058.43 -470L2058.43 -470L2066.43 -470L2078.43 -537L2229.43 -537L2229.43 -41Q2229.43 31 2194.43 79.5Q2159.43 128 2095.93 152.5Q2032.43 177 1946.43 177ZM1955.43 -146L1955.43 -146Q1993.43 -146 2021.93 -163Q2050.43 -180 2064.43 -210L2064.43 -210L2064.43 -365Q2050.43 -395 2021.93 -411.5Q1993.43 -428 1955.43 -428L1955.43 -428Q1922.43 -428 1897.93 -416.5Q1873.43 -405 1859.43 -382.5Q1845.43 -360 1845.43 -328L1845.43 -328L1845.43 -248Q1845.43 -216 1859.43 -193Q1873.43 -170 1898.43 -158Q1923.43 -146 1955.43 -146ZM2467.43 0L2302.43 0L2302.43 -729L2467.43 -729L2467.43 -464L2474.43 -464Q2504.43 -504 2549.93 -525Q2595.43 -546 2651.43 -546L2651.43 -546Q2718.43 -546 2762.93 -521.5Q2807.43 -497 2829.93 -452Q2852.43 -407 2852.43 -343L2852.43 -343L2852.43 0L2687.43 0L2687.43 -320Q2687.43 -353 2675.93 -376Q2664.43 -399 2642.43 -410.5Q2620.43 -422 2587.43 -422L2587.43 -422Q2547.43 -422 2516.93 -404Q2486.43 -386 2467.43 -357L2467.43 -357L2467.43 0ZM3253.43 0L3087.43 0Q3038.43 0 3009.93 -24Q2981.43 -48 2981.43 -98L2981.43 -98L2981.43 -416L2894.43 -416L2894.43 -537L2981.43 -537L2981.43 -683L3146.43 -683L3146.43 -537L3250.43 -537L3250.43 -416L3146.43 -416L3146.43 -128L3253.43 -128L3253.43 0ZM3474.43 0L3309.43 0L3309.43 -729L3474.43 -729L3474.43 -464L3481.43 -464Q3511.43 -504 3556.93 -525Q3602.43 -546 3658.43 -546L3658.43 -546Q3725.43 -546 3769.93 -521.5Q3814.43 -497 3836.93 -452Q3859.43 -407 3859.43 -343L3859.43 -343L3859.43 0L3694.43 0L3694.43 -320Q3694.43 -353 3682.93 -376Q3671.43 -399 3649.43 -410.5Q3627.43 -422 3594.43 -422L3594.43 -422Q3554.43 -422 3523.93 -404Q3493.43 -386 3474.43 -357L3474.43 -357L3474.43 0ZM4196.43 10L4196.43 10Q4129.43 10 4075.93 -7.5Q4022.43 -25 3984.93 -58.5Q3947.43 -92 3927.43 -139Q3907.43 -186 3907.43 -245L3907.43 -245L3907.43 -293Q3907.43 -371 3942.43 -428Q3977.43 -485 4042.43 -516Q4107.43 -547 4196.43 -547L4196.43 -547Q4263.43 -547 4316.93 -529.5Q4370.43 -512 4407.93 -478.5Q4445.43 -445 4465.93 -398Q4486.43 -351 4486.43 -293L4486.43 -293L4486.43 -245Q4486.43 -167 4450.93 -109.5Q4415.43 -52 4350.93 -21Q4286.43 10 4196.43 10ZM4196.43 -111L4196.43 -111Q4233.43 -111 4259.93 -123.5Q4286.43 -136 4300.93 -159.5Q4315.43 -183 4315.43 -212L4315.43 -212L4315.43 -325Q4315.43 -356 4300.93 -379Q4286.43 -402 4259.93 -414.5Q4233.43 -427 4196.43 -427L4196.43 -427Q4160.43 -427 4133.43 -414.5Q4106.43 -402 4091.93 -379Q4077.43 -356 4077.43 -325L4077.43 -325L4077.43 -212Q4077.43 -183 4091.93 -159.5Q4106.43 -136 4133.43 -123.5Q4160.43 -111 4196.43 -111ZM4918.43 -537L5083.43 -537L5083.43 0L4935.43 0L4918.43 -73L4911.43 -73Q4881.43 -33 4835.93 -12Q4790.43 9 4734.43 9L4734.43 9Q4668.43 9 4623.43 -15.5Q4578.43 -40 4555.93 -85.5Q4533.43 -131 4533.43 -194L4533.43 -194L4533.43 -537L4698.43 -537L4698.43 -217Q4698.43 -184 4709.93 -161.5Q4721.43 -139 4743.93 -127Q4766.43 -115 4798.43 -115L4798.43 -115Q4838.43 -115 4868.93 -133Q4899.43 -151 4918.43 -180L4918.43 -180L4918.43 -537ZM5391.43 10L5391.43 10Q5307.43 10 5251.93 -11.5Q5196.43 -33 5166.43 -71.5Q5136.43 -110 5130.43 -161L5130.43 -161L5295.43 -161Q5297.43 -136 5309.43 -120Q5321.43 -104 5342.43 -95.5Q5363.43 -87 5393.43 -87L5393.43 -87Q5437.43 -87 5458.43 -102Q5479.43 -117 5479.43 -143L5479.43 -143Q5479.43 -170 5458.93 -183.5Q5438.43 -197 5397.43 -207L5397.43 -207L5311.43 -223Q5250.43 -236 5214.43 -257.5Q5178.43 -279 5162.43 -309.5Q5146.43 -340 5146.43 -378L5146.43 -378Q5146.43 -433 5178.43 -470.5Q5210.43 -508 5264.93 -527.5Q5319.43 -547 5387.43 -547L5387.43 -547Q5459.43 -547 5513.43 -528Q5567.43 -509 5599.93 -472.5Q5632.43 -436 5637.43 -384L5637.43 -384L5480.43 -384Q5478.43 -408 5465.93 -423Q5453.43 -438 5433.43 -445Q5413.43 -452 5389.43 -452L5389.43 -452Q5363.43 -452 5345.43 -445.5Q5327.43 -439 5318.93 -427.5Q5310.43 -416 5310.43 -400L5310.43 -400Q5310.43 -376 5328.93 -362.5Q5347.43 -349 5389.43 -339L5389.43 -339L5471.43 -326Q5523.43 -315 5563.43 -295.5Q5603.43 -276 5626.43 -243.5Q5649.43 -211 5649.43 -159L5649.43 -159Q5649.43 -103 5616.93 -65.5Q5584.43 -28 5526.43 -9Q5468.43 10 5391.43 10ZM5970.43 10L5970.43 10Q5904.43 10 5851.43 -7.5Q5798.43 -25 5760.43 -58Q5722.43 -91 5702.43 -138.5Q5682.43 -186 5682.43 -245L5682.43 -245L5682.43 -293Q5682.43 -371 5717.93 -428Q5753.43 -485 5818.43 -516Q5883.43 -547 5970.43 -547L5970.43 -547Q6034.43 -547 6085.93 -529.5Q6137.43 -512 6174.43 -479Q6211.43 -446 6231.43 -399.5Q6251.43 -353 6251.43 -296L6251.43 -296L6251.43 -228L5852.43 -228L5852.43 -202Q5852.43 -173 5866.93 -150Q5881.43 -127 5908.43 -114.5Q5935.43 -102 5972.43 -102L5972.43 -102Q6017.43 -102 6046.43 -119Q6075.43 -136 6083.43 -167L6083.43 -167L6245.43 -167Q6237.43 -112 6199.43 -72.5Q6161.43 -33 6102.43 -11.5Q6043.43 10 5970.43 10ZM5852.43 -336L5852.43 -322L6083.43 -322L6083.43 -340Q6083.43 -369 6069.43 -390.5Q6055.43 -412 6030.43 -424Q6005.43 -436 5970.43 -436L5970.43 -436Q5933.43 -436 5906.93 -423.5Q5880.43 -411 5866.43 -388.5Q5852.43 -366 5852.43 -336L5852.43 -336Z" class="bk-ink"/></svg></a>
+    <nav class="nav" aria-label="Primary">
+      <a href="https://unlighthouse.dev/guide/getting-started/installation">Guide</a>
+      <a href="https://unlighthouse.dev/integrations/cli">Integrations</a>
+      <a href="https://unlighthouse.dev/learn-lighthouse">Learn Lighthouse</a>
+      <a href="https://unlighthouse.dev/tools">Tools</a>
+    </nav>
+    <div class="top-actions">
+      <a class="gh" href="https://github.com/harlan-zw/unlighthouse">GitHub</a>
+      <button class="theme" type="button" id="theme" aria-label="Toggle dark theme" aria-pressed="false"><span class="tl">Light</span><span class="td">Dark</span></button>
+      <a class="btn btn-lamp sm" href="https://unlighthouse.dev/guide/getting-started/installation">Get started</a>
+    </div>
+  </div>
+  <div class="ruler" aria-hidden="true"></div>
+</header>
+
+<main>
+<section class="hero wrap" aria-labelledby="h1">
+  <div class="grid hero-grid">
+    <div class="hero-copy">
+      <p class="lbl kicker"><span class="idx">Fig. 01</span><span>Site gauge, live scan</span></p>
+      <h1 class="display" id="h1">Lighthouse for your entire site<span class="dot">.</span></h1>
+      <p class="lede">Unlighthouse is a free, open-source CLI that runs Google Lighthouse on every page of your site in parallel. It auto-discovers URLs and delivers one unified performance report.</p>
+      <div class="cmd">
+        <code><span class="ps">$</span>npx unlighthouse <span class="fl">--site</span> example.com</code>
+        <button class="copy" type="button" data-copy="npx unlighthouse --site example.com">Copy</button>
+      </div>
+      <div class="cta">
+        <a class="btn btn-lamp" href="https://unlighthouse.dev/guide/getting-started/installation">Get started <span class="arrow" aria-hidden="true">&rarr;</span></a>
+        <a class="tlink" href="https://unlighthouse-demo.netlify.app/">View the demo report <span class="arrow" aria-hidden="true">&nearr;</span></a>
+      </div>
+      <dl class="specline">
+        <div><dt>Runtime</dt><dd>Node 22+</dd></div>
+        <div><dt>Licence</dt><dd>MIT</dd></div>
+        <div><dt>Config</dt><dd>Zero</dd></div>
+      </dl>
+    </div>
+    <figure class="gauge-fig">
+      <svg id="gauge" viewBox="0 0 900 760" role="img" aria-labelledby="gauge-t gauge-d">
+        <title id="gauge-t">Site gauge, example data</title>
+        <desc id="gauge-d">A ring of 118 route ticks. Unlighthouse audits routes from one shared queue with four workers. Each finished tick takes the length and colour of its score.</desc>
+      </svg>
+    </figure>
+  </div>
+
+  <div class="grid readout" aria-label="Scan readout, example data">
+    <div class="cell c-disc">
+      <p class="lbl"><span>Discovery</span><em>example data</em></p>
+      <ol class="log" id="disc">
+        <li data-t="0.2"><span class="ck">&check;</span><span>robots.txt <span class="m">&middot; 1 sitemap</span></span></li>
+        <li data-t="1.6"><span class="ck">&check;</span><span>sitemap.xml <span class="m">&middot; 96 URLs</span></span></li>
+        <li data-t="2.8"><span class="ck">&check;</span><span>internal links <span class="m">&middot; 22 more URLs</span></span></li>
+        <li data-t="3.0"><span class="ck">&check;</span><span>sampled /blog/[slug] <span class="m">&middot; 5 of 41</span></span></li>
+      </ol>
+    </div>
+    <div class="cell c-work">
+      <p class="lbl"><span>Workers</span><em>4 workers, one shared queue</em></p>
+      <ol class="wk" id="workers" aria-live="off"></ol>
+    </div>
+    <div class="cell c-chan">
+      <p class="lbl"><span>Category</span></p>
+      <div class="chan" role="radiogroup" aria-label="Category shown on the gauge and barcode">
+        <label><input type="radio" name="chan" value="performance" checked><span>Performance</span></label>
+        <label><input type="radio" name="chan" value="accessibility"><span>Accessibility</span></label>
+        <label><input type="radio" name="chan" value="best-practices"><span>Best Practices</span></label>
+        <label><input type="radio" name="chan" value="seo"><span>SEO</span></label>
+      </div>
+    </div>
+    <div class="cell c-key">
+      <p class="lbl"><span>Key</span><em>1 tick = 1 route</em></p>
+      <ul class="key">
+        <li><i class="h"></i>Found, waiting in the queue</li>
+        <li><i class="l"></i>Under audit</li>
+        <li><span class="bands"><i class="f"></i><i class="a"></i><i class="p"></i></span>Audited: 0&ndash;49, 50&ndash;89, 90&ndash;100</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="sec wrap" aria-labelledby="h-bc" style="margin-top: clamp(56px, 7vw, 104px)">
+  <div class="grid sec-head"><p class="lbl">Fig. 02</p><p class="lbl">Score barcode</p><p class="lbl">Example data</p></div>
+  <div class="grid">
+    <div class="bc-intro">
+      <h2 class="h2" id="h-bc">Every page in one reading.</h2>
+      <p class="body-l">The same scan, sorted by score. Each bar is one route. Unlighthouse puts every page in one unified report, so the slow template stands out at once.</p>
+    </div>
+    <div class="bc-counts" id="bc-counts" aria-live="polite">
+      <div><p class="lbl">Fail &middot; 0&ndash;49</p><span class="num t-fail" data-band="fail">0</span></div>
+      <div><p class="lbl">Average &middot; 50&ndash;89</p><span class="num t-avg" data-band="avg">0</span></div>
+      <div><p class="lbl">Pass &middot; 90&ndash;100</p><span class="num t-pass" data-band="pass">0</span></div>
+    </div>
+    <div class="barcode-wrap">
+      <div class="dims" id="dims" aria-hidden="true"></div>
+      <div class="barcode" role="img" id="barcode" aria-label="Score barcode, example data">
+        <div class="gl" style="bottom:90%"><span>90</span></div>
+        <div class="gl" style="bottom:50%"><span>50</span></div>
+        <div class="bars" id="bars"></div>
+      </div>
+      <div class="bc-axis"><span class="lbl">Route 1, lowest score</span><span class="lbl" id="bc-chan">Performance</span><span class="lbl">Route 118, highest</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec wrap" aria-labelledby="h-how">
+  <div class="grid sec-head"><p class="lbl">Fig. 03</p><p class="lbl">Signal path</p><p class="lbl">One command, four stages</p></div>
+  <div class="grid">
+    <h2 class="h2" id="h-how" style="grid-column: 1 / span 8; margin-bottom: clamp(40px, 5vw, 72px)">From one URL to every route.</h2>
+    <div class="steps">
+      <div class="step">
+        <span class="num">01</span>
+        <div class="seg" aria-hidden="true"><span class="seg-l">Found</span></div>
+        <h3>Discover</h3>
+        <p>Auto crawling discovers URLs via robots.txt, sitemap.xml, and internal links.</p>
+        <p class="tr"><b>robots.txt</b> &rarr; <b>sitemap.xml</b> &rarr; <b>links</b></p>
+      </div>
+      <div class="step">
+        <span class="num">02</span>
+        <div class="seg" aria-hidden="true"><span class="seg-l">Sampled</span></div>
+        <h3>Sample</h3>
+        <p>Smart sampling auto-samples dynamic routes to reduce scan time.</p>
+        <p class="tr"><b>/blog/[slug]</b> &middot; a few routes stand in for many</p>
+      </div>
+      <div class="step">
+        <span class="num">03</span>
+        <div class="seg" aria-hidden="true"><span class="seg-l">Under audit</span></div>
+        <h3>Audit</h3>
+        <p>Parallel scans: threaded workers with opportunistic throttling for fast audits.</p>
+        <p class="tr"><b>Google Lighthouse</b> on every page, in parallel</p>
+      </div>
+      <div class="step">
+        <span class="num">04</span>
+        <div class="seg" aria-hidden="true"><span class="seg-l">Scored</span></div>
+        <h3>Report</h3>
+        <p>One unified report. Search, sort, and re-scan pages in the Vite-powered client.</p>
+        <p class="tr"><b>Interactive dashboard</b>, JSON, CSV, static HTML</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec wrap" aria-labelledby="h-rp">
+  <div class="grid sec-head"><p class="lbl">Fig. 04</p><p class="lbl">The report</p><p class="lbl">Example data</p></div>
+  <div class="grid">
+    <div class="rp-notes">
+      <h2 class="h2" id="h-rp">The report.</h2>
+      <p class="body-l" style="font-size:17px">Every route, every Lighthouse category, in one table that updates while the scan runs.</p>
+      <ol>
+        <li><span class="callout">1</span><span><b>Five tabs</b>Overview, Performance, Accessibility, Best Practices, SEO.</span></li>
+        <li><span class="callout">2</span><span><b>Score</b>Four Lighthouse category scores per page on the Overview tab.</span></li>
+        <li><span class="callout">3</span><span><b>Search and sort</b>Find a route, sort any column, re-scan pages.</span></li>
+        <li><span class="callout">4</span><span><b>Actions</b>Open the Lighthouse report, rescan the route, or run PageSpeed Insights.</span></li>
+      </ol>
+    </div>
+    <div class="rp" id="report">
+      <span class="callout" style="left:-11px; top:68px">1</span>
+            <span class="callout" style="left:-11px; top:124px">3</span>
+      <div class="rp-bar">
+        <svg viewBox="0 0 100 100" aria-hidden="true"><g transform="translate(12.75 13.89) scale(0.94772)"><path d="M0 0H25V46A13 13 0 0 0 51 46V0H76V84H38A38 38 0 0 1 0 46Z" class="bk-ink"/><path d="M40.54 29.81L49.13 -4.63A46 46 0 0 1 78.62 18.4L47.27 35.07A10.5 10.5 0 0 0 40.54 29.81Z" class="bk-beam" stroke-width="6" paint-order="stroke" stroke-linejoin="round"/><circle cx="38" cy="40" r="7.5" class="bk-lamp"/></g></svg>
+        <span class="site">example.com</span>
+        <span class="meta">118 routes &middot; example data</span>
+        <span class="btn btn-ink sm" aria-hidden="true">Rescan Site</span>
+      </div>
+      <div class="rp-tabs" role="tablist" aria-label="Report tabs">
+        <button role="tab" aria-selected="true" data-tab="overview">Overview</button>
+        <button role="tab" aria-selected="false" data-tab="performance">Performance</button>
+        <button role="tab" aria-selected="false" data-tab="accessibility">Accessibility</button>
+        <button role="tab" aria-selected="false" data-tab="best-practices">Best Practices</button>
+        <button role="tab" aria-selected="false" data-tab="seo">SEO</button>
+      </div>
+      <div class="rp-tool">
+        <span class="rp-search"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><circle cx="5" cy="5" r="4" fill="none" stroke="currentColor"/><path d="M8 8l3 3" stroke="currentColor"/></svg>Search</span>
+        <span class="meta" id="rp-count">Showing 7 of 118</span>
+      </div>
+      <div class="rp-wrap-scroll">
+        <table class="rp-table">
+          <thead><tr><th>Page</th><th class="sorted" id="rp-score-h"><span class="callout in" aria-hidden="true">2</span>Score</th><th style="text-align:right"><span class="callout in" aria-hidden="true">4</span>Actions</th></tr></thead>
+          <tbody id="rp-rows"></tbody>
+        </table>
+      </div>
+      <div class="rp-foot"><span class="lbl">Example data</span><span class="lbl">Vite-powered client</span></div>
+    </div>
+    <div class="rp-cta">
+      <a class="btn btn-ink" href="https://unlighthouse-demo.netlify.app/">Open the live demo report <span class="arrow" aria-hidden="true">&nearr;</span></a>
+      <span class="lbl">A real report, built with --build-static</span>
+    </div>
+  </div>
+</section>
+
+<section class="sec wrap" aria-labelledby="h-int">
+  <div class="grid sec-head"><p class="lbl">Fig. 05</p><p class="lbl">Integrations</p><p class="lbl">Snippets from the docs</p></div>
+  <div class="grid">
+    <h2 class="h2" id="h-int" style="grid-column: 1 / span 8; margin-bottom: clamp(40px, 5vw, 72px)">Run it where you already work.</h2>
+    <div class="int-list" role="tablist" aria-label="Integrations">
+      <button role="tab" aria-selected="true" aria-controls="p-cli" id="t-cli"><span class="nm">CLI</span><span class="ds">One-time run</span></button>
+      <button role="tab" aria-selected="false" aria-controls="p-ci" id="t-ci" tabindex="-1"><span class="nm">CI</span><span class="ds">Budgets, exit codes</span></button>
+      <button role="tab" aria-selected="false" aria-controls="p-nuxt" id="t-nuxt" tabindex="-1"><span class="nm">Nuxt</span><span class="ds">Module</span></button>
+      <button role="tab" aria-selected="false" aria-controls="p-vite" id="t-vite" tabindex="-1"><span class="nm">Vite</span><span class="ds">Plugin</span></button>
+      <button role="tab" aria-selected="false" aria-controls="p-webpack" id="t-webpack" tabindex="-1"><span class="nm">Webpack</span><span class="ds">Plugin</span></button>
+    </div>
+    <div class="int-panel">
+      <div role="tabpanel" id="p-cli" aria-labelledby="t-cli">
+        <div class="code"><div class="code-h"><span class="lbl">Terminal &middot; no install</span><button class="copy" data-copy="npx unlighthouse --site example.com">Copy</button></div>
+<pre><span class="ln">npx unlighthouse <span class="c-f">--site</span> example.com</span></pre></div>
+        <div class="code"><div class="code-h"><span class="lbl">unlighthouse.config.ts</span><button class="copy" data-copy-pre>Copy</button></div>
+<pre><span class="ln"><span class="c-k">import</span> { defineUnlighthouseConfig } <span class="c-k">from</span> <span class="c-s">'unlighthouse/config'</span></span><span class="ln"></span><span class="ln"><span class="c-k">export default</span> defineUnlighthouseConfig({</span><span class="ln">  site: <span class="c-s">'example.com'</span>,</span><span class="ln">  debug: <span class="c-k">true</span>,</span><span class="ln">  scanner: {</span><span class="ln">    device: <span class="c-s">'desktop'</span>,</span><span class="ln">  },</span><span class="ln">})</span></pre></div>
+        <p class="int-note">Install globally with <code class="mono">npm install -g unlighthouse</code>. Configure with CLI arguments or a config file.</p>
+      </div>
+      <div role="tabpanel" id="p-ci" aria-labelledby="t-ci" hidden>
+        <div class="code"><div class="code-h"><span class="lbl">CI &middot; bash</span><button class="copy" data-copy-pre>Copy</button></div>
+<pre><span class="ln">npm install <span class="c-f">-g</span> @unlighthouse/cli puppeteer</span><span class="ln">unlighthouse-ci <span class="c-f">--site</span> https://staging.example.com <span class="c-f">--budget</span> 80</span></pre></div>
+        <div class="exits">
+          <div><span class="num">0</span><p class="lbl" style="margin-top:12px">Exit code</p><p>All pages passed.</p></div>
+          <div><span class="num">1</span><p class="lbl" style="margin-top:12px">Exit code</p><p>Budget failed.</p></div>
+        </div>
+        <p class="int-note">That is the entire contract. Wire this single command into GitHub Actions, GitLab CI, CircleCI, or any pipeline that runs bash.</p>
+      </div>
+      <div role="tabpanel" id="p-nuxt" aria-labelledby="t-nuxt" hidden>
+        <div class="code"><div class="code-h"><span class="lbl">Install</span><button class="copy" data-copy-pre>Copy</button></div>
+<pre><span class="ln">npm install <span class="c-f">-D</span> @unlighthouse/nuxt</span></pre></div>
+        <div class="code"><div class="code-h"><span class="lbl">nuxt.config.ts</span><button class="copy" data-copy-pre>Copy</button></div>
+<pre><span class="ln"><span class="c-k">export default</span> defineNuxtConfig({</span><span class="ln">  modules: [</span><span class="ln">    <span class="c-s">'@unlighthouse/nuxt'</span>,</span><span class="ln">  ],</span><span class="ln">})</span></pre></div>
+        <p class="int-note">Run your Nuxt app. It gives you the URL of the client; Unlighthouse starts once you visit it.</p>
+      </div>
+      <div role="tabpanel" id="p-vite" aria-labelledby="t-vite" hidden>
+        <div class="code"><div class="code-h"><span class="lbl">Install</span><button class="copy" data-copy-pre>Copy</button></div>
+<pre><span class="ln">npm install <span class="c-f">-D</span> @unlighthouse/vite</span></pre></div>
+        <div class="code"><div class="code-h"><span class="lbl">vite.config.ts</span><button class="copy" data-copy-pre>Copy</button></div>
+<pre><span class="ln"><span class="c-k">import</span> Unlighthouse <span class="c-k">from</span> <span class="c-s">'@unlighthouse/vite'</span></span><span class="ln"><span class="c-k">import</span> { defineConfig } <span class="c-k">from</span> <span class="c-s">'vite'</span></span><span class="ln"></span><span class="ln"><span class="c-k">export default</span> defineConfig({</span><span class="ln">  plugins: [</span><span class="ln">    Unlighthouse({</span><span class="ln">      <span class="c-c">// config</span></span><span class="ln">    })</span><span class="ln">  ]</span><span class="ln">})</span></pre></div>
+      </div>
+      <div role="tabpanel" id="p-webpack" aria-labelledby="t-webpack" hidden>
+        <div class="code"><div class="code-h"><span class="lbl">Install</span><button class="copy" data-copy-pre>Copy</button></div>
+<pre><span class="ln">npm install <span class="c-f">-D</span> @unlighthouse/webpack</span></pre></div>
+        <div class="code"><div class="code-h"><span class="lbl">webpack.config.js</span><button class="copy" data-copy-pre>Copy</button></div>
+<pre><span class="ln"><span class="c-k">import</span> Unlighthouse <span class="c-k">from</span> <span class="c-s">'@unlighthouse/webpack'</span></span><span class="ln"></span><span class="ln"><span class="c-k">export default</span> {</span><span class="ln">  <span class="c-c">// ...</span></span><span class="ln">  plugins: [</span><span class="ln">    Unlighthouse({</span><span class="ln">      <span class="c-c">// config</span></span><span class="ln">    }),</span><span class="ln">  ],</span><span class="ln">}</span></pre></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec wrap" aria-labelledby="h-spec">
+  <div class="grid sec-head"><p class="lbl">Fig. 06</p><p class="lbl">Specification</p><p class="lbl">unlighthouse</p></div>
+  <div class="grid">
+    <div class="spec-intro">
+      <h2 class="h2" id="h-spec">What is in the box.</h2>
+      <p class="spec-big" aria-hidden="true">MIT</p>
+      <p class="lbl">Free and open source</p>
+    </div>
+    <dl class="spec">
+      <div><span class="no">S.01</span><dt>Parallel scans</dt><dd>Threaded workers with opportunistic throttling for fast audits.</dd></div>
+      <div><span class="no">S.02</span><dt>Auto crawling</dt><dd>Discovers URLs via robots.txt, sitemap.xml, and internal links.</dd></div>
+      <div><span class="no">S.03</span><dt>Smart sampling</dt><dd>Auto-samples dynamic routes to reduce scan time.</dd></div>
+      <div><span class="no">S.04</span><dt>Modern UI</dt><dd>Search, sort, and re-scan pages in the Vite-powered client.</dd></div>
+      <div><span class="no">S.05</span><dt>SEO insights</dt><dd>Titles, meta descriptions, share images, link analysis.</dd></div>
+      <div><span class="no">S.06</span><dt>A11y summary</dt><dd>Accessibility audit with contrast issue visualization.</dd></div>
+      <div><span class="no">S.07</span><dt>Budgets</dt><dd>One threshold for all pages in CI, or one per category in your config.</dd></div>
+      <div><span class="no">S.08</span><dt>Reports</dt><dd>Interactive dashboard, JSON, CSV, and a static HTML report you can host anywhere.</dd></div>
+      <div><span class="no">S.09</span><dt>Runtime</dt><dd>Node 22+. Zero config.</dd></div>
+    </dl>
+  </div>
+</section>
+
+<section class="sec wrap" aria-labelledby="h-fund">
+  <div class="grid sec-head"><p class="lbl">Fig. 07</p><p class="lbl">Community funded</p><p class="lbl">github.com/sponsors/harlan-zw</p></div>
+  <div class="grid fund">
+    <div class="fund-h"><h2 class="h2" id="h-fund">Free and open source, thanks to generous community sponsors.</h2></div>
+    <div class="fund-a">
+      <p>Unlighthouse is MIT licensed. Sponsors keep the lamp on.</p>
+      <a class="btn btn-lamp" href="https://github.com/sponsors/harlan-zw">Become a sponsor <span class="arrow" aria-hidden="true">&rarr;</span></a>
+    </div>
+    <nav class="explore" aria-label="Improve every page">
+      <a href="https://unlighthouse.dev/tools"><b>Performance Tools <span class="arrow">&rarr;</span></b><span>Test Core Web Vitals, inspect reports, and diagnose page weight.</span></a>
+      <a href="https://unlighthouse.dev/learn-lighthouse"><b>Learn Lighthouse <span class="arrow">&rarr;</span></b><span>Understand Lighthouse audits, metrics, and practical fixes.</span></a>
+      <a href="https://unlighthouse.dev/integrations/cli"><b>Integrations <span class="arrow">&rarr;</span></b><span>Run Unlighthouse from the CLI, CI, Nuxt, Vite, or Webpack.</span></a>
+      <a href="https://unlighthouse.dev/glossary"><b>Glossary <span class="arrow">&rarr;</span></b><span>Look up Core Web Vitals and Lighthouse terminology.</span></a>
+    </nav>
+  </div>
+</section>
+</main>
+
+<p class="sr-only" role="status" id="copy-status"></p>
+<footer class="foot wrap">
+  <div class="foot-word" aria-hidden="true"><svg viewBox="0 -760 6252 960" role="img" aria-label="Unlighthouse"><g transform="translate(0 -537) scale(6.39286)"><path d="M0 0H25V46A13 13 0 0 0 51 46V0H76V84H38A38 38 0 0 1 0 46Z" class="bk-ink"/><path d="M40.54 29.81L49.13 -4.63A46 46 0 0 1 78.62 18.4L47.27 35.07A10.5 10.5 0 0 0 40.54 29.81Z" class="bk-beam" stroke-width="6" paint-order="stroke" stroke-linejoin="round"/><circle cx="38" cy="40" r="7.5" class="bk-lamp"/></g><path d="M736.86 0L571.86 0L571.86 -537L719.86 -537L736.86 -464L743.86 -464Q773.86 -504 819.36 -525Q864.86 -546 920.86 -546L920.86 -546Q987.86 -546 1032.36 -521.5Q1076.86 -497 1099.36 -452Q1121.86 -407 1121.86 -343L1121.86 -343L1121.86 0L956.86 0L956.86 -320Q956.86 -353 945.36 -376Q933.86 -399 911.86 -410.5Q889.86 -422 856.86 -422L856.86 -422Q816.86 -422 786.36 -404Q755.86 -386 736.86 -357L736.86 -357L736.86 0ZM1352.86 0L1187.86 0L1187.86 -729L1352.86 -729L1352.86 0ZM1590.86 0L1425.86 0L1425.86 -537L1590.86 -537L1590.86 0ZM1590.86 -605L1425.86 -605L1425.86 -737L1590.86 -737L1590.86 -605ZM1920.86 177L1920.86 177Q1809.86 177 1741.86 133.5Q1673.86 90 1661.86 15L1661.86 15L1821.86 15Q1828.86 42 1855.36 54Q1881.86 66 1921.86 66L1921.86 66Q1960.86 66 1986.86 55Q2012.86 44 2025.86 23Q2038.86 2 2038.86 -27L2038.86 -27L2038.86 -108L2031.86 -108Q2008.86 -69 1963.86 -48.5Q1918.86 -28 1865.86 -28L1865.86 -28Q1800.86 -28 1751.86 -56Q1702.86 -84 1675.86 -135Q1648.86 -186 1648.86 -255L1648.86 -255L1648.86 -320Q1648.86 -388 1676.36 -439Q1703.86 -490 1753.86 -518Q1803.86 -546 1869.86 -546L1869.86 -546Q1923.86 -546 1967.36 -525.5Q2010.86 -505 2032.86 -470L2032.86 -470L2040.86 -470L2052.86 -537L2203.86 -537L2203.86 -41Q2203.86 31 2168.86 79.5Q2133.86 128 2070.36 152.5Q2006.86 177 1920.86 177ZM1929.86 -146L1929.86 -146Q1967.86 -146 1996.36 -163Q2024.86 -180 2038.86 -210L2038.86 -210L2038.86 -365Q2024.86 -395 1996.36 -411.5Q1967.86 -428 1929.86 -428L1929.86 -428Q1896.86 -428 1872.36 -416.5Q1847.86 -405 1833.86 -382.5Q1819.86 -360 1819.86 -328L1819.86 -328L1819.86 -248Q1819.86 -216 1833.86 -193Q1847.86 -170 1872.86 -158Q1897.86 -146 1929.86 -146ZM2441.86 0L2276.86 0L2276.86 -729L2441.86 -729L2441.86 -464L2448.86 -464Q2478.86 -504 2524.36 -525Q2569.86 -546 2625.86 -546L2625.86 -546Q2692.86 -546 2737.36 -521.5Q2781.86 -497 2804.36 -452Q2826.86 -407 2826.86 -343L2826.86 -343L2826.86 0L2661.86 0L2661.86 -320Q2661.86 -353 2650.36 -376Q2638.86 -399 2616.86 -410.5Q2594.86 -422 2561.86 -422L2561.86 -422Q2521.86 -422 2491.36 -404Q2460.86 -386 2441.86 -357L2441.86 -357L2441.86 0ZM3227.86 0L3061.86 0Q3012.86 0 2984.36 -24Q2955.86 -48 2955.86 -98L2955.86 -98L2955.86 -416L2868.86 -416L2868.86 -537L2955.86 -537L2955.86 -683L3120.86 -683L3120.86 -537L3224.86 -537L3224.86 -416L3120.86 -416L3120.86 -128L3227.86 -128L3227.86 0ZM3448.86 0L3283.86 0L3283.86 -729L3448.86 -729L3448.86 -464L3455.86 -464Q3485.86 -504 3531.36 -525Q3576.86 -546 3632.86 -546L3632.86 -546Q3699.86 -546 3744.36 -521.5Q3788.86 -497 3811.36 -452Q3833.86 -407 3833.86 -343L3833.86 -343L3833.86 0L3668.86 0L3668.86 -320Q3668.86 -353 3657.36 -376Q3645.86 -399 3623.86 -410.5Q3601.86 -422 3568.86 -422L3568.86 -422Q3528.86 -422 3498.36 -404Q3467.86 -386 3448.86 -357L3448.86 -357L3448.86 0ZM4170.86 10L4170.86 10Q4103.86 10 4050.36 -7.5Q3996.86 -25 3959.36 -58.5Q3921.86 -92 3901.86 -139Q3881.86 -186 3881.86 -245L3881.86 -245L3881.86 -293Q3881.86 -371 3916.86 -428Q3951.86 -485 4016.86 -516Q4081.86 -547 4170.86 -547L4170.86 -547Q4237.86 -547 4291.36 -529.5Q4344.86 -512 4382.36 -478.5Q4419.86 -445 4440.36 -398Q4460.86 -351 4460.86 -293L4460.86 -293L4460.86 -245Q4460.86 -167 4425.36 -109.5Q4389.86 -52 4325.36 -21Q4260.86 10 4170.86 10ZM4170.86 -111L4170.86 -111Q4207.86 -111 4234.36 -123.5Q4260.86 -136 4275.36 -159.5Q4289.86 -183 4289.86 -212L4289.86 -212L4289.86 -325Q4289.86 -356 4275.36 -379Q4260.86 -402 4234.36 -414.5Q4207.86 -427 4170.86 -427L4170.86 -427Q4134.86 -427 4107.86 -414.5Q4080.86 -402 4066.36 -379Q4051.86 -356 4051.86 -325L4051.86 -325L4051.86 -212Q4051.86 -183 4066.36 -159.5Q4080.86 -136 4107.86 -123.5Q4134.86 -111 4170.86 -111ZM4892.86 -537L5057.86 -537L5057.86 0L4909.86 0L4892.86 -73L4885.86 -73Q4855.86 -33 4810.36 -12Q4764.86 9 4708.86 9L4708.86 9Q4642.86 9 4597.86 -15.5Q4552.86 -40 4530.36 -85.5Q4507.86 -131 4507.86 -194L4507.86 -194L4507.86 -537L4672.86 -537L4672.86 -217Q4672.86 -184 4684.36 -161.5Q4695.86 -139 4718.36 -127Q4740.86 -115 4772.86 -115L4772.86 -115Q4812.86 -115 4843.36 -133Q4873.86 -151 4892.86 -180L4892.86 -180L4892.86 -537ZM5365.86 10L5365.86 10Q5281.86 10 5226.36 -11.5Q5170.86 -33 5140.86 -71.5Q5110.86 -110 5104.86 -161L5104.86 -161L5269.86 -161Q5271.86 -136 5283.86 -120Q5295.86 -104 5316.86 -95.5Q5337.86 -87 5367.86 -87L5367.86 -87Q5411.86 -87 5432.86 -102Q5453.86 -117 5453.86 -143L5453.86 -143Q5453.86 -170 5433.36 -183.5Q5412.86 -197 5371.86 -207L5371.86 -207L5285.86 -223Q5224.86 -236 5188.86 -257.5Q5152.86 -279 5136.86 -309.5Q5120.86 -340 5120.86 -378L5120.86 -378Q5120.86 -433 5152.86 -470.5Q5184.86 -508 5239.36 -527.5Q5293.86 -547 5361.86 -547L5361.86 -547Q5433.86 -547 5487.86 -528Q5541.86 -509 5574.36 -472.5Q5606.86 -436 5611.86 -384L5611.86 -384L5454.86 -384Q5452.86 -408 5440.36 -423Q5427.86 -438 5407.86 -445Q5387.86 -452 5363.86 -452L5363.86 -452Q5337.86 -452 5319.86 -445.5Q5301.86 -439 5293.36 -427.5Q5284.86 -416 5284.86 -400L5284.86 -400Q5284.86 -376 5303.36 -362.5Q5321.86 -349 5363.86 -339L5363.86 -339L5445.86 -326Q5497.86 -315 5537.86 -295.5Q5577.86 -276 5600.86 -243.5Q5623.86 -211 5623.86 -159L5623.86 -159Q5623.86 -103 5591.36 -65.5Q5558.86 -28 5500.86 -9Q5442.86 10 5365.86 10ZM5944.86 10L5944.86 10Q5878.86 10 5825.86 -7.5Q5772.86 -25 5734.86 -58Q5696.86 -91 5676.86 -138.5Q5656.86 -186 5656.86 -245L5656.86 -245L5656.86 -293Q5656.86 -371 5692.36 -428Q5727.86 -485 5792.86 -516Q5857.86 -547 5944.86 -547L5944.86 -547Q6008.86 -547 6060.36 -529.5Q6111.86 -512 6148.86 -479Q6185.86 -446 6205.86 -399.5Q6225.86 -353 6225.86 -296L6225.86 -296L6225.86 -228L5826.86 -228L5826.86 -202Q5826.86 -173 5841.36 -150Q5855.86 -127 5882.86 -114.5Q5909.86 -102 5946.86 -102L5946.86 -102Q5991.86 -102 6020.86 -119Q6049.86 -136 6057.86 -167L6057.86 -167L6219.86 -167Q6211.86 -112 6173.86 -72.5Q6135.86 -33 6076.86 -11.5Q6017.86 10 5944.86 10ZM5826.86 -336L5826.86 -322L6057.86 -322L6057.86 -340Q6057.86 -369 6043.86 -390.5Q6029.86 -412 6004.86 -424Q5979.86 -436 5944.86 -436L5944.86 -436Q5907.86 -436 5881.36 -423.5Q5854.86 -411 5840.86 -388.5Q5826.86 -366 5826.86 -336L5826.86 -336Z" class="bk-ink"/></svg></div>
+  <div class="foot-row">
+    <span class="lbl">MIT licensed &middot; Scores and counts on this page are example data</span>
+    <nav aria-label="Footer">
+      <a class="lbl" href="https://github.com/harlan-zw/unlighthouse">GitHub</a>
+      <a class="lbl" href="https://unlighthouse.dev/guide/getting-started/installation">Docs</a>
+      <a class="lbl" href="https://github.com/sponsors/harlan-zw">Sponsors</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const NS = 'http://www.w3.org/2000/svg'
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
+  const CATS = ['performance', 'accessibility', 'best-practices', 'seo']
+  const CAT_LABEL = { 'performance': 'Performance', 'accessibility': 'Accessibility', 'best-practices': 'Best Practices', 'seo': 'SEO' }
+  const SHORT = { 'performance': 'Perf', 'accessibility': 'A11y', 'best-practices': 'BP', 'seo': 'SEO' }
+  const band = s => s >= 90 ? 'pass' : s >= 50 ? 'avg' : 'fail'
+  const el = (tag, attrs = {}, parent) => {
+    const n = document.createElementNS(NS, tag)
+    for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v)
+    if (parent) parent.appendChild(n)
+    return n
+  }
+
+  /* ---------- example data: pure, seeded ---------- */
+  const seeded = (a) => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296 }
+  const rnd = seeded(20261026)
+  const N = 118
+  const SITEMAP = 96
+  const sitemap = ['/', '/pricing', '/about', '/contact', '/blog', '/changelog', '/careers', '/security', '/privacy', '/terms', '/status', '/integrations', '/docs']
+  for (const d of ['getting-started', 'installation', 'configuration', 'authentication', 'caching', 'routing', 'deployment', 'environment', 'cli', 'api', 'webhooks', 'errors', 'limits', 'testing', 'migrations', 'plugins', 'theming', 'i18n', 'images', 'fonts', 'forms', 'sessions', 'logging', 'monitoring', 'search', 'analytics', 'redirects', 'headers', 'middleware', 'storage']) sitemap.push(`/docs/${d}`)
+  for (const d of ['github', 'gitlab', 'slack', 'vercel', 'netlify', 'cloudflare', 'stripe', 'sentry', 'figma', 'notion', 'linear', 'zapier']) sitemap.push(`/integrations/${d}`)
+  for (const d of ['first-deploy', 'custom-domain', 'team-setup', 'preview-builds', 'rollbacks', 'monorepos', 'edge-functions', 'cron-jobs', 'image-cdn', 'ab-tests', 'feature-flags', 'rate-limits', 'sso', 'audit-logs', 'backups', 'exports', 'imports', 'billing', 'invoices', 'refunds', 'support']) sitemap.push(`/guides/${d}`)
+  for (const d of ['starter', 'blog', 'docs', 'store', 'portfolio', 'saas', 'agency', 'landing', 'events', 'wiki']) sitemap.push(`/templates/${d}`)
+  for (const d of ['alpha', 'beta', 'gamma', 'delta', 'epsilon', 'zeta', 'eta', 'theta', 'iota', 'kappa']) sitemap.push(`/compare/${d}`)
+  const links = ['/blog/inp-in-practice', '/blog/shipping-faster', '/blog/image-budgets', '/blog/cache-rules', '/blog/release-notes-4', '/help', '/help/account', '/help/billing', '/help/domains', '/help/api-keys', '/help/limits', '/legal/dpa', '/legal/cookies', '/press', '/brand', '/events', '/events/meetup', '/partners', '/partners/apply', '/newsletter', '/sitemap', '/search']
+  const paths = sitemap.slice(0, SITEMAP).concat(links).slice(0, N)
+
+  const pick = (r, fail, avg, lo) => r < fail ? 18 + Math.round(rnd() * 31) : r < avg ? lo + Math.round(rnd() * (89 - lo)) : 90 + Math.round(rnd() * 10)
+  const routes = paths.map((path, i) => ({
+    i, path,
+    scores: {
+      'performance': pick(rnd(), 0.09, 0.42, 50),
+      'accessibility': pick(rnd(), 0.03, 0.24, 68),
+      'best-practices': pick(rnd(), 0.03, 0.3, 74),
+      'seo': pick(rnd(), 0.02, 0.12, 80),
+    },
+  }))
+  routes[0].scores = { 'performance': 98, 'accessibility': 100, 'best-practices': 100, 'seo': 100 }
+
+  // Discovery times, then one shared queue drained by 4 workers with uneven route times.
+  const SCAN_START = 3.2, WORKERS = 4
+  routes.forEach((r, i) => { r.found = i === 0 ? 0.2 : i < SITEMAP ? 0.7 + i * 0.009 : 2.0 + (i - SITEMAP) * 0.036 })
+  const free = Array.from({ length: WORKERS }, (_, k) => SCAN_START + k * 0.35)
+  for (const r of routes) {
+    let w = 0
+    for (let k = 1; k < WORKERS; k++) if (free[k] < free[w]) w = k
+    r.worker = w
+    r.start = Math.max(free[w], r.found)
+    r.dur = 1.7 + rnd() * 4.1 + (rnd() < 0.08 ? 3 + rnd() * 3 : 0)
+    r.end = r.start + r.dur
+    free[w] = r.end
+  }
+  const T_END = Math.max(...routes.map(r => r.end))
+  const stateAt = (r, t) => t < r.found ? 0 : t < r.start ? 1 : t < r.end ? 2 : 3
+
+  /* ---------- gauge ---------- */
+  const svg = document.getElementById('gauge')
+  const CX = 450, CY = 380, R0 = 150, L = 160, RS = 324, GAP = 12
+  const ang = i => (-90 + GAP / 2 + (i + 0.5) * (360 - GAP) / N) * Math.PI / 180
+  const pt = (a, r) => [CX + r * Math.cos(a), CY + r * Math.sin(a)]
+  const f = n => n.toFixed(2)
+
+  const gStruct = el('g', {}, svg)
+  // registration crosses
+  for (const [x, y] of [[CX - 380, CY], [CX + 380, CY], [CX, CY + 380]]) {
+    el('path', { d: `M${x - 7} ${y}H${x + 7}M${x} ${y - 7}V${y + 7}`, class: 'hair' }, gStruct)
+  }
+  el('circle', { cx: CX, cy: CY, r: R0 - 0.5, class: 'hair' }, gStruct)
+  el('circle', { cx: CX, cy: CY, r: R0 + L * 0.5, class: 'dash' }, gStruct)
+  el('circle', { cx: CX, cy: CY, r: R0 + L * 0.9, class: 'dash' }, gStruct)
+  el('circle', { cx: CX, cy: CY, r: RS, class: 'hair' }, gStruct)
+  // route scale: one mark per route, major every 10, numerals every 20
+  for (let i = 0; i < N; i++) {
+    const a = ang(i), maj = (i + 1) % 10 === 0
+    const [x1, y1] = pt(a, RS), [x2, y2] = pt(a, RS + (maj ? 12 : 5))
+    el('line', { x1: f(x1), y1: f(y1), x2: f(x2), y2: f(y2), class: maj ? 'scl maj' : 'scl' }, gStruct)
+    if ((i + 1) % 20 === 0) {
+      const [tx, ty] = pt(a, RS + 28)
+      const t = el('text', { 'x': f(tx), 'y': f(ty), 'text-anchor': 'middle', 'dominant-baseline': 'central' }, gStruct)
+      t.textContent = String(i + 1)
+    }
+  }
+  // zero point: the gap at 12 o'clock carries the radial score axis
+  const axis = [[0, R0], [50, R0 + L * 0.5], [90, R0 + L * 0.9], [100, R0 + L]]
+  el('line', { x1: CX, y1: CY - R0, x2: CX, y2: CY - R0 - L, class: 'hair' }, gStruct)
+  for (const [s, r] of axis) {
+    el('line', { x1: CX - 4, y1: CY - r, x2: CX + 4, y2: CY - r, class: 'scl maj' }, gStruct)
+  }
+  const ax = el('text', { 'x': CX - 10, 'y': CY - R0 - L - 14, 'text-anchor': 'end' }, gStruct); ax.textContent = '118'
+  const ax2 = el('text', { 'x': CX + 10, 'y': CY - R0 - L - 14, 'text-anchor': 'start' }, gStruct); ax2.textContent = '1'
+  const scoreLbl = el('text', { 'x': CX, 'y': CY - RS - 30, 'text-anchor': 'middle', 'class': 'ink' }, gStruct); scoreLbl.textContent = 'ROUTES 1–118, CLOCKWISE'
+
+  // annotations with leader lines (desktop only)
+  const gAnn = el('g', { class: 'annot' }, svg)
+  const annotate = (target, elbow, x0, x1, title, sub) => {
+    const d = `M${f(target[0])} ${f(target[1])}L${f(elbow[0])} ${f(elbow[1])}H${x1 === elbow[0] ? x0 : x1}`
+    el('path', { d, class: 'halo' }, gAnn)
+    el('path', { d, class: 'lead' }, gAnn)
+    el('circle', { cx: f(target[0]), cy: f(target[1]), r: 3.5, class: 'pin' }, gAnn)
+    const tx = Math.min(x0, x1)
+    const t1 = el('text', { x: tx, y: elbow[1] - 9, class: 'an-t' }, gAnn); t1.textContent = title
+    const t2 = el('text', { x: tx, y: elbow[1] + 18, class: 'an-s' }, gAnn); t2.textContent = sub
+  }
+  const A = Math.PI / 4
+  annotate(pt(-3 * A, RS), [150, 70], 0, 150, 'A  SCALE', '1 mark = 1 route')
+  annotate(pt(-A, R0 + L * 0.9), [750, 70], 900, 750, 'B  90', 'pass band')
+  annotate(pt(A, R0 + L * 0.5), [750, 690], 900, 750, 'C  50', 'average band')
+  annotate(pt(3 * A, R0), [150, 690], 0, 150, 'D  0', 'length = score')
+
+  // lamp beam: the light falls on the routes under audit (idea borrowed from redesign A)
+  const defs = el('defs', {}, svg)
+  const grad = el('radialGradient', { id: 'beam-g', gradientUnits: 'userSpaceOnUse', cx: CX, cy: CY, r: RS }, defs)
+  for (const [o, a] of [[0, 0], [R0 / RS, 0], [(R0 + 20) / RS, 0.55], [0.8, 1], [1, 0.25]]) el('stop', { 'offset': o, 'style': `stop-color: var(--lamp); stop-opacity: calc(var(--beam-a) * ${a})` }, grad)
+  const beam = el('path', { 'fill': 'url(#beam-g)', 'class': 'beam' }, svg)
+  const beamT = { a0: 0, a1: 0, on: false }, beamC = { a0: null, a1: null }
+  const STEP = (360 - GAP) / N * Math.PI / 180
+  const drawBeam = (dt) => {
+    if (!beamT.on) { beam.style.opacity = 0; return }
+    beam.style.opacity = 1
+    if (beamC.a0 === null || dt < 0) { beamC.a0 = beamT.a0; beamC.a1 = beamT.a1 }
+    else {
+      const k = 1 - Math.exp(-dt * 5)
+      beamC.a0 += (beamT.a0 - beamC.a0) * k; beamC.a1 += (beamT.a1 - beamC.a1) * k
+    }
+    const [x0, y0] = pt(beamC.a0, RS), [x1, y1] = pt(beamC.a1, RS)
+    beam.setAttribute('d', `M${CX} ${CY}L${f(x0)} ${f(y0)}A${RS} ${RS} 0 ${beamC.a1 - beamC.a0 > Math.PI ? 1 : 0} 1 ${f(x1)} ${f(y1)}Z`)
+  }
+
+  // route ticks
+  const gTicks = el('g', {}, svg)
+  const ticks = routes.map((r) => {
+    const a = ang(r.i), [x1, y1] = pt(a, R0 + 2), [x2, y2] = pt(a, R0 + L)
+    return el('path', { d: `M${f(x1)} ${f(y1)}L${f(x2)} ${f(y2)}`, pathLength: 100, class: 'tk' }, gTicks)
+  })
+  // queue head needle
+  const needle = el('path', { d: `M${CX} ${CY - RS + 2}l-6 -13h12z`, class: 'needle' }, svg)
+
+  // centre readout
+  const gRead = el('g', {}, svg)
+  const status = el('text', { 'x': CX, 'y': CY - 74, 'text-anchor': 'middle', 'class': 'stat stat-l' }, gRead)
+  const big = el('text', { 'x': CX, 'y': CY + 30, 'text-anchor': 'middle', 'class': 'big' }, gRead)
+  const of = el('text', { 'x': CX, 'y': CY + 60, 'text-anchor': 'middle', 'class': 'stat' }, gRead)
+  const med = el('text', { 'x': CX, 'y': CY + 84, 'text-anchor': 'middle' }, gRead)
+
+  // responsive crop: on narrow screens drop the annotation margins
+  const mq = matchMedia('(max-width: 680px)')
+  const crop = () => { svg.setAttribute('viewBox', mq.matches ? '76 6 748 748' : '0 0 900 760'); gAnn.style.display = mq.matches ? 'none' : '' }
+  mq.addEventListener('change', crop); crop()
+
+  /* ---------- workers + discovery panels ---------- */
+  const wk = document.getElementById('workers')
+  const wRows = Array.from({ length: WORKERS }, (_, k) => {
+    const li = document.createElement('li')
+    li.innerHTML = `<span class="wid">W${k + 1}</span><span class="wp"></span><span class="wb"><i></i></span><span class="wt"></span>`
+    wk.appendChild(li)
+    return { li, p: li.children[1], bar: li.children[2].firstElementChild, t: li.children[3] }
+  })
+  const disc = [...document.querySelectorAll('#disc li')]
+
+  let chan = 'performance'
+  const prev = new Array(N).fill(-1)
+  const pad3 = n => String(n).padStart(3, '0')
+  const clock = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(Math.floor(s % 60)).padStart(2, '0')}`
+
+  const paintTick = (r, s) => {
+    const tk = ticks[r.i]
+    tk.setAttribute('class', `tk s${s}${s === 3 ? ` ${band(r.scores[chan])}` : ''}`)
+    tk.style.strokeDasharray = s === 3 ? `${Math.max(r.scores[chan], 3)} 100` : ''
+  }
+
+  let lastNeedle = -1
+  const render = (t, force) => {
+    let found = 0, done = 0, head = -1, aMin = -1, aMax = -1
+    const doneScores = []
+    for (const r of routes) {
+      const s = stateAt(r, t)
+      if (s > 0) found++
+      if (s === 3) { done++; doneScores.push(r.scores[chan]) }
+      if (s === 1 && head < 0) head = r.i
+      if (s === 2) { if (aMin < 0) aMin = r.i; aMax = r.i }
+      if (s !== prev[r.i] || force) { paintTick(r, s); prev[r.i] = s }
+    }
+    // needle sits on the next route the queue hands out
+    const hi = head < 0 ? (done === N ? N - 1 : 0) : head
+    needle.style.opacity = found && done < N ? 1 : 0
+    if (hi !== lastNeedle) {
+      needle.classList.toggle('jump', hi < lastNeedle)
+      needle.style.transform = `rotate(${(ang(hi) * 180 / Math.PI + 90).toFixed(2)}deg)`
+      needle.style.transformOrigin = `${CX}px ${CY}px`
+      needle.style.opacity = found && done < N ? 1 : 0
+      lastNeedle = hi
+    }
+    beamT.on = aMin >= 0
+    if (beamT.on) { beamT.a0 = ang(aMin) - STEP; beamT.a1 = ang(aMax) + STEP }
+    if (force) drawBeam(-1)
+    status.textContent = t < SCAN_START ? '● DISCOVERING' : done < N ? '● SCANNING' : 'COMPLETE'
+    big.textContent = pad3(done)
+    of.textContent = `OF ${pad3(found)} AUDITED`
+    doneScores.sort((a, b) => a - b)
+    const m = doneScores.length ? doneScores[Math.floor(doneScores.length / 2)] : null
+    med.textContent = `${SHORT[chan].toUpperCase()} MEDIAN ${m === null ? '--' : m}`
+    med.style.fill = m === null ? '' : `var(--${band(m)}-t)`
+    // workers
+    for (let k = 0; k < WORKERS; k++) {
+      const r = routes.find(x => x.worker === k && t >= x.start && t < x.end)
+      const row = wRows[k]
+      if (r) {
+        row.li.className = ''
+        row.p.textContent = r.path
+        row.bar.style.width = `${Math.min((t - r.start) / 8, 1) * 100}%`
+        row.t.textContent = `${(t - r.start).toFixed(1)}s`
+      }
+      else {
+        row.li.className = 'idle'
+        row.p.textContent = t < SCAN_START ? 'waiting for queue' : 'idle, queue empty'
+        row.bar.style.width = '0'
+        row.t.textContent = '--'
+      }
+    }
+    for (const li of disc) li.classList.toggle('on', t >= Number(li.dataset.t))
+  }
+
+  /* ---------- clock: real time, paused offscreen ---------- */
+  let simT = reduce ? T_END + 1 : 52, visible = true, last = 0
+  const HOLD = 9
+  const frame = (now) => {
+    if (!last) last = now
+    const dt = Math.min((now - last) / 1000, 0.25)
+    last = now
+    if (visible && !document.hidden) {
+      simT += dt
+      if (simT > T_END + HOLD) { simT = 0; render(simT, true) }
+      render(simT)
+      drawBeam(dt)
+    }
+    requestAnimationFrame(frame)
+  }
+  render(simT, true)
+  if (!reduce) {
+    new IntersectionObserver(([e]) => { visible = e.isIntersecting; last = 0 }).observe(svg)
+    requestAnimationFrame(frame)
+  }
+
+  /* ---------- barcode ---------- */
+  const barsEl = document.getElementById('bars')
+  const dimsEl = document.getElementById('dims')
+  const bars = routes.map(() => {
+    const b = document.createElement('div'); b.className = 'bar'
+    b.appendChild(document.createElement('i'))
+    barsEl.appendChild(b)
+    return b
+  })
+  const dims = ['fail', 'avg', 'pass'].map((k) => {
+    const d = document.createElement('div'); d.className = 'dim'
+    d.innerHTML = '<span></span>'
+    dimsEl.appendChild(d)
+    return d
+  })
+  const BAND_NAME = { fail: 'Fail', avg: 'Average', pass: 'Pass' }
+  const counts = [...document.querySelectorAll('#bc-counts .num')]
+  let barcodeShown = reduce
+  const renderBarcode = () => {
+    const order = routes.slice().sort((a, b) => a.scores[chan] - b.scores[chan] || a.i - b.i)
+    const n = { fail: 0, avg: 0, pass: 0 }
+    order.forEach((r, rank) => {
+      const s = r.scores[chan], b = bars[r.i]
+      b.className = `bar ${band(s)}`
+      b.style.transform = `translateX(${rank * 100}%)`
+      b.firstChild.style.height = barcodeShown ? `${Math.max(s, 2)}%` : '0%'
+      n[band(s)]++
+    })
+    let start = 0
+    ;['fail', 'avg', 'pass'].forEach((k, j) => {
+      const d = dims[j]
+      d.style.left = `calc(${start / N * 100}% + 1px)`
+      d.style.width = `calc(${n[k] / N * 100}% - 2px)`
+      d.firstChild.textContent = `${BAND_NAME[k]} · ${n[k]}`
+      d.firstChild.className = `t-${k}`
+      d.style.visibility = n[k] ? '' : 'hidden'
+      start += n[k]
+    })
+    for (const c of counts) c.textContent = String(n[c.dataset.band])
+    document.getElementById('bc-chan').textContent = `${CAT_LABEL[chan]} score, sorted`
+  }
+  renderBarcode()
+  if (!reduce) {
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return
+      io.disconnect(); barcodeShown = true
+      routes.forEach((r) => { bars[r.i].firstChild.style.transitionDelay = `${(r.i % 40) * 12}ms` })
+      renderBarcode()
+      setTimeout(() => bars.forEach(b => { b.firstChild.style.transitionDelay = '' }), 1600)
+    }, { threshold: 0.3 })
+    io.observe(document.getElementById('barcode'))
+  }
+
+  document.querySelectorAll('input[name="chan"]').forEach(inp => inp.addEventListener('change', () => {
+    chan = inp.value
+    render(simT, true)
+    renderBarcode()
+  }))
+
+  /* ---------- signal path rail: one continuous run of route ticks ---------- */
+  const segs = document.querySelectorAll('.seg')
+  const T = 30
+  const ex = [96, 92, 74, 99, 88, 41, 93, 97, 81, 90, 95, 62, 98, 91, 86, 99, 94, 57, 92, 96, 71, 99, 93, 84, 97, 38, 95, 90, 66, 98]
+  const railSpec = [
+    i => ({ h: 0.16, c: (i < 10 ? i % 3 : i < 20 ? i % 2 : 0) ? 'x' : '' }),
+    i => i % 6 === 2 ? { h: 0.5, c: 'k' } : { h: 0.16, c: 'd' },
+    i => (i % 7) < 4 ? { h: 0.8, c: 'l' } : { h: 0.16, c: '' },
+    i => ({ h: ex[i] / 100 * 0.8, c: band(ex[i]) }),
+  ]
+  segs.forEach((seg, k) => {
+    for (let i = 0; i < T; i++) {
+      const o = railSpec[k](i), t = document.createElement('i')
+      t.style.setProperty('--h', o.h); if (o.c) t.className = o.c
+      seg.appendChild(t)
+    }
+  })
+
+  /* ---------- report replica ---------- */
+  const pickRows = ['/', '/pricing', '/docs/getting-started', '/blog/inp-in-practice', '/integrations/github', '/docs/configuration', '/changelog']
+  const repRoutes = pickRows.map(p => routes.find(r => r.path === p)).filter(Boolean)
+  const ring = (s, cat) => `<span class="sc ${band(s)}"><svg viewBox="0 0 34 34" aria-hidden="true"><circle class="ring-bg" cx="17" cy="17" r="14"/><circle class="ring" cx="17" cy="17" r="14" stroke-dasharray="${(s / 100 * 87.96).toFixed(2)} 88"/></svg><span><span class="v t-${band(s)}">${s}</span><span class="k">${SHORT[cat]}</span></span></span>`
+  const rowsEl = document.getElementById('rp-rows')
+  let rpTab = 'overview', openPath = '/pricing'
+  const MENU = '<div class="menu" role="group" aria-label="Route actions"><div><b>Open Lighthouse Report</b><span>Lighthouse HTML report is opened in a modal.</span></div><div><b>Rescan Route</b><span>Crawl the route again and generate a fresh report.</span></div><div><b>Run PageSpeed Insights</b><span>Get more accurate performance data.</span></div></div>'
+  const renderReport = () => {
+    const tab = rpTab
+    const list = repRoutes.slice().sort((a, b) => tab === 'overview' ? 0 : a.scores[tab] - b.scores[tab])
+    rowsEl.innerHTML = list.map((r, idx) => {
+      const score = tab === 'overview'
+        ? `<div class="scores">${CATS.map(c => ring(r.scores[c], c)).join('')}</div>`
+        : `<div class="single"><span class="sc ${band(r.scores[tab])}"><span class="v t-${band(r.scores[tab])}">${r.scores[tab]}</span></span><span class="trk"><i style="width:${r.scores[tab]}%;background:var(--${band(r.scores[tab])})"></i></span></div>`
+      const open = r.path === openPath
+      const menu = open ? MENU.replace('class="menu"', `class="menu${idx >= list.length - 3 ? ' up' : ''}"`) : ''
+      return `<tr><td class="pg">${r.path}</td><td>${score}</td><td class="act"><button class="dots" type="button" data-path="${r.path}" aria-expanded="${open}" aria-label="Actions for ${r.path}">\u22EF</button>${menu}</td></tr>`
+    }).join('')
+  }
+  renderReport()
+  rowsEl.addEventListener('click', (e) => {
+    const b = e.target.closest('.dots')
+    if (!b) return
+    openPath = openPath === b.dataset.path ? null : b.dataset.path
+    renderReport()
+    rowsEl.querySelector(`.dots[data-path="${b.dataset.path}"]`)?.focus()
+  })
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && openPath) { openPath = null; renderReport() } })
+  const rpTabs = [...document.querySelectorAll('.rp-tabs [role="tab"]')]
+  rpTabs.forEach(b => b.addEventListener('click', () => {
+    rpTabs.forEach(x => x.setAttribute('aria-selected', String(x === b)))
+    rpTab = b.dataset.tab
+    document.getElementById('rp-score-h').lastChild.textContent = rpTab === 'overview' ? 'Score' : `${CAT_LABEL[rpTab]} score`
+    renderReport()
+  }))
+
+  /* ---------- integration tabs ---------- */
+  const iTabs = [...document.querySelectorAll('.int-list [role="tab"]')]
+  const selectTab = (b) => {
+    iTabs.forEach((x) => {
+      const on = x === b
+      x.setAttribute('aria-selected', String(on)); x.tabIndex = on ? 0 : -1
+      document.getElementById(x.getAttribute('aria-controls')).hidden = !on
+    })
+  }
+  iTabs.forEach((b, i) => {
+    b.addEventListener('click', () => selectTab(b))
+    b.addEventListener('keydown', (e) => {
+      const d = e.key === 'ArrowDown' || e.key === 'ArrowRight' ? 1 : e.key === 'ArrowUp' || e.key === 'ArrowLeft' ? -1 : 0
+      if (!d) return
+      e.preventDefault()
+      const n = iTabs[(i + d + iTabs.length) % iTabs.length]
+      selectTab(n); n.focus()
+    })
+  })
+
+  /* ---------- copy + theme ---------- */
+  const legacyCopy = (text) => {
+    const ta = document.createElement('textarea')
+    ta.value = text; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0'
+    document.body.appendChild(ta); ta.select()
+    const ok = document.execCommand('copy')
+    ta.remove()
+    return ok
+  }
+  const copyText = text => navigator.clipboard ? navigator.clipboard.writeText(text).then(() => true, () => legacyCopy(text)) : Promise.resolve(legacyCopy(text))
+  const copyStatus = document.getElementById('copy-status')
+  document.querySelectorAll('.copy').forEach(b => b.addEventListener('click', () => {
+    const src = b.dataset.copy ? null : b.closest('.code').querySelector('pre')
+    const text = b.dataset.copy ?? src.innerText.trim()
+    copyText(text).then((ok) => {
+      if (!ok && src) getSelection().selectAllChildren(src)
+      b.textContent = ok ? 'Copied' : 'Press Ctrl+C'
+      copyStatus.textContent = ok ? 'Copied to clipboard' : 'Copy failed. The text is selected.'
+      setTimeout(() => { b.textContent = 'Copy' }, 1600)
+    })
+  }))
+  const themeBtn = document.getElementById('theme')
+  const syncTheme = () => themeBtn.setAttribute('aria-pressed', String(document.documentElement.dataset.theme === 'dark'))
+  syncTheme()
+  themeBtn.addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'
+    document.documentElement.dataset.theme = next
+    localStorage.setItem('ulh-theme', next)
+    syncTheme()
+  })
+})()
+</script>
+</body>
+</html>
