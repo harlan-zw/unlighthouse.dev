@@ -201,7 +201,7 @@ catalog:
   markdownlint-cli: ^0.49.1
   motion-v: ^2.6.0
   nitro-cloudflare-dev: ^0.2.2
-  nuxt: ^4.6.1
+  nuxt: ^4.6.2
   nuxt-auth-utils: ^0.5.30
   nuxt-build-cache: ^0.1.1
   nuxt-lodash: ^2.5.3
