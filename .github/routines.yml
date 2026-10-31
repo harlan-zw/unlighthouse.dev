@@ -8,6 +8,20 @@
 # writes the run log and opens nothing.
 version: 1
 routines:
+  - name: seo-review
+    on:
+      schedule:
+        - cron: '40 11 * * 2'
+    timezone: Australia/Sydney
+    mode: propose
+    enabled: true
+  - name: vitals-review
+    on:
+      schedule:
+        - cron: '40 12 * * 3'
+    timezone: Australia/Sydney
+    mode: propose
+    enabled: true
   - name: daily-checkin
     on:
       schedule:
