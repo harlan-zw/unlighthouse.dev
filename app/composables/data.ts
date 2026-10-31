@@ -1,6 +1,7 @@
+import type { DocsCollection } from '~~/utils/docs-version'
 import { titleCase } from 'scule'
 import { modifyRelativeDocLinksWithFramework } from '~~/utils/content'
-import { docsBranch, versionedDocPath } from '~~/utils/docs-version'
+import { commitMetadataBranch, versionedDocPath } from '~~/utils/docs-version'
 import { useAsyncData } from '#imports'
 
 export async function useStats() {
@@ -13,7 +14,7 @@ export async function useStats() {
   return asyncData
 }
 
-function getCollectionForPath(path: string) {
+function getCollectionForPath(path: string): DocsCollection {
   if (path.startsWith('/glossary'))
     return 'glossary' as const
   if (path.startsWith('/learn-lighthouse'))
@@ -60,15 +61,18 @@ export async function useCurrentDocPage() {
       }
     })
 
-    const lastCommitData = await $fetch<LastCommit>(`/api/github/last-file-commit`, {
-      query: {
-        file: `docs/${pageData.stem}`,
-        branch: docsBranch(route.path),
-      },
-    }).catch((error) => {
-      console.warn('[docs] Failed to load optional commit metadata', error)
-      return null
-    })
+    const branch = commitMetadataBranch(collection)
+    const lastCommitData = branch
+      ? await $fetch<LastCommit>(`/api/github/last-file-commit`, {
+          query: {
+            file: `docs/${pageData.stem}`,
+            branch,
+          },
+        }).catch((error) => {
+          console.warn('[docs] Failed to load optional commit metadata', error)
+          return null
+        })
+      : null
 
     return {
       page: pageData,
