@@ -26,6 +26,7 @@ const learnCategories = [
     description: 'CI/CD & APIs',
     color: 'amber',
     items: [
+      { label: 'Lighthouse CLI', icon: 'i-heroicons-command-line', to: '/learn-lighthouse/lighthouse-cli' },
       { label: 'Lighthouse CI', icon: 'i-heroicons-play-circle', to: '/learn-lighthouse/lighthouse-ci' },
       { label: 'Playwright', icon: 'i-simple-icons-playwright', to: '/learn-lighthouse/playwright' },
       { label: 'PSI API', icon: 'i-heroicons-code-bracket', to: '/learn-lighthouse/pagespeed-insights-api' },

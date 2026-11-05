@@ -35,7 +35,7 @@ const sectionConfig: Record<string, { label: string, description: string, icon: 
     label: 'Automation',
     description: 'CI/CD & APIs',
     icon: 'i-heroicons-cog-6-tooth',
-    paths: ['lighthouse-ci', 'playwright', 'pagespeed-insights-api', 'pagespeed-insights-vs-lighthouse', 'bulk-lighthouse-testing'],
+    paths: ['lighthouse-cli', 'lighthouse-ci', 'playwright', 'pagespeed-insights-api', 'pagespeed-insights-vs-lighthouse', 'bulk-lighthouse-testing'],
   },
 }
 
@@ -48,6 +48,7 @@ const itemConfig: Record<string, { icon: string, title: string }> = {
   'accessibility': { icon: 'i-heroicons-eye', title: 'Accessibility' },
   'seo': { icon: 'i-heroicons-magnifying-glass', title: 'SEO' },
   'best-practices': { icon: 'i-heroicons-shield-check', title: 'Best Practices' },
+  'lighthouse-cli': { icon: 'i-heroicons-command-line', title: 'Lighthouse CLI' },
   'lighthouse-ci': { icon: 'i-heroicons-play-circle', title: 'Lighthouse CI' },
   'playwright': { icon: 'i-simple-icons-playwright', title: 'Playwright' },
   'pagespeed-insights-api': { icon: 'i-heroicons-code-bracket', title: 'PSI API' },
@@ -83,7 +84,7 @@ function transformLearnNav(res: any): NavSection[] {
       }
 
       // Standalone page (no children in raw data or is a single file)
-      if (!raw?.children?.length || pathSegment === 'core-web-vitals' || pathSegment === 'bulk-lighthouse-testing') {
+      if (!raw?.children?.length || pathSegment === 'core-web-vitals' || pathSegment === 'bulk-lighthouse-testing' || pathSegment === 'lighthouse-cli') {
         item.to = item.path
         items.push(item)
         continue

@@ -58,6 +58,12 @@ const guides = [
     to: '/learn-lighthouse/bulk-lighthouse-testing',
   },
   {
+    title: 'Lighthouse CLI',
+    description: 'Run Lighthouse from your terminal and save JSON, HTML, or CSV reports.',
+    icon: 'i-heroicons-command-line',
+    to: '/learn-lighthouse/lighthouse-cli',
+  },
+  {
     title: 'Lighthouse CI',
     description: 'Automate audits in your CI/CD pipeline with @lhci/cli.',
     icon: 'i-heroicons-command-line',
