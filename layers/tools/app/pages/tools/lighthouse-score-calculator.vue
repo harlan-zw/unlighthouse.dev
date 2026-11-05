@@ -51,9 +51,12 @@ const {
   syncFromHash,
 } = useToolLighthouseCalculator()
 
-const metricGlossaryLinks: Partial<Record<MetricId, string>> = {
+const metricGuideLinks: Record<MetricId, string> = {
+  FCP: '/glossary/fcp',
   SI: '/glossary/speed-index',
+  LCP: '/learn-lighthouse/lcp',
   TBT: '/glossary/tbt',
+  CLS: '/learn-lighthouse/cls',
 }
 
 const { trackUse } = useToolTracking('lighthouse-score-calculator')
@@ -327,15 +330,11 @@ function fetchFromUrl() {
                 <div>
                   <h3 class="font-bold text-gray-900 dark:text-white">
                     <NuxtLink
-                      v-if="metricGlossaryLinks[metric.id]"
-                      :to="metricGlossaryLinks[metric.id]"
+                      :to="metricGuideLinks[metric.id]"
                       class="hover:text-violet-600 dark:hover:text-violet-400 hover:underline"
                     >
                       {{ metric.name }}
                     </NuxtLink>
-                    <template v-else>
-                      {{ metric.name }}
-                    </template>
                   </h3>
                   <div class="flex items-center gap-2">
                     <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
