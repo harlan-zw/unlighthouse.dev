@@ -82,7 +82,7 @@ Pick LHCI when:
 
 - You have a handful of critical URLs (homepage, checkout, product page) and want to track them over weeks or months.
 - You need [hard performance budgets enforced on every PR](https://web.dev/articles/lighthouse-ci#budgets), with builds failing when thresholds break.
-- You want to use **Lighthouse 13** diagnostics (requires LHCI v0.15+ and [Node.js 22+](https://nodejs.org/en/blog/release/v22.0.0)).
+- You want to use **Lighthouse 13** diagnostics (requires LHCI v0.16+ and [Node.js](https://nodejs.org) 22.19+).
 - You want a historical dashboard showing score trends, and you're willing to [host @lhci/server](/learn-lighthouse/lighthouse-ci/server) or use temporary public storage.
 - You're already invested in the Google Chrome tooling ecosystem and want [first-party GitHub App integration](https://github.com/apps/lighthouse-ci).
 
@@ -118,6 +118,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
       - run: npm ci
       - run: npx @lhci/cli@latest autorun
 ```
