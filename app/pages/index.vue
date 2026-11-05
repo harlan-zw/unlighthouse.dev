@@ -9,6 +9,8 @@ definePageMeta({
 const homepageDescription = 'Unlighthouse finds your pages and runs Lighthouse audits across your site. Review the results in one dashboard. Free and open source.'
 
 useSeoMeta({
+  // The title already names the brand, so skip the site name suffix.
+  titleTemplate: '%s',
   title: 'Unlighthouse: Site-Wide Google Lighthouse Audits',
   description: homepageDescription,
 })

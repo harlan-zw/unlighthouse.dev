@@ -34,8 +34,8 @@ const faqs = [
 ]
 
 useToolSeo({
-  title: 'Lighthouse Performance Score Calculator - Calculate Performance Scores',
-  description: 'Free interactive Lighthouse scoring calculator. See how FCP, LCP, TBT, CLS, and Speed Index weights and thresholds determine your Lighthouse performance score. Enter your metrics to calculate your score.',
+  title: 'Lighthouse Performance Score Calculator: Metrics and Weights',
+  description: 'Enter FCP, Speed Index, LCP, TBT, and CLS values to calculate a Lighthouse Performance score. See each metric weight, threshold, and metric score.',
   faqs,
 })
 
