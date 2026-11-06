@@ -1,0 +1,1121 @@
+<!doctype html>
+<!--
+  Art direction: "Night watch editorial"
+  1. The page is a night watch: deep navy sky, cool moonlit type, and one warm source of cream lamp light.
+  2. The hero is the light itself: a lamp on the horizon sweeps one beam across a skyline of your pages, one tick per page.
+  3. Light follows real work: the beam aims at the shared queue, ticks wait faint, glow while audited, then settle into score colour.
+  4. Type is editorial: wide heavy Hubot Sans display, numbered chapters, asymmetric columns, mono for anything a machine said.
+  5. Story in four chapters: find every page, light every page, read one report, hold the line in CI. Colour is for data only.
+-->
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unlighthouse: Site-Wide Google Lighthouse Audits</title>
+<meta name="description" content="Scan every page of your site with Google Lighthouse. Unlighthouse discovers URLs, runs audits in parallel, and combines results in one report.">
+<meta name="color-scheme" content="dark light">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/hubot-sans@5.3.0/standard.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/mona-sans@5.3.0/standard.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/fira-code@5.3.0/index.css">
+<script>
+  // Theme before paint: saved choice, else dark first.
+  try { const t = localStorage.getItem('ulh-theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t } catch {}
+</script>
+<style>
+:root {
+  --display: 'Hubot Sans Variable', 'Hubot Sans', system-ui, sans-serif;
+  --body: 'Mona Sans Variable', 'Mona Sans', system-ui, sans-serif;
+  --mono: 'Fira Code Variable', 'Fira Code', ui-monospace, monospace;
+  --gutter: clamp(20px, 4.4vw, 72px);
+  --max: 1320px;
+  --ease: cubic-bezier(.2, .7, .1, 1);
+}
+/* Night (default) */
+:root, [data-theme="dark"] {
+  --sky-top: #070e1d;
+  --sky-mid: #0c1830;
+  --bg: #0d172b;
+  --bg-2: #101d36;
+  --surface: #14213d;
+  --line: rgba(150, 174, 210, .16);
+  --line-2: rgba(150, 174, 210, .28);
+  --text: #e8ecf3;
+  --text-2: #b4c0d3;
+  --muted: #8fa0ba;
+  --steel: #6c84a6;
+  --lamp: #f4e9c8;
+  --lamp-ink: #f6dfa2;
+  --lamp-rgb: 246, 228, 180;
+  --beam-alpha: .15;
+  --beam-blend: lighter;
+  --tick-idle: rgba(140, 164, 200, .42);
+  --pass: #3fcf8e; --avg: #f2a43a; --fail: #ff6a5c;
+  --pass-t: #5fdba2; --avg-t: #f6b55a; --fail-t: #ff8a7e;
+  --btn-bg: #f4e9c8; --btn-ink: #0d172b;
+  --code-key: #f6dfa2; --code-str: #a9c5ea; --code-dim: #7f90ab;
+}
+[data-theme="light"] {
+  --sky-top: #e9e3d3;
+  --sky-mid: #f1ece0;
+  --bg: #f5f1e7;
+  --bg-2: #efe9db;
+  --surface: #fbf8f1;
+  --line: rgba(20, 33, 61, .13);
+  --line-2: rgba(20, 33, 61, .24);
+  --text: #14213d;
+  --text-2: #33415e;
+  --muted: #4f5d78;
+  --steel: #6c84a6;
+  --lamp: #a8711a;
+  --lamp-ink: #8a5a0e;
+  --lamp-rgb: 214, 150, 52;
+  --beam-alpha: .16;
+  --beam-blend: multiply;
+  --tick-idle: rgba(20, 33, 61, .26);
+  --pass: #17a35f; --avg: #e08718; --fail: #e0453a;
+  --pass-t: #0a7343; --avg-t: #9a4f00; --fail-t: #be2a22;
+  --btn-bg: #14213d; --btn-ink: #f5f1e7;
+  --code-key: #8a5a0e; --code-str: #2d5a8f; --code-dim: #5f6c84;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; background: var(--bg); }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font: 400 17px/1.6 var(--body);
+  font-feature-settings: 'ss01';
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  overflow-x: clip;
+}
+a { color: inherit; }
+::selection { background: rgba(var(--lamp-rgb), .35); }
+:focus-visible { outline: 2px solid var(--lamp); outline-offset: 3px; border-radius: 4px; }
+.wrap { width: 100%; max-width: calc(var(--max) + 2 * var(--gutter)); margin: 0 auto; padding: 0 var(--gutter); }
+.mono { font-family: var(--mono); font-feature-settings: 'zero' 0; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Beacon mark colour roles: moonlit housing, warm lamp + beam; beam stroke knocks out against the surface. */
+.bk-ink { fill: var(--text); }
+.bk-lamp { fill: var(--lamp); }
+.bk-beam { fill: var(--lamp); stroke: var(--knock, var(--bg)); }
+
+/* ---------- Header ---------- */
+.top { position: absolute; inset: 0 0 auto 0; z-index: 5; --knock: var(--sky-top); }
+.top .wrap { display: flex; align-items: center; gap: 28px; height: 76px; }
+.brand { display: inline-flex; height: 26px; }
+.brand svg { height: 100%; width: auto; overflow: visible; }
+.nav { display: flex; gap: 26px; margin-left: 18px; font-size: 15px; }
+.nav a { text-decoration: none; color: var(--text-2); }
+.nav a:hover { color: var(--text); }
+.top .spacer { flex: 1; }
+.icon-btn {
+  display: inline-grid; place-items: center; width: 38px; height: 38px; border-radius: 10px;
+  border: 1px solid var(--line-2); background: transparent; color: var(--text); cursor: pointer;
+}
+.icon-btn svg { width: 18px; height: 18px; }
+[data-theme="dark"] .i-moon, [data-theme="light"] .i-sun { display: none; }
+.gh { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text-2); font-size: 15px; }
+.gh:hover { color: var(--text); }
+.gh svg { width: 18px; height: 18px; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 10px; height: 48px; padding: 0 22px; border-radius: 999px;
+  font: 600 16px/1 var(--body); text-decoration: none; white-space: nowrap; cursor: pointer; border: 0;
+}
+.btn-lamp { background: var(--btn-bg); color: var(--btn-ink); }
+.btn-lamp:hover { filter: brightness(1.06); }
+.btn-ghost { color: var(--text); border: 1px solid var(--line-2); background: transparent; }
+.btn-ghost:hover { border-color: var(--text-2); }
+.btn .arr { transition: transform .3s var(--ease); }
+.btn:hover .arr { transform: translateX(3px); }
+.btn-sm { height: 40px; padding: 0 16px; font-size: 15px; }
+
+/* ---------- Hero ---------- */
+.hero {
+  position: relative; isolation: isolate; overflow: hidden;
+  background:
+    radial-gradient(120% 70% at 84% 18%, rgba(var(--lamp-rgb), .07), transparent 60%),
+    linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 62%, var(--bg) 100%);
+  padding-top: 76px;
+}
+.hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; display: block; }
+.hero-copy { padding-top: clamp(32px, 6vh, 84px); }
+.kicker {
+  display: flex; align-items: center; gap: 14px; margin: 0 0 28px;
+  font: 500 13px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+}
+.kicker b { color: var(--lamp-ink); font-weight: 500; }
+.kicker i { width: 36px; height: 1px; background: var(--line-2); }
+h1 {
+  margin: 0; max-width: 11.5em;
+  font: 820 clamp(46px, 7.6vw, 128px)/.9 var(--display);
+  font-stretch: 112%; letter-spacing: -.038em; text-wrap: balance;
+}
+h1 em { font-style: normal; color: var(--lamp-ink); }
+.hero-row {
+  display: grid; grid-template-columns: minmax(0, 42rem); gap: 26px;
+  margin-top: clamp(28px, 4.5vh, 48px);
+}
+.lede { margin: 0; font-size: clamp(17px, 1.35vw, 20px); line-height: 1.55; color: var(--text-2); max-width: 34rem; }
+.lede strong { color: var(--text); font-weight: 600; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.cmd {
+  display: inline-flex; align-items: center; gap: 12px; height: 48px; padding: 0 8px 0 18px; border-radius: 999px;
+  border: 1px solid var(--line-2); background: color-mix(in srgb, var(--bg) 70%, transparent);
+  backdrop-filter: blur(6px); font: 450 15px/1 var(--mono); color: var(--text); white-space: nowrap;
+}
+.cmd .p { color: var(--muted); }
+.cmd .f { color: var(--lamp-ink); }
+.copy {
+  height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line-2); background: transparent;
+  color: var(--text-2); font: 500 12px/1 var(--mono); cursor: pointer; min-width: 64px;
+}
+.copy:hover { color: var(--text); }
+.fine { margin: 18px 0 0; font: 500 12.5px/1.4 var(--mono); color: var(--muted); letter-spacing: .02em; }
+.fine a { color: var(--text-2); text-underline-offset: 3px; }
+
+.horizon { position: relative; height: clamp(220px, 28vh, 300px); margin-top: clamp(24px, 4vh, 56px); }
+.readout {
+  position: absolute; left: var(--gutter); right: var(--gutter); bottom: 22px; display: flex; justify-content: space-between; align-items: end; gap: 24px;
+  font: 450 12px/1.5 var(--mono); color: var(--muted); letter-spacing: .02em;
+}
+.readout .live { color: var(--text-2); }
+.readout .num { color: var(--text); font-variant-numeric: tabular-nums; }
+.readout .now { display: inline-block; width: 26ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; color: var(--text-2); }
+.legend { display: flex; gap: 16px; }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.legend i { width: 2px; height: 12px; border-radius: 1px; background: var(--c); }
+.legend .n { font-variant-numeric: tabular-nums; color: var(--text-2); display: inline-block; min-width: 3ch; text-align: right; }
+
+/* ---------- Chapters ---------- */
+.chapter { position: relative; padding: clamp(96px, 13vw, 176px) 0 0; }
+.chapter + .chapter { border-top: 0; }
+.ch-head { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 0 32px; align-items: start; }
+.ch-head > * { min-width: 0; }
+.ch-num {
+  position: relative; padding-top: 12px; border-top: 1px solid var(--line-2);
+  font: 500 13px/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
+}
+.ch-num b { display: block; margin-bottom: 4px; color: var(--lamp-ink); font-weight: 500; font-size: 13px; }
+h2 {
+  margin: 0; font: 780 clamp(40px, 5.6vw, 92px)/.94 var(--display); font-stretch: 108%; letter-spacing: -.034em;
+  text-wrap: balance;
+}
+h2 .dim { color: var(--muted); }
+.ch-intro { margin: 28px 0 0; max-width: 36rem; font-size: clamp(17px, 1.3vw, 19px); color: var(--text-2); }
+h3 { margin: 0 0 6px; font: 650 18px/1.3 var(--display); font-stretch: 100%; letter-spacing: 0; }
+.note { font: 450 12px/1.5 var(--mono); color: var(--muted); letter-spacing: .02em; }
+.tag-example {
+  display: inline-flex; align-items: center; gap: 6px; font: 500 11px/1 var(--mono); letter-spacing: .08em;
+  text-transform: uppercase; color: var(--muted); padding: 6px 9px; border: 1px dashed var(--line-2); border-radius: 6px;
+}
+
+/* 01 Discover */
+.discover { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr); gap: 64px; margin-top: 72px; align-items: start; }
+.sources { list-style: none; margin: 0; padding: 0; }
+.sources li { display: grid; grid-template-columns: 1fr auto; gap: 4px 16px; padding: 22px 0; border-top: 1px solid var(--line); }
+.sources li:last-child { border-bottom: 1px solid var(--line); }
+.sources .src { font: 500 16px/1.3 var(--mono); color: var(--text); }
+.sources .cnt { font: 450 13px/1.3 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; align-self: center; }
+.sources p { grid-column: 1 / -1; margin: 0; color: var(--text-2); font-size: 15.5px; }
+.strip { grid-column: 1 / -1; display: flex; gap: 3px; margin-top: 12px; flex-wrap: wrap; }
+.strip i { width: 2px; height: 16px; border-radius: 1px; background: var(--tick-idle); }
+.strip i.on { background: var(--lamp); height: 22px; margin-top: -6px; }
+.strip i.on + i:not(.on) { }
+
+.log {
+  margin: 0; padding: 28px 0 0; border-top: 1px solid var(--line-2);
+  font: 450 13.5px/1.85 var(--mono); color: var(--text-2); white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.log .c { color: var(--muted); }
+.log .k { color: var(--lamp-ink); }
+.log .s { color: var(--text); }
+.log .i { color: var(--steel); }
+.box { margin: 18px 0; padding: 18px 22px; border: 1px solid var(--line-2); border-radius: 14px; background: color-mix(in srgb, var(--surface) 60%, transparent); }
+.log-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 18px; }
+.log-head .mono { font-size: 13px; color: var(--text); }
+
+/* 02 Light */
+.light { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 56px; margin-top: 72px; align-items: start; }
+.lanes-wrap { position: relative; }
+.lanes svg { display: block; width: 100%; height: auto; overflow: visible; }
+.lanes .lane-label { font: 500 11.5px var(--mono); fill: var(--muted); letter-spacing: .04em; }
+.lanes .axis { font: 450 11px var(--mono); fill: var(--muted); }
+.lanes .bar { fill: color-mix(in srgb, var(--steel) 16%, transparent); stroke: var(--line-2); stroke-width: 1; }
+.lanes .bar-txt { font: 450 11px var(--mono); fill: var(--text-2); }
+.lanes .grid { stroke: var(--line); stroke-width: 1; }
+.lanes .q { fill: var(--tick-idle); }
+.facts { list-style: none; margin: 0; padding: 0; }
+.facts li { padding: 18px 0; border-top: 1px solid var(--line); }
+.facts li:last-child { border-bottom: 1px solid var(--line); }
+.facts p { margin: 0; color: var(--text-2); font-size: 15.5px; }
+.lanes-cap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 18px; }
+
+/* 03 Report */
+.report-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 48px; align-items: end; }
+.gauge { position: relative; width: 236px; height: 236px; }
+.gauge svg { width: 100%; height: 100%; display: block; }
+.gauge .g-c { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+.gauge .g-n { font: 760 64px/1 var(--display); font-stretch: 105%; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.gauge .g-l { margin-top: 6px; font: 500 11px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+
+.report { margin-top: 64px; border-top: 1px solid var(--line-2); }
+.r-bar { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 0; flex-wrap: wrap; }
+.r-site { display: flex; align-items: center; gap: 12px; font: 500 14px var(--mono); color: var(--text); }
+.r-site .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--pass); }
+.tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--line); }
+.tabs button {
+  position: relative; display: inline-flex; align-items: center; gap: 10px; padding: 14px 16px; border: 0; background: none; color: var(--muted);
+  font: 550 15px/1 var(--body); cursor: pointer; white-space: nowrap;
+}
+.tabs button[aria-selected="true"] { color: var(--text); }
+.tabs button[aria-selected="true"]::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: -1px; height: 2px; background: var(--lamp); }
+.tabs .sc { font: 500 12.5px var(--mono); font-variant-numeric: tabular-nums; }
+.tbl { width: 100%; border-collapse: collapse; }
+.tbl th { text-align: left; padding: 16px 12px; font: 500 11.5px/1.2 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line); }
+.tbl th:first-child, .tbl td:first-child { padding-left: 0; }
+.tbl th:last-child, .tbl td:last-child { padding-right: 0; text-align: right; }
+.tbl td { padding: 14px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.tbl tr { transition: background .2s; }
+.tbl tbody tr:hover { background: color-mix(in srgb, var(--surface) 55%, transparent); }
+.path { font: 450 14.5px var(--mono); color: var(--text); }
+.path .d { color: var(--muted); }
+.cats { display: grid; grid-template-columns: repeat(4, 64px); gap: 10px; }
+.cats-h { display: grid; grid-template-columns: repeat(4, 64px); gap: 10px; }
+.cats-h span { font: 500 10.5px/1.2 var(--mono); letter-spacing: .04em; text-transform: none; color: var(--muted); }
+.ring { display: inline-flex; align-items: center; gap: 8px; font: 600 15px var(--mono); font-variant-numeric: tabular-nums; }
+.ring svg { width: 26px; height: 26px; transform: rotate(-90deg); }
+.ring .trk { stroke: var(--line-2); }
+.ring.pass { color: var(--pass-t); } .ring.avg { color: var(--avg-t); } .ring.fail { color: var(--fail-t); }
+.ring.pass .arc { stroke: var(--pass); } .ring.avg .arc { stroke: var(--avg); } .ring.fail .arc { stroke: var(--fail); }
+.single { display: flex; align-items: center; gap: 16px; }
+.single .meter { width: 180px; height: 4px; border-radius: 2px; background: var(--line); position: relative; overflow: hidden; }
+.single .meter i { position: absolute; inset: 0 auto 0 0; background: var(--c); }
+.act { position: relative; display: inline-block; }
+.act > button {
+  width: 36px; height: 32px; border-radius: 8px; border: 1px solid var(--line-2); background: transparent; color: var(--text-2); cursor: pointer;
+  font: 700 15px/1 var(--body); letter-spacing: .1em;
+}
+.act > button[aria-expanded="true"] { color: var(--text); border-color: var(--lamp); }
+.menu {
+  position: absolute; right: calc(100% + 10px); top: 50%; transform: translateY(-50%); z-index: 3; width: 300px; text-align: left;
+  padding: 8px; border-radius: 14px; border: 1px solid var(--line-2); background: var(--surface);
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, .45);
+}
+.menu[hidden] { display: none; }
+.menu a { display: block; padding: 10px 12px; border-radius: 9px; text-decoration: none; }
+.menu a:hover { background: color-mix(in srgb, var(--text) 6%, transparent); }
+.menu b { display: block; font: 600 14.5px/1.3 var(--body); color: var(--text); }
+.menu span { display: block; font-size: 13px; line-height: 1.4; color: var(--muted); }
+.r-foot { display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; padding: 22px 0 0; }
+.claims { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; margin-top: 72px; }
+.claims div { padding-top: 16px; border-top: 1px solid var(--line-2); }
+.claims p { margin: 0; color: var(--text-2); font-size: 15.5px; }
+
+/* 04 CI */
+.ci { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 64px; margin-top: 72px; align-items: start; }
+.ci-cmd { margin: 0; padding: 22px 0; border-top: 1px solid var(--line-2); border-bottom: 1px solid var(--line-2); font: 450 14px/1.8 var(--mono); color: var(--text); white-space: pre-wrap; overflow-wrap: normal; word-break: normal; }
+.ci-cmd .c { color: var(--muted); }
+.ci-cmd .f { color: var(--lamp-ink); }
+.exits { display: grid; gap: 0; }
+.exit { display: grid; grid-template-columns: auto 1fr; gap: 6px 28px; align-items: baseline; padding: 26px 0; border-bottom: 1px solid var(--line); }
+.exit:first-child { padding-top: 0; }
+.exit .ecode { font: 600 clamp(56px, 7vw, 112px)/.9 var(--mono); letter-spacing: -.04em; color: var(--text); font-variant-numeric: tabular-nums; }
+.exit .ecode small { font-size: .32em; letter-spacing: 0; color: var(--muted); margin-right: .3em; vertical-align: .9em; }
+.exit p { margin: 0; font: 650 clamp(20px, 1.8vw, 26px)/1.2 var(--display); }
+.exit p span { display: block; margin-top: 6px; font: 400 15px/1.5 var(--body); color: var(--muted); }
+.exit .tick { display: inline-block; width: 3px; height: .9em; border-radius: 2px; margin-right: 12px; background: var(--c); vertical-align: -.1em; }
+.pull { margin: 32px 0 0; font: 700 clamp(22px, 2.2vw, 30px)/1.2 var(--display); font-stretch: 105%; letter-spacing: -.015em; }
+.pull span { color: var(--muted); font-weight: 600; }
+
+/* 05 Integrations */
+.integ { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 56px; margin-top: 72px; align-items: start; }
+.ilist { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line-2); }
+.ilist button {
+  display: flex; width: 100%; justify-content: space-between; align-items: baseline; padding: 18px 0; border: 0; border-bottom: 1px solid var(--line);
+  background: none; color: var(--muted); cursor: pointer; text-align: left;
+  font: 720 clamp(24px, 2.3vw, 32px)/1 var(--display); font-stretch: 105%; letter-spacing: -.02em;
+}
+.ilist button small { font: 450 12px var(--mono); letter-spacing: .02em; color: var(--muted); }
+.ilist button[aria-selected="true"] { color: var(--text); }
+.ilist button[aria-selected="true"] small { color: var(--lamp-ink); }
+.ilist button:hover { color: var(--text); }
+.panel { min-width: 0; }
+.panel[hidden] { display: none; }
+.panel p { margin: 0 0 22px; color: var(--text-2); max-width: 38rem; }
+.code {
+  margin: 0 0 16px; padding: 22px 24px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line);
+  font: 450 14px/1.75 var(--mono); color: var(--text); overflow-x: auto; white-space: pre;
+}
+.code .fn { color: var(--code-dim); display: block; margin-bottom: 8px; font-size: 12px; letter-spacing: .04em; }
+.code .k { color: var(--code-key); } .code .s { color: var(--code-str); } .code .c { color: var(--code-dim); }
+.more { display: inline-flex; gap: 8px; align-items: center; font-weight: 600; text-decoration: none; color: var(--text); border-bottom: 1px solid var(--line-2); padding-bottom: 2px; }
+.more:hover { border-color: var(--lamp); }
+
+/* 06 Sponsors + close */
+.fund { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 64px; margin-top: 56px; align-items: end; }
+.fund p { margin: 0 0 28px; color: var(--text-2); font-size: clamp(17px, 1.3vw, 19px); max-width: 32rem; }
+.closing { position: relative; margin-top: clamp(120px, 14vw, 200px); padding: clamp(80px, 10vw, 140px) 0 0; overflow: hidden; isolation: isolate;
+  background: linear-gradient(180deg, var(--bg) 0%, var(--sky-mid) 40%, var(--sky-top) 100%); }
+.closing canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; }
+.closing h2 { max-width: 12em; }
+.closing .actions { margin-top: 36px; }
+.closing .horizon-sm { height: 200px; }
+footer { padding: 28px 0 40px; background: var(--sky-top); --knock: var(--sky-top); }
+.foot { display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; font-size: 14px; color: var(--muted); }
+.foot nav { display: flex; gap: 22px; flex-wrap: wrap; }
+.foot a { text-decoration: none; color: var(--text-2); }
+.foot a:hover { color: var(--text); }
+.foot .brand { height: 22px; }
+
+/* Reveal */
+.rv { opacity: 0; transform: translateY(14px); transition: opacity .9s var(--ease), transform .9s var(--ease); }
+.rv.in { opacity: 1; transform: none; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1080px) {
+  .nav { display: none; }
+  .discover, .ci, .fund { grid-template-columns: 1fr; gap: 48px; }
+  .light { grid-template-columns: 1fr; }
+  .integ { grid-template-columns: 1fr; gap: 32px; }
+  .ilist { display: flex; flex-wrap: wrap; gap: 0 22px; border-top: 0; border-bottom: 1px solid var(--line); }
+  .ilist li { flex: none; }
+  .ilist button { border: 0; padding: 12px 0; font-size: 22px; }
+  .ilist button small { display: none; }
+  .ilist button[aria-selected="true"] { box-shadow: inset 0 -2px 0 var(--lamp); }
+}
+@media (max-width: 760px) {
+  body { font-size: 16px; }
+  .gh span, .top .btn { display: none; }
+  .top .wrap { height: 64px; }
+  .hero { padding-top: 64px; }
+  .brand { height: 22px; }
+  .ch-head { grid-template-columns: 1fr; gap: 20px; }
+  .ch-num { width: 140px; }
+  .report-head { grid-template-columns: 1fr; gap: 32px; }
+  .gauge { width: 180px; height: 180px; }
+  .gauge .g-n { font-size: 48px; }
+  .claims { grid-template-columns: 1fr; gap: 24px; }
+  .tbl thead { display: none; }
+  .tbl, .tbl tbody, .tbl tr, .tbl td { display: block; width: 100%; }
+  .tbl tr { position: relative; padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .tbl td { padding: 0; border: 0; text-align: left !important; }
+  .tbl td.c-page { padding-right: 48px; margin-bottom: 12px; }
+  .tbl td.c-act { position: absolute; right: 0; top: 12px; width: auto; }
+  .cats { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+  .ring { gap: 6px; font-size: 14px; }
+  .ring svg { width: 22px; height: 22px; }
+  .single .meter { width: 120px; }
+  .menu { right: 0; top: calc(100% + 8px); transform: none; width: min(300px, calc(100vw - 2 * var(--gutter))); }
+  .readout { flex-direction: column; align-items: flex-start; gap: 10px; bottom: 16px; }
+  .readout .now { width: 22ch; }
+  .legend { gap: 12px; }
+  .cmd { font-size: 12.5px; padding-left: 14px; gap: 8px; max-width: 100%; }
+  .cmd > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .copy { min-width: 0; padding: 0 10px; }
+  .actions .btn { flex: 1 1 auto; justify-content: center; }
+  .actions .cmd { flex: 1 1 100%; justify-content: space-between; }
+  .exit { grid-template-columns: 1fr; }
+  .code { font-size: 12.5px; padding: 18px; }
+  .horizon { height: 250px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rv { opacity: 1; transform: none; transition: none; }
+  .btn .arr { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#" aria-label="Unlighthouse home"><svg viewBox="0 -760 6252 960" role="img" aria-label="Unlighthouse"><g transform="translate(0 -537) scale(6.39286)"><path d="M0 0H25V46A13 13 0 0 0 51 46V0H76V84H38A38 38 0 0 1 0 46Z" class="bk-ink"/><path d="M40.54 29.81L49.13 -4.63A46 46 0 0 1 78.62 18.4L47.27 35.07A10.5 10.5 0 0 0 40.54 29.81Z" class="bk-beam" stroke-width="6" paint-order="stroke" stroke-linejoin="round"/><circle cx="38" cy="40" r="7.5" class="bk-lamp"/></g><path d="M736.86 0L571.86 0L571.86 -537L719.86 -537L736.86 -464L743.86 -464Q773.86 -504 819.36 -525Q864.86 -546 920.86 -546L920.86 -546Q987.86 -546 1032.36 -521.5Q1076.86 -497 1099.36 -452Q1121.86 -407 1121.86 -343L1121.86 -343L1121.86 0L956.86 0L956.86 -320Q956.86 -353 945.36 -376Q933.86 -399 911.86 -410.5Q889.86 -422 856.86 -422L856.86 -422Q816.86 -422 786.36 -404Q755.86 -386 736.86 -357L736.86 -357L736.86 0ZM1352.86 0L1187.86 0L1187.86 -729L1352.86 -729L1352.86 0ZM1590.86 0L1425.86 0L1425.86 -537L1590.86 -537L1590.86 0ZM1590.86 -605L1425.86 -605L1425.86 -737L1590.86 -737L1590.86 -605ZM1920.86 177L1920.86 177Q1809.86 177 1741.86 133.5Q1673.86 90 1661.86 15L1661.86 15L1821.86 15Q1828.86 42 1855.36 54Q1881.86 66 1921.86 66L1921.86 66Q1960.86 66 1986.86 55Q2012.86 44 2025.86 23Q2038.86 2 2038.86 -27L2038.86 -27L2038.86 -108L2031.86 -108Q2008.86 -69 1963.86 -48.5Q1918.86 -28 1865.86 -28L1865.86 -28Q1800.86 -28 1751.86 -56Q1702.86 -84 1675.86 -135Q1648.86 -186 1648.86 -255L1648.86 -255L1648.86 -320Q1648.86 -388 1676.36 -439Q1703.86 -490 1753.86 -518Q1803.86 -546 1869.86 -546L1869.86 -546Q1923.86 -546 1967.36 -525.5Q2010.86 -505 2032.86 -470L2032.86 -470L2040.86 -470L2052.86 -537L2203.86 -537L2203.86 -41Q2203.86 31 2168.86 79.5Q2133.86 128 2070.36 152.5Q2006.86 177 1920.86 177ZM1929.86 -146L1929.86 -146Q1967.86 -146 1996.36 -163Q2024.86 -180 2038.86 -210L2038.86 -210L2038.86 -365Q2024.86 -395 1996.36 -411.5Q1967.86 -428 1929.86 -428L1929.86 -428Q1896.86 -428 1872.36 -416.5Q1847.86 -405 1833.86 -382.5Q1819.86 -360 1819.86 -328L1819.86 -328L1819.86 -248Q1819.86 -216 1833.86 -193Q1847.86 -170 1872.86 -158Q1897.86 -146 1929.86 -146ZM2441.86 0L2276.86 0L2276.86 -729L2441.86 -729L2441.86 -464L2448.86 -464Q2478.86 -504 2524.36 -525Q2569.86 -546 2625.86 -546L2625.86 -546Q2692.86 -546 2737.36 -521.5Q2781.86 -497 2804.36 -452Q2826.86 -407 2826.86 -343L2826.86 -343L2826.86 0L2661.86 0L2661.86 -320Q2661.86 -353 2650.36 -376Q2638.86 -399 2616.86 -410.5Q2594.86 -422 2561.86 -422L2561.86 -422Q2521.86 -422 2491.36 -404Q2460.86 -386 2441.86 -357L2441.86 -357L2441.86 0ZM3227.86 0L3061.86 0Q3012.86 0 2984.36 -24Q2955.86 -48 2955.86 -98L2955.86 -98L2955.86 -416L2868.86 -416L2868.86 -537L2955.86 -537L2955.86 -683L3120.86 -683L3120.86 -537L3224.86 -537L3224.86 -416L3120.86 -416L3120.86 -128L3227.86 -128L3227.86 0ZM3448.86 0L3283.86 0L3283.86 -729L3448.86 -729L3448.86 -464L3455.86 -464Q3485.86 -504 3531.36 -525Q3576.86 -546 3632.86 -546L3632.86 -546Q3699.86 -546 3744.36 -521.5Q3788.86 -497 3811.36 -452Q3833.86 -407 3833.86 -343L3833.86 -343L3833.86 0L3668.86 0L3668.86 -320Q3668.86 -353 3657.36 -376Q3645.86 -399 3623.86 -410.5Q3601.86 -422 3568.86 -422L3568.86 -422Q3528.86 -422 3498.36 -404Q3467.86 -386 3448.86 -357L3448.86 -357L3448.86 0ZM4170.86 10L4170.86 10Q4103.86 10 4050.36 -7.5Q3996.86 -25 3959.36 -58.5Q3921.86 -92 3901.86 -139Q3881.86 -186 3881.86 -245L3881.86 -245L3881.86 -293Q3881.86 -371 3916.86 -428Q3951.86 -485 4016.86 -516Q4081.86 -547 4170.86 -547L4170.86 -547Q4237.86 -547 4291.36 -529.5Q4344.86 -512 4382.36 -478.5Q4419.86 -445 4440.36 -398Q4460.86 -351 4460.86 -293L4460.86 -293L4460.86 -245Q4460.86 -167 4425.36 -109.5Q4389.86 -52 4325.36 -21Q4260.86 10 4170.86 10ZM4170.86 -111L4170.86 -111Q4207.86 -111 4234.36 -123.5Q4260.86 -136 4275.36 -159.5Q4289.86 -183 4289.86 -212L4289.86 -212L4289.86 -325Q4289.86 -356 4275.36 -379Q4260.86 -402 4234.36 -414.5Q4207.86 -427 4170.86 -427L4170.86 -427Q4134.86 -427 4107.86 -414.5Q4080.86 -402 4066.36 -379Q4051.86 -356 4051.86 -325L4051.86 -325L4051.86 -212Q4051.86 -183 4066.36 -159.5Q4080.86 -136 4107.86 -123.5Q4134.86 -111 4170.86 -111ZM4892.86 -537L5057.86 -537L5057.86 0L4909.86 0L4892.86 -73L4885.86 -73Q4855.86 -33 4810.36 -12Q4764.86 9 4708.86 9L4708.86 9Q4642.86 9 4597.86 -15.5Q4552.86 -40 4530.36 -85.5Q4507.86 -131 4507.86 -194L4507.86 -194L4507.86 -537L4672.86 -537L4672.86 -217Q4672.86 -184 4684.36 -161.5Q4695.86 -139 4718.36 -127Q4740.86 -115 4772.86 -115L4772.86 -115Q4812.86 -115 4843.36 -133Q4873.86 -151 4892.86 -180L4892.86 -180L4892.86 -537ZM5365.86 10L5365.86 10Q5281.86 10 5226.36 -11.5Q5170.86 -33 5140.86 -71.5Q5110.86 -110 5104.86 -161L5104.86 -161L5269.86 -161Q5271.86 -136 5283.86 -120Q5295.86 -104 5316.86 -95.5Q5337.86 -87 5367.86 -87L5367.86 -87Q5411.86 -87 5432.86 -102Q5453.86 -117 5453.86 -143L5453.86 -143Q5453.86 -170 5433.36 -183.5Q5412.86 -197 5371.86 -207L5371.86 -207L5285.86 -223Q5224.86 -236 5188.86 -257.5Q5152.86 -279 5136.86 -309.5Q5120.86 -340 5120.86 -378L5120.86 -378Q5120.86 -433 5152.86 -470.5Q5184.86 -508 5239.36 -527.5Q5293.86 -547 5361.86 -547L5361.86 -547Q5433.86 -547 5487.86 -528Q5541.86 -509 5574.36 -472.5Q5606.86 -436 5611.86 -384L5611.86 -384L5454.86 -384Q5452.86 -408 5440.36 -423Q5427.86 -438 5407.86 -445Q5387.86 -452 5363.86 -452L5363.86 -452Q5337.86 -452 5319.86 -445.5Q5301.86 -439 5293.36 -427.5Q5284.86 -416 5284.86 -400L5284.86 -400Q5284.86 -376 5303.36 -362.5Q5321.86 -349 5363.86 -339L5363.86 -339L5445.86 -326Q5497.86 -315 5537.86 -295.5Q5577.86 -276 5600.86 -243.5Q5623.86 -211 5623.86 -159L5623.86 -159Q5623.86 -103 5591.36 -65.5Q5558.86 -28 5500.86 -9Q5442.86 10 5365.86 10ZM5944.86 10L5944.86 10Q5878.86 10 5825.86 -7.5Q5772.86 -25 5734.86 -58Q5696.86 -91 5676.86 -138.5Q5656.86 -186 5656.86 -245L5656.86 -245L5656.86 -293Q5656.86 -371 5692.36 -428Q5727.86 -485 5792.86 -516Q5857.86 -547 5944.86 -547L5944.86 -547Q6008.86 -547 6060.36 -529.5Q6111.86 -512 6148.86 -479Q6185.86 -446 6205.86 -399.5Q6225.86 -353 6225.86 -296L6225.86 -296L6225.86 -228L5826.86 -228L5826.86 -202Q5826.86 -173 5841.36 -150Q5855.86 -127 5882.86 -114.5Q5909.86 -102 5946.86 -102L5946.86 -102Q5991.86 -102 6020.86 -119Q6049.86 -136 6057.86 -167L6057.86 -167L6219.86 -167Q6211.86 -112 6173.86 -72.5Q6135.86 -33 6076.86 -11.5Q6017.86 10 5944.86 10ZM5826.86 -336L5826.86 -322L6057.86 -322L6057.86 -340Q6057.86 -369 6043.86 -390.5Q6029.86 -412 6004.86 -424Q5979.86 -436 5944.86 -436L5944.86 -436Q5907.86 -436 5881.36 -423.5Q5854.86 -411 5840.86 -388.5Q5826.86 -366 5826.86 -336L5826.86 -336Z" class="bk-ink"/></svg></a>
+    <nav class="nav" aria-label="Primary">
+      <a href="https://unlighthouse.dev/guide/getting-started/installation">Guide</a>
+      <a href="https://unlighthouse.dev/integrations/cli">Integrations</a>
+      <a href="https://unlighthouse.dev/learn-lighthouse">Learn Lighthouse</a>
+      <a href="https://unlighthouse.dev/tools">Tools</a>
+    </nav>
+    <span class="spacer"></span>
+    <a class="gh" href="https://github.com/harlan-zw/unlighthouse">
+      <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      <span>GitHub</span>
+    </a>
+    <button class="icon-btn" id="theme" type="button" aria-label="Switch to light theme">
+      <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></svg>
+      <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></svg>
+    </button>
+    <a class="btn btn-lamp btn-sm" href="https://unlighthouse.dev/guide/getting-started/installation">Get started</a>
+  </div>
+</header>
+
+<main>
+<!-- ============ HERO ============ -->
+<section class="hero" id="hero" aria-labelledby="h1">
+  <canvas id="sky" aria-hidden="true"></canvas>
+  <div class="wrap hero-copy">
+    <p class="kicker"><b>Free</b><i></i>Open source, MIT licensed</p>
+    <h1 id="h1">Lighthouse for your <em>entire site.</em></h1>
+    <div class="hero-row">
+      <p class="lede">Unlighthouse is a free, open-source CLI that runs <strong>Google Lighthouse on every page</strong> of your site in parallel, then delivers one unified report.</p>
+      <div>
+        <div class="actions">
+          <span class="cmd"><span><span class="p">$</span> npx unlighthouse <span class="f">--site</span> example.com</span><button class="copy" type="button" data-copy="npx unlighthouse --site example.com">Copy</button></span>
+          <a class="btn btn-lamp" href="https://unlighthouse.dev/guide/getting-started/installation">Get started <span class="arr" aria-hidden="true">→</span></a>
+        </div>
+      </div>
+    </div>
+    <p class="fine">Node 22+ · Zero config · <a href="https://unlighthouse-demo.netlify.app/">View the demo report</a></p>
+  </div>
+  <div class="wrap horizon" id="horizon">
+    <div class="readout" aria-live="off">
+      <div>
+        <div class="live">Example data · scanning example.com with 4 workers</div>
+        <div>Audited <span class="num" id="ro-done">000</span> of <span class="num" id="ro-total">120</span> pages · <span class="now" id="ro-now">/</span></div>
+      </div>
+      <div class="legend" aria-label="Performance score bands, example data">
+        <span style="--c: var(--pass)"><i></i>90–100 <span class="n" id="ro-pass">0</span></span>
+        <span style="--c: var(--avg)"><i></i>50–89 <span class="n" id="ro-avg">0</span></span>
+        <span style="--c: var(--fail)"><i></i>0–49 <span class="n" id="ro-fail">0</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 01 FIND ============ -->
+<section class="chapter" aria-labelledby="h-find">
+  <div class="wrap">
+    <div class="ch-head rv">
+      <div class="ch-num"><b>01</b>Discover</div>
+      <div>
+        <h2 id="h-find">Find every page. <span class="dim">Before you ask.</span></h2>
+        <p class="ch-intro">Point it at a site. Unlighthouse discovers URLs via robots.txt, sitemap.xml, and internal links, then auto-samples dynamic routes to reduce scan time.</p>
+      </div>
+    </div>
+    <div class="ch-head" style="margin-top:0">
+      <div></div>
+      <div class="discover">
+        <ul class="sources rv" id="sources">
+          <li><span class="src">robots.txt</span><span class="cnt">1 sitemap</span><p>Read first. Its sitemap entries tell Unlighthouse where to look.</p></li>
+          <li><span class="src">sitemap.xml</span><span class="cnt" id="cnt-sitemap">96 URLs</span><p>Every listed URL joins the queue.</p><div class="strip" data-n="96"></div></li>
+          <li><span class="src">internal links</span><span class="cnt">fallback</span><p>No sitemap? It falls back to crawler mode and follows your links from the homepage.</p></li>
+          <li><span class="src">/blog/[slug]</span><span class="cnt">5 of 41</span><p>Dynamic routes share one template, so a sample stands in for the rest.</p><div class="strip" data-n="41" data-on="5"></div></li>
+        </ul>
+        <div class="rv">
+          <div class="log-head"><span class="mono">npx unlighthouse --site example.com</span><span class="tag-example">Example data</span></div>
+<pre class="log"><span class="i">ℹ</span> Found /robots.txt, using entries. Sitemaps: <span class="s">1</span>, Groups: <span class="s">1</span>.
+<span class="i">ℹ</span> Discovered <span class="s">96</span> routes from <span class="s">1</span> sitemap.
+<span class="i">ℹ</span> Disabling crawler mode as sitemap has been provided.
+<span class="box" style="display:block"><span class="s">⛵ Unlighthouse</span> <span class="c">cli @ v0.18.0</span>
+
+<span class="k">▸ Scanning:</span> https://example.com
+<span class="k">▸ Route Discovery:</span> Sitemap <span class="c">96 initial URLs</span>
+
+<span class="s">Report: http://localhost:5678/</span></span><span class="c">The report shows scan progress in real time.</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 02 LIGHT ============ -->
+<section class="chapter" aria-labelledby="h-light">
+  <div class="wrap">
+    <div class="ch-head rv">
+      <div class="ch-num"><b>02</b>Scan</div>
+      <div>
+        <h2 id="h-light">Light every page. <span class="dim">In parallel.</span></h2>
+        <p class="ch-intro">A pool of Chrome workers shares one queue. Each worker takes the next page the moment it is free.</p>
+      </div>
+    </div>
+    <div class="ch-head" style="margin-top:0">
+      <div></div>
+      <div class="light">
+        <figure class="lanes-wrap rv" style="margin:0">
+          <div class="lanes" id="lanes" role="img" aria-label="Timeline, example data: four Chrome workers each audit pages of uneven length from one shared queue. Each bar ends with a tick in its performance score band."></div>
+          <figcaption class="lanes-cap"><span class="note">Each bar is one page in Chrome. The tick at its end is the score landing.</span><span class="tag-example">Example data</span></figcaption>
+        </figure>
+        <ul class="facts rv">
+          <li><h3>Parallel scans</h3><p>Threaded workers with opportunistic throttling for fast audits.</p></li>
+          <li><h3>Real Lighthouse</h3><p>Unlighthouse wraps the Lighthouse npm package, so every score is a Lighthouse score.</p></li>
+          <li><h3>Cached between runs</h3><p>Reports restore from cache. Pass <code class="mono">--no-cache</code> for a clean run.</p></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 03 REPORT ============ -->
+<section class="chapter" aria-labelledby="h-report">
+  <div class="wrap">
+    <div class="ch-head">
+      <div class="ch-num rv"><b>03</b>Report</div>
+      <div class="report-head rv">
+        <div>
+          <h2 id="h-report">Read one report. <span class="dim">Not one hundred.</span></h2>
+          <p class="ch-intro">Every page lands in one Vite-powered client. Search, sort, and re-scan pages, then open the full Lighthouse report for any row.</p>
+        </div>
+        <div class="gauge" id="gauge" role="img" aria-label="Site score ring, example data. Each tick is one page, coloured by its score band.">
+          <svg viewBox="0 0 240 240" id="gauge-svg" aria-hidden="true"></svg>
+          <div class="g-c" aria-hidden="true"><div class="g-n" id="gauge-n">0</div><div class="g-l">Total score<br>example data</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="report rv" id="report">
+      <div class="r-bar">
+        <span class="r-site"><span class="dot" aria-hidden="true"></span>https://example.com</span>
+        <span class="tag-example">Example data</span>
+      </div>
+      <div class="tabs" role="tablist" aria-label="Report category" id="tabs"></div>
+      <table class="tbl">
+        <thead><tr><th scope="col">Page</th><th scope="col" id="score-h">Score</th><th scope="col">Actions</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <div class="r-foot">
+        <span class="note">Columns and tabs match the Unlighthouse client. Scores are example data.</span>
+        <a class="more" href="https://unlighthouse-demo.netlify.app/">Open the live demo report <span aria-hidden="true">→</span></a>
+      </div>
+    </div>
+
+    <div class="claims rv">
+      <div><h3>SEO insights</h3><p>Titles, meta descriptions, share images, link analysis.</p></div>
+      <div><h3>Accessibility summary</h3><p>Accessibility audit with contrast issue visualization.</p></div>
+      <div><h3>Static reports</h3><p>Build the report as static HTML with <code class="mono">--build-static</code> and host it anywhere.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 04 CI ============ -->
+<section class="chapter" aria-labelledby="h-ci">
+  <div class="wrap">
+    <div class="ch-head rv">
+      <div class="ch-num"><b>04</b>Guard</div>
+      <div>
+        <h2 id="h-ci">Hold the line in CI.</h2>
+        <p class="ch-intro">Set a budget. Unlighthouse CI scans the whole site and fails the build when any page drops below it. Wire it into GitHub Actions, GitLab CI, CircleCI, or any pipeline that runs bash.</p>
+      </div>
+    </div>
+    <div class="ch-head" style="margin-top:0">
+      <div></div>
+      <div class="ci">
+        <div class="rv">
+<pre class="ci-cmd"><span class="c">$</span> npm install -g @unlighthouse/cli puppeteer
+<span class="c">$</span> unlighthouse-ci <span class="f">--site</span> https://staging.example.com <span class="f">--budget</span> 80</pre>
+          <p class="pull">“That’s the entire contract.”</p><p class="note" style="margin:10px 0 0">From the Unlighthouse CI guide, on exit codes.</p>
+        </div>
+        <div class="exits rv">
+          <div class="exit"><span class="ecode"><small>exit</small>0</span><p><i class="tick" style="--c: var(--pass)" aria-hidden="true"></i>All pages passed.<span>Every category on every page met the budget.</span></p></div>
+          <div class="exit"><span class="ecode"><small>exit</small>1</span><p><i class="tick" style="--c: var(--fail)" aria-hidden="true"></i>Budget failed.<span>At least one page fell short. The build stops here.</span></p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 05 INTEGRATIONS ============ -->
+<section class="chapter" aria-labelledby="h-int">
+  <div class="wrap">
+    <div class="ch-head rv">
+      <div class="ch-num"><b>05</b>Integrate</div>
+      <div>
+        <h2 id="h-int">Wherever you build.</h2>
+        <p class="ch-intro">Run Unlighthouse from the CLI, CI, Nuxt, Vite, or Webpack.</p>
+      </div>
+    </div>
+    <div class="ch-head" style="margin-top:0">
+      <div></div>
+      <div class="integ rv">
+        <ul class="ilist" role="tablist" aria-label="Integrations" id="ilist">
+          <li><button role="tab" aria-selected="true" aria-controls="p-cli" id="t-cli">CLI</button></li>
+          <li><button role="tab" aria-selected="false" aria-controls="p-ci" id="t-ci" tabindex="-1">CI</button></li>
+          <li><button role="tab" aria-selected="false" aria-controls="p-nuxt" id="t-nuxt" tabindex="-1">Nuxt</button></li>
+          <li><button role="tab" aria-selected="false" aria-controls="p-vite" id="t-vite" tabindex="-1">Vite</button></li>
+          <li><button role="tab" aria-selected="false" aria-controls="p-webpack" id="t-webpack" tabindex="-1">Webpack</button></li>
+        </ul>
+        <div>
+          <div class="panel" role="tabpanel" id="p-cli" aria-labelledby="t-cli">
+            <p>Run it once with no install, or install it globally.</p>
+<pre class="code"><span class="fn"># one-time run (no install)</span>npx unlighthouse <span class="k">--site</span> example.com</pre>
+<pre class="code"><span class="fn"># global install</span>npm install -g unlighthouse</pre>
+            <a class="more" href="https://unlighthouse.dev/integrations/cli">CLI guide <span aria-hidden="true">→</span></a>
+          </div>
+          <div class="panel" role="tabpanel" id="p-ci" aria-labelledby="t-ci" hidden>
+            <p>CI environments need Chrome. Install puppeteer alongside the CLI.</p>
+<pre class="code">npm install -g @unlighthouse/cli puppeteer
+unlighthouse-ci <span class="k">--site</span> https://staging.example.com <span class="k">--budget</span> 80</pre>
+            <a class="more" href="https://unlighthouse.dev/integrations/ci">CI guide <span aria-hidden="true">→</span></a>
+          </div>
+          <div class="panel" role="tabpanel" id="p-nuxt" aria-labelledby="t-nuxt" hidden>
+            <p>Add the module. Unlighthouse starts once you visit the client URL it prints.</p>
+<pre class="code">npm install -D @unlighthouse/nuxt</pre>
+<pre class="code"><span class="fn">nuxt.config.ts</span><span class="k">export default</span> defineNuxtConfig({
+  modules: [
+    <span class="s">'@unlighthouse/nuxt'</span>,
+  ],
+})</pre>
+            <a class="more" href="https://unlighthouse.dev/integrations/nuxt">Nuxt guide <span aria-hidden="true">→</span></a>
+          </div>
+          <div class="panel" role="tabpanel" id="p-vite" aria-labelledby="t-vite" hidden>
+            <p>Add the plugin. Unlighthouse starts once you visit the client URL it prints.</p>
+<pre class="code">npm install -D @unlighthouse/vite</pre>
+<pre class="code"><span class="fn">vite.config.ts</span><span class="k">import</span> Unlighthouse <span class="k">from</span> <span class="s">'@unlighthouse/vite'</span>
+<span class="k">import</span> { defineConfig } <span class="k">from</span> <span class="s">'vite'</span>
+
+<span class="k">export default</span> defineConfig({
+  plugins: [
+    Unlighthouse({
+      <span class="c">// config</span>
+    })
+  ]
+})</pre>
+            <a class="more" href="https://unlighthouse.dev/integrations/vite">Vite guide <span aria-hidden="true">→</span></a>
+          </div>
+          <div class="panel" role="tabpanel" id="p-webpack" aria-labelledby="t-webpack" hidden>
+            <p>Extend your webpack configuration with the plugin.</p>
+<pre class="code">npm install -D @unlighthouse/webpack</pre>
+<pre class="code"><span class="fn">webpack.config.js</span><span class="k">import</span> Unlighthouse <span class="k">from</span> <span class="s">'@unlighthouse/webpack'</span>
+
+<span class="k">export default</span> {
+  <span class="c">// ...</span>
+  plugins: [
+    Unlighthouse({
+      <span class="c">// config</span>
+    }),
+  ],
+}</pre>
+            <a class="more" href="https://unlighthouse.dev/integrations/webpack">Webpack guide <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 06 FUND ============ -->
+<section class="chapter" aria-labelledby="h-fund">
+  <div class="wrap">
+    <div class="ch-head rv">
+      <div class="ch-num"><b>06</b>Keep the lamp lit</div>
+      <div class="fund" style="margin-top:0">
+        <h2 id="h-fund">Community funded.</h2>
+        <div>
+          <p>Unlighthouse is free and open source thanks to generous community sponsors.</p>
+          <div class="actions">
+            <a class="btn btn-ghost" href="https://github.com/sponsors/harlan-zw">Become a sponsor <span class="arr" aria-hidden="true">→</span></a>
+            <a class="btn btn-ghost" href="https://github.com/harlan-zw/unlighthouse">Star on GitHub</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CLOSING ============ -->
+<section class="closing" id="closing" aria-labelledby="h-close">
+  <canvas id="sky2" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="ch-head">
+      <div class="ch-num"><b>∞</b>Your turn</div>
+      <div>
+        <h2 id="h-close">Scan the whole site tonight.</h2>
+        <div class="actions">
+          <span class="cmd"><span><span class="p">$</span> npx unlighthouse <span class="f">--site</span> example.com</span><button class="copy" type="button" data-copy="npx unlighthouse --site example.com">Copy</button></span>
+          <a class="btn btn-lamp" href="https://unlighthouse.dev/guide/getting-started/installation">Read the guide <span class="arr" aria-hidden="true">→</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="horizon-sm" id="horizon2"></div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <a class="brand" href="#" aria-label="Unlighthouse home"><svg viewBox="0 -760 6252 960" role="img" aria-label="Unlighthouse"><g transform="translate(0 -537) scale(6.39286)"><path d="M0 0H25V46A13 13 0 0 0 51 46V0H76V84H38A38 38 0 0 1 0 46Z" class="bk-ink"/><path d="M40.54 29.81L49.13 -4.63A46 46 0 0 1 78.62 18.4L47.27 35.07A10.5 10.5 0 0 0 40.54 29.81Z" class="bk-beam" stroke-width="6" paint-order="stroke" stroke-linejoin="round"/><circle cx="38" cy="40" r="7.5" class="bk-lamp"/></g><path d="M736.86 0L571.86 0L571.86 -537L719.86 -537L736.86 -464L743.86 -464Q773.86 -504 819.36 -525Q864.86 -546 920.86 -546L920.86 -546Q987.86 -546 1032.36 -521.5Q1076.86 -497 1099.36 -452Q1121.86 -407 1121.86 -343L1121.86 -343L1121.86 0L956.86 0L956.86 -320Q956.86 -353 945.36 -376Q933.86 -399 911.86 -410.5Q889.86 -422 856.86 -422L856.86 -422Q816.86 -422 786.36 -404Q755.86 -386 736.86 -357L736.86 -357L736.86 0ZM1352.86 0L1187.86 0L1187.86 -729L1352.86 -729L1352.86 0ZM1590.86 0L1425.86 0L1425.86 -537L1590.86 -537L1590.86 0ZM1590.86 -605L1425.86 -605L1425.86 -737L1590.86 -737L1590.86 -605ZM1920.86 177L1920.86 177Q1809.86 177 1741.86 133.5Q1673.86 90 1661.86 15L1661.86 15L1821.86 15Q1828.86 42 1855.36 54Q1881.86 66 1921.86 66L1921.86 66Q1960.86 66 1986.86 55Q2012.86 44 2025.86 23Q2038.86 2 2038.86 -27L2038.86 -27L2038.86 -108L2031.86 -108Q2008.86 -69 1963.86 -48.5Q1918.86 -28 1865.86 -28L1865.86 -28Q1800.86 -28 1751.86 -56Q1702.86 -84 1675.86 -135Q1648.86 -186 1648.86 -255L1648.86 -255L1648.86 -320Q1648.86 -388 1676.36 -439Q1703.86 -490 1753.86 -518Q1803.86 -546 1869.86 -546L1869.86 -546Q1923.86 -546 1967.36 -525.5Q2010.86 -505 2032.86 -470L2032.86 -470L2040.86 -470L2052.86 -537L2203.86 -537L2203.86 -41Q2203.86 31 2168.86 79.5Q2133.86 128 2070.36 152.5Q2006.86 177 1920.86 177ZM1929.86 -146L1929.86 -146Q1967.86 -146 1996.36 -163Q2024.86 -180 2038.86 -210L2038.86 -210L2038.86 -365Q2024.86 -395 1996.36 -411.5Q1967.86 -428 1929.86 -428L1929.86 -428Q1896.86 -428 1872.36 -416.5Q1847.86 -405 1833.86 -382.5Q1819.86 -360 1819.86 -328L1819.86 -328L1819.86 -248Q1819.86 -216 1833.86 -193Q1847.86 -170 1872.86 -158Q1897.86 -146 1929.86 -146ZM2441.86 0L2276.86 0L2276.86 -729L2441.86 -729L2441.86 -464L2448.86 -464Q2478.86 -504 2524.36 -525Q2569.86 -546 2625.86 -546L2625.86 -546Q2692.86 -546 2737.36 -521.5Q2781.86 -497 2804.36 -452Q2826.86 -407 2826.86 -343L2826.86 -343L2826.86 0L2661.86 0L2661.86 -320Q2661.86 -353 2650.36 -376Q2638.86 -399 2616.86 -410.5Q2594.86 -422 2561.86 -422L2561.86 -422Q2521.86 -422 2491.36 -404Q2460.86 -386 2441.86 -357L2441.86 -357L2441.86 0ZM3227.86 0L3061.86 0Q3012.86 0 2984.36 -24Q2955.86 -48 2955.86 -98L2955.86 -98L2955.86 -416L2868.86 -416L2868.86 -537L2955.86 -537L2955.86 -683L3120.86 -683L3120.86 -537L3224.86 -537L3224.86 -416L3120.86 -416L3120.86 -128L3227.86 -128L3227.86 0ZM3448.86 0L3283.86 0L3283.86 -729L3448.86 -729L3448.86 -464L3455.86 -464Q3485.86 -504 3531.36 -525Q3576.86 -546 3632.86 -546L3632.86 -546Q3699.86 -546 3744.36 -521.5Q3788.86 -497 3811.36 -452Q3833.86 -407 3833.86 -343L3833.86 -343L3833.86 0L3668.86 0L3668.86 -320Q3668.86 -353 3657.36 -376Q3645.86 -399 3623.86 -410.5Q3601.86 -422 3568.86 -422L3568.86 -422Q3528.86 -422 3498.36 -404Q3467.86 -386 3448.86 -357L3448.86 -357L3448.86 0ZM4170.86 10L4170.86 10Q4103.86 10 4050.36 -7.5Q3996.86 -25 3959.36 -58.5Q3921.86 -92 3901.86 -139Q3881.86 -186 3881.86 -245L3881.86 -245L3881.86 -293Q3881.86 -371 3916.86 -428Q3951.86 -485 4016.86 -516Q4081.86 -547 4170.86 -547L4170.86 -547Q4237.86 -547 4291.36 -529.5Q4344.86 -512 4382.36 -478.5Q4419.86 -445 4440.36 -398Q4460.86 -351 4460.86 -293L4460.86 -293L4460.86 -245Q4460.86 -167 4425.36 -109.5Q4389.86 -52 4325.36 -21Q4260.86 10 4170.86 10ZM4170.86 -111L4170.86 -111Q4207.86 -111 4234.36 -123.5Q4260.86 -136 4275.36 -159.5Q4289.86 -183 4289.86 -212L4289.86 -212L4289.86 -325Q4289.86 -356 4275.36 -379Q4260.86 -402 4234.36 -414.5Q4207.86 -427 4170.86 -427L4170.86 -427Q4134.86 -427 4107.86 -414.5Q4080.86 -402 4066.36 -379Q4051.86 -356 4051.86 -325L4051.86 -325L4051.86 -212Q4051.86 -183 4066.36 -159.5Q4080.86 -136 4107.86 -123.5Q4134.86 -111 4170.86 -111ZM4892.86 -537L5057.86 -537L5057.86 0L4909.86 0L4892.86 -73L4885.86 -73Q4855.86 -33 4810.36 -12Q4764.86 9 4708.86 9L4708.86 9Q4642.86 9 4597.86 -15.5Q4552.86 -40 4530.36 -85.5Q4507.86 -131 4507.86 -194L4507.86 -194L4507.86 -537L4672.86 -537L4672.86 -217Q4672.86 -184 4684.36 -161.5Q4695.86 -139 4718.36 -127Q4740.86 -115 4772.86 -115L4772.86 -115Q4812.86 -115 4843.36 -133Q4873.86 -151 4892.86 -180L4892.86 -180L4892.86 -537ZM5365.86 10L5365.86 10Q5281.86 10 5226.36 -11.5Q5170.86 -33 5140.86 -71.5Q5110.86 -110 5104.86 -161L5104.86 -161L5269.86 -161Q5271.86 -136 5283.86 -120Q5295.86 -104 5316.86 -95.5Q5337.86 -87 5367.86 -87L5367.86 -87Q5411.86 -87 5432.86 -102Q5453.86 -117 5453.86 -143L5453.86 -143Q5453.86 -170 5433.36 -183.5Q5412.86 -197 5371.86 -207L5371.86 -207L5285.86 -223Q5224.86 -236 5188.86 -257.5Q5152.86 -279 5136.86 -309.5Q5120.86 -340 5120.86 -378L5120.86 -378Q5120.86 -433 5152.86 -470.5Q5184.86 -508 5239.36 -527.5Q5293.86 -547 5361.86 -547L5361.86 -547Q5433.86 -547 5487.86 -528Q5541.86 -509 5574.36 -472.5Q5606.86 -436 5611.86 -384L5611.86 -384L5454.86 -384Q5452.86 -408 5440.36 -423Q5427.86 -438 5407.86 -445Q5387.86 -452 5363.86 -452L5363.86 -452Q5337.86 -452 5319.86 -445.5Q5301.86 -439 5293.36 -427.5Q5284.86 -416 5284.86 -400L5284.86 -400Q5284.86 -376 5303.36 -362.5Q5321.86 -349 5363.86 -339L5363.86 -339L5445.86 -326Q5497.86 -315 5537.86 -295.5Q5577.86 -276 5600.86 -243.5Q5623.86 -211 5623.86 -159L5623.86 -159Q5623.86 -103 5591.36 -65.5Q5558.86 -28 5500.86 -9Q5442.86 10 5365.86 10ZM5944.86 10L5944.86 10Q5878.86 10 5825.86 -7.5Q5772.86 -25 5734.86 -58Q5696.86 -91 5676.86 -138.5Q5656.86 -186 5656.86 -245L5656.86 -245L5656.86 -293Q5656.86 -371 5692.36 -428Q5727.86 -485 5792.86 -516Q5857.86 -547 5944.86 -547L5944.86 -547Q6008.86 -547 6060.36 -529.5Q6111.86 -512 6148.86 -479Q6185.86 -446 6205.86 -399.5Q6225.86 -353 6225.86 -296L6225.86 -296L6225.86 -228L5826.86 -228L5826.86 -202Q5826.86 -173 5841.36 -150Q5855.86 -127 5882.86 -114.5Q5909.86 -102 5946.86 -102L5946.86 -102Q5991.86 -102 6020.86 -119Q6049.86 -136 6057.86 -167L6057.86 -167L6219.86 -167Q6211.86 -112 6173.86 -72.5Q6135.86 -33 6076.86 -11.5Q6017.86 10 5944.86 10ZM5826.86 -336L5826.86 -322L6057.86 -322L6057.86 -340Q6057.86 -369 6043.86 -390.5Q6029.86 -412 6004.86 -424Q5979.86 -436 5944.86 -436L5944.86 -436Q5907.86 -436 5881.36 -423.5Q5854.86 -411 5840.86 -388.5Q5826.86 -366 5826.86 -336L5826.86 -336Z" class="bk-ink"/></svg></a>
+    <nav aria-label="Footer">
+      <a href="https://unlighthouse.dev/guide/getting-started/installation">Guide</a>
+      <a href="https://unlighthouse.dev/integrations/cli">Integrations</a>
+      <a href="https://unlighthouse.dev/learn-lighthouse">Learn Lighthouse</a>
+      <a href="https://unlighthouse.dev/glossary">Glossary</a>
+      <a href="https://github.com/harlan-zw/unlighthouse">GitHub</a>
+    </nav>
+    <span>MIT licensed</span>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const root = document.documentElement
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)')
+
+  /* ---------- Example data: one site, one shared queue ---------- */
+  function rng(seed) {
+    return () => {
+      seed |= 0; seed = seed + 0x6D2B79F5 | 0
+      let t = Math.imul(seed ^ seed >>> 15, 1 | seed)
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t
+      return ((t ^ t >>> 14) >>> 0) / 4294967296
+    }
+  }
+  const R = rng(20261026)
+  const groups = [
+    ['/', ['']],
+    ['/guide', ['getting-started/installation', 'getting-started/unlighthouse-cli', 'getting-started/how-it-works', 'guides/config', 'guides/url-discovery', 'guides/device', 'guides/lighthouse', 'guides/authentication', 'guides/dynamic-sampling', 'guides/generating-static-reports', 'recipes/large-sites', 'recipes/improving-accuracy', 'recipes/docker', 'recipes/puppeteer', 'guides/route-definitions', 'guides/chrome-dependency']],
+    ['/integrations', ['cli', 'ci', 'nuxt', 'vite', 'webpack']],
+    ['/learn-lighthouse', ['lcp', 'inp', 'cls', 'fcp', 'tbt', 'ttfb', 'speed-index', 'performance-score', 'accessibility-score', 'seo-score', 'best-practices-score', 'render-blocking', 'image-optimization', 'font-loading', 'third-party-scripts', 'javascript-bundles', 'caching', 'preload', 'lazy-loading', 'layout-shift-causes', 'lighthouse-vs-crux', 'lab-vs-field', 'mobile-vs-desktop', 'score-variance']],
+    ['/glossary', ['lcp', 'inp', 'cls', 'fcp', 'ttfb', 'tbt', 'speed-index', 'crux', 'core-web-vitals', 'lighthouse', 'pagespeed-insights', 'hydration', 'critical-path', 'main-thread', 'long-task', 'web-vitals', 'field-data', 'lab-data', 'cdn', 'compression']],
+    ['/tools', ['', 'cwv-checker', 'lighthouse-report-viewer', 'page-weight', 'image-audit', 'font-audit', 'meta-checker', 'robots-checker', 'sitemap-checker', 'redirect-checker']],
+    ['/blog', ['inp-is-here', 'site-wide-audits', 'lighthouse-in-ci', 'dynamic-sampling', 'static-reports', 'nuxt-module', 'vite-plugin', 'budgets', 'v0-18', 'cwv-2026', 'scoring-changes', 'chrome-headless', 'caching-reports', 'puppeteer-cluster', 'large-sites', 'authentication', 'docker-ci', 'lhci-server', 'csv-exports', 'device-presets', 'throttling', 'samples', 'route-definitions', 'sitemaps', 'robots-txt', 'crawler', 'contrast-issues', 'seo-insights', 'share-images', 'link-analysis', 'open-graph', 'redirects', 'i18n', 'max-routes', 'skip-javascript', 'exit-codes', 'json-reports', 'what-is-next']],
+  ]
+  const routes = []
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v))
+  groups.forEach(([base, leaves], gi) => {
+    leaves.forEach((leaf, li) => {
+      if (routes.length >= 120) return
+      const path = base === '/' ? '/' : leaf ? `${base}/${leaf}` : base
+      const heavy = base === '/blog' || base === '/learn-lighthouse' ? 1 : 0
+      const r1 = R(), r2 = R(), r3 = R(), r4 = R()
+      const perf = Math.round(clamp(100 - heavy * 7 - Math.pow(r1, 3.4) * 84, 18, 100))
+      const a11y = Math.round(clamp(100 - Math.pow(r2, 3) * 30, 60, 100))
+      const bp = Math.round(clamp(100 - Math.pow(r3, 4) * 26, 70, 100))
+      const seo = Math.round(clamp(100 - Math.pow(r4, 5) * 22, 75, 100))
+      routes.push({
+        path, group: gi, perf, a11y, bp, seo,
+        h: base === '/' ? 1 : (!leaf ? .82 : (.42 + R() * .3 + (li === 0 ? .14 : 0))),
+        dur: 2.6 + Math.pow(R(), 1.6) * 3.6 + (heavy ? .5 : 0),
+      })
+    })
+  })
+  const N = routes.length
+  const band = s => s >= 90 ? 'pass' : s >= 50 ? 'avg' : 'fail'
+  routes.forEach(r => { r.overall = Math.round((r.perf + r.a11y + r.bp + r.seo) / 4); r.band = band(r.perf) })
+
+  const css = () => {
+    const s = getComputedStyle(root)
+    const g = n => s.getPropertyValue(n).trim()
+    return {
+      idle: g('--tick-idle'), lamp: g('--lamp'), lampRgb: g('--lamp-rgb'), beamA: +g('--beam-alpha'), blend: g('--beam-blend'),
+      ink: g('--text'), pass: g('--pass'), avg: g('--avg'), fail: g('--fail'), line: g('--line-2'), steel: g('--steel'), dark: root.dataset.theme !== 'light',
+    }
+  }
+  let C = css()
+  const hex = h => { const m = h.replace('#', ''); return [0, 2, 4].map(i => parseInt(m.slice(i, i + 2), 16)) }
+  const mix = (a, b, t) => { const A = hex(a), B = hex(b); return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(',')})` }
+
+  /* ---------- Queue simulation (shared by hero, lanes, report) ---------- */
+  const WORKERS = 4
+  function makeSim() {
+    return { clock: 0, next: 0, workers: Array.from({ length: WORKERS }, () => null), state: routes.map(() => ({ s: 0, t0: 0, t1: 0, glow: 0 })), done: 0, hold: 0, log: [] }
+  }
+  function step(sim, dt, onDone) {
+    sim.clock += dt
+    for (let w = 0; w < WORKERS; w++) {
+      const job = sim.workers[w]
+      if (job && sim.clock >= job.end) {
+        const st = sim.state[job.i]; st.s = 2; st.t1 = job.end; sim.done++
+        sim.log.push({ w, i: job.i, start: job.start, end: job.end })
+        sim.workers[w] = null; onDone && onDone(job.i)
+      }
+      if (!sim.workers[w] && sim.next < N) {
+        const i = sim.next++, start = sim.workers[w] === null && job ? job.end : sim.clock
+        sim.workers[w] = { i, start, end: start + routes[i].dur }
+        const st = sim.state[i]; st.s = 1; st.t0 = start
+      }
+    }
+  }
+  function runTo(sim, t) { while (sim.clock < t) step(sim, 0.05) }
+
+  /* ---------- Hero sky ---------- */
+  function Sky(canvas, anchor, opts) {
+    const ctx = canvas.getContext('2d')
+    let W = 0, H = 0, dpr = 1, hy = 0, pitch = 0, x0 = 0, lamp = { x: 0, y: 0 }, xs = []
+    const sim = makeSim()
+    let beamX = null, last = 0, running = false, raf = 0, holdT = 0, resetT = 0
+    function layout() {
+      dpr = Math.min(2, devicePixelRatio || 1)
+      const r = canvas.getBoundingClientRect(); W = r.width; H = r.height
+      canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr)
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      const a = anchor.getBoundingClientRect()
+      hy = Math.round(a.top - r.top + opts.horizonOffset(a.height))
+      const gaps = groups.length - 1
+      const slots = N + gaps * 2
+      pitch = W / slots; x0 = pitch / 2
+      xs = []; let slot = 0, g = 0
+      routes.forEach(rt => { if (rt.group !== g) { slot += 2; g = rt.group } xs.push(x0 + slot * pitch); slot++ })
+      const narrow = W < 760
+      lamp = narrow ? { x: W * .9, y: Math.max(34, hy * .1) } : { x: W * opts.lampX, y: Math.max(120, hy * .2) }
+      if (beamX === null) beamX = xs[0]
+    }
+    const tickW = () => Math.max(1, Math.min(2.6, pitch * .26))
+    const tickH = () => Math.max(26, Math.min(58, H * .06))
+    function target() {
+      const act = sim.workers.filter(Boolean)
+      if (!act.length) return opts.still ? xs[Math.floor(N * .7)] : xs[0]
+      return act.reduce((a, j) => a + xs[j.i], 0) / act.length
+    }
+    function draw(now) {
+      ctx.clearRect(0, 0, W, H)
+      const base = tickH(), tw = tickW()
+      // Beam
+      const tx = beamX, ty = hy
+      const dx = tx - lamp.x, dy = ty - lamp.y, dist = Math.hypot(dx, dy)
+      const w = 26 + dist * .07
+      ctx.save()
+      ctx.globalCompositeOperation = C.blend
+      const grad = ctx.createLinearGradient(lamp.x, lamp.y, tx, ty)
+      grad.addColorStop(0, `rgba(${C.lampRgb},${C.beamA * 1.5})`)
+      grad.addColorStop(.55, `rgba(${C.lampRgb},${C.beamA * .9})`)
+      grad.addColorStop(1, `rgba(${C.lampRgb},${C.beamA * 1.1})`)
+      ctx.fillStyle = grad
+      for (const k of [1, .62, .32]) {
+        ctx.beginPath(); ctx.moveTo(lamp.x, lamp.y)
+        ctx.lineTo(tx - w * k, ty); ctx.lineTo(tx + w * k, ty); ctx.closePath(); ctx.globalAlpha = .55; ctx.fill()
+      }
+      ctx.globalAlpha = 1
+      // Pool of light on the horizon and its reflection
+      const pool = ctx.createRadialGradient(tx, ty, 0, tx, ty, w * 2.4)
+      pool.addColorStop(0, `rgba(${C.lampRgb},${C.beamA * 2.6})`); pool.addColorStop(1, `rgba(${C.lampRgb},0)`)
+      ctx.fillStyle = pool; ctx.save(); ctx.translate(tx, ty); ctx.scale(1, .32); ctx.translate(-tx, -ty)
+      ctx.beginPath(); ctx.arc(tx, ty, w * 2.4, 0, Math.PI * 2); ctx.fill(); ctx.restore()
+      const streak = ctx.createLinearGradient(0, ty, 0, H)
+      streak.addColorStop(0, `rgba(${C.lampRgb},${C.beamA * 1.2})`); streak.addColorStop(1, `rgba(${C.lampRgb},0)`)
+      ctx.fillStyle = streak
+      for (let k = 0; k < 7; k++) { const yy = ty + 6 + k * 13, ww = w * (1 - k * .11); ctx.fillRect(tx - ww / 2, yy, ww, 3) }
+      ctx.restore()
+      // Lamp
+      ctx.save()
+      const halo = ctx.createRadialGradient(lamp.x, lamp.y, 0, lamp.x, lamp.y, 64)
+      halo.addColorStop(0, `rgba(${C.lampRgb},${C.dark ? .45 : .35})`); halo.addColorStop(1, `rgba(${C.lampRgb},0)`)
+      ctx.globalCompositeOperation = C.blend; ctx.fillStyle = halo; ctx.beginPath(); ctx.arc(lamp.x, lamp.y, 64, 0, Math.PI * 2); ctx.fill()
+      ctx.restore()
+      if (W >= 760) { // mast: the lighthouse is the tallest tick on the horizon
+        ctx.fillStyle = C.line; ctx.fillRect(Math.round(lamp.x) - .5, lamp.y + 12, 1, hy - lamp.y - 12)
+      }
+      ctx.strokeStyle = C.lamp; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(lamp.x, lamp.y, 11, 0, Math.PI * 2); ctx.stroke()
+      ctx.fillStyle = C.lamp; ctx.beginPath(); ctx.arc(lamp.x, lamp.y, 5, 0, Math.PI * 2); ctx.fill()
+      // Horizon line
+      ctx.fillStyle = C.line; ctx.fillRect(0, hy, W, 1)
+      // Ticks + reflections
+      for (let i = 0; i < N; i++) {
+        const st = sim.state[i], rt = routes[i], x = xs[i]
+        let col = C.idle, h = base * rt.h, alpha = 1
+        if (st.s === 1) { col = C.ink; h += 8 }
+        else if (st.s === 2) {
+          const t = opts.still ? 1 : clamp((sim.clock - st.t1) / .9, 0, 1)
+          const e = 1 - Math.pow(1 - t, 3)
+          col = e >= 1 ? C[rt.band] : mix(C.ink, C[rt.band], e)
+          h += 6 * (1 - e)
+        }
+        if (resetT > 0 && st.s === 2) alpha = 1 - resetT
+        ctx.globalAlpha = alpha
+        ctx.fillStyle = col
+        ctx.fillRect(Math.round(x - tw / 2), hy - h, tw, h)
+        if (st.s === 1) { ctx.fillStyle = C.lamp; ctx.beginPath(); ctx.arc(x, hy - h - 5, Math.max(2, tw * 1.3), 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = col }
+        ctx.globalAlpha = alpha * (C.dark ? .2 : .16)
+        ctx.fillRect(Math.round(x - tw / 2), hy + 3, tw, h * .55)
+        if (resetT > 0 && st.s === 2) { ctx.globalAlpha = resetT; ctx.fillStyle = C.idle; ctx.fillRect(Math.round(x - tw / 2), hy - base * rt.h, tw, base * rt.h) }
+        ctx.globalAlpha = 1
+      }
+    }
+    function frame(now) {
+      raf = 0
+      if (!running) return
+      const dt = last ? Math.min(.1, (now - last) / 1000) : 0; last = now
+      if (resetT > 0) {
+        resetT = Math.min(1, resetT + dt / 1.6)
+        if (resetT >= 1) { Object.assign(sim, makeSim()); resetT = 0; holdT = 0; opts.onReset && opts.onReset() }
+      }
+      else if (sim.done >= N) {
+        holdT += dt
+        if (holdT > 6) resetT = .001
+      }
+      else step(sim, dt, i => opts.onDone && opts.onDone(sim, i))
+      const tgt = sim.done >= N ? xs[0] + (xs[N - 1] - xs[0]) * Math.max(0, 1 - holdT / 6) : target()
+      beamX += (tgt - beamX) * (1 - Math.exp(-dt * (sim.done >= N ? .9 : 1.4)))
+      draw(now)
+      raf = requestAnimationFrame(frame)
+    }
+    function start() { if (running || reduce.matches) return; running = true; last = 0; raf = requestAnimationFrame(frame) }
+    function stop() { running = false; if (raf) cancelAnimationFrame(raf); raf = 0 }
+    function still() { runTo(sim, opts.stillAt); beamX = target(); draw(0) }
+    return {
+      sim, layout, start, stop,
+      init() {
+        layout()
+        if (reduce.matches || opts.still) { opts.still = true; still(); opts.onDone && opts.onDone(sim, -1) }
+        else { runTo(sim, opts.preload); beamX = target(); draw(0); opts.onDone && opts.onDone(sim, -1) }
+      },
+      redraw() { layout(); if (opts.still) beamX = target(); draw(0) },
+    }
+  }
+
+  /* Readout */
+  const $ = id => document.getElementById(id)
+  const pad = n => String(n).padStart(3, '0')
+  function readout(sim, i) {
+    let p = 0, a = 0, f = 0
+    sim.state.forEach((st, k) => { if (st.s === 2) { const b = routes[k].band; b === 'pass' ? p++ : b === 'avg' ? a++ : f++ } })
+    $('ro-done').textContent = pad(sim.done)
+    $('ro-pass').textContent = p; $('ro-avg').textContent = a; $('ro-fail').textContent = f
+    const act = sim.workers.filter(Boolean).map(j => routes[j.i].path)
+    $('ro-now').textContent = sim.done >= N ? 'scan complete' : (act[act.length - 1] || '/')
+  }
+  $('ro-total').textContent = N
+
+  const hero = Sky($('sky'), $('horizon'), {
+    horizonOffset: h => Math.round(h * .44), lampX: .86, preload: 46, stillAt: 84,
+    onDone: readout, onReset: () => readout(hero.sim, -1),
+  })
+  const closing = Sky($('sky2'), $('horizon2'), {
+    horizonOffset: h => Math.round(h * .62), lampX: .82, still: true, stillAt: 999,
+  })
+  hero.init(); closing.init()
+
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.target.id === 'hero') e.isIntersecting && !document.hidden ? hero.start() : hero.stop()
+  }), { threshold: 0 })
+  io.observe($('hero'))
+  document.addEventListener('visibilitychange', () => { document.hidden ? hero.stop() : ($('hero').getBoundingClientRect().bottom > 0 && hero.start()) })
+  reduce.addEventListener('change', () => location.reload())
+  let rz = 0
+  addEventListener('resize', () => { cancelAnimationFrame(rz); rz = requestAnimationFrame(() => { hero.redraw(); closing.redraw(); drawLanes(); drawGauge() }) })
+
+  /* ---------- 01 strips ---------- */
+  document.querySelectorAll('.strip').forEach(el => {
+    const n = +el.dataset.n, on = +(el.dataset.on || 0)
+    const pick = new Set(); const r = rng(n * 7); while (pick.size < on) pick.add(Math.floor(r() * n))
+    el.innerHTML = Array.from({ length: n }, (_, i) => `<i${pick.has(i) ? ' class="on"' : ''}></i>`).join('')
+  })
+
+  /* ---------- 02 lanes ---------- */
+  const lanesSim = makeSim(); runTo(lanesSim, 40)
+  function drawLanes() {
+    const host = $('lanes'); const Wd = host.clientWidth || 800
+    const narrow = Wd < 560
+    const span = narrow ? 16 : 30
+    const left = narrow ? 34 : 70, top = 8, laneH = narrow ? 30 : 40, gap = 12
+    const plot = Wd - left - 4
+    const sx = t => left + (t / span) * plot
+    const Hh = top + WORKERS * (laneH + gap) + 26
+    let s = `<svg width="${Wd}" height="${Hh}" viewBox="0 0 ${Wd} ${Hh}" aria-hidden="true">`
+    for (let t = 0; t <= span; t += narrow ? 4 : 5) s += `<line class="grid" x1="${sx(t)}" x2="${sx(t)}" y1="${top}" y2="${Hh - 22}"/><text class="axis" x="${sx(t)}" y="${Hh - 6}" text-anchor="${t === 0 ? 'start' : t === span ? 'end' : 'middle'}">${t}s</text>`
+    for (let w = 0; w < WORKERS; w++) {
+      const y = top + w * (laneH + gap)
+      s += `<text class="lane-label" x="0" y="${y + laneH / 2 + 4}">${narrow ? 'W' + (w + 1) : 'worker ' + (w + 1)}</text>`
+      lanesSim.log.filter(l => l.w === w && l.start < span).forEach(l => {
+        const x1 = sx(l.start) + 1.5, x2 = Math.min(sx(l.end), sx(span)) - 1.5, rt = routes[l.i]
+        s += `<rect class="bar" x="${x1}" y="${y}" width="${Math.max(2, x2 - x1)}" height="${laneH}" rx="5"/>`
+        const label = rt.path.length > 1 ? rt.path.split('/').pop() : '/'
+        const room = (x2 - x1 - 16) / 6.7
+        if (room >= 4) s += `<text class="bar-txt" x="${x1 + 8}" y="${y + laneH / 2 + 4}">${label.length > room ? label.slice(0, Math.max(3, Math.floor(room) - 1)) + '…' : label}</text>`
+        if (l.end <= span) s += `<rect x="${x2 - 3}" y="${y + 5}" width="3" height="${laneH - 10}" rx="1.5" fill="var(--${rt.band})"/>`
+      })
+    }
+    s += '</svg>'
+    host.innerHTML = s
+  }
+  drawLanes()
+
+  /* ---------- 03 report ---------- */
+  const cats = [['Performance', 'perf'], ['Accessibility', 'a11y'], ['Best Practices', 'bp'], ['SEO', 'seo']]
+  const avg = k => Math.round(routes.reduce((a, r) => a + r[k], 0) / N)
+  const siteScore = Math.round(cats.reduce((a, [, k]) => a + avg(k), 0) / 4)
+  const rows = ['/', '/guide/getting-started/installation', '/integrations/ci', '/learn-lighthouse/lcp', '/blog/inp-is-here', '/tools/cwv-checker', '/glossary/cls'].map(p => routes.find(r => r.path === p)).filter(Boolean)
+  const ring = (v, label) => {
+    const b = band(v), c = 2 * Math.PI * 10
+    return `<span class="ring ${b}" title="${label}: ${v}"><svg viewBox="0 0 26 26" aria-hidden="true"><circle class="trk" cx="13" cy="13" r="10" fill="none" stroke-width="2.5"/><circle class="arc" cx="13" cy="13" r="10" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="${(v / 100) * c} ${c}"/></svg><span><span class="sr">${label} </span>${v}</span></span>`
+  }
+  const pathHtml = p => p === '/' ? '/' : p.split('/').map((seg, i, a) => i === a.length - 1 ? seg : `<span class="d">${seg}/</span>`).join('')
+  let tab = 0, openMenu = innerWidth < 760 ? -1 : 2
+  const tabsEl = $('tabs')
+  tabsEl.innerHTML = [['Overview', null], ...cats].map(([l, k], i) => `<button role="tab" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}" data-i="${i}">${l}${k ? ` <span class="sc ${band(avg(k))}" style="color:var(--${band(avg(k))}-t)">${avg(k)}</span>` : ''}</button>`).join('')
+  function renderRows() {
+    const head = $('score-h')
+    if (tab === 0) head.innerHTML = `<span class="sr">Score</span><span class="cats-h" aria-hidden="true"><span>Perf</span><span>A11y</span><span>Best Pr.</span><span>SEO</span></span>`
+    else head.textContent = `Score · ${cats[tab - 1][0]}`
+    const list = tab === 0 ? rows : [...rows].sort((a, b) => a[cats[tab - 1][1]] - b[cats[tab - 1][1]])
+    $('rows').innerHTML = list.map((r, i) => {
+      const score = tab === 0
+        ? `<span class="cats">${cats.map(([l, k]) => ring(r[k], l)).join('')}</span>`
+        : (() => { const v = r[cats[tab - 1][1]]; return `<span class="single">${ring(v, cats[tab - 1][0])}<span class="meter" aria-hidden="true"><i style="width:${v}%;--c:var(--${band(v)})"></i></span></span>` })()
+      const open = i === openMenu
+      return `<tr><td class="c-page"><span class="path">${pathHtml(r.path)}</span></td><td class="c-score">${score}</td><td class="c-act"><span class="act"><button type="button" aria-label="Open actions for ${r.path}" aria-expanded="${open}" aria-controls="m${i}" data-row="${i}">···</button><span class="menu" id="m${i}" ${open ? '' : 'hidden'}><a href="https://unlighthouse-demo.netlify.app/"><b>Open Lighthouse Report</b><span>Lighthouse HTML report is opened in a modal.</span></a><a href="https://unlighthouse-demo.netlify.app/"><b>Rescan Route</b><span>Crawl the route again and generate a fresh report.</span></a><a href="https://unlighthouse-demo.netlify.app/"><b>Run PageSpeed Insights</b><span>Get more accurate performance data by running a PageSpeed Insights test.</span></a></span></span></td></tr>`
+    }).join('')
+  }
+  renderRows()
+  tabsEl.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return
+    tab = +b.dataset.i; openMenu = -1
+    tabsEl.querySelectorAll('button').forEach((x, i) => { x.setAttribute('aria-selected', i === tab); x.tabIndex = i === tab ? 0 : -1 })
+    renderRows()
+  })
+  tabsEl.addEventListener('keydown', e => {
+    if (!['ArrowRight', 'ArrowLeft'].includes(e.key)) return
+    const bs = [...tabsEl.querySelectorAll('button')]; const n = (tab + (e.key === 'ArrowRight' ? 1 : bs.length - 1)) % bs.length
+    bs[n].click(); bs[n].focus()
+  })
+  $('rows').addEventListener('click', e => {
+    const b = e.target.closest('button[data-row]'); if (!b) return
+    const i = +b.dataset.row; openMenu = openMenu === i ? -1 : i
+    document.querySelectorAll('.menu').forEach((m, k) => { m.hidden = k !== openMenu })
+    document.querySelectorAll('button[data-row]').forEach((x, k) => x.setAttribute('aria-expanded', k === openMenu))
+  })
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && openMenu >= 0) { openMenu = -1; document.querySelectorAll('.menu').forEach(m => { m.hidden = true }); document.querySelectorAll('button[data-row]').forEach(x => x.setAttribute('aria-expanded', 'false')) } })
+
+  /* Site gauge: a ring of route ticks */
+  function drawGauge() {
+    const cx = 120, cy = 120, r0 = 98, r1 = 116
+    let s = ''
+    routes.forEach((rt, i) => {
+      const a = (i / N) * Math.PI * 2 - Math.PI / 2
+      const len = r0 + (r1 - r0) * (.55 + rt.h * .45)
+      s += `<line x1="${cx + Math.cos(a) * r0}" y1="${cy + Math.sin(a) * r0}" x2="${cx + Math.cos(a) * len}" y2="${cy + Math.sin(a) * len}" stroke="var(--${rt.band})" stroke-width="2" stroke-linecap="round"/>`
+    })
+    s += `<circle cx="120" cy="120" r="88" fill="none" stroke="var(--line)" stroke-width="1"/>`
+    $('gauge-svg').innerHTML = s
+    $('gauge-n').textContent = siteScore
+  }
+  drawGauge()
+
+  /* ---------- Integrations tabs ---------- */
+  const il = $('ilist')
+  il.addEventListener('click', e => {
+    const b = e.target.closest('[role=tab]'); if (!b) return
+    il.querySelectorAll('[role=tab]').forEach(t => { const on = t === b; t.setAttribute('aria-selected', on); t.tabIndex = on ? 0 : -1; $(t.getAttribute('aria-controls')).hidden = !on })
+  })
+  il.addEventListener('keydown', e => {
+    if (!['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft'].includes(e.key)) return
+    e.preventDefault()
+    const ts = [...il.querySelectorAll('[role=tab]')], i = ts.indexOf(document.activeElement)
+    const n = ts[(i + (e.key === 'ArrowDown' || e.key === 'ArrowRight' ? 1 : ts.length - 1)) % ts.length]; n.click(); n.focus()
+  })
+
+  /* ---------- Copy ---------- */
+  document.querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', () => {
+    navigator.clipboard?.writeText(b.dataset.copy).then(() => { b.textContent = 'Copied'; setTimeout(() => { b.textContent = 'Copy' }, 1600) }, () => { b.textContent = 'Select' })
+  }))
+
+  /* ---------- Theme ---------- */
+  const tbtn = $('theme')
+  const syncThemeLabel = () => tbtn.setAttribute('aria-label', root.dataset.theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme')
+  syncThemeLabel()
+  tbtn.addEventListener('click', () => {
+    root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark'
+    try { localStorage.setItem('ulh-theme', root.dataset.theme) } catch {}
+    syncThemeLabel(); C = css(); hero.redraw(); closing.redraw()
+  })
+
+  /* ---------- Reveal ---------- */
+  if (!reduce.matches) {
+    const rio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); rio.unobserve(e.target) } }), { rootMargin: '0px 0px -8% 0px' })
+    document.querySelectorAll('.rv').forEach(el => rio.observe(el))
+  }
+  else document.querySelectorAll('.rv').forEach(el => el.classList.add('in'))
+  document.fonts?.ready.then(() => { hero.redraw(); closing.redraw(); drawLanes() })
+})()
+</script>
+</body>
+</html>
