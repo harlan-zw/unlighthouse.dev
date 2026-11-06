@@ -13,7 +13,7 @@ const faqs = [
   },
   {
     question: 'How accurate are the gzip and brotli estimates?',
-    answer: 'The estimates use typical compression ratios: ~4.5x for gzip and ~5.1x for brotli on JSON data (Brotli offers best density for APIs). Alternatively, Zstandard (Zstd) achieves ~4.5x but is significantly faster. Real compression depends on data entropy and repetition. These estimates are within 10-20% of actual compression.',
+    answer: 'They are rough. The tool does not compress your JSON. It divides the minified size by fixed ratios: 4.5 for gzip and 5.1 for brotli. Real compressed size depends on how repetitive the data is and on the compression level your server uses. For an exact number, check the transferred size of the response in the DevTools Network panel.',
   },
   {
     question: 'Why should I optimize JSON size?',
