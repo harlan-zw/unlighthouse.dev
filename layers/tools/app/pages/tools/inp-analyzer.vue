@@ -895,6 +895,14 @@ const insights = computed<ToolInsight[]>(() => {
               <UIcon name="i-heroicons-academic-cap" class="w-4 h-4 mr-1" />
               INP Optimization Guide
             </UButton>
+            <UButton to="/learn-lighthouse/lcp" variant="ghost" size="sm">
+              <UIcon name="i-heroicons-academic-cap" class="w-4 h-4 mr-1" />
+              LCP Guide
+            </UButton>
+            <UButton to="/learn-lighthouse/cls" variant="ghost" size="sm">
+              <UIcon name="i-heroicons-academic-cap" class="w-4 h-4 mr-1" />
+              CLS Guide
+            </UButton>
             <UButton to="/glossary/inp" variant="ghost" size="sm">
               <UIcon name="i-heroicons-book-open" class="w-4 h-4 mr-1" />
               INP Glossary
