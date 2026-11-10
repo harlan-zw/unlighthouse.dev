@@ -99,7 +99,7 @@ export async function useCurrentDocPage() {
   }
 
   return {
-    page: ref(pageData),
+    page: shallowRef(pageData),
     surround: ref(data.value.surround),
     lastCommit: ref(data.value.lastCommit),
   }

@@ -262,7 +262,7 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
       <div class="max-w-5xl mx-auto px-6 text-center relative">
         <ClientOnly>
           <div
-            v-motion
+            v-motion="{}"
             :initial="{ opacity: 0, y: -10 }"
             :animate="{ opacity: 1, y: 0 }"
             :transition="{ duration: 0.3 }"
@@ -272,7 +272,7 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
             PERFORMANCE SHOWDOWN
           </div>
           <h1
-            v-motion
+            v-motion="{}"
             :initial="{ opacity: 0, y: 20 }"
             :animate="{ opacity: 1, y: 0 }"
             :transition="{ duration: 0.4, delay: 0.05 }"
@@ -285,7 +285,7 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
             </span>
           </h1>
           <p
-            v-motion
+            v-motion="{}"
             :initial="{ opacity: 0, y: 20 }"
             :animate="{ opacity: 1, y: 0 }"
             :transition="{ duration: 0.4, delay: 0.1 }"
@@ -419,7 +419,7 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
               <!-- Overall Winner Banner -->
               <div
                 v-if="result.winners.overall"
-                v-motion
+                v-motion="{}"
                 :initial="{ opacity: 0, scale: 0.95 }"
                 :animate="{ opacity: 1, scale: 1 }"
                 :transition="{ duration: 0.4, delay: 0.1 }"
@@ -477,7 +477,7 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
                   class="relative"
                 >
                   <div
-                    v-motion
+                    v-motion="{}"
                     :initial="{ opacity: 0, x: -20 }"
                     :animate="{ opacity: 1, x: 0 }"
                     :transition="{ duration: 0.3 }"
@@ -532,7 +532,7 @@ const supportingMetrics: MetricKey[] = ['fcp', 'ttfb']
                               <!-- Value bar -->
                               <div
                                 v-if="comp.hasData && getMetricValue(comp, metric) !== undefined"
-                                v-motion
+                                v-motion="{}"
                                 :initial="{ width: 0 }"
                                 :animate="{ width: `${getBarWidth(comp, metric)}%` }"
                                 :transition="{ duration: 0.6, delay: idx * 0.1 }"

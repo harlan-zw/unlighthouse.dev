@@ -87,7 +87,7 @@ const copyrightYear = useState('footer-copyright-year', () => new Date().getFull
             </UButton>
             <ColorModeButton verbose />
             <ULink target="_blank" external href="/llms.txt" class="flex items-center gap-1 hover:underline transition">
-              <UIcon dynamic name="i-noto-sparkles" class="w-4 h-4" />
+              <UIcon name="i-noto-sparkles" class="w-4 h-4" />
               /llms.txt
             </ULink>
           </div>
@@ -103,7 +103,7 @@ const copyrightYear = useState('footer-copyright-year', () => new Date().getFull
                 <ul class="space-y-4">
                   <li v-for="(link, key) in docsLinks" :key="key">
                     <ULink :to="link.to" class="flex items-center gap-1 hover:underline transition">
-                      <UIcon v-if="link.icon" dynamic :name="link.icon" class="w-4 h-4" />
+                      <UIcon v-if="link.icon" :name="link.icon" class="w-4 h-4" />
                       {{ link.label }}
                     </ULink>
                   </li>
@@ -118,7 +118,7 @@ const copyrightYear = useState('footer-copyright-year', () => new Date().getFull
                 <ul class="grid grid-cols-2 gap-4">
                   <li v-for="(link, key) in integrationsLinks" :key="key">
                     <ULink :to="link.to" class="flex items-center gap-1 hover:underline transition">
-                      <UIcon v-if="link.icon" dynamic :name="link.icon" class="w-4 h-4" />
+                      <UIcon v-if="link.icon" :name="link.icon" class="w-4 h-4" />
                       {{ link.label }}
                     </ULink>
                   </li>
@@ -139,7 +139,7 @@ const copyrightYear = useState('footer-copyright-year', () => new Date().getFull
               <ul class="grid grid-cols-2 gap-x-6 gap-y-4">
                 <li v-for="(link, key) in learnLinks" :key="key">
                   <ULink :to="link.to" class="flex items-center gap-1 hover:underline transition">
-                    <UIcon v-if="link.icon" dynamic :name="link.icon" class="w-4 h-4" />
+                    <UIcon v-if="link.icon" :name="link.icon" class="w-4 h-4" />
                     {{ link.label }}
                   </ULink>
                 </li>
@@ -159,7 +159,7 @@ const copyrightYear = useState('footer-copyright-year', () => new Date().getFull
               <ul class="space-y-4">
                 <li v-for="(link, key) in toolsLinks" :key="key">
                   <ULink :to="link.to" class="flex items-center gap-1 hover:underline transition">
-                    <UIcon v-if="link.icon" dynamic :name="link.icon" class="w-4 h-4" />
+                    <UIcon v-if="link.icon" :name="link.icon" class="w-4 h-4" />
                     {{ link.label }}
                   </ULink>
                 </li>

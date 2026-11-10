@@ -18,7 +18,8 @@
     "lint:links": "node check_external_links.mjs",
     "checkin": "nuxt-checkin prepare && nuxt-checkin --save",
     "test": "node --test --experimental-strip-types tests/*.test.ts",
-    "typecheck": "nuxt typecheck"
+    "typecheck": "nuxt prepare && site-typecheck --noEmit --incremental false",
+    "typecheck:legacy": "nuxt typecheck"
   },
   "dependencies": {
     "@nuxtjs/mcp-toolkit": "catalog:",
@@ -96,6 +97,7 @@
     "octokit": "catalog:",
     "ofetch": "catalog:",
     "simple-git-hooks": "catalog:",
+    "site-typecheck": "workspace:*",
     "tailwind-merge": "catalog:",
     "tailwindcss": "catalog:",
     "tailwindcss-animate": "catalog:",

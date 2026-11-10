@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { WorldMapTopoJSON } from '@unovis/ts/maps'
+import { VisSingleContainer, VisTopoJSONMap } from '@unovis/vue'
 
 const PSI_SERVERS = [
   { id: 'oregon', label: 'Oregon', latitude: 45.84, longitude: -119.7, region: 'US West' },

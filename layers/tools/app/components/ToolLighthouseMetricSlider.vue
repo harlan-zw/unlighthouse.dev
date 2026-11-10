@@ -116,7 +116,7 @@ const thresholds = computed(() => {
       <!-- Filled track -->
       <ClientOnly>
         <div
-          v-motion
+          v-motion="{}"
           class="absolute inset-y-0 left-0 flex items-center pointer-events-none"
           :style="{ width: `${normalizedValue * 100}%` }"
         >
@@ -144,7 +144,7 @@ const thresholds = computed(() => {
       <!-- Thumb -->
       <ClientOnly>
         <div
-          v-motion
+          v-motion="{}"
           class="absolute top-1/2 -translate-y-1/2 pointer-events-none"
           :style="{ left: `calc(${normalizedValue * 100}% - 8px)` }"
         >

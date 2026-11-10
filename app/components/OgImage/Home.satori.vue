@@ -85,7 +85,7 @@ const modules = [
         </svg>
       </div>
       <div class="flex justify-center max-w-[600px] mb-[60px] mx-auto gap-10">
-        <UIcon v-for="(module, key) in modules" :key="key" mode="svg" dynamic class="text-blue-300 w-[120px] h-[120px]" :name="module.icon" />
+        <UIcon v-for="(module, key) in modules" :key="key" mode="svg" class="text-blue-300 w-[120px] h-[120px]" :name="module.icon" />
       </div>
     </div>
   </div>

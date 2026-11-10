@@ -465,7 +465,7 @@ https://example.com/pricing"
       <!-- Progress State -->
       <div v-if="loading && results.length > 0" role="status" aria-live="polite" aria-busy="true" class="p-4 sm:p-6">
         <div
-          v-motion
+          v-motion="{}"
           :initial="{ opacity: 0, y: 10 }"
           :animate="{ opacity: 1, y: 0 }"
           class="p-6 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800"
@@ -528,7 +528,7 @@ https://example.com/pricing"
         <!-- Summary Cards (only show when complete) -->
         <div
           v-if="summary"
-          v-motion
+          v-motion="{}"
           :initial="{ opacity: 0, y: 20 }"
           :animate="{ opacity: 1, y: 0 }"
           class="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 sm:p-6 pb-0"
@@ -569,7 +569,7 @@ https://example.com/pricing"
 
         <!-- Results Table -->
         <div
-          v-motion
+          v-motion="{}"
           :initial="{ opacity: 0, y: 20 }"
           :animate="{ opacity: 1, y: 0 }"
           :transition="{ delay: 0.1 }"
@@ -665,7 +665,7 @@ https://example.com/pricing"
                 <tr
                   v-for="(result, idx) in sortedResults"
                   :key="result.url"
-                  v-motion
+                  v-motion="{}"
                   :initial="{ opacity: 0, x: -10 }"
                   :animate="{ opacity: 1, x: 0 }"
                   :transition="{ delay: idx * 0.05 }"

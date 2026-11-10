@@ -224,7 +224,7 @@ function fetchFromUrl() {
                     :color="device === 'mobile' ? 'primary' : 'neutral'"
                     :variant="device === 'mobile' ? 'solid' : 'ghost'"
                     size="xs"
-                    rounded="none"
+                    class="rounded-none"
                     @click="device = 'mobile'"
                   >
                     <UIcon name="i-heroicons-device-phone-mobile" class="w-3.5 h-3.5 mr-1" />
@@ -234,7 +234,7 @@ function fetchFromUrl() {
                     :color="device === 'desktop' ? 'primary' : 'neutral'"
                     :variant="device === 'desktop' ? 'solid' : 'ghost'"
                     size="xs"
-                    rounded="none"
+                    class="rounded-none"
                     @click="device = 'desktop'"
                   >
                     <UIcon name="i-heroicons-computer-desktop" class="w-3.5 h-3.5 mr-1" />

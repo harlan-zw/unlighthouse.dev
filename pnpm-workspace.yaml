@@ -108,6 +108,9 @@ peerDependencyRules:
 
 shellEmulator: true
 
+packages:
+  - tools/typecheck
+
 overrides:
   esbuild: ^0.28.1
   fast-uri: ^3.1.6
@@ -198,6 +201,8 @@ catalog:
   eslint-plugin-harlanzw: ^0.21.1
   fuse.js: ^7.5.0
   h3: ^1.15.11
+  jsonc-parser: 3.3.1
+
   lint-staged: ^17.5.0
   markdownlint-cli: ^0.49.1
   motion-v: ^2.6.0
@@ -227,3 +232,8 @@ catalog:
   vue-tsc: 3.3.14
   wrangler: ^4.130.0
   zod: ^4.6.6
+
+catalogs:
+  native:
+    '@vue/content-mapper': 4.0.0-alpha.3
+    typescript: 7.1.0-beta

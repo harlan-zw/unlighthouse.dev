@@ -332,7 +332,7 @@ const exploreLinks = [
               </h3>
               <div class="flex flex-wrap gap-4">
                 <NuxtLink v-for="entry in sponsors.tiers.top" :key="entry.login" :to="entry.websiteUrl || entry.profileUrl" class="flex items-center gap-2 hover:opacity-80 transition">
-                  <NuxtImg loading="lazy" :alt="entry.name" width="40" height="40" :src="entry.avatarUrl" class="w-10 h-10 rounded-full" />
+                  <NuxtImg v-bind="{ loading: 'lazy', alt: entry.name } satisfies { loading: 'lazy', alt?: string }" width="40" height="40" :src="entry.avatarUrl" class="w-10 h-10 rounded-full" />
                   <span class="font-medium">{{ entry.name }}</span>
                 </NuxtLink>
               </div>
@@ -343,7 +343,7 @@ const exploreLinks = [
               </h3>
               <div class="flex flex-wrap gap-3">
                 <NuxtLink v-for="entry in sponsors.tiers.gold" :key="entry.login" :to="entry.websiteUrl || entry.profileUrl" class="hover:opacity-80 transition">
-                  <NuxtImg loading="lazy" :alt="entry.name || entry.login" width="36" height="36" :src="entry.avatarUrl" class="w-9 h-9 rounded-full" />
+                  <NuxtImg v-bind="{ loading: 'lazy', alt: entry.name || entry.login } satisfies { loading: 'lazy', alt: string }" width="36" height="36" :src="entry.avatarUrl" class="w-9 h-9 rounded-full" />
                 </NuxtLink>
               </div>
             </div>
@@ -354,7 +354,7 @@ const exploreLinks = [
               <div class="flex flex-wrap gap-2">
                 <UTooltip v-for="entry in sponsors.ungrouped" :key="entry.login" :text="entry.name || entry.login">
                   <NuxtLink :to="(entry.monthlyDollars > 5 ? entry.websiteUrl : entry.profileUrl) || entry.profileUrl" class="hover:opacity-80 transition">
-                    <NuxtImg loading="lazy" :alt="entry.name || entry.login" width="32" height="32" :src="entry.avatarUrl" class="w-8 h-8 rounded-full" :class="entry.monthlyDollars > 5 ? ['ring-green-500 ring-2'] : []" />
+                    <NuxtImg v-bind="{ loading: 'lazy', alt: entry.name || entry.login } satisfies { loading: 'lazy', alt: string }" width="32" height="32" :src="entry.avatarUrl" class="w-8 h-8 rounded-full" :class="entry.monthlyDollars > 5 ? ['ring-green-500 ring-2'] : []" />
                   </NuxtLink>
                 </UTooltip>
               </div>

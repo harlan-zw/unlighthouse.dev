@@ -365,7 +365,7 @@ const visualResources = computed(() => {
 
         <!-- Hero Stat: Total Page Weight -->
         <div
-          v-motion
+          v-motion="{}"
           :initial="{ opacity: 0, y: 20 }"
           :animate="{ opacity: 1, y: 0 }"
           :transition="{ duration: 0.3 }"
@@ -392,7 +392,7 @@ const visualResources = computed(() => {
 
         <!-- Percentile Comparison -->
         <div
-          v-motion
+          v-motion="{}"
           :initial="{ opacity: 0, y: 20 }"
           :animate="{ opacity: 1, y: 0 }"
           :transition="{ duration: 0.3, delay: 0.1 }"
@@ -422,7 +422,7 @@ const visualResources = computed(() => {
 
         <!-- Summary Stats -->
         <div
-          v-motion
+          v-motion="{}"
           :initial="{ opacity: 0, y: 20 }"
           :animate="{ opacity: 1, y: 0 }"
           :transition="{ duration: 0.3, delay: 0.15 }"
@@ -464,7 +464,7 @@ const visualResources = computed(() => {
 
         <!-- Resource Breakdown -->
         <div
-          v-motion
+          v-motion="{}"
           :initial="{ opacity: 0, y: 20 }"
           :animate="{ opacity: 1, y: 0 }"
           :transition="{ duration: 0.3, delay: 0.2 }"
@@ -509,7 +509,7 @@ const visualResources = computed(() => {
         <!-- Largest Resources -->
         <div
           v-if="result.largestResources.length"
-          v-motion
+          v-motion="{}"
           :initial="{ opacity: 0, y: 20 }"
           :animate="{ opacity: 1, y: 0 }"
           :transition="{ duration: 0.3, delay: 0.25 }"
@@ -551,7 +551,7 @@ const visualResources = computed(() => {
         <!-- Third-Party Weight -->
         <div
           v-if="result.thirdPartyDomains.length"
-          v-motion
+          v-motion="{}"
           :initial="{ opacity: 0, y: 20 }"
           :animate="{ opacity: 1, y: 0 }"
           :transition="{ duration: 0.3, delay: 0.3 }"
@@ -592,7 +592,7 @@ const visualResources = computed(() => {
         <!-- Unused Code -->
         <div
           v-if="result.unusedBytes > 0"
-          v-motion
+          v-motion="{}"
           :initial="{ opacity: 0, y: 20 }"
           :animate="{ opacity: 1, y: 0 }"
           :transition="{ duration: 0.3, delay: 0.35 }"
@@ -614,7 +614,7 @@ const visualResources = computed(() => {
         <!-- Compression Efficiency -->
         <div
           v-if="result.compressionRatio > 1"
-          v-motion
+          v-motion="{}"
           :initial="{ opacity: 0, y: 20 }"
           :animate="{ opacity: 1, y: 0 }"
           :transition="{ duration: 0.3, delay: 0.4 }"
