@@ -118,6 +118,7 @@ overrides:
   vite: ^8.2.1
 
   vue: 3.5.43
+  vue-tsc@3.3.14>@vue/language-core: 3.3.11
 
 allowBuilds:
   '@mongodb-js/zstd': true
@@ -223,6 +224,6 @@ catalog:
   typescript: 6.0.3
   ufo: ^1.6.4
   unhead: ^3.4.3
-  vue-tsc: ^3.3.11
+  vue-tsc: 3.3.14
   wrangler: ^4.130.0
   zod: ^4.6.6
