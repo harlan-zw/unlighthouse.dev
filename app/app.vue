@@ -4,6 +4,9 @@ import { searchContentEntries } from '~~/utils/content-search'
 import { docsVersion } from '~~/utils/docs-version'
 import { queryCollectionNavigation } from '#imports'
 
+// Keep search in its own chunk without Nuxt’s hydration wrapper.
+const ContentSearch = defineAsyncComponent(() => import('@nuxt/ui/components/content/ContentSearch.vue'))
+
 const appConfig = useAppConfig()
 const route = useRoute()
 
@@ -148,7 +151,7 @@ const shouldMountToolBackgroundIndicator = computed(() =>
       </NuxtLayout>
     </main>
     <ClientOnly>
-      <LazyUContentSearch
+      <ContentSearch
         v-if="shouldMountSearch"
         :key="openSearch ? 'open' : 'closed'"
         v-model:search-term="searchTerm"

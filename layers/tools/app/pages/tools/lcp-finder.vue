@@ -782,7 +782,7 @@ const insights = computed<LcpInsight[]>(() => {
               <div
                 v-for="(opp, idx) in result.opportunities"
                 :key="opp.id"
-                v-motion
+                v-motion="{}"
                 :initial="{ opacity: 0, x: -10 }"
                 :animate="{ opacity: 1, x: 0 }"
                 :transition="{ duration: 0.2, delay: idx * 0.05 }"

@@ -268,7 +268,7 @@ const keyBarColors = ['bg-teal-500', 'bg-cyan-500', 'bg-blue-500', 'bg-indigo-50
       <div v-if="analysis" class="px-4 sm:px-6 pb-6 space-y-6">
         <!-- Summary Stats Grid -->
         <div
-          v-motion
+          v-motion="{}"
           :initial="{ opacity: 0, y: 20 }"
           :animate="{ opacity: 1, y: 0 }"
           :transition="{ duration: 0.3 }"
@@ -315,7 +315,7 @@ const keyBarColors = ['bg-teal-500', 'bg-cyan-500', 'bg-blue-500', 'bg-indigo-50
 
         <!-- Savings + Structure -->
         <div
-          v-motion
+          v-motion="{}"
           :initial="{ opacity: 0, y: 20 }"
           :animate="{ opacity: 1, y: 0 }"
           :transition="{ duration: 0.3, delay: 0.1 }"
@@ -368,7 +368,7 @@ const keyBarColors = ['bg-teal-500', 'bg-cyan-500', 'bg-blue-500', 'bg-indigo-50
         <!-- Top-Level Key Contributions -->
         <div
           v-if="analysis.topLevelKeys.length > 1"
-          v-motion
+          v-motion="{}"
           :initial="{ opacity: 0, y: 20 }"
           :animate="{ opacity: 1, y: 0 }"
           :transition="{ duration: 0.3, delay: 0.2 }"
@@ -426,7 +426,7 @@ const keyBarColors = ['bg-teal-500', 'bg-cyan-500', 'bg-blue-500', 'bg-indigo-50
 
         <!-- Minified Output -->
         <div
-          v-motion
+          v-motion="{}"
           :initial="{ opacity: 0, y: 20 }"
           :animate="{ opacity: 1, y: 0 }"
           :transition="{ duration: 0.3, delay: 0.25 }"

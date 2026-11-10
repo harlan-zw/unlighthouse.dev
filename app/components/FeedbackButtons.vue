@@ -111,7 +111,7 @@ async function onSubmit(event: FormSubmitEvent<CommentFeedbackSchemaOutput>) {
       </div>
       <UForm :schema="CommentFeedbackSchema" :state="state" class="space-y-4" :validate-on="['change']" @submit="onSubmit">
         <UFormField label="Comments" name="comment" class="mb-3">
-          <UTextarea v-model="state.comment" type="textarea" class="w-full" />
+          <UTextarea v-model="state.comment" class="w-full" />
         </UFormField>
         <UButton type="submit" size="sm" color="secondary" :loading="commentSubmissionStatus === 'loading'">
           Send feedback

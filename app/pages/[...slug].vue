@@ -106,7 +106,7 @@ watchEffect(() => {
         </ClientOnly>
       </UPageHeader>
 
-      <UPageBody prose class="pb-0">
+      <UPageBody class="pb-0">
         <ContentRenderer v-if="page?.body" :value="page" class="mb-10" />
         <div v-if="repoLinks[0]" class="justify-center flex items-center gap-5 font-semibold">
           <div class="flex items-center gap-2">

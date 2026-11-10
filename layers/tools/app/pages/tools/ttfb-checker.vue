@@ -262,7 +262,7 @@ const ttfbTips = [
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- Field Data Card -->
           <div
-            v-motion
+            v-motion="{}"
             :initial="{ opacity: 0, y: 20 }"
             :animate="{ opacity: 1, y: 0 }"
             :transition="{ duration: 0.3 }"
@@ -307,7 +307,7 @@ const ttfbTips = [
 
           <!-- Lab Data Card -->
           <div
-            v-motion
+            v-motion="{}"
             :initial="{ opacity: 0, y: 20 }"
             :animate="{ opacity: 1, y: 0 }"
             :transition="{ duration: 0.3, delay: 0.1 }"

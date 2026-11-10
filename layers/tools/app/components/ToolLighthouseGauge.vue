@@ -85,7 +85,7 @@ const ratingLabel = computed(() => {
         <circle
           v-for="(arc, i) in metricArcs"
           :key="arc.id"
-          v-motion
+          v-motion="{}"
           :cx="center"
           :cy="center"
           :r="radius + strokeWidth + 4"
@@ -103,7 +103,7 @@ const ratingLabel = computed(() => {
 
         <!-- Score arc (main) -->
         <circle
-          v-motion
+          v-motion="{}"
           :cx="center"
           :cy="center"
           :r="radius"
@@ -122,7 +122,7 @@ const ratingLabel = computed(() => {
 
         <!-- Score text -->
         <text
-          v-motion
+          v-motion="{}"
           :x="center"
           :y="center - 8"
           text-anchor="middle"
@@ -137,7 +137,7 @@ const ratingLabel = computed(() => {
 
         <!-- Rating label -->
         <text
-          v-motion
+          v-motion="{}"
           :x="center"
           :y="center + 20"
           text-anchor="middle"
