@@ -98,6 +98,30 @@ function errorReport(type: string, value: string, frames: Array<{ filename: stri
   }
 }
 
+test('drops the controlled npm rate limit and keeps unrelated failures', () => {
+  const policy: ReportPolicy = {
+    ...clientPolicy,
+    scope: 'server',
+    ignoreErrors: [{
+      _tag: 'pattern',
+      source: EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE.source,
+      flags: EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE.flags,
+    }],
+  }
+  const report = errorReport('Error', 'npm downloads are rate limited right now. Try again later.', [])
+
+  assert.deepEqual(decideReport(report, undefined, policy), { _tag: 'drop', rule: 'ignore-message' })
+
+  for (const message of [
+    'npm request failed',
+    'npm downloads returned invalid data',
+    'Cannot read properties of undefined',
+    '[GET] https://another-provider.example: 429 Too Many Requests',
+  ]) {
+    assert.deepEqual(decideReport(errorReport('Error', message, []), undefined, policy), { _tag: 'send' })
+  }
+})
+
 test('drops the app manifest fetch failure that carries no stack', () => {
   const decision = decideReport(errorReport('TypeError', 'Failed to fetch', []), undefined, clientPolicy)
 
