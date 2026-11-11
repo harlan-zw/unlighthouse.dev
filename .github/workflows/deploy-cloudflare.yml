@@ -42,6 +42,7 @@ jobs:
       # Node was pinned to 22 here while every other site had moved to 24.
       - uses: harlan-zw/harlan-nuxt/.github/actions/harlan-desktop-setup@main
         with:
+          node-version: 26.13.0
           # `postinstall` runs `nuxt prepare`, which the build depends on.
           install-args: ''
 
