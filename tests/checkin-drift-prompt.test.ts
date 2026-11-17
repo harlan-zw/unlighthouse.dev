@@ -1,9 +1,5 @@
-/* eslint-disable test/no-import-node-test */
 import assert from 'node:assert/strict'
-import { register } from 'node:module'
 import { it } from 'node:test'
-
-register('./support/resolve-ts.mjs', import.meta.url)
 
 const { default: config } = await import('../nuxt.config.ts')
 
