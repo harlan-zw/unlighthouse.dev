@@ -73,15 +73,14 @@ const toolCategories: ToolCategory[] = [
 </script>
 
 <template>
-  <div class="tools-menu grid grid-cols-3 gap-0 p-0 min-w-[680px]">
+  <div class="grid grid-cols-3 gap-0 p-0 min-w-[680px]">
     <div
       v-for="(category, catIdx) in toolCategories"
       :key="category.label"
-      class="category-column relative"
+      class="relative"
       :class="[
         catIdx < toolCategories.length - 1 ? 'border-r border-default' : '',
       ]"
-      :style="{ '--stagger': catIdx }"
     >
       <!-- Category header -->
       <div class="px-4 pt-4 pb-2">
@@ -102,12 +101,11 @@ const toolCategories: ToolCategory[] = [
       <!-- Tools list -->
       <div class="px-2 pb-3 space-y-0.5">
         <NuxtLink
-          v-for="(tool, toolIdx) in category.tools"
+          v-for="tool in category.tools"
           :key="tool.to"
           :to="tool.to"
-          class="tool-item group flex items-center gap-2.5 px-2 py-2 rounded-lg transition-all duration-200"
+          class="group flex items-center gap-2.5 px-2 py-2 rounded-lg transition-all duration-200"
           :class="colorClasses[category.color].hover"
-          :style="{ '--tool-delay': toolIdx }"
         >
           <!-- Icon -->
           <div
@@ -151,52 +149,3 @@ const toolCategories: ToolCategory[] = [
     </div>
   </div>
 </template>
-
-<style scoped>
-.tools-menu {
-  animation: menu-enter 0.2s ease-out;
-}
-
-@keyframes menu-enter {
-  from {
-    opacity: 0;
-    transform: translateY(-4px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.category-column {
-  animation: column-stagger 0.25s ease-out backwards;
-  animation-delay: calc(var(--stagger) * 40ms);
-}
-
-@keyframes column-stagger {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.tool-item {
-  animation: tool-fade 0.2s ease-out backwards;
-  animation-delay: calc(var(--stagger) * 40ms + var(--tool-delay) * 30ms + 80ms);
-}
-
-@keyframes tool-fade {
-  from {
-    opacity: 0;
-    transform: translateX(-6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-</style>

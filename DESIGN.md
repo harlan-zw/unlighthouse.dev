@@ -145,3 +145,4 @@ components:
 - Accessibility repairs use semantic HTML and Nuxt UI primitives without changing the visual hierarchy.
 - Opaque tool requests show stable operation copy and elapsed time. Percentages are reserved for measured progress.
 - Background capable tools explicitly permit navigation, preserve elapsed time, and notify completion globally.
+- Header menus open at once. Opening a menu is a critical interaction, so its panel and rows appear whole on the next frame. The menus wait 40ms on hover, against Reka's 200ms default, so a pointer that passes over the bar opens nothing. They mount when the page is idle after hydration, so opening one never renders its rows. The panel scale, the content slide, the size transition, and the row stagger are gone. Escape acts only on the open menu and returns focus to that menu's trigger.
