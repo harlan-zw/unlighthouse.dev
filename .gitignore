@@ -16,6 +16,7 @@ sw.*
 .netlify
 
 .content
+.cache/og-image/
 
 .data
 .wrangler
