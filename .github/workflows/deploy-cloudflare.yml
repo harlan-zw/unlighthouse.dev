@@ -54,6 +54,14 @@ jobs:
           restore-keys: |
             nuxt-skew-
 
+      - name: Cache prerendered OG images
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .cache/og-image
+          key: og-images-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml', 'nuxt.config.ts', 'app/assets/**', 'app/components/OgImage/**', 'public/**') }}-${{ github.event.workflow_run.head_sha || github.sha }}
+          restore-keys: |
+            og-images-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml', 'nuxt.config.ts', 'app/assets/**', 'app/components/OgImage/**', 'public/**') }}-
+
       - run: pnpm build
         timeout-minutes: 30
         env:

@@ -193,6 +193,7 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
   // that no page on this site ever links to.
   ogImage: {
     zeroRuntime: true,
+    buildCache: { base: '.cache/og-image' },
     // Both docs versions can exceed the default render deadline during prerender.
     security: { renderTimeout: 60_000 },
   },
