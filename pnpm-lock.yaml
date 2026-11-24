@@ -22,8 +22,8 @@ catalogs:
       specifier: 0.4.0
       version: 0.4.0
     '@harlan-zw/nuxt-cloudflare':
-      specifier: 0.5.2
-      version: 0.5.2
+      specifier: 0.5.3
+      version: 0.5.3
     '@harlan-zw/nuxt-dx':
       specifier: 0.3.0
       version: 0.3.0
@@ -362,7 +362,7 @@ importers:
         version: 0.4.0(@nuxt/schema@4.6.1)(confbox@0.3.1)(dotenv@17.4.2)(giget@3.3.1)(jiti@2.7.0)(magic-string@1.4.5)(mlly@1.8.2)(nuxt@4.7.0(3c3339964babc5bff26d1002b79c2902))(oxc-parser@0.153.0)(rolldown@1.2.19)(unplugin@3.7.0(esbuild@0.28.2)(rolldown@1.2.19)(rollup@4.68.8)(vite@8.2.1(@types/node@26.5.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.50.0)(yaml@2.9.1)))
       '@harlan-zw/nuxt-cloudflare':
         specifier: 'catalog:'
-        version: 0.5.2(3400787c874572416fb332459bb47f97)
+        version: 0.5.3(3400787c874572416fb332459bb47f97)
       '@harlan-zw/nuxt-dx':
         specifier: 'catalog:'
         version: 0.3.0(@nuxt/schema@4.6.1)(confbox@0.3.1)(dotenv@17.4.2)(giget@3.3.1)(jiti@2.7.0)(magic-string@1.4.5)(mlly@1.8.2)(nuxt@4.7.0(3c3339964babc5bff26d1002b79c2902))(oxc-parser@0.153.0)(rolldown@1.2.19)(unplugin@3.7.0(esbuild@0.28.2)(rolldown@1.2.19)(rollup@4.68.8)(vite@8.2.1(@types/node@26.5.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.50.0)(yaml@2.9.1)))(vite@8.2.1(@types/node@26.5.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.50.0)(yaml@2.9.1))(vue@3.5.46(typescript@6.0.3))
@@ -1404,8 +1404,8 @@ packages:
     peerDependencies:
       nuxt: ^4.6.0 || ^5.0.0
 
-  '@harlan-zw/nuxt-cloudflare@0.5.2':
-    resolution: {integrity: sha512-81/oDjhHkPeNw5tX9nP7aw5mQI7Rdd1gPaBwqI2Dvd0W7KWKVNOuuxEa214RI3L4+Ftf7y9VvRqHaEp9NFZmdA==}
+  '@harlan-zw/nuxt-cloudflare@0.5.3':
+    resolution: {integrity: sha512-4wOzeOcTHRmxnjza9QP8inIrWifDMaaAb43JZOB7FFlsguDJy74SxmLhXdbX+fY+g6xmQeRNc5oipRXHI4MACg==}
     engines: {node: ^22.22.3 || ^24.15.0 || >=26.0.0}
     hasBin: true
     peerDependencies:
@@ -10514,7 +10514,7 @@ snapshots:
       - rolldown
       - unplugin
 
-  '@harlan-zw/nuxt-cloudflare@0.5.2(3400787c874572416fb332459bb47f97)':
+  '@harlan-zw/nuxt-cloudflare@0.5.3(3400787c874572416fb332459bb47f97)':
     dependencies:
       '@nuxt/kit': 4.6.4(@nuxt/schema@4.6.1)(confbox@0.2.4)(dotenv@17.4.2)(giget@3.3.1)(jiti@2.7.0)(magic-string@1.4.3)(mlly@1.8.2)(oxc-parser@0.153.0)(rolldown@1.2.19)(unplugin@3.7.0(esbuild@0.28.2)(rolldown@1.2.19)(rollup@4.68.8)(vite@8.2.1(@types/node@26.5.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.50.0)(yaml@2.9.1)))
       citty: 0.2.2
