@@ -7,6 +7,7 @@ import { buildPsiRequestUrl, psiFailureErrorOptions } from '../../shared/psi-req
 
 const _fetchPSI = defineCachedFunction(async (url: string, strategy: 'mobile' | 'desktop', token: string) => {
   return $fetch<PSIResult>(buildPsiRequestUrl(url, strategy), {
+    retry: 0,
     timeout: 120_000, // 2 min - PSI can be slow
     headers: { 'X-Goog-Api-Key': token },
   }).catch((error) => {
@@ -14,6 +15,8 @@ const _fetchPSI = defineCachedFunction(async (url: string, strategy: 'mobile' | 
     throw createError(psiFailureErrorOptions(error))
   })
 }, {
+  // Leave time to store the result after the upstream deadline.
+  maxResolveTime: 125,
   base: 'psi',
   swr: true,
   getKey: (url: string, strategy: string) => `raw:v1:${strategy}:${url}`,

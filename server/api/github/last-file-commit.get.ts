@@ -81,6 +81,7 @@ export default defineCachedHandler(async (e) => {
     message: lastCommit.commit.message,
   }
 }, {
+  allowQuery: ['file', 'branch'],
   name: 'github-last-commit',
   maxAge: 60 * 60 * 24, // 1 day
   getKey: e => `${getQuery(e).branch === 'v1' ? 'v1' : '0.x'}:${String(getQuery(e)?.file || '')}`,

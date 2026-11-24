@@ -28,6 +28,7 @@ export default defineCachedHandler(async (e) => {
     }),
   }
 }, {
+  allowQuery: ['body', 'limit'],
   // last for 1 hour
   maxAge: 60 * 60,
 })

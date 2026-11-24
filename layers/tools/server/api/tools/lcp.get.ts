@@ -1,4 +1,4 @@
-import { createError, getQuery } from 'h3'
+import { createError, defineEventHandler, getQuery } from 'h3'
 import { defineCachedHandler } from 'nitro/cache'
 import { trackToolRequest } from '#server/utils/analytics'
 import { detectFramework, extractOpportunities, extractScreenshot, fetchPSI } from '#server/utils/psi'
@@ -18,8 +18,7 @@ interface DiscoveryCheck {
 
 const TAG_RE = /^<(\w+)/
 
-export default defineCachedHandler(async (event) => {
-  await checkFreeToolRateLimit(event)
+const cachedHandler = defineCachedHandler(async (event) => {
   const query = getQuery(event)
   const url = await validateUrl(query.url as string)
   const strategy = (query.strategy === 'desktop' ? 'desktop' : 'mobile') as 'mobile' | 'desktop'
@@ -141,6 +140,9 @@ export default defineCachedHandler(async (event) => {
     performanceScore: (results.lighthouseResult.categories.performance?.score || 0) * 100,
   }
 }, {
+  allowQuery: ['url', 'strategy'],
+  // Allow the URL probe and the 120-second PageSpeed request to finish.
+  maxResolveTime: 135,
   base: 'psi',
   swr: true,
   getKey: (event) => {
@@ -149,4 +151,9 @@ export default defineCachedHandler(async (event) => {
   },
   maxAge: 60 * 60,
   staleMaxAge: 24 * 60 * 60,
+})
+
+export default defineEventHandler(async (event) => {
+  await checkFreeToolRateLimit(event)
+  return cachedHandler(event)
 })
