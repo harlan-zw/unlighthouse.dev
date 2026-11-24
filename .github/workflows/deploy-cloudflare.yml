@@ -82,7 +82,7 @@ jobs:
           NUXT_OAUTH_GITHUB_CLIENT_ID: ${{ secrets.NUXT_OAUTH_GITHUB_CLIENT_ID }}
           NUXT_OAUTH_GITHUB_CLIENT_SECRET: ${{ secrets.NUXT_OAUTH_GITHUB_CLIENT_SECRET }}
           NUXT_OAUTH_GITHUB_REDIRECT_URL: ${{ secrets.NUXT_OAUTH_GITHUB_REDIRECT_URL }}
-          NUXT_SESSION_PASSWORD: ${{ secrets.NUXT_SESSION_PASSWORD }}
+          NUXT_APP_SECRET: ${{ secrets.NUXT_APP_SECRET || secrets.NUXT_SESSION_PASSWORD }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           # `GITHUB_SHA` is the default branch tip on a `workflow_run` event, so
           # the release tag named a commit this build does not contain. Sentry
@@ -143,7 +143,7 @@ jobs:
           NUXT_GITHUB_SPONSORS_TOKEN: ${{ secrets.NUXT_GITHUB_AUTH_TOKEN }}
           NUXT_GOOGLE_API_TOKEN: ${{ secrets.NUXT_GOOGLE_API_TOKEN }}
           NUXT_OAUTH_GITHUB_CLIENT_SECRET: ${{ secrets.NUXT_OAUTH_GITHUB_CLIENT_SECRET }}
-          NUXT_SESSION_PASSWORD: ${{ secrets.NUXT_SESSION_PASSWORD }}
+          NUXT_APP_SECRET: ${{ secrets.NUXT_APP_SECRET || secrets.NUXT_SESSION_PASSWORD }}
 
       # The build created the release for the sourcemap upload but nothing closed
       # it, so every release stayed (unreleased) and release health plus

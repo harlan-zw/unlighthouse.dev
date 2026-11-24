@@ -29,6 +29,8 @@
     "drizzle-orm": "catalog:",
     "fuse.js": "catalog:",
     "h3": "catalog:",
+    "lru-cache": "catalog:",
+    "nitro": "catalog:",
     "nuxt-auth-utils": "catalog:",
     "pathe": "catalog:",
     "rangi": "catalog:",

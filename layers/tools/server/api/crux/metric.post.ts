@@ -1,7 +1,9 @@
 import type { FieldSource } from '~~/shared/field-assessment'
 import type { MetricKey } from '../../../app/utils/crux'
 import type { FormFactor, NormalizedCrUXCurrentResult } from '../../utils/crux'
+import { createError, defineEventHandler, readBody } from 'h3'
 import { fetchCrUXCurrent, normalizeCruxCurrent } from '../../utils/crux'
+import { isValidUrl, normalizeUrl } from '../../utils/url'
 
 export interface CruxMetricRequest {
   url: string
@@ -47,7 +49,7 @@ function formatValue(metric: MetricKey, value: number): string {
 }
 
 export default defineEventHandler(async (event): Promise<CruxMetricResponse> => {
-  const { url, metric, formFactor } = await readBody<CruxMetricRequest>(event)
+  const { url, metric, formFactor = 'PHONE' } = await readBody<Partial<CruxMetricRequest>>(event) ?? {}
 
   if (!url || !metric)
     throw createError({ statusCode: 400, message: 'URL and metric required' })

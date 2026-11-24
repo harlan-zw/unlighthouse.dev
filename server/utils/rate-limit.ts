@@ -1,6 +1,7 @@
 import type { H3Event } from 'h3'
 import { isTransientD1Error } from '@harlan-zw/nuxt-cloudflare/d1'
-import { createError, getHeader, getRequestIP, setResponseHeaders } from 'h3'
+import { getHeader, getRequestIP, HTTPError, setResponseHeaders } from 'h3'
+import { getWorkerEnv } from './worker-env.ts'
 
 interface RateLimiter {
   limit: (opts: { key: string }) => Promise<{ success: boolean }>
@@ -96,7 +97,7 @@ function getEndOfDayTimestamp(): number {
  * counter runs one statement of its own and needs no ORM or schema.
  */
 function requestRateLimitStore(event: H3Event): RateLimitStore | null {
-  const env = event.context.cloudflare?.env as { DB?: RateLimitDatabase } | undefined
+  const env = getWorkerEnv<{ DB: RateLimitDatabase }>(event)
   return env?.DB ? createRateLimitStore(env.DB) : null
 }
 
@@ -171,12 +172,15 @@ async function enforceDailyLimit(event: H3Event, options: {
     return
 
   if (count > limit) {
-    setResponseHeaders(event, {
-      'X-RateLimit-Limit': String(limit),
-      'X-RateLimit-Remaining': '0',
-      'X-RateLimit-Reset': String(getEndOfDayTimestamp()),
+    throw new HTTPError({
+      status: 429,
+      message,
+      headers: {
+        'X-RateLimit-Limit': String(limit),
+        'X-RateLimit-Remaining': '0',
+        'X-RateLimit-Reset': String(getEndOfDayTimestamp()),
+      },
     })
-    throw createError({ statusCode: 429, message })
   }
 
   setResponseHeaders(event, {
@@ -193,19 +197,19 @@ export async function checkFreeToolRateLimit(event: H3Event, store: RateLimitSto
   const ip = getRequestIp(event)
 
   // Per-minute check (native Cloudflare binding)
-  const cf = event.context.cloudflare?.env as Record<string, RateLimiter> | undefined
+  const cf = getWorkerEnv<{ RL_FREE_TOOLS: RateLimiter }>(event)
   const limiter = cf?.RL_FREE_TOOLS
 
   if (limiter) {
     const { success } = await limiter.limit({ key: `ip:${ip}` })
     if (!success) {
-      setResponseHeaders(event, {
-        'X-RateLimit-Limit': String(FREE_TOOL_DAILY_LIMIT),
-        'Retry-After': '60',
-      })
-      throw createError({
-        statusCode: 429,
+      throw new HTTPError({
+        status: 429,
         message: 'Rate limit exceeded. Please wait before making more requests.',
+        headers: {
+          'X-RateLimit-Limit': String(FREE_TOOL_DAILY_LIMIT),
+          'Retry-After': '60',
+        },
       })
     }
   }

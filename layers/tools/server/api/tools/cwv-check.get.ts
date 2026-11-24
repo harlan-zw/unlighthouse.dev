@@ -1,4 +1,10 @@
 import type { FieldData, WebVitalMetric } from '../../utils/web-vitals'
+import { createError, defineEventHandler, getQuery } from 'h3'
+import { defineCachedHandler } from 'nitro/cache'
+import { trackToolRequest } from '#server/utils/analytics'
+import { fetchPSI } from '#server/utils/psi'
+import { checkFreeToolRateLimit } from '#server/utils/rate-limit'
+import { validateUrl } from '../../utils/url'
 import { assessPsiFieldData, formatMetricValue, getRating, parsePsiFieldData } from '../../utils/web-vitals'
 
 interface MetricResult {
@@ -75,8 +81,7 @@ function generateRecommendations(lab: Record<string, MetricResult>, field: Field
   return recs
 }
 
-export default defineCachedEventHandler(async (event) => {
-  await checkFreeToolRateLimit(event)
+const cachedHandler = defineCachedHandler(async (event) => {
   const query = getQuery(event)
   const url = await validateUrl(query.url as string)
   const strategy = (query.strategy === 'desktop' ? 'desktop' : 'mobile') as 'mobile' | 'desktop'
@@ -157,6 +162,9 @@ export default defineCachedEventHandler(async (event) => {
       : null,
   }
 }, {
+  allowQuery: ['url', 'strategy'],
+  // Allow the URL probe and the 120-second PageSpeed request to finish.
+  maxResolveTime: 135,
   base: 'psi',
   swr: true,
   getKey: (event) => {
@@ -165,4 +173,9 @@ export default defineCachedEventHandler(async (event) => {
   },
   maxAge: 60 * 60,
   staleMaxAge: 24 * 60 * 60,
+})
+
+export default defineEventHandler(async (event) => {
+  await checkFreeToolRateLimit(event)
+  return cachedHandler(event)
 })

@@ -1,4 +1,10 @@
 import type { H3Event } from 'h3'
+import type { PSIResult } from '#server/utils/psi'
+import { createError, createEventStream, defineHandler, readBody } from 'h3'
+import { trackToolUsage } from '#server/utils/analytics'
+import { fetchPSI } from '#server/utils/psi'
+import { checkFreeToolRateLimit } from '#server/utils/rate-limit'
+import { normalizeUrl } from '../../utils/url'
 
 interface BulkPSIResult {
   url: string
@@ -90,7 +96,7 @@ async function processSingleUrl(
   }
 }
 
-export default defineEventHandler(async (event) => {
+export default defineHandler(async (event) => {
   await checkFreeToolRateLimit(event)
 
   const body = await readBody<{
@@ -119,16 +125,8 @@ export default defineEventHandler(async (event) => {
 
   await trackToolUsage(event, 'bulk-pagespeed', 'use')
 
-  // Set up SSE
-  setResponseHeaders(event, {
-    'Content-Type': 'text/event-stream',
-    'Cache-Control': 'no-cache',
-    'Connection': 'keep-alive',
-  })
-
-  const sendEvent = (data: unknown) => {
-    event.node.res.write(`data: ${JSON.stringify(data)}\n\n`)
-  }
+  const stream = createEventStream(event)
+  const sendEvent = (data: unknown) => stream.push(JSON.stringify(data))
 
   // Initialize all URLs as queued
   const results: BulkPSIResult[] = urls.map(url => ({
@@ -142,24 +140,21 @@ export default defineEventHandler(async (event) => {
     si: null,
   }))
 
-  // Send initial state
-  sendEvent({ type: 'init', results, device: strategy })
-
   // Process URLs with concurrency limit
   const queue = [...urls]
-  const processing = new Set<string>()
+  stream.onClosed(() => {
+    queue.length = 0
+  })
 
   async function processNext(): Promise<void> {
     if (queue.length === 0)
       return
 
     const url = queue.shift()!
-    processing.add(url)
-
     // Update status to processing
     const idx = urls.indexOf(url)
     results[idx]!.status = 'processing'
-    sendEvent({ type: 'status', url, status: 'processing', index: idx })
+    await sendEvent({ type: 'status', url, status: 'processing', index: idx })
 
     // Process the URL
     const result = await processSingleUrl(event, url, strategy).catch(err => ({
@@ -175,37 +170,36 @@ export default defineEventHandler(async (event) => {
     }))
 
     results[idx] = result
-    processing.delete(url)
-
-    sendEvent({ type: 'result', index: idx, result })
+    await sendEvent({ type: 'result', index: idx, result })
 
     // Process next in queue
     await processNext()
   }
 
-  // Start initial batch of concurrent requests
-  const initialBatch = Math.min(CONCURRENCY, urls.length)
-  await Promise.all(
-    Array.from({ length: initialBatch }, () => processNext()),
-  )
+  async function sendResults() {
+    await sendEvent({ type: 'init', results, device: strategy })
+    const initialBatch = Math.min(CONCURRENCY, urls.length)
+    await Promise.all(Array.from({ length: initialBatch }, () => processNext()))
 
-  // Calculate summary
-  const successfulResults = results.filter(r => r.status === 'success' && r.performance !== null)
-  const avgPerformance = successfulResults.length > 0
-    ? Math.round(successfulResults.reduce((sum, r) => sum + (r.performance || 0), 0) / successfulResults.length)
-    : 0
+    const successfulResults = results.filter(r => r.status === 'success' && r.performance !== null)
+    const avgPerformance = successfulResults.length > 0
+      ? Math.round(successfulResults.reduce((sum, r) => sum + (r.performance || 0), 0) / successfulResults.length)
+      : 0
 
-  const summary = {
-    totalUrls: urls.length,
-    successCount: successfulResults.length,
-    errorCount: results.filter(r => r.status === 'error').length,
-    avgPerformance,
-    goodCount: successfulResults.filter(r => (r.performance || 0) >= 90).length,
-    needsWorkCount: successfulResults.filter(r => (r.performance || 0) >= 50 && (r.performance || 0) < 90).length,
-    poorCount: successfulResults.filter(r => (r.performance || 0) < 50).length,
+    const summary = {
+      totalUrls: urls.length,
+      successCount: successfulResults.length,
+      errorCount: results.filter(r => r.status === 'error').length,
+      avgPerformance,
+      goodCount: successfulResults.filter(r => (r.performance || 0) >= 90).length,
+      needsWorkCount: successfulResults.filter(r => (r.performance || 0) >= 50 && (r.performance || 0) < 90).length,
+      poorCount: successfulResults.filter(r => (r.performance || 0) < 50).length,
+    }
+    await sendEvent({ type: 'complete', results, summary, device: strategy, timestamp: Date.now() })
   }
 
-  sendEvent({ type: 'complete', results, summary, device: strategy, timestamp: Date.now() })
-
-  event.node.res.end()
+  event.waitUntil(sendResults().catch((error: unknown) => {
+    console.error('Failed to send PageSpeed results.', error)
+  }).finally(() => stream.close()))
+  return stream
 })

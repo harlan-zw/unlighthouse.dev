@@ -260,14 +260,13 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
     },
     oauth: {
       github: {
-        redirectUrl: '', // NUXT_OAUTH_GITHUB_REDIRECT_URL
+        redirectURL: '', // NUXT_OAUTH_GITHUB_REDIRECT_URL
         clientId: '', // NUXT_OAUTH_GITHUB_CLIENT_ID
         clientSecret: '', // NUXT_OAUTH_GITHUB_CLIENT_SECRET
       },
     },
     session: {
       maxAge: 60 * 60 * 24 * 7, // 7 days
-      password: '', // NUXT_SESSION_PASSWORD
       cookie: {
         sameSite: 'lax',
         secure: true,
@@ -322,10 +321,7 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
     scheduledTasks: {
       '*/5 * * * *': ['rate-limits:cleanup'],
     },
-    externals: {
-      external: ['agents/mcp', 'drizzle-orm'],
-    },
-    preset: 'cloudflare-durable',
+    preset: 'cloudflare-module',
     cloudflare: {
       deployConfig: true,
       nodeCompat: true,
@@ -385,7 +381,7 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
         ],
         ai: {
           binding: 'AI',
-          experimental_remote: true,
+          remote: true,
         },
         observability: {
           // Full log volume. The module default is 0.01.
@@ -453,6 +449,12 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
   ],
 
   hooks: {
+    'nitro:init': (nitro) => {
+      nitro.hooks.hook('prerender:config', (config) => {
+        // The Node prerender process has no Cloudflare CACHE binding.
+        config.kv = { ...config.kv, cache: { driver: 'memory' } }
+      })
+    },
     'components:extend': function (components) {
       for (const component of components) {
         if (component.pascalName === 'UAlert') {

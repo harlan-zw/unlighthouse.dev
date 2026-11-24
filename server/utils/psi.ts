@@ -1,8 +1,13 @@
 import type { H3Event } from 'h3'
+import { createError } from 'h3'
+import { defineCachedFunction } from 'nitro/cache'
+import { useRuntimeConfig } from 'nuxt/server'
+import { $fetch } from 'ofetch'
 import { buildPsiRequestUrl, psiFailureErrorOptions } from '../../shared/psi-request'
 
-const _fetchPSI = cachedFunction(async (url: string, strategy: 'mobile' | 'desktop', token: string) => {
+const _fetchPSI = defineCachedFunction(async (url: string, strategy: 'mobile' | 'desktop', token: string) => {
   return $fetch<PSIResult>(buildPsiRequestUrl(url, strategy), {
+    retry: 0,
     timeout: 120_000, // 2 min - PSI can be slow
     headers: { 'X-Goog-Api-Key': token },
   }).catch((error) => {
@@ -10,6 +15,8 @@ const _fetchPSI = cachedFunction(async (url: string, strategy: 'mobile' | 'deskt
     throw createError(psiFailureErrorOptions(error))
   })
 }, {
+  // Leave time to store the result after the upstream deadline.
+  maxResolveTime: 125,
   base: 'psi',
   swr: true,
   getKey: (url: string, strategy: string) => `raw:v1:${strategy}:${url}`,
@@ -17,8 +24,8 @@ const _fetchPSI = cachedFunction(async (url: string, strategy: 'mobile' | 'deskt
   staleMaxAge: 24 * 60 * 60,
 })
 
-export function fetchPSI(event: H3Event, url: string, strategy: 'mobile' | 'desktop' = 'mobile') {
-  const token = useRuntimeConfig(event).googleApiToken
+export function fetchPSI(_event: H3Event, url: string, strategy: 'mobile' | 'desktop' = 'mobile') {
+  const token = useRuntimeConfig().googleApiToken
   if (!token)
     throw createError({ message: 'NUXT_GOOGLE_API_TOKEN not configured', statusCode: 500 })
 

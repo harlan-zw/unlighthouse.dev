@@ -1,3 +1,6 @@
+import { createError, defineEventHandler, getQuery } from 'h3'
+import { useRuntimeConfig } from 'nuxt/server'
+import { $fetch } from 'ofetch'
 import { getTimeRangeFilter } from '~~/server/utils/analytics'
 import { requireAdminAuth } from '../../utils/admin'
 
@@ -16,7 +19,7 @@ export default defineEventHandler(async (event): Promise<ToolAnalyticsSummary> =
   const range = (query.range as string) || '7d'
   const { value, unit } = getTimeRangeFilter(range)
 
-  const config = useRuntimeConfig(event)
+  const config = useRuntimeConfig()
   const accountId = config.cloudflareAccountId
   const apiToken = config.cloudflareAnalyticsApiToken
 

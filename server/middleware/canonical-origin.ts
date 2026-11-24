@@ -1,3 +1,5 @@
+import { defineEventHandler, getRequestURL, sendRedirect, setResponseHeader } from 'h3'
+
 const PRODUCTION_HOSTNAME = 'unlighthouse.dev'
 const HSTS_POLICY = 'max-age=31536000; includeSubDomains'
 

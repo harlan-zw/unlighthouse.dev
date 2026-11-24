@@ -1,6 +1,7 @@
+import { defineCachedHandler } from 'nitro/cache'
 import { initOctokitRequestHandler } from '~~/server/utils/github'
 
-export default defineCachedEventHandler(async (e) => {
+export default defineCachedHandler(async (e) => {
   const { octokit, repo, owner } = initOctokitRequestHandler(e)
   const { data: contributors } = await octokit.request('GET /repos/{owner}/{repo}/contributors', {
     repo,

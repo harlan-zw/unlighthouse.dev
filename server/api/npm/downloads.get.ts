@@ -1,10 +1,13 @@
+import { createError } from 'h3'
+import { defineCachedHandler } from 'nitro/cache'
+import { $fetch } from 'ofetch'
 import { EXPECTED_UPSTREAM_FAILURE } from '../../../shared/sentry.ts'
 
 function formatDate(date: Date) {
   return date.toISOString().split('T')[0]
 }
 
-export default defineCachedEventHandler(async () => {
+export default defineCachedHandler(async () => {
   const packageName = '@unlighthouse/core'
   const endDate = new Date() // Today's date
   endDate.setDate(endDate.getDate() - 2) // 90 days ago

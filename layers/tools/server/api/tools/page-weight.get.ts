@@ -1,4 +1,6 @@
 import type { WeightEntry } from '~~/shared/page-weight'
+import { createError, defineEventHandler, getQuery } from 'h3'
+import { defineCachedHandler } from 'nitro/cache'
 import {
   assessCompleteness,
   classifyResource,
@@ -12,7 +14,10 @@ import {
   RESOURCE_LIMIT,
   summarizeWeight,
 } from '~~/shared/page-weight'
+import { trackToolRequest } from '#server/utils/analytics'
+import { checkFreeToolRateLimit } from '#server/utils/rate-limit'
 import { publicFetch } from '../../../../../server/utils/public-fetch'
+import { normalizeUrl, validateUrl } from '../../utils/url'
 
 /**
  * The fast half of the page size tool.
@@ -65,8 +70,7 @@ async function mapWithLimit<T, R>(items: readonly T[], limit: number, work: (ite
   return results
 }
 
-export default defineCachedEventHandler(async (event) => {
-  await checkFreeToolRateLimit(event)
+const cachedHandler = defineCachedHandler(async (event) => {
   const query = getQuery(event)
 
   // The guard runs before anything fetches. `validateUrl` probes the URL to
@@ -234,9 +238,15 @@ export default defineCachedEventHandler(async (event) => {
     }
   })
 }, {
+  allowQuery: ['url'],
   base: 'psi',
   swr: true,
   getKey: event => `page-weight:v2:${getQuery(event).url}`,
   maxAge: 60 * 60,
   staleMaxAge: 24 * 60 * 60,
+})
+
+export default defineEventHandler(async (event) => {
+  await checkFreeToolRateLimit(event)
+  return cachedHandler(event)
 })

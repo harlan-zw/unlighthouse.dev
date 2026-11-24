@@ -1,12 +1,13 @@
 import type { CommentFeedbackResponse } from '~~/types/schemas'
-import { getHeader } from 'h3'
+import { createError, defineEventHandler, getHeader, readValidatedBody } from 'h3'
 import { parseURL } from 'ufo'
 import { CommentFeedbackSchema } from '~~/types/schemas'
+import { getSessionId } from '#server/utils/analytics'
 import { feedback } from '../database/schema'
 import { getDB } from '../utils/db'
 import { checkFeedbackRateLimit } from '../utils/rate-limit'
 
-export default defineEventHandler<Promise<CommentFeedbackResponse>>(async (event) => {
+export default defineEventHandler(async (event): Promise<CommentFeedbackResponse> => {
   await checkFeedbackRateLimit(event)
   const { comment, path: explicitPath, toolId, thumbFeedbackId, context } = await readValidatedBody(event, CommentFeedbackSchema.parse)
   const referrer = parseURL(getHeader(event, 'Referer')).pathname

@@ -1,11 +1,11 @@
-import type { H3Event } from 'h3'
-import { getQuery } from 'h3'
+import { createError, getQuery, setHeader } from 'h3'
+import { defineCachedHandler } from 'nitro/cache'
 import { logger } from '~~/logger'
 import { initOctokitRequestHandler } from '~~/server/utils/github'
 
 const PR_NUMBER_RE = /#(\d+)/
 
-export default defineCachedEventHandler(async (e) => {
+export default defineCachedHandler(async (e) => {
   setHeader(e, 'Content-Type', 'application/json')
   const { octokit, repo, owner } = initOctokitRequestHandler(e)
   let path = String(getQuery(e)?.file) // something is strippign the .md
@@ -81,7 +81,8 @@ export default defineCachedEventHandler(async (e) => {
     message: lastCommit.commit.message,
   }
 }, {
+  allowQuery: ['file', 'branch'],
   name: 'github-last-commit',
   maxAge: 60 * 60 * 24, // 1 day
-  getKey: (e: H3Event) => `${getQuery(e).branch === 'v1' ? 'v1' : '0.x'}:${String(getQuery(e)?.file || '')}`,
+  getKey: e => `${getQuery(e).branch === 'v1' ? 'v1' : '0.x'}:${String(getQuery(e)?.file || '')}`,
 })

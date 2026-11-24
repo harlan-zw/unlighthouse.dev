@@ -1,4 +1,3 @@
-/* eslint-disable test/no-import-node-test */
 import type { H3Event } from 'h3'
 import type { RateLimitDatabase, RateLimitStore } from '../server/utils/rate-limit.ts'
 import assert from 'node:assert/strict'
@@ -6,6 +5,7 @@ import { readFileSync } from 'node:fs'
 import { DatabaseSync } from 'node:sqlite'
 import test from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { mockEvent } from 'h3'
 import { checkFeedbackRateLimit, createRateLimitStore, FEEDBACK_DAILY_LIMIT } from '../server/utils/rate-limit.ts'
 
 const migration = readFileSync(
@@ -46,12 +46,9 @@ const tomorrow = Math.floor(Date.now() / 1000) + 86_400
 
 /** An event carrying the header the limiter reads first, so no socket is needed. */
 function fakeEvent(ip = '203.0.113.1'): H3Event {
-  return {
-    node: {
-      req: { headers: { 'cf-connecting-ip': ip } },
-      res: { setHeader: () => {}, getHeader: () => undefined, headersSent: false },
-    },
-  } as unknown as H3Event
+  return mockEvent('https://unlighthouse.dev/api/feedback', {
+    headers: { 'cf-connecting-ip': ip },
+  })
 }
 
 /** A store whose counts the test drives directly. */
@@ -112,8 +109,22 @@ test('rejects the submission that passes the daily feedback limit', async () => 
 
   await assert.rejects(
     () => checkFeedbackRateLimit(fakeEvent(), store),
-    (error: { statusCode?: number }) => error.statusCode === 429,
+    (error: { status?: number, headers?: Headers }) => error.status === 429 && error.headers?.get('x-ratelimit-remaining') === '0',
   )
+})
+
+test('reads the daily counter from a Nitro 3 Worker request', async () => {
+  const db = sqliteDatabase()
+  const event = fakeEvent()
+  Object.assign(event.req, { runtime: { name: 'cloudflare', cloudflare: { env: { DB: db } } } })
+  try {
+    for (let attempt = 0; attempt < FEEDBACK_DAILY_LIMIT; attempt++)
+      await checkFeedbackRateLimit(event)
+    await assert.rejects(() => checkFeedbackRateLimit(event), { status: 429 })
+  }
+  finally {
+    db.close()
+  }
 })
 
 test('allows the submission that reaches the daily feedback limit', async () => {

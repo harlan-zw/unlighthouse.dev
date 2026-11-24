@@ -1,5 +1,8 @@
 import type { H3Event } from 'h3'
 import type { CruxEndpoint } from '~~/shared/crux-request'
+import { createError } from 'h3'
+import { useRuntimeConfig } from 'nuxt/server'
+import { $fetch } from 'ofetch'
 import { buildCruxRequestUrl, cruxFailureErrorOptions, readUpstreamStatus } from '~~/shared/crux-request'
 
 export type FormFactor = 'PHONE' | 'DESKTOP' | 'TABLET' | 'ALL_FORM_FACTORS'
@@ -179,7 +182,7 @@ export function normaliseCruxHistory(data: CrUXHistoryResult): NormalizedCrUXHis
 }
 
 export async function fetchCrUXHistory(event: H3Event, url: string, mode: 'origin' | 'url', formFactor: FormFactor) {
-  const apiKey = useRuntimeConfig(event).googleApiToken
+  const apiKey = useRuntimeConfig().googleApiToken
   if (!apiKey)
     throw createError({ statusCode: 500, message: 'Google API key not configured' })
 
@@ -294,7 +297,7 @@ export function normalizeCruxCurrent(data: CrUXCurrentResult): NormalizedCrUXCur
 }
 
 export async function fetchCrUXCurrent(event: H3Event, url: string, mode: 'origin' | 'url', formFactor: FormFactor) {
-  const apiKey = useRuntimeConfig(event).googleApiToken
+  const apiKey = useRuntimeConfig().googleApiToken
   if (!apiKey)
     throw createError({ statusCode: 500, message: 'Google API key not configured' })
 

@@ -1,6 +1,8 @@
+import { getQuery } from 'h3'
+import { defineCachedHandler } from 'nitro/cache'
 import { initOctokitRequestHandler } from '~~/server/utils/github'
 
-export default defineCachedEventHandler(async (e) => {
+export default defineCachedHandler(async (e) => {
   const query = getQuery(e)
   const includeBody = query.body !== 'false'
   const limit = Math.max(1, Math.min(100, Number.parseInt(String(query.limit || '30'), 10) || 30))
@@ -26,6 +28,7 @@ export default defineCachedEventHandler(async (e) => {
     }),
   }
 }, {
+  allowQuery: ['body', 'limit'],
   // last for 1 hour
   maxAge: 60 * 60,
 })

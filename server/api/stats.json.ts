@@ -1,3 +1,7 @@
+import { defineCachedHandler } from 'nitro/cache'
+import { serverFetch } from 'nuxt/server'
+import { readRouteJson } from '../utils/route-json'
+
 function customSortSemver(a: string, b: string) {
   const aParts = String(a).split('.')
   const bParts = String(b).split('.')
@@ -10,14 +14,15 @@ function customSortSemver(a: string, b: string) {
   return 0
 }
 
-export default defineCachedEventHandler(async (e) => {
+export default defineCachedHandler(async (event) => {
+  const request = { req: new Request(event.req.url, { headers: event.req.headers }), context: event.context }
   const [stars, commitCount, issuesClosed, releases, downloads, contributors] = await Promise.all([
-    e.$fetch(`/api/github/stars`),
-    e.$fetch(`/api/github/commit-count`),
-    e.$fetch(`/api/github/issues-closed`),
-    e.$fetch(`/api/github/releases?body=false&limit=100`),
-    e.$fetch(`/api/npm/downloads`),
-    e.$fetch(`/api/github/contributors`),
+    readRouteJson(serverFetch(request, '/api/github/stars')),
+    readRouteJson(serverFetch(request, '/api/github/commit-count')),
+    readRouteJson(serverFetch(request, '/api/github/issues-closed')),
+    readRouteJson(serverFetch(request, '/api/github/releases?body=false&limit=100')),
+    readRouteJson(serverFetch(request, '/api/npm/downloads')),
+    readRouteJson(serverFetch(request, '/api/github/contributors')),
   ])
   // get all major versions from releases, need to map into major version groups then get first child
   const versionGroups = (releases?.releases || []).map(r => r.name).reduce((group: Record<string, string[]>, v) => {

@@ -1,14 +1,19 @@
-/* eslint-disable test/no-import-node-test */
 import assert from 'node:assert/strict'
+import { registerHooks } from 'node:module'
 import test from 'node:test'
-import { createError } from 'h3'
 import { FetchError } from 'ofetch'
 import { EXPECTED_UPSTREAM_FAILURE } from '../shared/sentry.ts'
 
-// Nitro supplies these globals in production. Import after installing the test boundary.
+const serverDependencies = new URL('./fixtures/server-dependencies.ts', import.meta.url).href
+registerHooks({
+  resolve(specifier, context, nextResolve) {
+    if (context.parentURL?.endsWith('/api/npm/downloads.get.ts') && ['nitro/cache', 'ofetch'].includes(specifier))
+      return { url: serverDependencies, shortCircuit: true }
+    return nextResolve(specifier, context)
+  },
+})
+
 const globals = globalThis as unknown as Record<string, unknown>
-globals.defineCachedEventHandler = (handler: unknown) => handler
-globals.createError = createError
 const { default: handler } = await import('../server/api/npm/downloads.get.ts')
 
 test('returns a controlled upstream failure when npm rate limits a refresh', async () => {

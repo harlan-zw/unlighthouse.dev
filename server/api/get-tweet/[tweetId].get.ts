@@ -1,8 +1,11 @@
-export default defineCachedEventHandler(async (event) => {
+import { defineCachedHandler } from 'nitro/cache'
+import { $fetch } from 'ofetch'
+
+export default defineCachedHandler(async (event) => {
   const tweetId = event.context.params?.tweetId
 
   if (!tweetId)
-    return sendError(event, new Error('Missing tweetId'))
+    throw new Error('Missing tweetId')
 
   const SYNDICATION_URL = 'https://cdn.syndication.twimg.com'
 
@@ -32,5 +35,5 @@ export default defineCachedEventHandler(async (event) => {
 
   if (result.text)
     return result
-  else return sendError(event, new Error('something wrong'))
+  throw new Error('something wrong')
 })
