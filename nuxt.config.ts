@@ -417,10 +417,6 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
       //   cache: { driver: 'memory' },
       //   kv: { driver: 'memory' },
       // },
-      fs: {
-        driver: 'fs',
-        base: '.data/kv',
-      },
     },
   },
 
@@ -453,6 +449,7 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
       nitro.hooks.hook('prerender:config', (config) => {
         // The Node prerender process has no Cloudflare CACHE binding.
         config.kv = { ...config.kv, cache: { driver: 'memory' } }
+        config.storage = { ...config.storage, fs: { driver: 'fs', base: '.data/kv' } }
       })
     },
     'components:extend': function (components) {
