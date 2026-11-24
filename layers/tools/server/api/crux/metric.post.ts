@@ -1,7 +1,9 @@
 import type { FieldSource } from '~~/shared/field-assessment'
 import type { MetricKey } from '../../../app/utils/crux'
 import type { FormFactor, NormalizedCrUXCurrentResult } from '../../utils/crux'
+import { createError, defineEventHandler, readBody } from 'h3'
 import { fetchCrUXCurrent, normalizeCruxCurrent } from '../../utils/crux'
+import { isValidUrl, normalizeUrl } from '../../utils/url'
 
 export interface CruxMetricRequest {
   url: string

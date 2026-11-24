@@ -2,6 +2,7 @@ import type { D1Database } from '@cloudflare/workers-types'
 import type { SentryRuntimeConfig } from '@harlan-zw/nuxt-sentry/server'
 import type { H3Event } from 'h3'
 import type { HealthMetrics, HealthSummary, Probe } from './health'
+import { useRuntimeConfig } from 'nitropack/runtime'
 import { getD1 } from './db'
 import { parseFeedbackMetrics, parseToolBreakdown, parseToolWindow, summarizeHealth } from './health'
 

@@ -1,3 +1,7 @@
+import { sendError } from 'h3'
+import { defineCachedEventHandler } from 'nitropack/runtime'
+import { $fetch } from 'ofetch'
+
 export default defineCachedEventHandler(async (event) => {
   const tweetId = event.context.params?.tweetId
 

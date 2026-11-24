@@ -1,10 +1,16 @@
-/* eslint-disable test/no-import-node-test */
 import assert from 'node:assert/strict'
 import { registerHooks } from 'node:module'
 import test from 'node:test'
 
+const serverDependencies = new URL('./fixtures/server-dependencies.ts', import.meta.url).href
 registerHooks({
   resolve(specifier, context, nextResolve) {
+    if (context.parentURL?.endsWith('/cwv-check.get.ts') && (
+      ['h3', 'nitropack/runtime', '../../utils/url'].includes(specifier)
+      || specifier.startsWith('#server/')
+    )) {
+      return { url: serverDependencies, shortCircuit: true }
+    }
     if (specifier.startsWith('.') && !specifier.endsWith('.ts'))
       return nextResolve(`${specifier}.ts`, context)
     return nextResolve(specifier, context)
@@ -12,7 +18,6 @@ registerHooks({
 })
 
 const globals = globalThis as unknown as Record<string, unknown>
-globals.defineCachedEventHandler = (handler: unknown) => handler
 globals.checkFreeToolRateLimit = async () => {}
 globals.getQuery = () => ({ url: 'https://example.com/article', strategy: 'desktop' })
 globals.validateUrl = async (value: string) => value

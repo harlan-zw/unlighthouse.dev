@@ -1,4 +1,5 @@
 import type { H3Event } from 'h3'
+import { createError } from 'h3'
 
 const ADMIN_EMAILS = ['harlan@harlanzw.com']
 

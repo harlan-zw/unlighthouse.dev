@@ -5,8 +5,13 @@ import test from 'node:test'
 import { createError } from 'h3'
 
 const root = new URL('../', import.meta.url)
+const serverDependencies = new URL('./fixtures/server-dependencies.ts', import.meta.url).href
 registerHooks({
   resolve(specifier, context, nextResolve) {
+    if (context.parentURL?.endsWith('/utils/crux.ts') && ['nitropack/runtime', 'ofetch'].includes(specifier))
+      return { url: serverDependencies, shortCircuit: true }
+    if (context.parentURL?.endsWith('/api/crux/metric.post.ts') && ['h3', '../../utils/url'].includes(specifier))
+      return { url: serverDependencies, shortCircuit: true }
     if (specifier.startsWith('~~/'))
       return nextResolve(`${new URL(specifier.slice(3), root).href}.ts`, context)
     if (specifier.startsWith('.') && !specifier.endsWith('.ts'))

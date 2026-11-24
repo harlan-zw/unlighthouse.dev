@@ -1,7 +1,11 @@
 import type { FieldAssessment, FieldSource } from '~~/shared/field-assessment'
 import type { FormFactor, NormalizedCrUXCurrentResult, NormalizedCrUXHistoryResult } from '../../utils/crux'
+import { createError, defineEventHandler, readBody } from 'h3'
 import { assessFieldCoreWebVitals } from '~~/shared/field-assessment'
+import { trackToolUsage } from '#server/utils/analytics'
+import { checkFreeToolRateLimit } from '#server/utils/rate-limit'
 import { fetchCrUXCurrent, fetchCrUXHistory, normaliseCruxHistory, normalizeCruxCurrent } from '../../utils/crux'
+import { isValidUrl, normalizeUrl } from '../../utils/url'
 
 export interface CWVCompareRequest {
   urls: string[]

@@ -1,4 +1,5 @@
 import { queryCollectionSearchSections } from '@harlan-zw/comark-content/server'
+import { defineCachedEventHandler } from 'nitropack/runtime'
 import { toolCatalog } from '~~/shared/tool-catalog'
 
 const toolSearchSections = [

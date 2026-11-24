@@ -1,4 +1,6 @@
 import type { WeightEntry } from '~~/shared/page-weight'
+import { createError, getQuery } from 'h3'
+import { defineCachedEventHandler } from 'nitropack/runtime'
 import {
   assessCompleteness,
   classifyResource,
@@ -12,7 +14,10 @@ import {
   RESOURCE_LIMIT,
   summarizeWeight,
 } from '~~/shared/page-weight'
+import { trackToolRequest } from '#server/utils/analytics'
+import { checkFreeToolRateLimit } from '#server/utils/rate-limit'
 import { publicFetch } from '../../../../../server/utils/public-fetch'
+import { normalizeUrl, validateUrl } from '../../utils/url'
 
 /**
  * The fast half of the page size tool.

@@ -223,6 +223,8 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
   future: {
     compatibilityVersion: 5,
   },
+  // Preserve h3 v1 server APIs while using Nitro 3.
+  nitroLegacy: true,
 
   aiReady: {
     database: {
@@ -322,10 +324,7 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
     scheduledTasks: {
       '*/5 * * * *': ['rate-limits:cleanup'],
     },
-    externals: {
-      external: ['agents/mcp', 'drizzle-orm'],
-    },
-    preset: 'cloudflare-durable',
+    preset: 'cloudflare-module',
     cloudflare: {
       deployConfig: true,
       nodeCompat: true,
@@ -385,7 +384,7 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
         ],
         ai: {
           binding: 'AI',
-          experimental_remote: true,
+          remote: true,
         },
         observability: {
           // Full log volume. The module default is 0.01.
@@ -453,6 +452,12 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
   ],
 
   hooks: {
+    'nitro:init': (nitro) => {
+      nitro.hooks.hook('prerender:config', (config) => {
+        // The Node prerender process has no Cloudflare CACHE binding.
+        config.kv = { ...config.kv, cache: { driver: 'memory' } }
+      })
+    },
     'components:extend': function (components) {
       for (const component of components) {
         if (component.pascalName === 'UAlert') {

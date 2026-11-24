@@ -1,4 +1,5 @@
 import { desc, sql } from 'drizzle-orm'
+import { defineEventHandler } from 'h3'
 import { feedback } from '../../../../../server/database/schema'
 import { getDB } from '../../../../../server/utils/db'
 import { requireAdminAuth } from '../../utils/admin'

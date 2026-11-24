@@ -1,3 +1,10 @@
+import { createError, getQuery } from 'h3'
+import { defineCachedEventHandler } from 'nitropack/runtime'
+import { trackToolRequest } from '#server/utils/analytics'
+import { extractScreenshot, fetchPSI } from '#server/utils/psi'
+import { checkFreeToolRateLimit } from '#server/utils/rate-limit'
+import { validateUrl } from '../../utils/url'
+
 export default defineCachedEventHandler(async (event) => {
   await checkFreeToolRateLimit(event)
   const query = getQuery(event)

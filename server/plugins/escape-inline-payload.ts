@@ -1,3 +1,5 @@
+import { defineNitroPlugin } from 'nitropack/runtime'
+
 const NUXT_PAYLOAD_MARKER = 'data-nuxt-data="nuxt-app"'
 const SCRIPT_CLOSE = '</script>'
 const ESCAPED_SCRIPT_CLOSE = '<\\u002Fscript>'

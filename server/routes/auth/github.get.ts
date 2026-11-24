@@ -1,4 +1,6 @@
 import { eq } from 'drizzle-orm'
+import { defineEventHandler, deleteCookie, getCookie, getQuery, sendRedirect } from 'h3'
+import { $fetch } from 'ofetch'
 import { users } from '../../database/schema'
 import { getDB } from '../../utils/db'
 

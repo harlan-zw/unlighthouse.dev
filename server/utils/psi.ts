@@ -1,4 +1,7 @@
 import type { H3Event } from 'h3'
+import { createError } from 'h3'
+import { cachedFunction, useRuntimeConfig } from 'nitropack/runtime'
+import { $fetch } from 'ofetch'
 import { buildPsiRequestUrl, psiFailureErrorOptions } from '../../shared/psi-request'
 
 const _fetchPSI = cachedFunction(async (url: string, strategy: 'mobile' | 'desktop', token: string) => {

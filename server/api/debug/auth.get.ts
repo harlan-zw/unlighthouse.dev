@@ -1,3 +1,6 @@
+import { defineEventHandler, getHeader, parseCookies } from 'h3'
+import { useRuntimeConfig } from 'nitropack/runtime'
+
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig(event)
   const cookies = parseCookies(event)

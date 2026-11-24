@@ -1,3 +1,10 @@
+import { createError, getQuery } from 'h3'
+import { defineCachedEventHandler } from 'nitropack/runtime'
+import { trackToolRequest } from '#server/utils/analytics'
+import { detectFramework, extractOpportunities, extractScreenshot, fetchPSI } from '#server/utils/psi'
+import { checkFreeToolRateLimit } from '#server/utils/rate-limit'
+import { validateUrl } from '../../utils/url'
+
 interface BreakdownPhase {
   subpart: string
   label: string

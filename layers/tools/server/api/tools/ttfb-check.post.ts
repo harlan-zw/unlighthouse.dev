@@ -1,5 +1,10 @@
 import type { FormFactor, NormalizedCrUXHistoryResult } from '../../utils/crux'
+import { createError, defineEventHandler, readBody } from 'h3'
+import { trackToolRequest } from '#server/utils/analytics'
+import { fetchPSI } from '#server/utils/psi'
+import { checkFreeToolRateLimit } from '#server/utils/rate-limit'
 import { fetchCrUXCurrent, fetchCrUXHistory, normaliseCruxHistory, normalizeCruxCurrent } from '../../utils/crux'
+import { isValidUrl, normalizeUrl } from '../../utils/url'
 
 export interface TTFBCheckResponse {
   url: string

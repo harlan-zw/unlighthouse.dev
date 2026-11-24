@@ -1,4 +1,5 @@
 import { runChecks } from '@harlan-zw/nuxt-checkin/server'
+import { defineEventHandler, setResponseHeader } from 'h3'
 import checks from '#checkin/checks'
 import { requiredChecks } from '../../shared/checkin'
 

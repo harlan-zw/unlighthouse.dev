@@ -1,5 +1,9 @@
 import type { FormFactor, NormalizedCrUXHistoryResult } from '../../utils/crux'
+import { createError, defineEventHandler, readBody } from 'h3'
+import { trackToolRequest } from '#server/utils/analytics'
+import { checkFreeToolRateLimit } from '#server/utils/rate-limit'
 import { fetchCrUXHistory, normaliseCruxHistory } from '../../utils/crux'
+import { isValidUrl, normalizeUrl } from '../../utils/url'
 
 export interface CWVHistoryResponse {
   url: string

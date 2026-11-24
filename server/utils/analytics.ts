@@ -1,5 +1,6 @@
 import type { H3Event } from 'h3'
 import type { ToolId } from '../../shared/tool-catalog'
+import { getCookie, setCookie } from 'h3'
 import { toolLookups } from '../database/schema'
 import { getDB } from './db'
 import { runWithToolOutcome } from './tool-outcome'

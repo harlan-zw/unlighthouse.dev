@@ -1,5 +1,7 @@
 import type { ToolId } from '~~/shared/tool-catalog'
+import { createError, defineEventHandler, readBody } from 'h3'
 import { toolCatalog } from '~~/shared/tool-catalog'
+import { trackToolUsage } from '#server/utils/analytics'
 
 const validTools = new Set<string>(toolCatalog.map(tool => tool.id))
 const validActions = new Set(['view', 'use', 'share', 'export', 'copy'] as const)

@@ -1,4 +1,5 @@
 import type { H3Event } from 'h3'
+import { defineCachedFunction, useRuntimeConfig } from 'nitropack/runtime'
 import { Octokit } from 'octokit'
 
 export function initOctokitRequestHandler(e: H3Event) {

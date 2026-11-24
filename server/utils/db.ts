@@ -1,6 +1,7 @@
 import type { D1Database } from '@cloudflare/workers-types'
 import type { H3Event } from 'h3'
 import { drizzle } from 'drizzle-orm/d1'
+import { createError } from 'h3'
 
 /**
  * The raw binding, for callers that report on a missing database instead of

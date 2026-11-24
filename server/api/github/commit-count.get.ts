@@ -1,3 +1,4 @@
+import { defineCachedEventHandler } from 'nitropack/runtime'
 import { initOctokitRequestHandler } from '~~/server/utils/github'
 import { parseGitHubLastPage } from '~~/shared/github'
 

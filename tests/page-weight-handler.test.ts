@@ -1,4 +1,3 @@
-/* eslint-disable test/no-import-node-test */
 import assert from 'node:assert/strict'
 import { registerHooks } from 'node:module'
 import test from 'node:test'
@@ -7,11 +6,18 @@ import { MAX_BODY_BYTES } from '../shared/page-weight.ts'
 import { EXPECTED_UPSTREAM_FAILURE_MESSAGE_RE } from '../shared/sentry.ts'
 
 const root = new URL('../', import.meta.url)
+const serverDependencies = new URL('./fixtures/server-dependencies.ts', import.meta.url).href
 
 // The handler names its imports with Nuxt's `~~` root alias, which plain Node
 // does not resolve, so tests map that alias onto the repository root here.
 registerHooks({
   resolve(specifier, context, nextResolve) {
+    if (context.parentURL?.endsWith('/page-weight.get.ts') && (
+      ['h3', 'nitropack/runtime', '../../utils/url'].includes(specifier)
+      || specifier.startsWith('#server/')
+    )) {
+      return { url: serverDependencies, shortCircuit: true }
+    }
     if (specifier.startsWith('~~/'))
       return nextResolve(`${new URL(specifier.slice(3), root).href}.ts`, context)
     if (specifier.endsWith('/public-fetch') || specifier.endsWith('/public-transport'))
@@ -33,16 +39,13 @@ registerHooks({
   },
 })
 
-// The handler is written against Nitro's auto-imports. Tests provide the ones
-// it uses, keeping the fetch stub the only thing under test.
+// Isolate the route from rate limits and analytics while testing its HTTP results.
 const globals = globalThis as unknown as Record<string, unknown>
-globals.defineCachedEventHandler = (handler: unknown) => handler
 globals.checkFreeToolRateLimit = async () => {}
 globals.getQuery = (event: { query?: Record<string, unknown> }) => event.query ?? {}
 globals.normalizeUrl = (url: string) => url
 globals.validateUrl = async (url: string) => url
 globals.trackToolRequest = (_event: unknown, _meta: unknown, work: () => unknown) => work()
-globals.createError = createError
 
 const { default: handler } = await import('../layers/tools/server/api/tools/page-weight.get.ts')
 

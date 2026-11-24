@@ -1,3 +1,6 @@
+import { createError } from 'h3'
+import { defineCachedEventHandler } from 'nitropack/runtime'
+import { $fetch } from 'ofetch'
 import { EXPECTED_UPSTREAM_FAILURE } from '../../../shared/sentry.ts'
 
 function formatDate(date: Date) {

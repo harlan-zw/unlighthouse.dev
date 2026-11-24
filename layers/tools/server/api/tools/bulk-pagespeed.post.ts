@@ -1,4 +1,10 @@
 import type { H3Event } from 'h3'
+import type { PSIResult } from '#server/utils/psi'
+import { createError, defineEventHandler, readBody, setResponseHeaders } from 'h3'
+import { trackToolUsage } from '#server/utils/analytics'
+import { fetchPSI } from '#server/utils/psi'
+import { checkFreeToolRateLimit } from '#server/utils/rate-limit'
+import { normalizeUrl } from '../../utils/url'
 
 interface BulkPSIResult {
   url: string

@@ -1,5 +1,6 @@
 import type { H3Event } from 'h3'
-import { getQuery } from 'h3'
+import { createError, getQuery, setHeader } from 'h3'
+import { defineCachedEventHandler } from 'nitropack/runtime'
 import { logger } from '~~/logger'
 import { initOctokitRequestHandler } from '~~/server/utils/github'
 
