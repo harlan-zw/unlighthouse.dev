@@ -1,6 +1,7 @@
 import type { H3Event } from 'h3'
 import { isTransientD1Error } from '@harlan-zw/nuxt-cloudflare/d1'
 import { getHeader, getRequestIP, HTTPError, setResponseHeaders } from 'h3'
+import { getWorkerEnv } from './worker-env.ts'
 
 interface RateLimiter {
   limit: (opts: { key: string }) => Promise<{ success: boolean }>
@@ -96,7 +97,7 @@ function getEndOfDayTimestamp(): number {
  * counter runs one statement of its own and needs no ORM or schema.
  */
 function requestRateLimitStore(event: H3Event): RateLimitStore | null {
-  const env = event.context.cloudflare?.env as { DB?: RateLimitDatabase } | undefined
+  const env = getWorkerEnv<{ DB: RateLimitDatabase }>(event)
   return env?.DB ? createRateLimitStore(env.DB) : null
 }
 
@@ -196,7 +197,7 @@ export async function checkFreeToolRateLimit(event: H3Event, store: RateLimitSto
   const ip = getRequestIp(event)
 
   // Per-minute check (native Cloudflare binding)
-  const cf = event.context.cloudflare?.env as Record<string, RateLimiter> | undefined
+  const cf = getWorkerEnv<{ RL_FREE_TOOLS: RateLimiter }>(event)
   const limiter = cf?.RL_FREE_TOOLS
 
   if (limiter) {

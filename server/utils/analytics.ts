@@ -4,6 +4,7 @@ import { getCookie, setCookie } from 'h3'
 import { toolLookups } from '../database/schema'
 import { getDB } from './db'
 import { runWithToolOutcome } from './tool-outcome'
+import { getWorkerEnv } from './worker-env'
 
 const SESSION_COOKIE = 'analytics-session'
 const SESSION_MAX_AGE = 60 * 60 * 24 * 365 // 1 year
@@ -24,7 +25,7 @@ export interface AnalyticsDataPoint {
 }
 
 export function getAnalyticsEngine(event: H3Event) {
-  return (event.context.cloudflare?.env as { TOOL_ANALYTICS?: { writeDataPoint: (dataPoint: AnalyticsDataPoint) => void } } | undefined)?.TOOL_ANALYTICS
+  return getWorkerEnv<{ TOOL_ANALYTICS: { writeDataPoint: (dataPoint: AnalyticsDataPoint) => void } }>(event)?.TOOL_ANALYTICS
 }
 
 export async function trackToolUsage(

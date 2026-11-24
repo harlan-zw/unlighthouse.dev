@@ -1,4 +1,3 @@
-/* eslint-disable test/no-import-node-test */
 import type { H3Event } from 'h3'
 import type { RateLimitDatabase, RateLimitStore } from '../server/utils/rate-limit.ts'
 import assert from 'node:assert/strict'
@@ -112,6 +111,20 @@ test('rejects the submission that passes the daily feedback limit', async () => 
     () => checkFeedbackRateLimit(fakeEvent(), store),
     (error: { status?: number, headers?: Headers }) => error.status === 429 && error.headers?.get('x-ratelimit-remaining') === '0',
   )
+})
+
+test('reads the daily counter from a Nitro 3 Worker request', async () => {
+  const db = sqliteDatabase()
+  const event = fakeEvent()
+  Object.assign(event.req, { runtime: { name: 'cloudflare', cloudflare: { env: { DB: db } } } })
+  try {
+    for (let attempt = 0; attempt < FEEDBACK_DAILY_LIMIT; attempt++)
+      await checkFeedbackRateLimit(event)
+    await assert.rejects(() => checkFeedbackRateLimit(event), { status: 429 })
+  }
+  finally {
+    db.close()
+  }
 })
 
 test('allows the submission that reaches the daily feedback limit', async () => {
