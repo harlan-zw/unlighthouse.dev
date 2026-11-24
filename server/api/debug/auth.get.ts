@@ -1,8 +1,8 @@
 import { defineEventHandler, getHeader, parseCookies } from 'h3'
-import { useRuntimeConfig } from 'nitropack/runtime'
+import { useRuntimeConfig } from 'nuxt/server'
 
 export default defineEventHandler(async (event) => {
-  const config = useRuntimeConfig(event)
+  const config = useRuntimeConfig()
   const cookies = parseCookies(event)
 
   let session = null
@@ -16,8 +16,7 @@ export default defineEventHandler(async (event) => {
 
   return {
     env: {
-      hasSessionPassword: !!config.session?.password,
-      sessionPasswordLength: config.session?.password?.length || 0,
+      hasApplicationSecret: !!config.appSecret,
       hasOAuthClientId: !!process.env.NUXT_OAUTH_GITHUB_CLIENT_ID,
       hasOAuthClientSecret: !!process.env.NUXT_OAUTH_GITHUB_CLIENT_SECRET,
       redirectUrl: process.env.NUXT_OAUTH_GITHUB_REDIRECT_URL || 'not set',
@@ -26,7 +25,7 @@ export default defineEventHandler(async (event) => {
       hasClientId: !!config.oauth?.github?.clientId,
       clientIdPrefix: config.oauth?.github?.clientId?.slice(0, 8) || 'not set',
       hasClientSecret: !!config.oauth?.github?.clientSecret,
-      redirectUrl: config.oauth?.github?.redirectUrl || 'not set',
+      redirectUrl: config.oauth?.github?.redirectURL || 'not set',
     },
     sessionConfig: {
       maxAge: config.session?.maxAge,
@@ -35,7 +34,7 @@ export default defineEventHandler(async (event) => {
     },
     cookies: {
       hasAuthState: !!cookies['nuxt-auth-state'],
-      hasSession: !!cookies['nuxt-session'],
+      hasSession: !!cookies['nuxt-auth-session'],
       allCookieNames: Object.keys(cookies),
     },
     session: session || null,

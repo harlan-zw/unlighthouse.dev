@@ -1,5 +1,5 @@
 import { queryCollectionSearchSections } from '@harlan-zw/comark-content/server'
-import { defineCachedEventHandler } from 'nitropack/runtime'
+import { defineCachedHandler } from 'nitro/cache'
 import { toolCatalog } from '~~/shared/tool-catalog'
 
 const toolSearchSections = [
@@ -19,7 +19,7 @@ const toolSearchSections = [
   })),
 ]
 
-export default defineCachedEventHandler(async (event) => {
+export default defineCachedHandler(async (event) => {
   const [root, beta, glossary, learnLighthouse] = await Promise.all([
     queryCollectionSearchSections(event, 'root'),
     queryCollectionSearchSections(event, 'beta'),

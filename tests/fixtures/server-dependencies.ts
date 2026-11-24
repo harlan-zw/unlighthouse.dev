@@ -5,8 +5,8 @@ export { createError }
 type Boundary = (...args: unknown[]) => unknown
 const fixtures = globalThis as unknown as Record<string, Boundary>
 
-export const defineCachedEventHandler = <Handler>(handler: Handler): Handler => handler
-export const defineEventHandler = defineCachedEventHandler
+export const defineCachedHandler = <Handler>(handler: Handler): Handler => handler
+export const defineEventHandler = defineCachedHandler
 export const getQuery: Boundary = (...args) => fixtures.getQuery!(...args)
 export const readBody: Boundary = (...args) => fixtures.readBody!(...args)
 export const checkFreeToolRateLimit: Boundary = (...args) => fixtures.checkFreeToolRateLimit!(...args)

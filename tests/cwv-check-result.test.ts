@@ -1,17 +1,18 @@
 import assert from 'node:assert/strict'
 import { registerHooks } from 'node:module'
+import { extname } from 'node:path'
 import test from 'node:test'
 
 const serverDependencies = new URL('./fixtures/server-dependencies.ts', import.meta.url).href
 registerHooks({
   resolve(specifier, context, nextResolve) {
     if (context.parentURL?.endsWith('/cwv-check.get.ts') && (
-      ['h3', 'nitropack/runtime', '../../utils/url'].includes(specifier)
+      ['h3', 'nitro/cache', '../../utils/url'].includes(specifier)
       || specifier.startsWith('#server/')
     )) {
       return { url: serverDependencies, shortCircuit: true }
     }
-    if (specifier.startsWith('.') && !specifier.endsWith('.ts'))
+    if (specifier.startsWith('.') && !extname(specifier))
       return nextResolve(`${specifier}.ts`, context)
     return nextResolve(specifier, context)
   },

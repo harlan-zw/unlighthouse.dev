@@ -1,4 +1,3 @@
-/* eslint-disable test/no-import-node-test */
 import assert from 'node:assert/strict'
 import { registerHooks } from 'node:module'
 import test from 'node:test'
@@ -11,7 +10,7 @@ const serverDependencies = new URL('./fixtures/server-dependencies.ts', import.m
 // does not resolve, so tests map that alias onto the repository root here.
 registerHooks({
   resolve(specifier, context, nextResolve) {
-    if (context.parentURL?.endsWith('/utils/crux.ts') && ['nitropack/runtime', 'ofetch'].includes(specifier))
+    if (context.parentURL?.endsWith('/utils/crux.ts') && ['nuxt/server', 'ofetch'].includes(specifier))
       return { url: serverDependencies, shortCircuit: true }
     if (specifier.startsWith('~~/'))
       return nextResolve(`${new URL(specifier.slice(3), root).href}.ts`, context)

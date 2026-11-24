@@ -1,10 +1,11 @@
 import type { H3Event } from 'h3'
 import { createError } from 'h3'
-import { cachedFunction, useRuntimeConfig } from 'nitropack/runtime'
+import { defineCachedFunction } from 'nitro/cache'
+import { useRuntimeConfig } from 'nuxt/server'
 import { $fetch } from 'ofetch'
 import { buildPsiRequestUrl, psiFailureErrorOptions } from '../../shared/psi-request'
 
-const _fetchPSI = cachedFunction(async (url: string, strategy: 'mobile' | 'desktop', token: string) => {
+const _fetchPSI = defineCachedFunction(async (url: string, strategy: 'mobile' | 'desktop', token: string) => {
   return $fetch<PSIResult>(buildPsiRequestUrl(url, strategy), {
     timeout: 120_000, // 2 min - PSI can be slow
     headers: { 'X-Goog-Api-Key': token },
@@ -20,8 +21,8 @@ const _fetchPSI = cachedFunction(async (url: string, strategy: 'mobile' | 'deskt
   staleMaxAge: 24 * 60 * 60,
 })
 
-export function fetchPSI(event: H3Event, url: string, strategy: 'mobile' | 'desktop' = 'mobile') {
-  const token = useRuntimeConfig(event).googleApiToken
+export function fetchPSI(_event: H3Event, url: string, strategy: 'mobile' | 'desktop' = 'mobile') {
+  const token = useRuntimeConfig().googleApiToken
   if (!token)
     throw createError({ message: 'NUXT_GOOGLE_API_TOKEN not configured', statusCode: 500 })
 

@@ -1,7 +1,7 @@
-import { defineCachedEventHandler } from 'nitropack/runtime'
+import { defineCachedHandler } from 'nitro/cache'
 import { initOctokitRequestHandler } from '~~/server/utils/github'
 
-export default defineCachedEventHandler(async (e) => {
+export default defineCachedHandler(async (e) => {
   const { octokit, repo, owner } = initOctokitRequestHandler(e)
   const res = await octokit.graphql(`query ($owner: String!, $name: String!) {
   repository(owner: $owner, name: $name) {

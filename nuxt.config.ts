@@ -223,8 +223,6 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
   future: {
     compatibilityVersion: 5,
   },
-  // Preserve h3 v1 server APIs while using Nitro 3.
-  nitroLegacy: true,
 
   aiReady: {
     database: {
@@ -262,14 +260,13 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
     },
     oauth: {
       github: {
-        redirectUrl: '', // NUXT_OAUTH_GITHUB_REDIRECT_URL
+        redirectURL: '', // NUXT_OAUTH_GITHUB_REDIRECT_URL
         clientId: '', // NUXT_OAUTH_GITHUB_CLIENT_ID
         clientSecret: '', // NUXT_OAUTH_GITHUB_CLIENT_SECRET
       },
     },
     session: {
       maxAge: 60 * 60 * 24 * 7, // 7 days
-      password: '', // NUXT_SESSION_PASSWORD
       cookie: {
         sameSite: 'lax',
         secure: true,

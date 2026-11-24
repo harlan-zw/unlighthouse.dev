@@ -1,8 +1,8 @@
-import { defineCachedEventHandler } from 'nitropack/runtime'
+import { defineCachedHandler } from 'nitro/cache'
 import { initOctokitRequestHandler } from '~~/server/utils/github'
 import { parseGitHubLastPage } from '~~/shared/github'
 
-export default defineCachedEventHandler(async (e) => {
+export default defineCachedHandler(async (e) => {
   const { octokit, repo, owner } = initOctokitRequestHandler(e)
   const { headers } = await octokit.request('GET /repos/{owner}/{repo}/commits', {
     repo,

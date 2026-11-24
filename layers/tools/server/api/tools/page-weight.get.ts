@@ -1,6 +1,6 @@
 import type { WeightEntry } from '~~/shared/page-weight'
 import { createError, getQuery } from 'h3'
-import { defineCachedEventHandler } from 'nitropack/runtime'
+import { defineCachedHandler } from 'nitro/cache'
 import {
   assessCompleteness,
   classifyResource,
@@ -70,7 +70,7 @@ async function mapWithLimit<T, R>(items: readonly T[], limit: number, work: (ite
   return results
 }
 
-export default defineCachedEventHandler(async (event) => {
+export default defineCachedHandler(async (event) => {
   await checkFreeToolRateLimit(event)
   const query = getQuery(event)
 

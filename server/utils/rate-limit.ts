@@ -1,6 +1,6 @@
 import type { H3Event } from 'h3'
 import { isTransientD1Error } from '@harlan-zw/nuxt-cloudflare/d1'
-import { createError, getHeader, getRequestIP, setResponseHeaders } from 'h3'
+import { getHeader, getRequestIP, HTTPError, setResponseHeaders } from 'h3'
 
 interface RateLimiter {
   limit: (opts: { key: string }) => Promise<{ success: boolean }>
@@ -171,12 +171,15 @@ async function enforceDailyLimit(event: H3Event, options: {
     return
 
   if (count > limit) {
-    setResponseHeaders(event, {
-      'X-RateLimit-Limit': String(limit),
-      'X-RateLimit-Remaining': '0',
-      'X-RateLimit-Reset': String(getEndOfDayTimestamp()),
+    throw new HTTPError({
+      status: 429,
+      message,
+      headers: {
+        'X-RateLimit-Limit': String(limit),
+        'X-RateLimit-Remaining': '0',
+        'X-RateLimit-Reset': String(getEndOfDayTimestamp()),
+      },
     })
-    throw createError({ statusCode: 429, message })
   }
 
   setResponseHeaders(event, {
@@ -199,13 +202,13 @@ export async function checkFreeToolRateLimit(event: H3Event, store: RateLimitSto
   if (limiter) {
     const { success } = await limiter.limit({ key: `ip:${ip}` })
     if (!success) {
-      setResponseHeaders(event, {
-        'X-RateLimit-Limit': String(FREE_TOOL_DAILY_LIMIT),
-        'Retry-After': '60',
-      })
-      throw createError({
-        statusCode: 429,
+      throw new HTTPError({
+        status: 429,
         message: 'Rate limit exceeded. Please wait before making more requests.',
+        headers: {
+          'X-RateLimit-Limit': String(FREE_TOOL_DAILY_LIMIT),
+          'Retry-After': '60',
+        },
       })
     }
   }

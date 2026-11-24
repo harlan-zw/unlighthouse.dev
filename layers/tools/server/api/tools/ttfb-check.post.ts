@@ -60,7 +60,7 @@ export default defineEventHandler(async (event): Promise<TTFBCheckResponse> => {
     formFactor?: FormFactor
     includeHistory?: boolean
     includeLab?: boolean
-  }>(event)
+  }>(event) ?? {}
 
   const url = body.url?.trim()
   if (!url)

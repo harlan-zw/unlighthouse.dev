@@ -1,9 +1,10 @@
 import type { H3Event } from 'h3'
-import { defineCachedFunction, useRuntimeConfig } from 'nitropack/runtime'
+import { defineCachedFunction } from 'nitro/cache'
+import { useRuntimeConfig } from 'nuxt/server'
 import { Octokit } from 'octokit'
 
-export function initOctokitRequestHandler(e: H3Event) {
-  const { githubAccessToken } = useRuntimeConfig(e)
+export function initOctokitRequestHandler(_event: H3Event) {
+  const { githubAccessToken } = useRuntimeConfig()
   if (!githubAccessToken) {
     throw new Error('Missing githubAccessToken')
   }
@@ -18,8 +19,8 @@ export function initOctokitRequestHandler(e: H3Event) {
   }
 }
 
-export const cachedFetchGitHubRaw = defineCachedFunction(async (e: H3Event, fullPath: string) => {
-  const { githubAccessToken } = useRuntimeConfig(e)
+export const cachedFetchGitHubRaw = defineCachedFunction(async (_event: H3Event, fullPath: string) => {
+  const { githubAccessToken } = useRuntimeConfig()
   if (!githubAccessToken) {
     throw new Error('Missing githubAccessToken')
   }

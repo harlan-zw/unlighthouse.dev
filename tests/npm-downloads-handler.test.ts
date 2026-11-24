@@ -7,7 +7,7 @@ import { EXPECTED_UPSTREAM_FAILURE } from '../shared/sentry.ts'
 const serverDependencies = new URL('./fixtures/server-dependencies.ts', import.meta.url).href
 registerHooks({
   resolve(specifier, context, nextResolve) {
-    if (context.parentURL?.endsWith('/api/npm/downloads.get.ts') && ['nitropack/runtime', 'ofetch'].includes(specifier))
+    if (context.parentURL?.endsWith('/api/npm/downloads.get.ts') && ['nitro/cache', 'ofetch'].includes(specifier))
       return { url: serverDependencies, shortCircuit: true }
     return nextResolve(specifier, context)
   },

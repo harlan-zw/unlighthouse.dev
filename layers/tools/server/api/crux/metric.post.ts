@@ -49,7 +49,7 @@ function formatValue(metric: MetricKey, value: number): string {
 }
 
 export default defineEventHandler(async (event): Promise<CruxMetricResponse> => {
-  const { url, metric, formFactor } = await readBody<CruxMetricRequest>(event)
+  const { url, metric, formFactor = 'PHONE' } = await readBody<Partial<CruxMetricRequest>>(event) ?? {}
 
   if (!url || !metric)
     throw createError({ statusCode: 400, message: 'URL and metric required' })

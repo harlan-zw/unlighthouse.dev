@@ -7,7 +7,7 @@ import { feedback } from '../database/schema'
 import { getDB } from '../utils/db'
 import { checkFeedbackRateLimit } from '../utils/rate-limit'
 
-export default defineEventHandler<Promise<CommentFeedbackResponse>>(async (event) => {
+export default defineEventHandler(async (event): Promise<CommentFeedbackResponse> => {
   await checkFeedbackRateLimit(event)
   const { comment, path: explicitPath, toolId, thumbFeedbackId, context } = await readValidatedBody(event, CommentFeedbackSchema.parse)
   const referrer = parseURL(getHeader(event, 'Referer')).pathname

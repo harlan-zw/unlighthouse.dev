@@ -51,7 +51,7 @@ export interface CWVCompareResponse {
 export default defineEventHandler(async (event): Promise<CWVCompareResponse> => {
   await checkFreeToolRateLimit(event)
 
-  const body = await readBody<CWVCompareRequest>(event)
+  const body = await readBody<Partial<CWVCompareRequest>>(event) ?? {}
 
   const urls = body.urls || []
   if (urls.length < 2)

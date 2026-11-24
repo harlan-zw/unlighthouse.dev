@@ -21,7 +21,7 @@ export default defineEventHandler(async (event): Promise<CWVHistoryResponse> => 
     url?: string
     mode?: 'origin' | 'url'
     formFactor?: FormFactor
-  }>(event)
+  }>(event) ?? {}
 
   const url = body.url?.trim()
   if (!url)

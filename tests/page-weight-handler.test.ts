@@ -13,7 +13,7 @@ const serverDependencies = new URL('./fixtures/server-dependencies.ts', import.m
 registerHooks({
   resolve(specifier, context, nextResolve) {
     if (context.parentURL?.endsWith('/page-weight.get.ts') && (
-      ['h3', 'nitropack/runtime', '../../utils/url'].includes(specifier)
+      ['h3', 'nitro/cache', '../../utils/url'].includes(specifier)
       || specifier.startsWith('#server/')
     )) {
       return { url: serverDependencies, shortCircuit: true }
