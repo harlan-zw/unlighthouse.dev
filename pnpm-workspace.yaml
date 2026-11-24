@@ -58,6 +58,7 @@ minimumReleaseAgeExclude:
   - '@vercel/nft@1.11.12'
   - nitropack@2.14.0
   - nuxt@4.7.0
+  - '@types/node@26.6.7'
 
 trustPolicy: no-downgrade
 trustPolicyIgnoreAfter: 262800
@@ -193,6 +194,7 @@ catalog:
   '@sentry/nuxt': ^11.17.0
   '@tiptap/core': 3.31.3
   '@tiptap/pm': 3.31.3
+  '@types/node': ^26.6.7
   '@types/three': 0.187.0
   '@unovis/ts': ^1.6.7
   '@unovis/vue': ^1.6.7
