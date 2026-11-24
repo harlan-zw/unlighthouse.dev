@@ -91,7 +91,6 @@
     "lint-staged": "catalog:",
     "markdownlint-cli": "catalog:",
     "motion-v": "catalog:",
-    "nitro-cloudflare-dev": "catalog:",
     "nuxt": "catalog:",
     "nuxt-build-cache": "catalog:",
     "nuxt-lodash": "catalog:",

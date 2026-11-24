@@ -1,7 +1,8 @@
 import { defineEventHandler } from 'h3'
+import { getWorkerEnv } from '../utils/worker-env'
 
-export default defineEventHandler((e) => {
+export default defineEventHandler((event) => {
   return {
-    ASSETS: !!e?.context?.cloudflare?.env.ASSETS,
+    ASSETS: !!getWorkerEnv<{ ASSETS: unknown }>(event)?.ASSETS,
   }
 })

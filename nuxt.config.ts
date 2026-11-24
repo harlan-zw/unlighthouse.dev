@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url'
 import { defineNuxtConfig } from 'nuxt/config'
 import { resolve } from 'pathe'
 import { gray, logger } from './logger.ts'
@@ -163,7 +164,6 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
     ['motion-v/nuxt', { directives: true }],
     '@harlan-zw/comark-content',
     '@vueuse/nuxt',
-    'nitro-cloudflare-dev',
     '@nuxt/scripts',
     '@nuxt/image',
     '@sentry/nuxt/module',
@@ -308,6 +308,11 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
   },
 
   nitro: {
+    $development: {
+      // Use Wrangler for local bindings and Node to run the dev bundle.
+      devServer: { runner: 'node-worker' },
+      plugins: [fileURLToPath(new URL('./server/runtime/cloudflare-dev-platform.ts', import.meta.url))],
+    },
     rollupConfig: {
       output: {
         banner: workerdConsoleTaskFix,
