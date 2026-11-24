@@ -177,9 +177,6 @@ catalogs:
     nitro:
       specifier: 3.0.261103-rc
       version: 3.0.261103-rc
-    nitro-cloudflare-dev:
-      specifier: ^0.2.2
-      version: 0.2.2
     nuxt:
       specifier: 4.7.0
       version: 4.7.0
@@ -486,9 +483,6 @@ importers:
       motion-v:
         specifier: 'catalog:'
         version: 2.6.0(@vueuse/core@14.4.0(vue@3.5.46(typescript@6.0.3)))(vue@3.5.46(typescript@6.0.3))
-      nitro-cloudflare-dev:
-        specifier: 'catalog:'
-        version: 0.2.2
       nuxt:
         specifier: 'catalog:'
         version: 4.7.0(3c3339964babc5bff26d1002b79c2902)
@@ -7505,9 +7499,6 @@ packages:
   negotiator@1.0.0:
     resolution: {integrity: sha512-8Ofs/AUQh8MaEcrlq5xOX0CQ9ypTF5dl78mjlMNfOK08fzpgTHQRQPBxcPlEtIw0yRpws+Zo/3r+5WRby7u3Gg==}
     engines: {node: '>= 0.6'}
-
-  nitro-cloudflare-dev@0.2.2:
-    resolution: {integrity: sha512-aZfNTVdgXPQeAmXW0Tw8hm3usAHr4qVG4Bg3WhHBGeZYuXr9OyT04Ztb+STkMzhyaXvfMHViAaPUPg06iAYqag==}
 
   nitro@3.0.261103-rc:
     resolution: {integrity: sha512-tLD7r5fWCtwnQEE4ZkckLUnx1wkWDaLY48dD+BCJtcQ+srSWAUpxJEK3YfTsgN3v+e4UgBYRzuR7zV7Sqns/zA==}
@@ -18351,12 +18342,6 @@ snapshots:
   natural-orderby@5.0.0: {}
 
   negotiator@1.0.0: {}
-
-  nitro-cloudflare-dev@0.2.2:
-    dependencies:
-      consola: 3.4.2
-      mlly: 1.8.2
-      pkg-types: 2.3.3
 
   nitro@3.0.261103-rc:
     dependencies:
