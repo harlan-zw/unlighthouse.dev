@@ -185,6 +185,7 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
   nuxtCloudflare: {
     kvCache: { binding: 'CACHE' },
     requiredSecrets: CLOUDFLARE_REQUIRED_SECRETS,
+    static404Fallback: true,
   },
 
   // Every page that calls defineOgImage is prerendered, so the worker never
@@ -222,6 +223,14 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
 
   future: {
     compatibilityVersion: 5,
+  },
+
+  experimental: {
+    // Keep `/__nuxt_error` sub-request dispatch active so `nuxtCloudflare.static404Fallback`
+    // can intercept runtime HTML 404s and serve the prerendered `/404.html` from ASSETS.
+    inlineErrorRendering: false,
+    // Server-render `/404.html` at build time instead of emitting an empty SPA shell.
+    prerenderErrorPages: true,
   },
 
   aiReady: {
