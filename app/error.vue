@@ -17,7 +17,9 @@ useSeoMeta({
 
 const recommendedLinks = ref()
 
-const { data: navigation } = await useAsyncData(`navigation-error`, () => queryCollectionNavigation('root'), {
+const { data: navigation } = useAsyncData(`navigation-error`, () => queryCollectionNavigation('root'), {
+  server: false,
+  lazy: true,
   default: () => [],
   async transform(res: any) {
     const nav = mapPath(res)
@@ -60,72 +62,70 @@ const { data: navigation } = await useAsyncData(`navigation-error`, () => queryC
   },
 })
 provide('navigation', navigation)
-// Don't do fuzzy redirects during prerender - it causes infinite redirect loops
-const isPrerendering = import.meta.server && !import.meta.dev
-if (props.error.statusCode && !isPrerendering) {
-  const walkChildren = (children: any[], parents: string[] = []): any[] => {
-    return (children || []).flatMap((item) => {
-      if (item.children) {
-        // If this is a parent with children, add its title to the parents array
-        // and pass that to recursive calls
-        const currentPath = [...parents, item.title]
-        return walkChildren(item.children, currentPath)
-      }
-      // For leaf nodes, include the hierarchy information
+
+if (import.meta.client && props.error.statusCode === 404) {
+  const route = useRoute()
+  watch(navigation, async (nav) => {
+    if (!nav?.length)
+      return
+
+    const walkChildren = (children: any[], parents: string[] = []): any[] => {
+      return (children || []).flatMap((item) => {
+        if (item.children) {
+          const currentPath = [...parents, item.title]
+          return walkChildren(item.children, currentPath)
+        }
+        return {
+          ...item,
+          hierarchy: parents,
+          fullTitle: [...parents, item.title].join(' -> '),
+        }
+      })
+    }
+    const childrenOnly = walkChildren(nav as any[]).map((i: any) => {
       return {
-        ...item,
-        hierarchy: parents,
-        fullTitle: [...parents, item.title].join(' -> '),
+        title: i.title,
+        path: i.path,
+        lastPathSegment: i.path.split('/').slice(-1)[0],
+        hierarchy: i.hierarchy,
+        fullTitle: i.fullTitle,
       }
     })
-  }
-  const childrenOnly = walkChildren(navigation.value as any[]).map((i: any) => {
-    return {
-      title: i.title,
-      path: i.path,
-      lastPathSegment: i.path.split('/').slice(-1)[0],
-      hierarchy: i.hierarchy,
-      fullTitle: i.fullTitle,
+
+    interface SearchItem {
+      path: string
+      lastPathSegment: string
     }
-  })
 
-  interface SearchItem {
-    path: string
-    lastPathSegment: string
-  }
+    const fuse = new Fuse<SearchItem>(childrenOnly, {
+      keys: [
+        {
+          name: 'path',
+          weight: 0.9,
+        },
+        {
+          name: 'lastPathSegment',
+          weight: 2,
+        },
+      ],
+      ignoreLocation: true,
+      isCaseSensitive: false,
+      includeScore: true,
+    })
 
-  // do a fuse search for a page link it
-  const fuse = new Fuse<SearchItem>(childrenOnly, {
-    keys: [
-      {
-        name: 'path',
-        weight: 0.9,
-      },
-      {
-        name: 'lastPathSegment',
-        weight: 2,
-      },
-    ],
-    ignoreLocation: true,
-    isCaseSensitive: false,
-    includeScore: true,
-  })
+    const path = route.path
+    const lastSegment = path.split('/').slice(-1)[0]
+    const explicitMatch = childrenOnly.filter(i => (i as any).lastPathSegment === lastSegment)
+    if (explicitMatch?.length === 1 && explicitMatch[0]) {
+      await navigateTo(explicitMatch[0].path, { redirectCode: 301 })
+      return
+    }
 
-  const path = useRoute().path
-  const lastSegment = path.split('/').slice(-1)[0]
-  const explicitMatch = childrenOnly.filter(i => (i as any).lastPathSegment === lastSegment)
-  // search for last segment see if we can find 1 direct match
-  if (explicitMatch?.length === 1 && explicitMatch[0]) {
-    // redirect to the found path
-    await navigateTo(explicitMatch[0].path, { redirectCode: 301 })
-  }
-  else {
     const res = fuse.search(path, {
       limit: 3,
     })
     if (res.length > 0 && res[0]) {
       const { item, score } = res[0]
-      // can't be ambigious
       const matchingScore = (res[1]?.score === score || res[2]?.score === score)
       if (score !== undefined && score < 0.01 && !matchingScore) {
         await navigateTo(item.path, { redirectCode: 301 })
@@ -134,7 +134,7 @@ if (props.error.statusCode && !isPrerendering) {
         recommendedLinks.value = res
       }
     }
-  }
+  }, { immediate: true })
 }
 </script>
 
