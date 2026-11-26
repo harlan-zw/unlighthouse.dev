@@ -243,6 +243,12 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
     },
   },
 
+  // Only the private `/admin` page reads `useUserSession()`, so skip the
+  // per-request SSR `/api/_auth/session` fetch on dynamic SSR and 404 renders.
+  auth: {
+    loadStrategy: 'client-only',
+  },
+
   skewProtection: {
     updateStrategy: 'ws',
     reloadStrategy: 'idle',
@@ -409,7 +415,6 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
     },
     experimental: {
       openAPI: true,
-      websocket: true,
       asyncContext: true,
       tasks: true,
     },
