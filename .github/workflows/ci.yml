@@ -1,20 +1,13 @@
 name: CI
 
-# The pull request gate. This repository had no check of any kind: lint,
-# typecheck, and test ran nowhere, and deploy-cloudflare.yml built and shipped
-# every push to main unvalidated.
+# The pull request gate. Required checks stay under `harlan-desktop / *`, and
+# the `changes` job skips them on non-rendered docs PRs so required checks still
+# report instead of hanging.
 #
 # The jobs live in harlan-zw/harlan-nuxt so every site shares one pinned copy.
 
-# Pull requests always start a run. The `changes` job decides whether the
-# checks run or skip, because `harlan-desktop / lint`, `/ typecheck` and
-# `/ test` are required checks. A path filter at the event starts no run for a
-# docs-only pull request, so the required checks never report and it blocks. A
-# skipped check passes.
 on:
   pull_request:
-  push:
-    branches: [main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -32,30 +25,24 @@ jobs:
       code: ${{ steps.filter.outputs.code }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        if: github.event_name == 'pull_request'
         with:
           persist-credentials: false
           fetch-depth: 0
-      # Push builds always run in full. A pull request runs the checks when any
-      # changed file is code, or site content that renders.
+      # Run the checks when any changed file is code, or site content that renders.
       - id: filter
         env:
-          EVENT: ${{ github.event_name }}
           BASE: ${{ github.event.pull_request.base.sha }}
           HEAD: ${{ github.event.pull_request.head.sha }}
         run: |
-          code=true
-          if [ "$EVENT" = pull_request ]; then
-            files=$(git diff --name-only "$BASE...$HEAD")
-            code=false
-            while IFS= read -r file; do
-              case "$file" in
-                content/*) code=true; break ;;
-                *.md|docs/*|.editorconfig|.gitignore|.idea/*|.vscode/*|'') ;;
-                *) code=true; break ;;
-              esac
-            done <<< "$files"
-          fi
+          files=$(git diff --name-only "$BASE...$HEAD")
+          code=false
+          while IFS= read -r file; do
+            case "$file" in
+              content/*) code=true; break ;;
+              *.md|docs/*|.editorconfig|.gitignore|.idea/*|.vscode/*|'') ;;
+              *) code=true; break ;;
+            esac
+          done <<< "$files"
           echo "code=$code" >> "$GITHUB_OUTPUT"
 
   harlan-desktop:
@@ -78,9 +65,8 @@ jobs:
       timeout-minutes: 30
 
   build:
-    # Main builds in the deploy workflow. Keep the build check on pull requests.
     needs: changes
-    if: ${{ !cancelled() && github.event_name == 'pull_request' && needs.changes.outputs.code != 'false' }}
+    if: ${{ !cancelled() && needs.changes.outputs.code != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -115,3 +101,11 @@ jobs:
           NUXT_APP_SECRET: pr-build-application-secret-placeholder
           # No github.token fallback: it cannot read sponsors, so fork builds skip the prerender.
           NUXT_GITHUB_SPONSORS_TOKEN: ${{ secrets.NUXT_GITHUB_AUTH_TOKEN }}
+
+      # Boot the built Worker in workerd and validate its bundle before merge
+      # so global-scope startup faults (such as Cloudflare error 10021) fail on
+      # the pull request instead of breaking production deploy.
+      - name: Verify Worker startup and bundle
+        run: |
+          pnpm exec wrangler check startup --outfile "$RUNNER_TEMP/worker-startup.cpuprofile"
+          pnpm exec wrangler deploy --dry-run
