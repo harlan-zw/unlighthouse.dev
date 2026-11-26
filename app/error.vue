@@ -150,8 +150,8 @@ if (import.meta.client && props.error.statusCode === 404) {
     <Header class="z-100" />
 
     <main id="main-content" tabindex="-1">
-      <NuxtLayout>
-        <div class="w-4xl max-w-full">
+      <NuxtLayout name="default">
+        <div class="w-4xl max-w-full mx-auto px-6 py-12 lg:py-16">
           <UPageHeader
             :title="error.statusCode === 404 ? error.message : 'Something Went Wrong'"
             :description="error.statusCode === 404 ? 'Oops... we can\'t find that.' : 'Uh oh, looks like an error :('"
