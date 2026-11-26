@@ -9,24 +9,23 @@ definePageMeta({
 
 const route = useRoute()
 
-const [{ data: page }, { data: surround }] = await Promise.all([
-  useAsyncData(`learn-${route.path}`, () => queryCollection('learnLighthouse').path(route.path).first()),
-  useAsyncData(`learn-${route.path}-surround`, () => queryCollectionItemSurroundings('learnLighthouse', route.path, {
-    fields: ['title', 'description', 'path'],
-  }), {
-    transform(items) {
-      return items.map(m => m
-        ? {
-            ...m,
-            _path: m.path,
-          }
-        : null)
-    },
-  }),
-])
+const { data: page } = await useAsyncData(`learn-${route.path}`, () => queryCollection('learnLighthouse').path(route.path).first())
 
 if (!page.value)
   throw createError({ statusCode: 404, statusMessage: 'Page not found', fatal: true })
+
+const { data: surround } = await useAsyncData(`learn-${route.path}-surround`, () => queryCollectionItemSurroundings('learnLighthouse', route.path, {
+  fields: ['title', 'description', 'path'],
+}), {
+  transform(items) {
+    return items.map(m => m
+      ? {
+          ...m,
+          _path: m.path,
+        }
+      : null)
+  },
+})
 
 useSeoMeta({
   title: () => page.value?.title || '',
