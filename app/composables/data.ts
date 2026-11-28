@@ -37,20 +37,22 @@ interface LastCommit {
 }
 
 export async function useCurrentDocPage() {
+  const nuxtApp = useNuxtApp()
   const route = useRoute()
 
   const collection = getCollectionForPath(route.path)
   const { data, error } = await useAsyncData(`docs-current:${route.path}`, async () => {
-    const [pageData, surroundData] = await Promise.all([
-      queryCollection(collection).path(route.path).first(),
-      queryCollectionItemSurroundings(collection, route.path, {
-        fields: ['title', 'description', 'path'],
-      }),
-    ])
+    const pageData = await queryCollection(collection).path(route.path).first()
 
     if (!pageData?.body?.nodes) {
       throw createError({ statusCode: 404, statusMessage: `Page not found: ${route.path}`, fatal: true })
     }
+
+    const surroundData = await nuxtApp.runWithContext(() =>
+      queryCollectionItemSurroundings(collection, route.path, {
+        fields: ['title', 'description', 'path'],
+      }),
+    )
 
     const surround = (surroundData || []).filter(Boolean).map((m: any) => {
       const path = m.path.replace(/\/index$/, '') || '/'

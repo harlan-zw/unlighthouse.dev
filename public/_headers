@@ -10,6 +10,12 @@
 /guide
   Cache-Control: public, max-age=300, s-maxage=86400, stale-while-revalidate=604800
 
+/v1/*
+  Cache-Control: public, max-age=300, s-maxage=86400, stale-while-revalidate=604800
+
+/v1
+  Cache-Control: public, max-age=300, s-maxage=86400, stale-while-revalidate=604800
+
 /integrations/*
   Cache-Control: public, max-age=300, s-maxage=86400, stale-while-revalidate=604800
 
@@ -38,6 +44,9 @@
   Cache-Control: public, max-age=300, s-maxage=86400, stale-while-revalidate=604800
 
 /tools/*
+  Cache-Control: public, max-age=300, s-maxage=86400, stale-while-revalidate=604800
+
+/releases
   Cache-Control: public, max-age=300, s-maxage=86400, stale-while-revalidate=604800
 
 /*.md
