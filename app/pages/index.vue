@@ -332,8 +332,8 @@ const exploreLinks = [
               </h3>
               <div class="flex flex-wrap gap-4">
                 <NuxtLink v-for="entry in sponsors.tiers.top" :key="entry.login" :to="entry.websiteUrl || entry.profileUrl" class="flex items-center gap-2 hover:opacity-80 transition">
-                  <NuxtImg v-bind="{ loading: 'lazy', alt: entry.name } satisfies { loading: 'lazy', alt?: string }" width="40" height="40" :src="entry.avatarUrl" class="w-10 h-10 rounded-full" />
-                  <span class="font-medium">{{ entry.name }}</span>
+                  <NuxtImg v-bind="{ loading: 'lazy', alt: '' } satisfies { loading: 'lazy', alt: string }" width="40" height="40" :src="entry.avatarUrl" class="w-10 h-10 rounded-full" />
+                  <span class="font-medium">{{ entry.name || entry.login }}</span>
                 </NuxtLink>
               </div>
             </div>

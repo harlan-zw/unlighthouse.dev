@@ -271,7 +271,7 @@ const breadcrumbs = useBreadcrumbItems({
                 <div class="h-px bg-gradient-to-r from-transparent via-[var(--ui-border)] to-transparent mb-4" />
 
                 <!-- Current Section Navigation -->
-                <nav v-if="currentSectionNav" aria-label="Section Navigation" class="space-y-1">
+                <nav v-if="currentSectionNav" aria-label="Section" class="space-y-1">
                   <template v-for="item in currentSectionNav.items" :key="item.path">
                     <!-- Standalone link (no children) -->
                     <NuxtLink

@@ -23,6 +23,7 @@ function changeVersion(value: unknown) {
     return navigateTo(switchDocsVersion(route.path, value, versionPaths.value || []))
 }
 const versions = [{ label: '0.x stable', value: 'stable' }, { label: 'v1 beta', value: 'beta' }]
+const versionAriaLabel = computed(() => `Documentation version: ${versions.find(v => v.value === version.value)?.label || version.value}`)
 const navigation = inject<Ref<any[]>>('navigation')
 
 watch(() => route.path, () => {
@@ -88,7 +89,7 @@ const subSectionLinks = computed(() => {
             </NuxtLink>
           </div>
         </div>
-        <USelect :model-value="version" :items="versions" value-key="value" aria-label="Documentation version" class="w-32 shrink-0" :ui="{ base: 'min-h-11' }" @update:model-value="changeVersion" />
+        <USelect :model-value="version" :items="versions" value-key="value" :aria-label="versionAriaLabel" class="w-32 shrink-0" :ui="{ base: 'min-h-11' }" @update:model-value="changeVersion" />
       </div>
     </div>
     <div class="relative mb-20 px-5">
@@ -109,7 +110,7 @@ const subSectionLinks = computed(() => {
     <UDrawer v-model:open="navOpen">
       <template #content>
         <div class="px-5">
-          <USelect :model-value="version" :items="versions" value-key="value" aria-label="Documentation version" class="w-full mt-5" @update:model-value="changeVersion" />
+          <USelect :model-value="version" :items="versions" value-key="value" :aria-label="versionAriaLabel" class="w-full mt-5" @update:model-value="changeVersion" />
           <div class="space-y-2 mb-3 mt-5 px-5">
             <div class="flex gap-4 justify-center">
               <NuxtLink

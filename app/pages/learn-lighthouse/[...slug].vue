@@ -105,7 +105,7 @@ const humanUpdatedDate = computed(() => page.value?.updatedAt ? humanDate(page.v
         <div class="flex justify-center items-center gap-3 mt-5 text-sm text-dimmed flex-wrap">
           <NuxtLink to="https://x.com/harlan-zw" external target="_blank" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border border-default hover:border-accented transition">
             <img
-              alt="Harlan Wilton"
+              alt=""
               src="https://avatars.githubusercontent.com/u/5326365?v=4"
               width="16"
               height="16"
