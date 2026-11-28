@@ -10,6 +10,11 @@ const version = computed(() => docsVersion(route.path))
 const { data: versionPaths } = await useAsyncData('docs-version-paths', async () => {
   const [stable, beta] = await Promise.all([queryCollection('root').select('path').all(), queryCollection('beta').select('path').all()])
   return [...stable, ...beta].map(page => page.path)
+}, {
+  default: () => [],
+  // Real docs pages are prerendered at build time; skip loading both collection
+  // indexes on live Worker SSR requests (which only reach this layout on 404s).
+  server: import.meta.dev || import.meta.prerender,
 })
 prerenderRoutes(versionPaths.value || [])
 

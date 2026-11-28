@@ -80,7 +80,10 @@ const {
   },
   watch: [() => docsVersion(route.path)],
   immediate: needsDocsNavigation(route.path),
-  server: needsDocsNavigation(route.path),
+  // Real docs pages are prerendered at build time; skip loading navigation on
+  // live Worker SSR requests so 404s under docs prefixes do not decompress and
+  // syntax-highlight navigation trees before failing over to error.vue.
+  server: (import.meta.dev || import.meta.prerender) && needsDocsNavigation(route.path),
 })
 provide('search', search)
 provide('navigation', navigation)
