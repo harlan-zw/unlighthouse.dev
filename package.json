@@ -78,6 +78,7 @@
     "@sentry/nuxt": "catalog:",
     "@tiptap/core": "catalog:",
     "@tiptap/pm": "catalog:",
+    "@types/node": "catalog:",
     "@types/three": "catalog:",
     "@unovis/vue": "catalog:",
     "@vueuse/core": "catalog:",

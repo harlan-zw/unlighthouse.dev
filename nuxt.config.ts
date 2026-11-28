@@ -313,9 +313,7 @@ Include User feedback and Pulse sections with lookups, sessions, error rate, fee
     defaults: {
       styles: ['normal'],
     },
-    experimental: {
-      processCSSVariables: true,
-    },
+    processCSSVariables: true,
     families: [
       { name: 'Hubot Sans', stretch: '75% 125%', global: true },
       { name: 'Nunito Sans' },

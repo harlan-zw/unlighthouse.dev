@@ -34,6 +34,28 @@ const { data: analytics, refresh, status } = useFetch('/api/admin/tool-analytics
   watch: [timeRange],
 })
 
+const colorClasses: Record<string, { background: string, text: string, bar: string }> = {
+  emerald: { background: 'bg-emerald-500/10', text: 'text-emerald-500', bar: 'bg-emerald-500' },
+  blue: { background: 'bg-blue-500/10', text: 'text-blue-500', bar: 'bg-blue-500' },
+  amber: { background: 'bg-amber-500/10', text: 'text-amber-500', bar: 'bg-amber-500' },
+  violet: { background: 'bg-violet-500/10', text: 'text-violet-500', bar: 'bg-violet-500' },
+  teal: { background: 'bg-teal-500/10', text: 'text-teal-500', bar: 'bg-teal-500' },
+  indigo: { background: 'bg-indigo-500/10', text: 'text-indigo-500', bar: 'bg-indigo-500' },
+  purple: { background: 'bg-purple-500/10', text: 'text-purple-500', bar: 'bg-purple-500' },
+  orange: { background: 'bg-orange-500/10', text: 'text-orange-500', bar: 'bg-orange-500' },
+  lime: { background: 'bg-lime-500/10', text: 'text-lime-500', bar: 'bg-lime-500' },
+  sky: { background: 'bg-sky-500/10', text: 'text-sky-500', bar: 'bg-sky-500' },
+  rose: { background: 'bg-rose-500/10', text: 'text-rose-500', bar: 'bg-rose-500' },
+  pink: { background: 'bg-pink-500/10', text: 'text-pink-500', bar: 'bg-pink-500' },
+  red: { background: 'bg-red-500/10', text: 'text-red-500', bar: 'bg-red-500' },
+  cyan: { background: 'bg-cyan-500/10', text: 'text-cyan-500', bar: 'bg-cyan-500' },
+  gray: { background: 'bg-gray-500/10', text: 'text-gray-500', bar: 'bg-gray-500' },
+}
+
+function getColorClasses(color: string) {
+  return colorClasses[color] ?? colorClasses.gray!
+}
+
 const toolMetadata: Record<string, { name: string, icon: string, color: string }> = {
   'pagespeed-insights': { name: 'PageSpeed Insights', icon: 'i-carbon-meter', color: 'emerald' },
   'lcp': { name: 'LCP Finder', icon: 'i-carbon-image', color: 'blue' },
@@ -118,8 +140,8 @@ const lookupColumns: TableColumn<ToolLookup>[] = [
     cell: ({ row }) => {
       const meta = getToolMeta(row.original.tool)
       return h('div', { class: 'flex items-center gap-2.5' }, [
-        h('div', { class: `w-8 h-8 rounded-lg bg-${meta.color}-500/10 flex items-center justify-center` }, [
-          h('span', { class: `${meta.icon} w-4 h-4 text-${meta.color}-500` }),
+        h('div', { class: ['w-8 h-8 rounded-lg flex items-center justify-center', getColorClasses(meta.color).background] }, [
+          h('span', { class: [meta.icon, 'w-4 h-4', getColorClasses(meta.color).text] }),
         ]),
         h('span', { class: 'font-medium text-highlighted' }, meta.name),
       ])
@@ -314,8 +336,8 @@ const feedbackColumns: TableColumn<FeedbackEntry>[] = [
       const path = row.original.path
       const meta = getToolMeta(path)
       return h('div', { class: 'flex items-center gap-2.5' }, [
-        h('div', { class: `w-8 h-8 rounded-lg bg-${meta.color}-500/10 flex items-center justify-center` }, [
-          h('span', { class: `${meta.icon} w-4 h-4 text-${meta.color}-500` }),
+        h('div', { class: ['w-8 h-8 rounded-lg flex items-center justify-center', getColorClasses(meta.color).background] }, [
+          h('span', { class: [meta.icon, 'w-4 h-4', getColorClasses(meta.color).text] }),
         ]),
         h('span', { class: 'font-medium text-highlighted text-sm' }, meta.name),
       ])
@@ -562,9 +584,9 @@ function toggleJourney(id: string) {
               <div class="flex items-start justify-between mb-3">
                 <div
                   class="w-10 h-10 rounded-lg flex items-center justify-center"
-                  :class="`bg-${stat.color}-500/10`"
+                  :class="getColorClasses(stat.color).background"
                 >
-                  <UIcon :name="stat.icon" class="w-5 h-5" :class="`text-${stat.color}-500`" />
+                  <UIcon :name="stat.icon" class="w-5 h-5" :class="getColorClasses(stat.color).text" />
                 </div>
                 <div v-if="status === 'pending'" class="w-12 h-4 rounded bg-default animate-pulse" />
               </div>
@@ -592,12 +614,12 @@ function toggleJourney(id: string) {
                     <div class="flex items-center gap-2.5">
                       <div
                         class="w-7 h-7 rounded-md flex items-center justify-center"
-                        :class="`bg-${getToolMeta(tool.tool).color}-500/10`"
+                        :class="getColorClasses(getToolMeta(tool.tool).color).background"
                       >
                         <UIcon
                           :name="getToolMeta(tool.tool).icon"
                           class="w-3.5 h-3.5"
-                          :class="`text-${getToolMeta(tool.tool).color}-500`"
+                          :class="getColorClasses(getToolMeta(tool.tool).color).text"
                         />
                       </div>
                       <span class="text-sm font-medium text-highlighted">
@@ -611,7 +633,7 @@ function toggleJourney(id: string) {
                   <div class="h-1.5 rounded-full bg-default overflow-hidden">
                     <div
                       class="h-full rounded-full transition-all duration-500"
-                      :class="`bg-${getToolMeta(tool.tool).color}-500`"
+                      :class="getColorClasses(getToolMeta(tool.tool).color).bar"
                       :style="{ width: `${(tool.count / maxToolCount) * 100}%` }"
                     />
                   </div>
@@ -688,12 +710,12 @@ function toggleJourney(id: string) {
                     <div class="flex items-center gap-2.5">
                       <div
                         class="w-7 h-7 rounded-md flex items-center justify-center"
-                        :class="`bg-${tool.meta.color}-500/10`"
+                        :class="getColorClasses(tool.meta.color).background"
                       >
                         <UIcon
                           :name="tool.meta.icon"
                           class="w-3.5 h-3.5"
-                          :class="`text-${tool.meta.color}-500`"
+                          :class="getColorClasses(tool.meta.color).text"
                         />
                       </div>
                       <span class="text-sm font-medium text-highlighted">{{ tool.meta.name }}</span>
@@ -897,10 +919,10 @@ function toggleJourney(id: string) {
                       v-for="(lookup, li) in journey.lookups.slice(0, 8)"
                       :key="li"
                       class="w-6 h-6 rounded flex items-center justify-center shrink-0"
-                      :class="`bg-${getToolMeta(lookup.tool).color}-500/10`"
+                      :class="getColorClasses(getToolMeta(lookup.tool).color).background"
                       :title="getToolMeta(lookup.tool).name"
                     >
-                      <UIcon :name="getToolMeta(lookup.tool).icon" class="w-3 h-3" :class="`text-${getToolMeta(lookup.tool).color}-500`" />
+                      <UIcon :name="getToolMeta(lookup.tool).icon" class="w-3 h-3" :class="getColorClasses(getToolMeta(lookup.tool).color).text" />
                     </div>
                     <span v-if="journey.lookups.length > 8" class="text-xs text-dimmed">+{{ journey.lookups.length - 8 }}</span>
                   </div>
@@ -918,9 +940,9 @@ function toggleJourney(id: string) {
                   >
                     <div
                       class="w-6 h-6 rounded flex items-center justify-center shrink-0"
-                      :class="`bg-${getToolMeta(lookup.tool).color}-500/10`"
+                      :class="getColorClasses(getToolMeta(lookup.tool).color).background"
                     >
-                      <UIcon :name="getToolMeta(lookup.tool).icon" class="w-3 h-3" :class="`text-${getToolMeta(lookup.tool).color}-500`" />
+                      <UIcon :name="getToolMeta(lookup.tool).icon" class="w-3 h-3" :class="getColorClasses(getToolMeta(lookup.tool).color).text" />
                     </div>
                     <span class="text-highlighted">{{ getToolMeta(lookup.tool).name }}</span>
                     <code class="text-xs text-muted">{{ lookup.query }}</code>
@@ -1073,9 +1095,9 @@ function toggleJourney(id: string) {
                       <div class="flex items-center gap-1.5">
                         <div
                           class="w-5 h-5 rounded flex items-center justify-center"
-                          :class="`bg-${getToolMeta(entry.path).color}-500/10`"
+                          :class="getColorClasses(getToolMeta(entry.path).color).background"
                         >
-                          <UIcon :name="getToolMeta(entry.path).icon" class="w-2.5 h-2.5" :class="`text-${getToolMeta(entry.path).color}-500`" />
+                          <UIcon :name="getToolMeta(entry.path).icon" class="w-2.5 h-2.5" :class="getColorClasses(getToolMeta(entry.path).color).text" />
                         </div>
                         <span>{{ getToolMeta(entry.path).name }}</span>
                       </div>

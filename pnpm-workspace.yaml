@@ -58,6 +58,7 @@ minimumReleaseAgeExclude:
   - '@vercel/nft@1.11.12'
   - nitropack@2.14.0
   - nuxt@4.7.0
+  - '@types/node@26.6.7'
 
 trustPolicy: no-downgrade
 trustPolicyIgnoreAfter: 262800
@@ -162,7 +163,7 @@ onlyBuiltDependencies:
 catalog:
   '@antfu/eslint-config': ^9.5.1
   '@cloudflare/workers-types': ^5.20260908.1
-  '@comark/nuxt': 0.6.2
+  '@comark/nuxt': 0.9.2
   '@harlan-zw/comark-content': 0.2.3
   '@harlan-zw/nuxt-checkin': 0.4.0
   '@harlan-zw/nuxt-cloudflare': 0.6.1
@@ -183,39 +184,40 @@ catalog:
   '@iconify-json/unjs': ^1.2.4
   '@iconify-json/vscode-icons': ^1.2.77
   '@inspira-ui/plugins': ^0.0.2
-  '@nuxt/devtools': 4.0.0-alpha.17
-  '@nuxt/fonts': ^0.14.0
+  '@nuxt/devtools': 4.0.0-alpha.20
+  '@nuxt/fonts': ^1.2.0
   '@nuxt/image': ^2.1.0
   '@nuxt/scripts': 2.0.0-beta.17
   '@nuxt/ui': ^4.11.1
-  '@nuxtjs/mcp-toolkit': ^0.19.0
+  '@nuxtjs/mcp-toolkit': ^0.24.3
   '@nuxtjs/seo': ^6.1.0
   '@resvg/resvg-js': ^2.6.2
   '@resvg/resvg-wasm': 2.6.2
   '@sentry/cli': ^3.7.0
-  '@sentry/nuxt': ^10.73.0
+  '@sentry/nuxt': ^11.17.0
   '@tiptap/core': 3.31.3
   '@tiptap/pm': 3.31.3
-  '@types/three': 0.185.4
+  '@types/node': ^26.6.7
+  '@types/three': 0.187.0
   '@unovis/ts': ^1.6.7
   '@unovis/vue': ^1.6.7
-  '@vueuse/core': ^14.4.0
-  '@vueuse/nuxt': ^14.4.0
-  agents: ^0.22.0
+  '@vueuse/core': ^15.1.0
+  '@vueuse/nuxt': ^15.1.0
+  agents: ^0.34.0
   case-police: ^2.2.1
   clsx: ^2.1.1
   consola: ^3.4.2
   date-fns: ^4.4.0
-  drizzle-orm: 1.0.0-rc.4
+  drizzle-orm: 1.0.0-rc.6
   eslint: ^10.10.0
-  eslint-plugin-harlanzw: ^0.21.1
+  eslint-plugin-harlanzw: ^0.23.0
   fuse.js: ^7.5.0
   h3: 2.0.8
   jsonc-parser: 3.3.1
 
   lint-staged: ^17.5.0
   lru-cache: ^11.2.6
-  markdownlint-cli: ^0.49.1
+  markdownlint-cli: ^0.50.1
   motion-v: ^2.6.0
   nitro: 3.0.261103-rc
   nuxt: 4.7.0
@@ -232,10 +234,10 @@ catalog:
   scule: ^1.3.0
   simple-git-hooks: ^2.14.0
   tailwind-merge: ^3.6.0
-  tailwind-variants: ^3.3.1
+  tailwind-variants: ^4.0.2
   tailwindcss: ^4.3.3
   tailwindcss-animate: ^1.0.7
-  three: ^0.185.1
+  three: ^0.187.0
   troisjs: ^0.3.4
   typescript: 6.0.3
   ufo: ^1.6.4

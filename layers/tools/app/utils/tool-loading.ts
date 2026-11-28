@@ -10,7 +10,7 @@ export function formatToolElapsed(elapsedMs: number): string {
 
 export function useToolElapsed(startedAt?: MaybeRefOrGetter<number | null | undefined>) {
   const mountedAt = Date.now()
-  const now = useNow({ interval: 1000 })
+  const now = useNow({ scheduler: callback => useIntervalFn(callback, 1000) })
   const elapsedMs = computed(() => Math.max(0, now.value.getTime() - (toValue(startedAt) ?? mountedAt)))
   const elapsedLabel = computed(() => formatToolElapsed(elapsedMs.value))
 
